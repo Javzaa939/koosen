@@ -50,7 +50,7 @@ export default function Elearn({
 				/>
 				{errors.title && <FormFeedback className='d-block'>{t(errors.title.message)}</FormFeedback>}
 			</Col>
-			<Col md={12}>
+			<Col md={6} className="mt-50">
 				<Controller
 					defaultValue={false}
 					control={control}
@@ -73,7 +73,7 @@ export default function Elearn({
 					{t('Төгсөлтийн шалгалттай эсэх')}
 				</Label>
 			</Col>
-			<Col md={12}>
+			<Col md={6} className="mt-50">
 				<Controller
 					defaultValue={false}
 					control={control}
@@ -96,7 +96,7 @@ export default function Elearn({
 					{t('Сертификат олгох эсэх')}
 				</Label>
 			</Col>
-			<Col md={6}>
+			<Col md={6} className="mt-50">
 				<Label className="form-label" for="start_date">
 					{t('Хичээл эхлэх хугацаа')}
 				</Label>
@@ -118,7 +118,7 @@ export default function Elearn({
 				/>
 				{errors.start_date && <FormFeedback className='d-block'>{t(errors.start_date.message)}</FormFeedback>}
 			</Col>
-			<Col md={6}>
+			<Col md={6} className="mt-50">
 				<Label className="form-label" for="end_date">
 					{t('Хичээл дуусах хугацаа')}
 				</Label>

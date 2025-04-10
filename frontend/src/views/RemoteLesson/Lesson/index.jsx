@@ -133,12 +133,6 @@ function Lesson() {
                                         </Badge>
                                     </div>
                                 </div>
-                                <img
-                                    src={datas?.image}
-                                    alt='image'
-                                    className='mt-1'
-                                    style={{ height: '300px', width: '100%', objectFit: 'cover', borderRadius: 5 }}
-                                />
                             </div>
                         </CardBody>
                     </Card>

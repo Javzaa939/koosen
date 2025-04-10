@@ -1,18 +1,17 @@
-import React, { useEffect, useState } from 'react'
-import { Plus, Search } from 'react-feather'
-import { Badge, Button, Card, CardBody, CardHeader, CardTitle, Col, Input, PopoverBody, PopoverHeader, Row, UncontrolledPopover } from 'reactstrap'
+import { useEffect, useState } from 'react';
+import { Plus, Search } from 'react-feather';
+import { CiUser } from "react-icons/ci";
+import { FaAngleDoubleRight } from "react-icons/fa";
+import { PiCertificate, PiExam } from "react-icons/pi";
+import { Badge, Button, Card, CardBody, CardHeader, CardTitle, Col, Input, PopoverBody, PopoverHeader, Row, UncontrolledPopover } from 'reactstrap';
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
-import './style.scss'
-// import { sample } from './asd'
-import { CiUser } from "react-icons/ci";
-import { FaAngleDoubleRight } from "react-icons/fa";
+import { getPagination } from '@utils';
+import empty from "@src/assets/images/empty-image.jpg";
 
-import { getPagination } from '@utils'
-import { PiExam } from "react-icons/pi";
-import { PiCertificate } from "react-icons/pi";
 import Addmodal from './components/Add';
+import './style.scss';
 
 function RemoteLesson() {
     // const datas = sample
@@ -24,7 +23,7 @@ function RemoteLesson() {
     const [currentPage, setCurrentPage] = useState(1)
 
     // Нэг хуудсанд харуулах нийт датаны тоо
-    const [rowsPerPage, setRowsPerPage] = useState(6)
+    const [rowsPerPage, setRowsPerPage] = useState(8)
 
     // Хайлт хийхэд ажиллах хувьсагч
     const [searchValue, setSearchValue] = useState('')
@@ -123,61 +122,77 @@ function RemoteLesson() {
                         {Loader}
                     </div>
                     :
-                    <Row>
-                        {datas.map((data, idx) => (
-                            <Col md={3} key={idx} className='p-1'>
-                                <div className='lesson_card d-flex flex-wrap align-items-between align-content-between p-2 shadow-sm' style={{ overflow: 'hidden' }}>
-                                    <div className='w-100'>
-                                        <div className='fw-bold text-center'>
-                                            {data?.title || ''}
+                    <Row className='gy-6 mb-6'>
+                        {datas.map((data, idx) => {
+                            const { id, title, teacher_info, students, is_end_exam, is_certificate, image: imageOriginal } = data
+                            const image = imageOriginal || empty
+                            return (
+                                <Col sm={6} lg={3} key={idx} className='m-0 p-50'>
+                                    <Card className="p-50 h-100 shadow-none border bg-white">
+                                        <div className="rounded-2 text-center mb-1">
+                                            <img className="img-fluid" src={image} alt={title}
+                                                onError={({ currentTarget }) => {
+                                                    currentTarget.onerror = null; // prevents looping
+                                                    currentTarget.src = empty
+                                                }}
+                                            />
                                         </div>
-                                        <div className='d-flex justify-content-between mt-1'>
-                                            <div>
-                                                Багш: <span className='text-decoration-underline' id={`teacher_${idx}`} style={{ cursor: 'help' }}>{data?.teacher_info?.full_name}</span>
-                                                <UncontrolledPopover
-                                                    placement="bottom"
-                                                    trigger="legacy"
-                                                    target={`teacher_${idx}`}
-                                                >
-                                                    <PopoverHeader>
-                                                        Багшийн мэдээлэл
-                                                    </PopoverHeader>
-                                                    <PopoverBody>
-                                                        <div>
-                                                            <div style={{ fontSize: 12 }}>{data?.teacher_info?.sub_org?.name}</div>
-                                                            <b>
-                                                                {data?.teacher_info?.last_name} {data?.teacher_info?.first_name}
-                                                            </b>
-                                                        </div>
-                                                    </PopoverBody>
-                                                </UncontrolledPopover>
+                                        <CardBody className="p-1 pt-50 d-flex flex-column h-100">
+                                            <div className="d-flex justify-content-between align-items-center mb-1">
+                                                <div>
+                                                    Багш: <span className='text-decoration-underline' id={`teacher_${idx}`} style={{ cursor: 'help' }}>{teacher_info?.full_name}</span>
+                                                    <UncontrolledPopover
+                                                        placement="bottom"
+                                                        trigger="legacy"
+                                                        target={`teacher_${idx}`}
+                                                    >
+                                                        <PopoverHeader>
+                                                            Багшийн мэдээлэл
+                                                        </PopoverHeader>
+                                                        <PopoverBody>
+                                                            <div>
+                                                                <div style={{ fontSize: 12 }}>{teacher_info?.sub_org?.name}</div>
+                                                                <b>
+                                                                    {teacher_info?.last_name} {teacher_info?.first_name}
+                                                                </b>
+                                                            </div>
+                                                        </PopoverBody>
+                                                    </UncontrolledPopover>
+                                                </div>
+                                                <p className="d-flex align-items-center justify-content-center fw-medium gap-1 mb-0">
+                                                    <Badge color={is_end_exam ? `light-success` : 'light-secondary'} pill title={is_end_exam ? 'Төгсөлтийн шалгалттай' : 'Төгсөлтийн шалгалтгүй'} className='d-flex align-items-center gap-25'>
+                                                        <PiExam style={{ width: "24px", height: "24px" }} />
+                                                    </Badge>
+                                                    <Badge color={is_certificate ? `light-danger` : 'light-secondary'} pill title={is_certificate ? 'Сертификаттай' : 'Сертификатгүй'} className='d-flex align-items-center gap-25'>
+                                                        <PiCertificate style={{ width: "24px", height: "24px" }} />
+                                                    </Badge>
+                                                </p>
                                             </div>
-                                            <div className='d-flex gap-25'>
-                                                <Badge color='primary' pill title='Оюутны тоо' className='d-flex align-items-center gap-25'>
-                                                    <CiUser style={{ width: "12px", height: "12px" }} /> {data?.students?.length || 0}
-                                                </Badge>
-                                                <Badge color={data?.is_end_exam ? `light-success` : 'light-secondary'} pill title={data?.is_end_exam ? 'Төгсөлтийн шалгалттай' : 'Төгсөлтийн шалгалтгүй'} className='d-flex align-items-center gap-25'>
-                                                    <PiExam style={{ width: "24px", height: "24px" }} />
-                                                </Badge>
-                                                <Badge color={data?.is_certificate ? `light-danger` : 'light-secondary'} pill title={data?.is_certificate ? 'Сертификаттай' : 'Сертификатгүй'} className='d-flex align-items-center gap-25'>
-                                                    <PiCertificate style={{ width: "24px", height: "24px" }} />
-                                                </Badge>
+                                            <span className="h5">{title}</span>
+                                            <p className="mt-25">Introductory course for Angular and framework basics in web development.</p>
+                                            <div className='mt-auto'>
+                                                <p className="d-flex align-items-center mb-25">
+                                                    <Badge color='primary' pill title='Оюутны тоо' className='d-flex align-items-center gap-25'>
+                                                        <CiUser style={{ width: "12px", height: "12px" }} /> {students?.length || 0}
+                                                    </Badge>
+                                                </p>
+                                                <div className="progress mb-1" style={{ height: '8px' }}>
+                                                    <div className="progress-bar w-75" role="progressbar" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                                <div className='text-end'>
+                                                    <a
+                                                        className="btn btn-label-primary"
+                                                        href={`/remote_lesson/${id}`}
+                                                    >
+                                                        <span className="me-50">Дэлгэрэнгүй</span> <FaAngleDoubleRight />
+                                                    </a>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <img
-                                            src={data?.image}
-                                            alt='image'
-                                            className='mt-1'
-                                            style={{ height: '200px', width: '100%', objectFit: 'cover', borderRadius: 5 }}
-                                        />
-                                    </div>
-                                    <div className='d-flex justify-content-between mt-1'>
-                                        <div></div>
-                                        <a href={`/remote_lesson/${data?.id}`} className='d-flex align-items-center gap-25 pe-50 fw-bold text-decoration-underline'>Дэлгэрэнгүй <FaAngleDoubleRight /></a>
-                                    </div>
-                                </div>
-                            </Col>
-                        ))}
+                                        </CardBody>
+                                    </Card>
+                                </Col>
+                            )
+                        })}
                     </Row>
             }
         </>

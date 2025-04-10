@@ -115,7 +115,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
             <Modal
                 isOpen={open}
                 toggle={handleModal}
-                className="modal-dialog-centered modal-lg"
+                className="modal-dialog-centered"
                 contentClassName="pt-0"
                 fade={true}
                 backdrop='static'
