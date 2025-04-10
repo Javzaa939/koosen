@@ -171,7 +171,7 @@ function RemoteLesson() {
                                             <span className="h5">{title}</span>
                                             <p className="mt-25">Introductory course for Angular and framework basics in web development.</p>
                                             <div className='mt-auto'>
-                                                <p className="d-flex align-items-center mb-25">
+                                                <p className="d-flex align-items-center mb-50">
                                                     <Badge color='primary' pill title='Оюутны тоо' className='d-flex align-items-center gap-25'>
                                                         <CiUser style={{ width: "12px", height: "12px" }} /> {students?.length || 0}
                                                     </Badge>
