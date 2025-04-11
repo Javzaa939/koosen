@@ -164,10 +164,10 @@ const AddEditOnlineSubInfo = ({ open, handleModal, refreshDatas, editData, elear
                                 control={control}
                                 defaultValue=''
                                 name={inputNameFileTypeText}
-                                render={({ field }) => {
+                                render={({ field: { ref, ...rest} }) => {
                                     return (
                                         <Editor
-                                            field={field}
+                                            {...rest}
                                             placeholder={t('ТEXT төрлийн мэдээлэл')}
                                         />
                                     )

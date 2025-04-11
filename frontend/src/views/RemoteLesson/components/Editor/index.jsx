@@ -1,21 +1,25 @@
-import ReactQuill from 'react-quill';
+import { useQuill } from 'react-quilljs';
 import 'quill/dist/quill.snow.css'
-import { useRef } from 'react';
+import { useEffect } from 'react';
+import useLoader from '@src/utility/hooks/useLoader';
 
 export default function Editor({
 	placeholder,
-	className,
+	className = '',
 	style,
 	modules,
 	formats,
-	...field
+	saveFileApi,
+	name,
+	value,
+	onChange
 }) {
-	const quillRef = useRef(null);
+	const { fetchData } = useLoader({});
 
 	modules = modules || {
 		toolbar: [
 			[{ 'font': [] }, { 'size': ['small', 'medium', 'large', 'huge'] }],
-			[{ 'header': '1' }, { 'header': '2' }, { 'font': [] }],
+			[{ 'header': '1' }, { 'header': '2' }],
 			[{ 'align': [] }],
 			['bold', 'italic', 'underline', 'strike'],
 			[{ 'list': 'ordered' }, { 'list': 'bullet' }],
@@ -34,29 +38,69 @@ export default function Editor({
 		'size', 'link',
 		'image', 'video',
 		'color', 'background',
-		'clean'
+		'clean', 'font', 'blockquote'
 	];
 
+	const { quill, quillRef } = useQuill({
+		modules: modules,
+		theme: 'snow',
+		formats: formats,
+		readOnly: false,
+		placeholder: placeholder,
+	});
+
+	const insertToEditor = (url) => {
+		const range = quill.getSelection();
+		quill.insertEmbed(range.index, 'image', url);
+	};
+
+	async function saveToServer(file) {
+		const fileFormData = new FormData();
+		fileFormData.append('file', file);
+
+		const { success, data } = await fetchData(saveFileApi(fileFormData))
+		insertToEditor(data);
+	}
+
+	function selectLocalImage() {
+		const input = document.createElement('input');
+		input.setAttribute('type', 'file');
+		input.setAttribute('accept', 'image/*');
+		input.click();
+
+		input.onchange = () => {
+			const file = input.files[0];
+			saveToServer(file);
+		};
+	}
+
+	useEffect(() => {
+		if (quill) {
+			quill.getModule('toolbar').addHandler('image', selectLocalImage);
+
+			if (onChange) {
+				quill.on('text-change', () => {
+					onChange(quill.root.innerHTML);
+				});
+			}
+		}
+	}, [quill]);
+
+	useEffect(() => {
+		if (quill && value !== quill.root.innerHTML) {
+			quill.root.innerHTML = value;
+		}
+	}, [value]);
+
 	return (
-		<>
-			<style>
-				{`
-					.custom-quill .ql-container {
-						min-height: 100px;
-					}
-				`}
-			</style>
-			<ReactQuill
-				{...field}
-				id={field.name}
+		<div>
+			<div
+				name={name}
+				id={name}
 				ref={quillRef}
-				placeholder={placeholder}
-				modules={modules}
-				formats={formats}
-				theme="snow"
-				className={`custom-quill ${className}`}
+				className={className}
 				style={style}
 			/>
-		</>
+		</div>
 	)
 }
