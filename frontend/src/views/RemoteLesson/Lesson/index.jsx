@@ -121,8 +121,8 @@ function Lesson() {
                                             <span>Дуусах хугацаа: {datas?.end_date && new Date(datas?.end_date)?.toISOString()?.split('T')[0]}</span>
                                         </div>
                                     </div>
-                                    <div className='d-flex gap-25'>
-                                        <Badge color='primary' pill title='Оюутны тоо' className='d-flex align-items-center gap-25'>
+                                    <p className="d-flex align-items-center justify-content-center fw-medium gap-1 mb-0">
+                                        <Badge color='primary' pill title='Оюутны тоо' className='d-flex align-items-center gap-25' style={{ height: "24px" }}>
                                             <CiUser style={{ width: "12px", height: "12px" }} /> {datas?.students?.length || 0}
                                         </Badge>
                                         {datas?.is_end_exam && <Badge color={`light-success`} pill title={'Төгсөлтийн шалгалттай'} className='d-flex align-items-center gap-25'>
@@ -131,7 +131,7 @@ function Lesson() {
                                         {datas?.is_certificate && <Badge color={`light-danger`} pill title={'Сертификаттай'} className='d-flex align-items-center gap-25'>
                                             <PiCertificate style={{ width: "24px", height: "24px" }} />
                                         </Badge>}
-                                    </div>
+                                    </p>
                                 </div>
                             </div>
                         </CardBody>

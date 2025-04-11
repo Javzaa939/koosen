@@ -7,10 +7,6 @@ import classNames from 'classnames';
 import { ReactSelectStyles } from '@src/utility/Utils';
 import Select from 'react-select'
 
-// editor imports
-import ReactQuill from 'react-quill';
-import 'quill/dist/quill.snow.css'
-
 import {
     Button,
     Col,
@@ -29,6 +25,7 @@ import empty from "@src/assets/images/empty-image.jpg";
 import { onChangeFile } from '@src/views/RemoteLesson/utils';
 
 import ScrollSelectFilter from '../ScrollSelectFilter';
+import Editor from '../Editor';
 
 const fileTypeOptions = [
     { id: 1, name: "PDF" },
@@ -79,41 +76,12 @@ const AddEditOnlineSubInfo = ({ open, handleModal, refreshDatas, editData, elear
         }
     }
 
-    // #region editor code
-    const quillRef = useRef(null);
-
-    const modules = {
-        toolbar: [
-            [{ 'font': [] }, { 'size': ['small', 'medium', 'large', 'huge'] }],
-            [{ 'header': '1' }, { 'header': '2' }, { 'font': [] }],
-            [{ 'align': [] }],
-            ['bold', 'italic', 'underline', 'strike'],
-            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-            [{ 'indent': '-1' }, { 'indent': '+1' }],
-            ['link'],
-            [{ color: [] }, { background: [] }],
-            ['blockquote'],
-            //   ['image'],
-            ['clean']
-        ],
-    };
-
-    const formats = [
-        'header', 'bold', 'italic', 'underline', 'strike',
-        'align', 'list', 'indent',
-        'size', 'link',
-        // 'image',
-        'color', 'background',
-        'clean'
-    ];
-    // #endregion
-
     return (
         <Fragment>
             <Modal
                 isOpen={open}
                 toggle={handleModal}
-                className="modal-dialog-centered"
+                className="modal-dialog-centered modal-lg"
                 contentClassName="pt-0"
                 fade={true}
                 backdrop='static'
@@ -198,25 +166,10 @@ const AddEditOnlineSubInfo = ({ open, handleModal, refreshDatas, editData, elear
                                 name={inputNameFileTypeText}
                                 render={({ field }) => {
                                     return (
-                                        <>
-                                            <style>
-                                                {`
-                                                .custom-quill .ql-container {
-                                                    min-height: 100px;
-                                                }
-                                            `}
-                                            </style>
-                                            <ReactQuill
-                                                {...field}
-                                                id={field.name}
-                                                ref={quillRef}
-                                                placeholder={t('ТEXT төрлийн мэдээлэл')}
-                                                modules={modules}
-                                                formats={formats}
-                                                theme="snow"
-                                                className='custom-quill'
-                                            />
-                                        </>
+                                        <Editor
+                                            field={field}
+                                            placeholder={t('ТEXT төрлийн мэдээлэл')}
+                                        />
                                     )
                                 }}
                             ></Controller>
