@@ -845,7 +845,7 @@ class RemoteLessonAPIView(
 
         if file:
             file = file[request_file_index]
-            relative_path, _, error = create_file_in_cdn_silently(dir_name, file)
+            _, full_path, error = create_file_in_cdn_silently(dir_name, file)
 
             if error:
                 dict_where_to_remove[field_name_to_add] = file
@@ -853,7 +853,7 @@ class RemoteLessonAPIView(
             else:
                 for field_name_to_remove in field_names_to_remove:
                     del dict_where_to_remove[field_name_to_remove]
-                file_path_in_cdn = relative_path
+                file_path_in_cdn = full_path
 
         return file_path_in_cdn, None
 
