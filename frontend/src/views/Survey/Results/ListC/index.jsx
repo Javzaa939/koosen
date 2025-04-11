@@ -42,6 +42,7 @@ ChartJS.register(
 );
 
 import './list.css'
+import DisplayQuill from "../../SurveyMain/Detail/components/DisplayQuill";
 
 const KIND_STUDENT = 8;
 const KIND_TEACHER = 5;
@@ -84,7 +85,7 @@ function ListC(props) {
                             )}
                         </div>
                     <CardFooter className="ps-0 mt-1 customscroll" style={{ maxHeight: '200px', overflow: 'scroll' }}>
-                        {data.description}
+                        <DisplayQuill content={data.description} />
                     </CardFooter>
                 </CardBody>
 		    </div>
