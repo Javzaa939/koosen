@@ -125,12 +125,12 @@ function Lesson() {
                                         <Badge color='primary' pill title='Оюутны тоо' className='d-flex align-items-center gap-25'>
                                             <CiUser style={{ width: "12px", height: "12px" }} /> {datas?.students?.length || 0}
                                         </Badge>
-                                        <Badge color={datas?.is_end_exam ? `light-success` : 'light-secondary'} pill title={datas?.is_end_exam ? 'Төгсөлтийн шалгалттай' : 'Төгсөлтийн шалгалтгүй'} className='d-flex align-items-center gap-25'>
+                                        {datas?.is_end_exam && <Badge color={`light-success`} pill title={'Төгсөлтийн шалгалттай'} className='d-flex align-items-center gap-25'>
                                             <PiExam style={{ width: "24px", height: "24px" }} />
-                                        </Badge>
-                                        <Badge color={datas?.is_certificate ? `light-danger` : 'light-secondary'} pill title={datas?.is_certificate ? 'Сертификаттай' : 'Сертификатгүй'} className='d-flex align-items-center gap-25'>
+                                        </Badge>}
+                                        {datas?.is_certificate && <Badge color={`light-danger`} pill title={'Сертификаттай'} className='d-flex align-items-center gap-25'>
                                             <PiCertificate style={{ width: "24px", height: "24px" }} />
-                                        </Badge>
+                                        </Badge>}
                                     </div>
                                 </div>
                             </div>

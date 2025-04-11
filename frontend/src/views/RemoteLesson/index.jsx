@@ -131,18 +131,6 @@ function RemoteLesson() {
                             return (
                                 <Col sm={6} lg={3} key={idx} className='m-0 p-50'>
                                     <Card className="p-50 h-100 shadow-none border bg-white">
-                                        {
-                                            imageOriginal
-                                            &&
-                                            <div className="rounded-2 text-center mb-1">
-                                                <img className="img-fluid" src={image} alt={title}
-                                                    onError={({ currentTarget }) => {
-                                                        currentTarget.onerror = null; // prevents looping
-                                                        currentTarget.src = empty
-                                                    }}
-                                                />
-                                            </div>
-                                        }
                                         <CardBody className="p-1 pt-50 d-flex flex-column h-100">
                                             <div className="d-flex justify-content-between align-items-center mb-1">
                                                 <div>
@@ -166,17 +154,17 @@ function RemoteLesson() {
                                                     </UncontrolledPopover>
                                                 </div>
                                                 <p className="d-flex align-items-center justify-content-center fw-medium gap-1 mb-0">
-                                                    <Badge color={is_end_exam ? `light-success` : 'light-secondary'} pill title={is_end_exam ? 'Төгсөлтийн шалгалттай' : 'Төгсөлтийн шалгалтгүй'} className='d-flex align-items-center gap-25'>
+                                                    {is_end_exam && <Badge color={`light-success`} pill title={'Төгсөлтийн шалгалттай'} className='d-flex align-items-center gap-25'>
                                                         <PiExam style={{ width: "24px", height: "24px" }} />
-                                                    </Badge>
-                                                    <Badge color={is_certificate ? `light-danger` : 'light-secondary'} pill title={is_certificate ? 'Сертификаттай' : 'Сертификатгүй'} className='d-flex align-items-center gap-25'>
+                                                    </Badge>}
+                                                    {is_certificate && <Badge color={`light-danger`} pill title={'Сертификаттай'} className='d-flex align-items-center gap-25'>
                                                         <PiCertificate style={{ width: "24px", height: "24px" }} />
-                                                    </Badge>
+                                                    </Badge>}
                                                 </p>
                                             </div>
                                             <span className="h5">{title}</span>
                                             <p className="mt-25">
-                                                <DisplayQuill content={description} />
+                                                {description && <DisplayQuill content={description} />}
                                             </p>
                                             <div className='mt-auto'>
                                                 <p className="d-flex align-items-center mb-50">
