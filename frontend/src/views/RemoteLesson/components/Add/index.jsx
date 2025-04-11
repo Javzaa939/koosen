@@ -140,6 +140,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
                                 t={t}
                                 control={control}
                                 errors={errors}
+                                setValue={setValue}
                             />
                         </Col>
                         <Col md={12} className="text-center mt-2">

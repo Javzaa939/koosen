@@ -12,12 +12,14 @@ export default function Elearn({
 	t,
 	control,
 	errors,
+	setValue
 }) {
 	// #region to save file
 	const [image_old, setImageOld] = useState('')
 
 	const handleDeleteImage = () => {
 		setImageOld('')
+		setValue('image', '')
 	}
 
 	const clickLogoImage = () => {
@@ -32,7 +34,7 @@ export default function Elearn({
 	const modules = {
 		toolbar: [
 			[{ 'font': [] }, { 'size': ['small', 'medium', 'large', 'huge'] }],
-			[{ 'header': '1' }, { 'header': '2' }, { 'font': [] }],
+			[{ 'header': '1' }, { 'header': '2' }],
 			[{ 'align': [] }],
 			['bold', 'italic', 'underline', 'strike'],
 			[{ 'list': 'ordered' }, { 'list': 'bullet' }],
@@ -51,7 +53,7 @@ export default function Elearn({
 		'size', 'link',
 		// 'image',
 		'color', 'background',
-		'clean'
+		'clean','font','blockquote'
 	];
 	// #endregion
 

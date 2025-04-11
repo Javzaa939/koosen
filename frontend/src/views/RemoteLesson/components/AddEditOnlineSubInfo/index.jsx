@@ -1,6 +1,5 @@
 import { t } from 'i18next';
-import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
-import { X } from 'react-feather';
+import { Fragment, useEffect, useState } from 'react';
 import { useForm, Controller } from "react-hook-form";
 import '@styles/react/libs/flatpickr/flatpickr.scss';
 import classNames from 'classnames';
@@ -21,21 +20,26 @@ import {
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import { convertDefaultValue } from "@utils";
-import empty from "@src/assets/images/empty-image.jpg";
-import { onChangeFile } from '@src/views/RemoteLesson/utils';
 
-import ScrollSelectFilter from '../ScrollSelectFilter';
 import Editor from '../Editor';
+import InputFile from '../InputFile';
+
+const PDF = 1
+const VIDEO = 2
+const TEXT = 3
+const AUDIO = 4
+const QUIZ = 5
 
 const fileTypeOptions = [
-    { id: 1, name: "PDF" },
-    { id: 2, name: "Video хичээл" },
-    { id: 3, name: "TEXT" },
-    // { id: 5, name: "Шалгалт" },
+    { id: PDF, name: "PDF" },
+    { id: VIDEO, name: "Video хичээл" },
+    { id: TEXT, name: "TEXT" },
+    // { id: QUIZ, name: "Шалгалт" },
 ]
 
 const inputNameFileType = 'file_type'
-const inputNameFileTypeText = 'text'
+const inputNameText = 'text'
+const inputNameFile = 'file'
 
 const AddEditOnlineSubInfo = ({ open, handleModal, refreshDatas, editData, elearnId, onlineInfoId }) => {
     const { control, handleSubmit, setError, setValue, reset, formState: { errors }, watch } = useForm()
@@ -62,7 +66,10 @@ const AddEditOnlineSubInfo = ({ open, handleModal, refreshDatas, editData, elear
         cdata.elearn = elearnId
         cdata.parent_title = onlineInfoId
         cdata = convertDefaultValue(cdata)
-        const { success, errors } = await fetchData(remoteApi.onlineSubInfo.post(cdata))
+        const formData = new FormData()
+        formData.append('json_data', JSON.stringify(cdata))
+        formData.append('file', cdata['file'])
+        const { success, errors } = await fetchData(remoteApi.onlineSubInfo.post(formData))
 
         if (success) {
             reset()
@@ -75,6 +82,8 @@ const AddEditOnlineSubInfo = ({ open, handleModal, refreshDatas, editData, elear
             }
         }
     }
+
+    const [radioFileType, setRadioFileType] = useState(`${inputNameFile}-file`)
 
     return (
         <Fragment>
@@ -156,15 +165,85 @@ const AddEditOnlineSubInfo = ({ open, handleModal, refreshDatas, editData, elear
                             ></Controller>
                             {errors[inputNameFileType] && <FormFeedback className='d-block'>{t(errors[inputNameFileType].message)}</FormFeedback>}
                         </Col>
-                        {formValues[inputNameFileType] === 3 && <Col md={12} className='mt-1'>
-                            <Label className="form-label" for={inputNameFileTypeText}>
+                        {[PDF, VIDEO].includes(formValues[inputNameFileType]) && <Col md={12} className='mt-1 text-center'>
+                            <Label className="form-label" for={inputNameFile}>
+                                {t('Файл')}
+                            </Label>
+                            <Controller
+                                control={control}
+                                defaultValue=''
+                                name={inputNameFile}
+                                render={({ field: { ref, ...rest } }) => {
+                                    return (
+                                        <Row className='mt-1'>
+                                            <Col md={6} className='text-end'>
+                                                <Input
+                                                    className='me-1'
+                                                    type='radio'
+                                                    value={`${rest.name}-file`}
+                                                    name={`${rest.name}-file_source`}
+                                                    id={`${rest.name}-file`}
+                                                    checked={radioFileType === `${rest.name}-file`}
+                                                    onChange={(e) => { setRadioFileType(e.target.value) }}
+                                                />
+                                                <Label className='form-label' for={`${rest.name}-file`}>
+                                                    {t('Файл сонгох')}
+                                                </Label>
+                                            </Col>
+                                            <Col md={6} className='text-start'>
+                                                <Input
+                                                    className='me-1'
+                                                    type='radio'
+                                                    value={`${rest.name}-url`}
+                                                    name={`${rest.name}-file_source`}
+                                                    id={`${rest.name}-url`}
+                                                    checked={radioFileType === `${rest.name}-url`}
+                                                    onChange={(e) => { setRadioFileType(e.target.value) }}
+                                                />
+                                                <Label className='form-label' for={`${rest.name}-url`}>
+                                                    {t('URL хаяг')}
+                                                </Label>
+                                            </Col>
+                                            <Col md={12}>
+                                                {radioFileType === `${rest.name}-file` ?
+                                                    <InputFile
+                                                        {...rest}
+                                                        placeholder={t('Файл сонгоно уу')}
+                                                        errors={errors}
+                                                        onChange={(e) => {
+                                                            rest.onChange(e?.target?.files?.[0] ?? '')
+                                                        }}
+                                                        accept={formValues[inputNameFileType] === VIDEO ? 'video/*' : 'application/pdf'}
+                                                        warning={formValues[inputNameFileType] === VIDEO ? 'Файл оруулна уу. Зөвхөн VIDEO файл хүлээж авна' : 'Файл оруулна уу. Зөвхөн .pdf файл хүлээж авна'}
+                                                    />
+                                                    :
+                                                    <>
+                                                        <Input
+                                                            {...rest}
+                                                            type='text'
+                                                            id={rest.name}
+                                                            bsSize='sm'
+                                                            placeholder={t('URL хаяг')}
+                                                            invalid={errors[rest.name] && true}
+                                                        />
+                                                        {errors[rest.name] && <FormFeedback className='d-block'>{t(errors[rest.name].message)}</FormFeedback>}
+                                                    </>
+                                                }
+                                            </Col>
+                                        </Row>
+                                    )
+                                }}
+                            ></Controller>
+                        </Col>}
+                        {formValues[inputNameFileType] === TEXT && <Col md={12} className='mt-1'>
+                            <Label className="form-label" for={inputNameText}>
                                 {t('ТEXT төрлийн мэдээлэл')}
                             </Label>
                             <Controller
                                 control={control}
                                 defaultValue=''
-                                name={inputNameFileTypeText}
-                                render={({ field: { ref, ...rest} }) => {
+                                name={inputNameText}
+                                render={({ field: { ref, ...rest } }) => {
                                     return (
                                         <Editor
                                             {...rest}
@@ -173,7 +252,7 @@ const AddEditOnlineSubInfo = ({ open, handleModal, refreshDatas, editData, elear
                                     )
                                 }}
                             ></Controller>
-                            {errors[inputNameFileTypeText] && <FormFeedback className='d-block'>{t(errors[inputNameFileTypeText].message)}</FormFeedback>}
+                            {errors[inputNameText] && <FormFeedback className='d-block'>{t(errors[inputNameText].message)}</FormFeedback>}
                         </Col>}
                         <Col md={12} className="text-center mt-2">
                             <Button className='me-2' color="primary" type="submit">

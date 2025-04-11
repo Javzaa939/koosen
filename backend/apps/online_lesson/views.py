@@ -42,7 +42,7 @@ from core.models import (
 )
 
 from main.utils.file import split_root_path
-from main.utils.function.utils import create_file_in_cdn_silently, create_file_to_cdn, remove_file_from_cdn, get_file_from_cdn, str2bool
+from main.utils.function.utils import convert_stringified_querydict_to_dict, create_file_in_cdn_silently, create_file_to_cdn, is_url, remove_file_from_cdn, get_file_from_cdn, save_file_to_cdn_and_remove_from_dict, str2bool
 
 @permission_classes([IsAuthenticated])
 class OnlineLessonListAPIView(
@@ -838,72 +838,6 @@ class RemoteLessonAPIView(
 
         return serializer
 
-    # to save file in django server if CDN does not work
-    def save_file_to_cdn_and_remove_from_dict(self, dict_where_to_remove, field_names_to_remove, dir_name, request_file_field_name, request_file_index, field_name_to_add):
-        file = self.request.FILES.getlist(request_file_field_name)
-        file_path_in_cdn = None
-
-        if file:
-            file = file[request_file_index]
-            _, full_path, error = create_file_in_cdn_silently(dir_name, file)
-
-            if error:
-                dict_where_to_remove[field_name_to_add] = file
-                return None, error
-            else:
-                for field_name_to_remove in field_names_to_remove:
-                    del dict_where_to_remove[field_name_to_remove]
-                file_path_in_cdn = full_path
-
-        return file_path_in_cdn, None
-
-    """
-        to get "POST" data in "json-parsed" types and keep all list items of QueryDict/formData for their specified keys in 2nd argument (keep_list)
-        Required to use JSON.stringify() first for all "not file fields" on frontend to pass formData
-    """
-    def convert_stringified_querydict_to_dict(self,post_data,keep_list=[],is_keep_only_not_singles=True):
-        if keep_list:
-            post_data_dict = post_data.dict()
-
-            for keep_item in keep_list:
-                post_data_list = post_data.getlist(keep_item)
-
-                if is_keep_only_not_singles and len(post_data_list) == 1:
-                    post_data_dict[keep_item] = post_data_list[0]
-                else:
-                    post_data_dict[keep_item] = post_data_list
-
-            post_data = post_data_dict
-        result = {}
-
-        for key in post_data.keys():
-            if isinstance(post_data[key], list):
-                if not isinstance(result.get(key), list):
-                    result[key]= []
-
-                values = []
-
-                if keep_list:
-                    values = post_data[key]
-                else:
-                    values = post_data.getlist(key)
-
-                for value in values:
-                    if key in keep_list:
-                        result[key].append(value)
-                    else:
-                        result[key].append(json.loads(value))
-            else:
-                if key in keep_list:
-                    result[key] = post_data[key]
-                else:
-                    if post_data[key] == 'undefined':
-                        post_data[key] = 'null'
-
-                    result[key] = json.loads(post_data[key])
-
-        return result
-
     def get(self,request,pk=None):
         if pk:
             datas = self.retrieve(request, pk).data
@@ -917,9 +851,10 @@ class RemoteLessonAPIView(
 
         try:
             upload_to = self.queryset.model._meta.get_field('image').upload_to
+            file_keys = request.FILES.keys()
 
             # to get "POST" data in "json-parsed" types and keep all list items of QueryDict/formData for their specified keys in 2nd argument (keep_list)
-            data = self.convert_stringified_querydict_to_dict(request.data,request.FILES.keys())
+            data = convert_stringified_querydict_to_dict(request.data,file_keys)
 
             # to require fields
             if not data.get('title'):
@@ -927,15 +862,17 @@ class RemoteLessonAPIView(
 
             teacher_instance = Teachers.objects.filter(user_id=request.user.id).first()
             data['created_user'] = teacher_instance.id
-            file_path_in_cdn, _ = self.save_file_to_cdn_and_remove_from_dict(data,['image'],upload_to,'image',0,'image')
+            file_path_in_cdn = None
 
-            if not file_path_in_cdn:
-                return request.send_error('CDN_error', 'Файл хадгалахад алдаа гарсан байна (CDN).')
+            if file_keys:
+                file_path_in_cdn, _ = save_file_to_cdn_and_remove_from_dict(request,data,['image'],upload_to,'image',0,'image')
+
+                if not file_path_in_cdn:
+                    return request.send_error('CDN_error', 'Файл хадгалахад алдаа гарсан байна (CDN).')
 
             with transaction.atomic():
                 elearn_instance = self.create(data).instance
 
-                # to save file if CDN is alive
                 if file_path_in_cdn:
                     elearn_instance.image = file_path_in_cdn
                     elearn_instance.save()
@@ -1077,6 +1014,13 @@ class RemoteLessonOnlineSubInfoAPIView(
     filter_backends = [SearchFilter]
     search_fields = ['title']
 
+    def create(self, data):
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+
+        return serializer
+
     def get(self,request,pk=None):
         elearn_id = request.query_params.get('elearnId')
         self.queryset = self.queryset.filter(parent_title__elearn__id=elearn_id)
@@ -1092,12 +1036,45 @@ class RemoteLessonOnlineSubInfoAPIView(
         result = request.send_info("INF_001")
 
         try:
-            # to require fields
-            if not request.data.get('title'):
+            file_keys = ['file']
+            upload_to = ELearn._meta.get_field('image').upload_to
+            data = convert_stringified_querydict_to_dict(request.data,file_keys)
+            request_data = data.get('json_data')
+
+            # to remove from dict because serializer requires file in filefield
+            if file_keys[0] in request_data:
+                del request_data[file_keys[0]]
+
+            # region to require fields
+            if not request_data.get('title'):
                 raise ValidationError({ 'title': ['Хоосон байна'] })
 
+            if (
+                not request_data.get('file') and
+                not request_data.get('text')
+            ):
+                raise ValidationError({ 'file': ['Хоосон байна'], 'text': ['Хоосон байна'] })
+            # endregion
+
+            file_path = None
+
+            if request.FILES.keys():
+                file = request.FILES.getlist(file_keys[0])[0]
+                _, file_path, _ = create_file_in_cdn_silently(upload_to, file)
+
+                if not file_path:
+                    return request.send_error('CDN_error', 'Файл хадгалахад алдаа гарсан байна (CDN).')
+
+            # to save URL of file
+            elif is_url(data[file_keys[0]]):
+                file_path = data[file_keys[0]]
+
             with transaction.atomic():
-                self.create(request)
+                instance = self.create(request_data).instance
+
+                if file_path:
+                    instance.file = file_path
+                    instance.save()
         except ValidationError as serializer_errors:
             traceback.print_exc()
             result = request.send_error_valid(serializer_errors.detail)
