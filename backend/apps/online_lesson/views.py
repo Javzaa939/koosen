@@ -929,6 +929,9 @@ class RemoteLessonAPIView(
             data['created_user'] = teacher_instance.id
             file_path_in_cdn, _ = self.save_file_to_cdn_and_remove_from_dict(data,['image'],upload_to,'image',0,'image')
 
+            if not file_path_in_cdn:
+                return request.send_error('CDN_error', 'Файл хадгалахад алдаа гарсан байна (CDN).')
+
             with transaction.atomic():
                 elearn_instance = self.create(data).instance
 
