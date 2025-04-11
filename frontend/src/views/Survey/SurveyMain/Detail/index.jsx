@@ -4,7 +4,7 @@ import { Modal, ModalBody, ModalHeader, Row, Collapse, Button, Badge } from "rea
 import './detail.css'
 import DisplayQuestions from "./DisplayQuestions"
 import Scope from './Scope'
-import DisplayQuill from "./components/DisplayQuill";
+import DisplayQuill from "../../components/DisplayQuill";
 
 
 

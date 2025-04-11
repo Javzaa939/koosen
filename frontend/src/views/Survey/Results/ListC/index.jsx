@@ -42,7 +42,7 @@ ChartJS.register(
 );
 
 import './list.css'
-import DisplayQuill from "../../SurveyMain/Detail/components/DisplayQuill";
+import DisplayQuill from "../../components/DisplayQuill";
 
 const KIND_STUDENT = 8;
 const KIND_TEACHER = 5;
