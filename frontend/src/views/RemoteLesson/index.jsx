@@ -9,7 +9,6 @@ import { Link } from 'react-router-dom';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import { getPagination } from '@utils';
-import empty from "@src/assets/images/empty-image.jpg";
 
 import Addmodal from './components/Add';
 import './style.scss';
@@ -126,8 +125,8 @@ function RemoteLesson() {
                     :
                     <Row className='gy-6 mb-6'>
                         {datas.map((data, idx) => {
-                            const { id, title, teacher_info, students, is_end_exam, is_certificate, image: imageOriginal, description } = data
-                            const image = imageOriginal || empty
+                            const { id, title, teacher_info, students, is_end_exam, is_certificate, description } = data
+
                             return (
                                 <Col sm={6} lg={3} key={idx} className='m-0 p-50'>
                                     <Card className="p-50 h-100 shadow-none border bg-white">
@@ -180,6 +179,7 @@ function RemoteLesson() {
                                                         color="primary"
                                                         outline
                                                         className="btn-label-primary border"
+                                                        state={{ selectedELearn: data }}
                                                     >
                                                         <span className="me-50">Дэлгэрэнгүй</span> <FaAngleDoubleRight />
                                                     </Button>

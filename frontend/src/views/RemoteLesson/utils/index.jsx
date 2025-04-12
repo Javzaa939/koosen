@@ -9,3 +9,9 @@ export const onChangeFile = (e, setImageOld) => {
 		reader.readAsDataURL(files[0])
 	}
 }
+
+export const PDF = 1
+export const VIDEO = 2
+export const TEXT = 3
+export const AUDIO = 4
+export const QUIZ = 5

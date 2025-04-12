@@ -27,6 +27,7 @@ export default function OnlineInfoBlock({
 	elearnId,
 	onlineSubInfoDatas,
 	getOnlineSubInfoDatas,
+	handleSelectOnlineSubInfo
 }) {
 	const onlineInfos = datas?.results || []
 	const onlineSubInfos = onlineSubInfoDatas?.results || []
@@ -117,6 +118,8 @@ export default function OnlineInfoBlock({
 										<OnlineSubInfoBlock
 											t={t}
 											datas={onlineSubInfos.filter(item => item.parent_title === id)}
+											handleSelectOnlineSubInfo={handleSelectOnlineSubInfo}
+											onlineInfoTitle={title}
 										/>
 									</AccordionBody>
 								</AccordionItem>

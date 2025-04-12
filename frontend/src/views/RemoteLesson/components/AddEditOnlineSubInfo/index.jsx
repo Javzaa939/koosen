@@ -23,12 +23,7 @@ import { convertDefaultValue } from "@utils";
 
 import Editor from '../Editor';
 import InputFile from '../InputFile';
-
-const PDF = 1
-const VIDEO = 2
-const TEXT = 3
-const AUDIO = 4
-const QUIZ = 5
+import { PDF, TEXT, VIDEO } from '../../utils';
 
 const fileTypeOptions = [
     { id: PDF, name: "PDF" },

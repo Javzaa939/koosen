@@ -1050,10 +1050,10 @@ class RemoteLessonOnlineSubInfoAPIView(
                 raise ValidationError({ 'title': ['Хоосон байна'] })
 
             if (
-                not request_data.get('file') and
+                not data.get(file_keys[0]) and
                 not request_data.get('text')
             ):
-                raise ValidationError({ 'file': ['Хоосон байна'], 'text': ['Хоосон байна'] })
+                raise ValidationError({ file_keys[0]: ['Хоосон байна'], 'text': ['Хоосон байна'] })
             # endregion
 
             file_path = None

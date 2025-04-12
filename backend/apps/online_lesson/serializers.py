@@ -402,6 +402,7 @@ class OnlineSubInfoSerializer(serializers.ModelSerializer):
 
     quezquestions_count = serializers.SerializerMethodField()
     file_type_name = serializers.SerializerMethodField()
+    file_path = serializers.SerializerMethodField()
 
     class Meta:
         model = OnlineSubInfo
@@ -414,3 +415,8 @@ class OnlineSubInfoSerializer(serializers.ModelSerializer):
     def get_file_type_name(self, obj):
         file_type_name = obj.get_file_type_display()
         return file_type_name
+
+    # to get orignal field value, because Django automatically adds MEDIA and other url parts at the start of path in filefields so this another field is needed
+    def get_file_path(self, obj):
+        result = obj.file.name if obj.file else None
+        return result
