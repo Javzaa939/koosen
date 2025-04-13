@@ -96,12 +96,15 @@ export default function OnlineInfoBlock({
 						</Col>
 						<Col md={2} className="d-flex justify-content-end">
 							<div>
-								<Button color='primary' onClick={() => toggleAddEditModal()}
-									className="rounded-circle d-flex align-items-center justify-content-center p-0"
-									style={{ width: '30px', height: '30px' }}
+								<a
+									role="button"
+									onClick={() => toggleAddEditModal()}
+									id={`complaintListDatatableAdd`}
+									className='me-1'
 								>
-									<Plus size={15} />
-								</Button>
+									<Badge color="primary"><Plus width={"10px"} /></Badge>
+								</a>
+								<UncontrolledTooltip placement='top' target={`complaintListDatatableAdd`} >{t('Бүлэг нэмэх')}</UncontrolledTooltip>
 							</div>
 						</Col>
 					</Row>
@@ -122,46 +125,49 @@ export default function OnlineInfoBlock({
 													<span className="text-body fw-normal">{0} / {online_sub_infos_filtered.length} {t('дэд бүлэг')}</span>
 												</span>
 											</Col>
-											<Col md={2} className="d-flex justify-content-end">
+											<Col md={2} className="d-flex justify-content-end align-items-center">
 												<div>
-													<div>
-														<a
-															role="button"
-															onClick={(e) => { toggleAddEditModal(onlineInfosItem); e.stopPropagation(); }}
-															id={`complaintListDatatableEdit${id}`}
-															className='me-1'
-														>
-															<Badge color="light-success"><Edit width={"10px"} /></Badge>
-														</a>
-														<UncontrolledTooltip placement='top' target={`complaintListDatatableEdit${id}`} >{t('Засах')}</UncontrolledTooltip>
-													</div>
-													<div>
-														<a
-															role="button"
-															onClick={(e) => {
-																showWarning({
-																	header: {
-																		title: t(`Бүлэг устгах`),
-																	},
-																	question: t(`Та энэ бүлгийг устгахдаа итгэлтэй байна уу?`),
-																	onClick: () => handleDelete(id),
-																	btnText: t('Устгах'),
-																})
-																e.stopPropagation()
-															}}
-															className='me-1'
-															id={`complaintListDatatableCancel${id}`}
-														>
-															<Badge color="light-danger" ><Trash2 width={"10px"} /></Badge>
-														</a>
-														<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${id}`} >{t('Устгах')}</UncontrolledTooltip>
-													</div>
-													<Button color='primary' onClick={(e) => { toggleAddOnlineSubInfoModal(id); e.stopPropagation(); }}
-														className="rounded-circle d-flex align-items-center justify-content-center p-0"
-														style={{ width: '30px', height: '30px' }}
+													<a
+														role="button"
+														onClick={(e) => { toggleAddEditModal(onlineInfosItem); e.stopPropagation(); }}
+														id={`complaintListDatatableEdit${id}`}
+														className='me-1'
 													>
-														<Plus size={15} />
-													</Button>
+														<Badge color="light-success"><Edit width={"10px"} /></Badge>
+													</a>
+													<UncontrolledTooltip placement='top' target={`complaintListDatatableEdit${id}`} >{t('Засах')}</UncontrolledTooltip>
+												</div>
+												<div>
+													<a
+														role="button"
+														onClick={(e) => {
+															showWarning({
+																header: {
+																	title: t(`Бүлэг устгах`),
+																},
+																question: t(`Та энэ бүлгийг устгахдаа итгэлтэй байна уу?`),
+																onClick: () => handleDelete(id),
+																btnText: t('Устгах'),
+															})
+															e.stopPropagation()
+														}}
+														className='me-1'
+														id={`complaintListDatatableCancel${id}`}
+													>
+														<Badge color="light-danger" ><Trash2 width={"10px"} /></Badge>
+													</a>
+													<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${id}`} >{t('Устгах')}</UncontrolledTooltip>
+												</div>
+												<div>
+													<a
+														role="button"
+														onClick={(e) => { toggleAddOnlineSubInfoModal(id); e.stopPropagation(); }}
+														id={`complaintListDatatableAdd${id}`}
+														className='me-1'
+													>
+														<Badge color="primary"><Plus width={"10px"} /></Badge>
+													</a>
+													<UncontrolledTooltip placement='top' target={`complaintListDatatableAdd${id}`} >{t('Дэд бүлэг нэмэх')}</UncontrolledTooltip>
 												</div>
 											</Col>
 										</Row>
