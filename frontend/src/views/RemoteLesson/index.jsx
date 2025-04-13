@@ -89,7 +89,7 @@ function RemoteLesson() {
     }
 
     async function handleDelete(id) {
-        const { success } = await fetchData(remoteApi.delete(id))
+        const { success } = await fetchData(remoteApi.onlineInfo.delete(id))
         if (success) getDatas()
     }
     // #endregion

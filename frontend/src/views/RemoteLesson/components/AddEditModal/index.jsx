@@ -24,7 +24,7 @@ const AddEditModal = ({ open, handleModal, refreshDatas, editData }) => {
     const remoteApi = useApi().remote
 
     useEffect(() => {
-        if (editData && Object.keys(editData).length > 0) {
+        if (editData) {
             const { students, ...editDataCleaned } = editData
 
             for (let key in editDataCleaned) {
@@ -93,7 +93,7 @@ const AddEditModal = ({ open, handleModal, refreshDatas, editData }) => {
         }
 
         let apiFunc = null
-        if (editData && Object.keys(editData).length > 0) apiFunc = () => remoteApi.put(formData, editData.id)
+        if (editData) apiFunc = () => remoteApi.put(formData, editData.id)
         else apiFunc = () => remoteApi.post(formData)
 
         const { success, errors } = await fetchData(apiFunc())
@@ -147,7 +147,7 @@ const AddEditModal = ({ open, handleModal, refreshDatas, editData }) => {
                             <Button className='me-2' color="primary" type="submit">
                                 {t('Хадгалах')}
                             </Button>
-                            <Button color="secondary" outline type="reset" onClick={handleModal}>
+                            <Button color="secondary" outline type="reset" onClick={() => handleModal()}>
                                 {t('Буцах')}
                             </Button>
                         </Col>

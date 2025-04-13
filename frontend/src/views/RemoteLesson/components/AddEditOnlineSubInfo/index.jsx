@@ -253,7 +253,7 @@ const AddEditOnlineSubInfo = ({ open, handleModal, refreshDatas, editData, elear
                             <Button className='me-2' color="primary" type="submit">
                                 {t('Хадгалах')}
                             </Button>
-                            <Button color="secondary" outline type="reset" onClick={handleModal}>
+                            <Button color="secondary" outline type="reset" onClick={() => handleModal()}>
                                 {t('Буцах')}
                             </Button>
                         </Col>

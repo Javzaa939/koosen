@@ -393,15 +393,11 @@ class ELearnSerializer(serializers.ModelSerializer):
 
 class OnlineInfoSerializer(serializers.ModelSerializer):
 
-    online_sub_info_count = serializers.SerializerMethodField()
+    related_info_name = serializers.CharField(source='related_info.title', default='')
 
     class Meta:
         model = OnlineInfo
         fields = "__all__"
-
-    def get_online_sub_info_count(self, obj):
-        result = OnlineSubInfo.objects.filter(parent_title=obj).count()
-        return result
 
 
 class OnlineSubInfoSerializer(serializers.ModelSerializer):

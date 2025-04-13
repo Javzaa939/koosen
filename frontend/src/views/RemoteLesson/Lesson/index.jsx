@@ -178,6 +178,8 @@ function Lesson() {
                         getOnlineSubInfoDatas={() => setRefreshOnlineSubInfo((current) => !current)}
                         elearnId={id}
                         handleSelectOnlineSubInfo={handleSelectOnlineSubInfo}
+                        fetchData={fetchData}
+                        remoteApi={remoteApi}
                     />
                 </Col>
                 <Col md={8}>

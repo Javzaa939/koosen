@@ -2080,6 +2080,8 @@ function useApi(isDisplay=false) {
 			onlineInfo: {
 				get: ({ limit = 'Бүгд', page = 1, search = '', elearnId = '' }) => instance.get(`online_lesson/remote/online-info/?limit=${limit}&page=${page}&search=${search}&elearnId=${elearnId}`),
 				post : (data) => instance.post(`online_lesson/remote/online-info/`,data),
+				put : (data, id) => instance.put(`online_lesson/remote/online-info/${id}/`,data),
+				delete: (id) => instance.delete(`online_lesson/remote/online-info/${id}/`),
 			},
 
 			onlineSubInfo: {
