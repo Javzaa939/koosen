@@ -379,10 +379,16 @@ class TeacherSerializer(serializers.ModelSerializer):
 class ELearnSerializer(serializers.ModelSerializer):
 
     teacher_info = TeacherSerializer(source='teacher', read_only=True)
+    image_path = serializers.SerializerMethodField()
 
     class Meta:
         model = ELearn
         fields = "__all__"
+
+    # to get orignal field value, because Django automatically adds MEDIA and other url parts at the start of path in filefields so this another field is needed
+    def get_image_path(self, obj):
+        result = obj.image.name if obj.image else None
+        return result
 
 
 class OnlineInfoSerializer(serializers.ModelSerializer):
