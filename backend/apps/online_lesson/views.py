@@ -891,6 +891,7 @@ class RemoteLessonAPIView(
 
             teacher_instance = Teachers.objects.filter(user_id=request.user.id).first()
             data['created_user'] = teacher_instance.id
+            data['teacher'] = teacher_instance.id
             file_path_in_cdn = None
 
             if file_keys:
@@ -930,6 +931,8 @@ class RemoteLessonAPIView(
             if not data.get('title'):
                 raise ValidationError({ 'title': ['Хоосон байна'] })
 
+            teacher_instance = Teachers.objects.filter(user_id=request.user.id).first()
+            data['teacher'] = teacher_instance.id
             file_path_in_cdn = None
 
             if file_keys:
