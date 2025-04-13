@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Edit, Plus, Search } from 'react-feather';
+import { Edit, Plus, Search, Trash2 } from 'react-feather';
 import { CiUser } from "react-icons/ci";
 import { FaAngleDoubleRight } from "react-icons/fa";
 import { PiCertificate, PiExam } from "react-icons/pi";
@@ -13,13 +13,10 @@ import { getPagination } from '@utils';
 import AddEditModal from './components/AddEditModal';
 import './style.scss';
 import DisplayQuill from './components/DisplayQuill';
+import useModal from '@src/utility/hooks/useModal';
 
 function RemoteLesson() {
-    // const datas = sample
     const [datas, setDatas] = useState([])
-
-    const [addEditModal, setAddEditModal] = useState(false)
-    const [editData, setEditData] = useState()
 
     // Хуудаслалтын анхны утга
     const [currentPage, setCurrentPage] = useState(1)
@@ -35,13 +32,6 @@ function RemoteLesson() {
 
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('-id')
-
-    function toggleAddEditModal(data) {
-        if (addEditModal) setEditData()
-        else setEditData(data)
-
-        setAddEditModal(!addEditModal)
-    }
 
     const { isLoading, fetchData, Loader } = useLoader({ isSmall: true });
 
@@ -84,6 +74,25 @@ function RemoteLesson() {
     async function handleSearch() {
         getDatas()
     }
+
+    // #region to handle modals
+    const [addEditModal, setAddEditModal] = useState(false)
+    const [editData, setEditData] = useState()
+
+    const { showWarning } = useModal()
+
+    function toggleAddEditModal(data) {
+        if (addEditModal) setEditData()
+        else setEditData(data)
+
+        setAddEditModal(!addEditModal)
+    }
+
+    async function handleDelete(id) {
+        const { success } = await fetchData(remoteApi.delete(id))
+        if (success) getDatas()
+    }
+    // #endregion
 
     return (
         <>
@@ -195,23 +204,43 @@ function RemoteLesson() {
                                                 </p>
                                                 <Progress value={75} style={{ height: '8px' }} className="mb-1" />
                                                 <div className='d-flex justify-content-between'>
-                                                    <div>
-                                                        <a
-                                                            role="button"
-                                                            onClick={() => toggleAddEditModal(data)}
-                                                            id={`complaintListDatatableEdit${id}`}
-                                                            className='me-1'
-                                                        >
-                                                            <Badge color="light-success"><Edit width={"10px"} /></Badge>
-                                                        </a>
-                                                        <UncontrolledTooltip placement='top' target={`complaintListDatatableEdit${id}`} >Засах</UncontrolledTooltip>
+                                                    <div className='d-flex'>
+                                                        <div>
+                                                            <a
+                                                                role="button"
+                                                                onClick={() => toggleAddEditModal(data)}
+                                                                id={`complaintListDatatableEdit${id}`}
+                                                                className='me-1'
+                                                            >
+                                                                <Badge color="light-success"><Edit width={"10px"} /></Badge>
+                                                            </a>
+                                                            <UncontrolledTooltip placement='top' target={`complaintListDatatableEdit${id}`} >Засах</UncontrolledTooltip>
+                                                        </div>
+                                                        <div>
+                                                            <a
+                                                                role="button"
+                                                                onClick={() => showWarning({
+                                                                    header: {
+                                                                        title: `Сургалт устгах`,
+                                                                    },
+                                                                    question: `Та энэ сургалтыг устгахдаа итгэлтэй байна уу?`,
+                                                                    onClick: () => handleDelete(id),
+                                                                    btnText: 'Устгах',
+                                                                })}
+                                                                className='me-1'
+                                                                id={`complaintListDatatableCancel${id}`}
+                                                            >
+                                                                <Badge color="light-danger" ><Trash2 width={"10px"} /></Badge>
+                                                            </a>
+                                                            <UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${id}`} >Устгах</UncontrolledTooltip>
+                                                        </div>
                                                     </div>
                                                     <Button
                                                         tag={Link}
                                                         to={`/remote_lesson/${id}`}
                                                         color="primary"
                                                         outline
-                                                        className="btn-label-primary border"
+                                                        className="btn-label-primary border my-auto"
                                                         state={{ selectedELearn: data }}
                                                         size='sm'
                                                     >

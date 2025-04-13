@@ -42,7 +42,7 @@ from core.models import (
 )
 
 from main.utils.file import split_root_path
-from main.utils.function.utils import convert_stringified_querydict_to_dict, create_file_in_cdn_silently, create_file_to_cdn, is_url, remove_file_from_cdn, get_file_from_cdn, save_file_to_cdn_and_remove_from_dict, str2bool
+from main.utils.function.utils import convert_stringified_querydict_to_dict, create_file_in_cdn_silently, create_file_to_cdn, has_permission, is_url, remove_file_from_cdn, get_file_from_cdn, save_file_to_cdn_and_remove_from_dict, str2bool
 
 @permission_classes([IsAuthenticated])
 class OnlineLessonListAPIView(
@@ -855,6 +855,8 @@ class RemoteLessonAPIView(
         return serializer
     # endregion
 
+    # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
+    @has_permission(must_permissions=['"lms-online-lesson-read"'])
     def get(self,request,pk=None):
         if pk:
             datas = self.retrieve(request, pk).data
@@ -871,6 +873,8 @@ class RemoteLessonAPIView(
 
         return request.send_data(serializer)
 
+    # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
+    @has_permission(must_permissions=['lms-study-lessonstandart-create'])
     def post(self, request):
         result = request.send_info("INF_001")
 
@@ -910,8 +914,10 @@ class RemoteLessonAPIView(
 
         return result
 
+    # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
+    @has_permission(must_permissions=['lms-study-lessonstandart-update'])
     def put(self,request,pk=None):
-        result = request.send_info("INF_001")
+        result = request.send_info("INF_002")
 
         try:
             upload_to = self.queryset.model._meta.get_field('image').upload_to
@@ -941,6 +947,19 @@ class RemoteLessonAPIView(
         except ValidationError as serializer_errors:
             traceback.print_exc()
             result = request.send_error_valid(serializer_errors.detail)
+        except Exception:
+            traceback.print_exc()
+            result = request.send_error("ERR_002")
+
+        return result
+
+    # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
+    @has_permission(must_permissions=['lms-study-lessonstandart-delete'])
+    def delete(self, request, pk=None):
+        result = request.send_info("INF_003")
+
+        try:
+            self.destroy(request)
         except Exception:
             traceback.print_exc()
             result = request.send_error("ERR_002")

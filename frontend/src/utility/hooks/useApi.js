@@ -2069,6 +2069,7 @@ function useApi(isDisplay=false) {
 			getOne: (id) => instance.get(`online_lesson/remote/${id}/`),
 			post : (data) => instance.post(`online_lesson/remote/`,data),
 			put : (data, id) => instance.put(`online_lesson/remote/${id}/`,data),
+			delete: (id) => instance.delete(`online_lesson/remote/${id}/`),
 
 			students: {
 				get: ({ limit = 'Бүгд', page = 1, search = '', elearnId = '' }) => instance.get(`online_lesson/remote/students/?limit=${limit}&page=${page}&search=${search}&elearnId=${elearnId}`),
