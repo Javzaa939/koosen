@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useQuill } from 'react-quilljs';
 
-export default function DisplayQuill({ content }) {
+export default function DisplayQuill({ content, className, style }) {
 	const { quillRef, quill } = useQuill({
 		readOnly: true,
 		modules: {
@@ -15,5 +15,5 @@ export default function DisplayQuill({ content }) {
 		}
 	}, [quill])
 
-	return <span ref={quillRef} style={{ border: 'none' }}></span>
+	return <span ref={quillRef} className={className} style={{ border: 'none', ...style }}></span>
 }

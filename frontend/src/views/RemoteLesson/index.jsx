@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
-import { Plus, Search } from 'react-feather';
+import { Edit, Plus, Search } from 'react-feather';
 import { CiUser } from "react-icons/ci";
 import { FaAngleDoubleRight } from "react-icons/fa";
 import { PiCertificate, PiExam } from "react-icons/pi";
-import { Badge, Button, Card, CardBody, CardHeader, CardTitle, Col, Input, PopoverBody, PopoverHeader, Progress, Row, UncontrolledPopover } from 'reactstrap';
+import { Badge, Button, Card, CardBody, CardHeader, CardTitle, Col, Input, PopoverBody, PopoverHeader, Progress, Row, UncontrolledPopover, UncontrolledTooltip } from 'reactstrap';
 import { Link } from 'react-router-dom';
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import { getPagination } from '@utils';
 
-import Addmodal from './components/Add';
+import AddEditModal from './components/AddEditModal';
 import './style.scss';
 import DisplayQuill from './components/DisplayQuill';
 
@@ -18,7 +18,8 @@ function RemoteLesson() {
     // const datas = sample
     const [datas, setDatas] = useState([])
 
-    const [addModal, setAddModal] = useState(false)
+    const [addEditModal, setAddEditModal] = useState(false)
+    const [editData, setEditData] = useState()
 
     // Хуудаслалтын анхны утга
     const [currentPage, setCurrentPage] = useState(1)
@@ -33,10 +34,13 @@ function RemoteLesson() {
     const [total_count, setTotalCount] = useState(1)
 
     // Эрэмбэлэлт
-    const [sortField, setSort] = useState('')
+    const [sortField, setSort] = useState('-id')
 
-    function toggleAddModal() {
-        setAddModal(!addModal)
+    function toggleAddEditModal(data) {
+        if (addEditModal) setEditData()
+        else setEditData(data)
+
+        setAddEditModal(!addEditModal)
     }
 
     const { isLoading, fetchData, Loader } = useLoader({ isSmall: true });
@@ -44,7 +48,8 @@ function RemoteLesson() {
     const remoteApi = useApi().remote
 
     async function getDatas() {
-        const { success, data } = await fetchData(remoteApi.get(rowsPerPage, currentPage, searchValue));
+        const { success, data } = await fetchData(remoteApi.get(rowsPerPage, currentPage, sortField, searchValue));
+
         if (success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
@@ -82,15 +87,18 @@ function RemoteLesson() {
 
     return (
         <>
-            <Addmodal
-                open={addModal}
-                handleModal={toggleAddModal}
+            {/* to reset modal values 'key' prop is used, because reset() function does not work sometimes I could not find reason */}
+            <AddEditModal
+                key={editData?.id}
+                open={addEditModal}
+                handleModal={toggleAddEditModal}
                 refreshDatas={getDatas}
+                editData={editData}
             />
             <Card>
                 <CardHeader>
                     <CardTitle>Зайн сургалт</CardTitle>
-                    <Button color='primary' onClick={() => toggleAddModal()}><Plus size={14} /> Үүсгэх</Button>
+                    <Button color='primary' onClick={() => toggleAddEditModal()}><Plus size={14} /> Үүсгэх</Button>
                 </CardHeader>
             </Card>
             <div className='d-flex justify-content-between align-items-center mb-1'>
@@ -163,7 +171,21 @@ function RemoteLesson() {
                                             </div>
                                             <span className="h5">{title}</span>
                                             <p className="mt-25">
-                                                {description && <DisplayQuill content={description} />}
+                                                {description && <>
+                                                    {/* to limit ELearn card-item height */}
+                                                    <style>
+                                                        {`
+                                                            .custom-quill .ql-editor {
+                                                                max-height: 130px;
+                                                                overflow: hidden;
+                                                            }
+                                                        `}
+                                                    </style>
+                                                    <DisplayQuill
+                                                        content={description}
+                                                        className={'custom-quill'}
+                                                    />
+                                                </>}
                                             </p>
                                             <div className='mt-auto'>
                                                 <p className="d-flex align-items-center mb-50">
@@ -172,7 +194,18 @@ function RemoteLesson() {
                                                     </Badge>
                                                 </p>
                                                 <Progress value={75} style={{ height: '8px' }} className="mb-1" />
-                                                <div className='text-end'>
+                                                <div className='d-flex justify-content-between'>
+                                                    <div>
+                                                        <a
+                                                            role="button"
+                                                            onClick={() => toggleAddEditModal(data)}
+                                                            id={`complaintListDatatableEdit${id}`}
+                                                            className='me-1'
+                                                        >
+                                                            <Badge color="light-success"><Edit width={"10px"} /></Badge>
+                                                        </a>
+                                                        <UncontrolledTooltip placement='top' target={`complaintListDatatableEdit${id}`} >Засах</UncontrolledTooltip>
+                                                    </div>
                                                     <Button
                                                         tag={Link}
                                                         to={`/remote_lesson/${id}`}
@@ -180,6 +213,7 @@ function RemoteLesson() {
                                                         outline
                                                         className="btn-label-primary border"
                                                         state={{ selectedELearn: data }}
+                                                        size='sm'
                                                     >
                                                         <span className="me-50">Дэлгэрэнгүй</span> <FaAngleDoubleRight />
                                                     </Button>

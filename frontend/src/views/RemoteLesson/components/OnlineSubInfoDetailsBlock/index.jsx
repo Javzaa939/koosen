@@ -29,13 +29,12 @@ export default function OnlineSubInfoDetailsBlock({
 					</div>
 				</div>
 				<div className="card shadow-none border">
-					<CardBody>
+					<CardBody className='d-flex justify-content-center'>
 						{
 							file_type === TEXT ?
 								text && <DisplayQuill content={text} />
 								:
 								file_type === VIDEO ?
-									<div className='d-flex'>
 										<video
 											controls
 											src={file_path}
@@ -45,7 +44,6 @@ export default function OnlineSubInfoDetailsBlock({
 										>
 											{t('Видео тоглуулахад алдаа гарлаа')}.
 										</video>
-									</div>
 									:
 									file_type === PDF ?
 										<iframe src={file_path} width="100%" height="640" allowFullScreen frameBorder="0" style={{ border: 'none' }}></iframe>

@@ -818,6 +818,7 @@ class SummarizeLessonMaterialAPIView(
 class RemoteLessonAPIView(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
     mixins.RetrieveModelMixin,
     generics.GenericAPIView
@@ -831,6 +832,7 @@ class RemoteLessonAPIView(
     filter_backends = [SearchFilter]
     search_fields = ['lesson__name', 'lesson__code', 'teacher__first_name', 'title']
 
+    # region to override mixins' methods to take instance and save cdn file path
     def create(self, data):
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
@@ -838,10 +840,33 @@ class RemoteLessonAPIView(
 
         return serializer
 
+    def update(self, data, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return serializer
+    # endregion
+
     def get(self,request,pk=None):
         if pk:
             datas = self.retrieve(request, pk).data
             return request.send_data(datas)
+
+        # region to sort by one or multiple fields
+        sorting = self.request.GET.get('sorting', '')
+
+        if sorting:
+            self.queryset = self.queryset.order_by(*sorting.split(','))
+        # endregion
+
         serializer = self.list(request).data
 
         return request.send_data(serializer)
@@ -872,6 +897,43 @@ class RemoteLessonAPIView(
 
             with transaction.atomic():
                 elearn_instance = self.create(data).instance
+
+                if file_path_in_cdn:
+                    elearn_instance.image = file_path_in_cdn
+                    elearn_instance.save()
+        except ValidationError as serializer_errors:
+            traceback.print_exc()
+            result = request.send_error_valid(serializer_errors.detail)
+        except Exception:
+            traceback.print_exc()
+            result = request.send_error("ERR_002")
+
+        return result
+
+    def put(self,request,pk=None):
+        result = request.send_info("INF_001")
+
+        try:
+            upload_to = self.queryset.model._meta.get_field('image').upload_to
+            file_keys = request.FILES.keys()
+
+            # to get "POST" data in "json-parsed" types and keep all list items of QueryDict/formData for their specified keys in 2nd argument (keep_list)
+            data = convert_stringified_querydict_to_dict(request.data,file_keys)
+
+            # to require fields
+            if not data.get('title'):
+                raise ValidationError({ 'title': ['Хоосон байна'] })
+
+            file_path_in_cdn = None
+
+            if file_keys:
+                file_path_in_cdn, _ = save_file_to_cdn_and_remove_from_dict(request,data,['image'],upload_to,'image',0,'image')
+
+                if not file_path_in_cdn:
+                    return request.send_error('CDN_error', 'Файл хадгалахад алдаа гарсан байна (CDN).')
+
+            with transaction.atomic():
+                elearn_instance = self.update(data).instance
 
                 if file_path_in_cdn:
                     elearn_instance.image = file_path_in_cdn

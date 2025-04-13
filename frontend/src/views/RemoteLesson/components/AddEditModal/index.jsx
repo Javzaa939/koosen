@@ -18,22 +18,18 @@ import useLoader from '@hooks/useLoader';
 import '@styles/react/libs/flatpickr/flatpickr.scss';
 import Elearn from '../Elearn';
 
-const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
+const AddEditModal = ({ open, handleModal, refreshDatas, editData }) => {
     const { control, handleSubmit, setError, setValue, reset, formState: { errors } } = useForm()
     const { fetchData, isLoading, Loader } = useLoader({ isFullScreen: true });
     const remoteApi = useApi().remote
 
     useEffect(() => {
         if (editData && Object.keys(editData).length > 0) {
-            for (let key in editData) {
-                if (editData[key] !== null && editData[key] !== undefined) {
-                    setValue(key, editData[key])
-                } else {
-                    setValue(key, '')
-                }
-                if (key === 'lesson') {
-                    setValue(key, editData[key]?.id || '');
-                }
+            const { students, ...editDataCleaned } = editData
+
+            for (let key in editDataCleaned) {
+                if (editDataCleaned[key] !== null && editDataCleaned[key] !== undefined) setValue(key, editDataCleaned[key])
+                else setValue(key, '')
             }
         }
     }, [editData]);
@@ -96,7 +92,11 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
             else formData.append(key, JSON.stringify(cdata[key]))
         }
 
-        const { success, errors } = await fetchData(remoteApi.post(formData))
+        let apiFunc = null
+        if (editData && Object.keys(editData).length > 0) apiFunc = () => remoteApi.put(formData, editData.id)
+        else apiFunc = () => remoteApi.post(formData)
+
+        const { success, errors } = await fetchData(apiFunc())
 
         if (success) {
             reset()
@@ -158,4 +158,4 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
     )
 }
 
-export default Addmodal
+export default AddEditModal
