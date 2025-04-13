@@ -28,8 +28,11 @@ const AddEditModal = ({ open, handleModal, refreshDatas, editData }) => {
             const { students, ...editDataCleaned } = editData
 
             for (let key in editDataCleaned) {
-                if (editDataCleaned[key] !== null && editDataCleaned[key] !== undefined) setValue(key, editDataCleaned[key])
-                else setValue(key, '')
+                if (editDataCleaned[key] !== null && editDataCleaned[key] !== undefined) {
+                    let finalValue = editDataCleaned[key]
+                    if (['start_date', 'end_date'].includes(key)) finalValue = typeof editDataCleaned[key] === 'string' ? editDataCleaned[key].split('T')[0] : ''
+                    setValue(key, finalValue)
+                } else setValue(key, '')
             }
         }
     }, [editData]);
