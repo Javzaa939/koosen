@@ -48,8 +48,15 @@ const AddEditOnlineSubInfo = ({ open, handleModal, refreshDatas, editData, elear
     useEffect(() => {
         if (editData) {
             for (let key in editData) {
-                if (editData[key] !== null && editData[key] !== undefined) setValue(key, editData[key])
-                else setValue(key, '')
+                let finalValue = ''
+                const value = editData[key]
+
+                if (value !== null && value !== undefined) {
+                    if (key == 'file' && editData['file_path']) finalValue = editData['file_path']
+                    else finalValue = value
+                }
+
+                setValue(key, finalValue)
             }
         }
     }, [editData])
