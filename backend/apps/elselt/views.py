@@ -62,7 +62,8 @@ from lms.models import (
     AdmissionLesson,
     AdmissionBottomScore,
     StudentAdmissionScore,
-    Payment
+    Payment,
+    ProfessionalDegree
 )
 
 from core.models import Employee
@@ -136,6 +137,18 @@ class ElseltApiView(
     def get(self, request):
         join_year = request.query_params.get('lesson_year')
         is_store = request.query_params.get('is_store')
+        user = request.user
+        user_permissions = get_user_permissions(user)
+        if not user.is_superuser:
+            master_ids = ProfessionalDegree.objects.filter(degree_code__in=['F', 'E']).values_list('id', flat=True)
+            bachelor_ids = ProfessionalDegree.objects.filter(degree_code__in=['D', 'C']).values_list('id', flat=True)
+            # Магистр докторын элсэгчдийг харуулна.
+            if 'lms-elselt-master-read' in user_permissions:
+                self.queryset = self.queryset.filter(degrees=list(master_ids))
+
+            # Бакалавр, дэд бакалавр  элсэгчдийг харуулна.
+            if 'lms-elselt-bachelor-read' in user_permissions:
+                self.queryset = self.queryset.filter(degrees=list(bachelor_ids))
 
         if join_year:
             self.queryset = self.queryset.filter(lesson_year=join_year)
@@ -319,6 +332,17 @@ class ElseltActiveListProfession(
         if elselt and elselt != 'undefined':
             self.queryset = self.queryset.filter(admission=elselt)
 
+        user = request.user
+        user_permissions = get_user_permissions(user)
+        if not user.is_superuser:
+            # Магистр докторын элсэгчдийг харуулна.
+            if 'lms-elselt-master-read' in user_permissions:
+                self.queryset = self.queryset.filter(profession__degree__degree_code__in=['F', 'E'])
+
+            # Бакалавр, дэд бакалавр  элсэгчдийг харуулна.
+            if 'lms-elselt-bachelor-read' in user_permissions:
+                self.queryset = self.queryset.filter(profession__degree__degree_code__in=['D', 'C'])
+
         all_data = self.list(request).data
 
         return request.send_data(all_data)
@@ -486,6 +510,9 @@ class AdmissionUserInfoAPIView(
         userinfo_qs = UserInfo.objects.filter(user=OuterRef('user')).values('gpa')[:1]
         userinfo_org = UserInfo.objects.filter(user=OuterRef('user')).values('work_organization')[:1]
 
+        user = self.request.user
+        user_permissions = get_user_permissions(user)
+
         queryset = (
             queryset
             .annotate(
@@ -493,6 +520,15 @@ class AdmissionUserInfoAPIView(
                 org=Subquery(userinfo_org),
             )
         )
+
+        if not user.is_superuser:
+            # Магистр докторын элсэгчдийг харуулна.
+            if 'lms-elselt-master-read' in user_permissions:
+                queryset = queryset.filter(profession__profession__degree__degree_code__in=['F', 'E'])
+
+            # Бакалавр, дэд бакалавр  элсэгчдийг харуулна.
+            if 'lms-elselt-bachelor-read' in user_permissions:
+                queryset = queryset.filter(profession__profession__degree__degree_code__in=['C', 'D'])
 
         lesson_year_id = self.request.query_params.get('lesson_year_id')
         profession_id = self.request.query_params.get('profession_id')
@@ -836,7 +872,18 @@ class AdmissionYearAPIView(
     serializer_class = AdmissionSerializer
 
     def get(self, request):
+        user = request.user
+        user_permissions = get_user_permissions(user)
+        if not user.is_superuser:
+            master_ids = ProfessionalDegree.objects.filter(degree_code__in=['F', 'E']).values_list('id', flat=True)
+            bachelor_ids = ProfessionalDegree.objects.filter(degree_code__in=['D', 'C']).values_list('id', flat=True)
+            # Магистр докторын элсэгчдийг харуулна.
+            if 'lms-elselt-master-read' in user_permissions:
+                self.queryset = self.queryset.filter(degrees=list(master_ids))
 
+            # Бакалавр, дэд бакалавр  элсэгчдийг харуулна.
+            if 'lms-elselt-bachelor-read' in user_permissions:
+                self.queryset = self.queryset.filter(degrees=list(bachelor_ids))
         all_data = self.list(request).data
         return request.send_data(all_data)
 
@@ -3812,8 +3859,18 @@ class EyeshOrderUserInfoAPIView(
         return queryset
 
     def get(self, request, pk=None):
-            user = request.user.id
+            user = self.request.user
             employee_sub_org_id = Employee.objects.filter(user=user).values_list('sub_org', flat=True).first()
+            user_permissions = get_user_permissions(user)
+
+            if not user.is_superuser:
+                # Магистр докторын элсэгчдийг харуулна.
+                if 'lms-elselt-master-read' in user_permissions:
+                    self.queryset = self.queryset.filter(profession__profession__degree__degree_code__in=['F', 'E'])
+
+                # Бакалавр, дэд бакалавр  элсэгчдийг харуулна.
+                if 'lms-elselt-bachelor-read' in user_permissions:
+                    self.queryset = self.queryset.filter(profession__profession__degree__degree_code__in=['C', 'D'])
 
             if employee_sub_org_id == 21:
                 self.queryset = self.queryset.filter(profession__profession__school=employee_sub_org_id)
@@ -4074,8 +4131,8 @@ class AdmissionPaymentAPIView(
     search_fields = ['admission__first_name', 'admission__register', 'admission__email', 'admission__code', 'payed_date']
 
     def get(self, request):
-        # user = request.user
-        # permissions = get_user_permissions(user)
+        user = request.user
+        permissions = get_user_permissions(user)
 
         filters = dict()
 
@@ -4101,16 +4158,16 @@ class AdmissionPaymentAPIView(
             filter_profession_qs = filter_profession_qs.filter(profession__profession__degree__degree_code=degree)
 
         user_ids = filter_profession_qs.values_list('user', flat=True)
-        # if not user.is_superuser:
-        #     # Магистр докторын элсэгчдийг харуулна.
-        #     if 'lms-elselt-graduate-read' in permissions:
-        #         filter_profession_qs = filter_profession_qs.filter(profession__profession__degree__degree_code__in=['F', 'E'])
+        if not user.is_superuser:
+            # Магистр докторын элсэгчдийг харуулна.
+            if 'lms-elselt-graduate-read' in permissions:
+                filter_profession_qs = filter_profession_qs.filter(profession__profession__degree__degree_code__in=['F', 'E'])
 
-        #     # Бакалавр, дэд бакалавр  элсэгчдийг харуулна.
-        #     if 'lms-elselt-bachelor-read' in permissions:
-        #         filter_profession_qs = filter_profession_qs.filter(profession__profession__degree__degree_code__in=['C', 'D'])
+            # Бакалавр, дэд бакалавр  элсэгчдийг харуулна.
+            if 'lms-elselt-bachelor-read' in permissions:
+                filter_profession_qs = filter_profession_qs.filter(profession__profession__degree__degree_code__in=['C', 'D'])
 
-            # user_ids = filter_profession_qs.values_list('user', flat=True)
+            user_ids = filter_profession_qs.values_list('user', flat=True)
 
         profession_qs = AdmissionUserProfession.objects.filter(user=OuterRef('user')).annotate(profession_name=F("profession__profession__name"), admission=F("profession__admission"), register_id=F("profession_id")).values('profession_name', 'admission', 'register_id')[:1]
 
