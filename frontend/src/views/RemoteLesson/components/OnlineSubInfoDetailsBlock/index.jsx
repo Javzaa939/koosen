@@ -8,12 +8,12 @@ export default function OnlineSubInfoDetailsBlock({
 	t,
 	getOnlineSubInfoDatas,
 	selectedELearn,
-	selectedOnlineSubInfo = {},
+	selectedOnlineSubInfo,
 }) {
-	const { teacher_info = {}, description, students } = selectedELearn
-	const { full_name } = teacher_info
-	const { onlineSubInfoData = {}, onlineInfoTitle } = selectedOnlineSubInfo
-	const { title, file_path, file_type, text } = onlineSubInfoData
+	const { teacher_info, description, students } = selectedELearn || {}
+	const { full_name } = teacher_info || {}
+	const { onlineSubInfoData, onlineInfoTitle } = selectedOnlineSubInfo || {}
+	const { title, file_path, file_type, text } = onlineSubInfoData || {}
 
 	return (
 		<Card>
