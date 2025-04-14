@@ -412,6 +412,9 @@ const VerticalLayout = (props) =>
 
                         /** Хандах эрх */
                         if (menus.id === 'role' && !user.permissions?.includes('lms-role-read'))  delete newMenu[idx];
+
+                        /** ----------------------------- Цахим сургалт ---------------------------- */
+                        if (menus.id === 'remotelesson' && !user.permissions?.includes('lms-elearn-list-read'))  delete newMenu[idx];
                     }
                 })
                 setCNavigation(newMenu)
