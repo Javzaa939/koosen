@@ -31,8 +31,9 @@ function Teacher({ onChosenScopeChange, editData}) {
 	const surveyApi = useApi().survey.surveyrange;
 
 	async function getDatas() {
-		const { success, data } = await fetchData(surveyApi.get('teacher', selectedValue));
+		const { success, data: apiResult } = await fetchData(surveyApi.get({ types: 'teacher', selectedValue: selectedValue }));
 		if (success) {
+			const data = apiResult?.results
 			var formattedData = {}
 			if (selectedValue === 'is_org') {
 				formattedData = {

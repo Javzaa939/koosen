@@ -1,5 +1,9 @@
 import { t } from "i18next"
-import React, { Fragment, useState, useEffect } from 'react'
+import React, { Fragment, useState, useEffect, useRef } from 'react'
+
+// editor imports
+import ReactQuill from 'react-quill';
+import 'quill/dist/quill.snow.css'
 
 import { useForm, Controller } from "react-hook-form";
 
@@ -89,6 +93,43 @@ const MainInfo = ({ stepper, setSubmitDatas, data, editData }) => {
         [editData]
     )
 
+    useEffect(
+        () =>
+        {
+            if (data.surveyType === "satisfaction") setValue('is_required', true)
+        },
+        [data.surveyType]
+    )
+
+    // #region editor code
+    const quillRef = useRef(null);
+
+    const modules = {
+        toolbar: [
+            [{ 'font': [] }, { 'size': ['small', 'medium', 'large', 'huge'] }],
+            [{ 'header': '1' }, { 'header': '2' }, { 'font': [] }],
+            [{ 'align': [] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+            [{ 'indent': '-1' }, { 'indent': '+1' }],
+            ['link'],
+            [{ color: [] }, { background: [] }],
+            ['blockquote'],
+            //   ['image'],
+            ['clean']
+        ],
+    };
+
+    const formats = [
+        'header', 'bold', 'italic', 'underline', 'strike',
+        'align', 'list', 'indent',
+        'size', 'link',
+        // 'image',
+        'color', 'background',
+        'clean'
+    ];
+    // #endregion
+
    return (
         <Fragment>
             <Row tag={Form} onSubmit={handleSubmit(onSubmit)}>
@@ -126,15 +167,15 @@ const MainInfo = ({ stepper, setSubmitDatas, data, editData }) => {
                             id="description"
                             name="description"
                             render={({ field }) => (
-                                <Input
-                                    type='textarea'
-                                    name='description'
-                                    id='description'
-                                    bsSize='sm'
+                                <ReactQuill
                                     {...field}
-                                    rows="4"
+                                    id={field.name}
+                                    ref={quillRef}
                                     placeholder={t('Тайлбар')}
-                                    invalid={errors.description && true}
+                                    modules={modules}
+                                    formats={formats}
+                                    theme="snow"
+                                    className='custom-quill'
                                 />
                             )}
                         />
@@ -192,6 +233,7 @@ const MainInfo = ({ stepper, setSubmitDatas, data, editData }) => {
                                         type="checkbox"
                                         className='me-50'
                                         {...field}
+                                        disabled={data.surveyType === "satisfaction"}
                                     />
                                 )}
                             />
@@ -220,6 +262,29 @@ const MainInfo = ({ stepper, setSubmitDatas, data, editData }) => {
                             </Label>
                         </div>
                     </Col>
+                    {data.surveyType === "satisfaction" &&
+                        <Col md={6} sm={12} className='mt-1'>
+                            <div>
+                                <Controller
+                                    control={control}
+                                    name="soul_type"
+                                    defaultValue={false}
+                                    render={({ field }) => (
+                                        <Input
+                                            {...field}
+                                            id={field.name}
+                                            checked={field.value}
+                                            type="checkbox"
+                                            className='me-50'
+                                        />
+                                    )}
+                                />
+                                <Label className="form-label" for="soul_type">
+                                    {t('Багш, хичээлүүдээр бөглөх эсэх')}
+                                </Label>
+                            </div>
+                        </Col>
+                    }
                 </Row>
                 <Col md={12} className="text-center mt-2">
                     <div className='d-flex justify-content-between mt-3'>

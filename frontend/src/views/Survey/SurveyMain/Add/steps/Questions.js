@@ -14,8 +14,11 @@ import empty from "@src/assets/images/empty-image.jpg"
 import ChoiceInput from './ChoiceInput';
 
 import '../style.css'
+import { useTranslation } from 'react-i18next';
 
 function Question(props) {
+
+    const { t } = useTranslation()
 
     const {
         questions,
@@ -23,16 +26,50 @@ function Question(props) {
         removeQuestion,
         handleChange,
         handleAddChoice,
+        onHandleRatingWordChange,
         errors,
         handleDeleteImage,
-        clickLogoImage
+        clickLogoImage,
+        setQuestions,
+        titleIndex,
+        copyQuestion,
+        surveyType,
+        questionTitles
     } = props
 
     const [qtypeOption, setTypeOption] = useState(get_questionype())
 
     return questions.map((rowsData, idx) => {
 
-        const { kind, question, imageUrl, image,  rating_max_count, low_rating_word, high_rating_word, max_choice_count, choices, yes_or_no } = rowsData;
+        const { kind: rowsDataKind, question, imageUrl, image,  rating_max_count: rowsDataRatingMaxCount, rating_words: rowsDataRatingWords, max_choice_count, choices, yes_or_no } = rowsData;
+        let rating_max_count = rowsDataRatingMaxCount
+        let kind = rowsDataKind
+        let rating_words = rowsDataRatingWords
+        const isNotFirstGlobalQuestion = titleIndex !== 0 || (titleIndex === 0 && idx !== 0)
+
+        if (surveyType === 'satisfaction') {
+            // to block "kind" input
+            kind = qtypeOption.find((c) => c.name === 'Үнэлгээ')?.id
+            if (rowsData.kind !== kind) handleChange(idx, kind, 'kind')
+
+            // to reflect rating max count
+            if (isNotFirstGlobalQuestion) {
+                rating_max_count = questionTitles[0].questions[0].rating_max_count
+                if (rowsData.rating_max_count !== rating_max_count) handleChange(idx, rating_max_count, 'rating_max_count')
+            }
+
+            // to reflect rating words
+            if (isNotFirstGlobalQuestion) {
+                rating_words = questionTitles[0].questions[0].rating_words
+
+                // to avoid state recursive infinite loops, change only if not equal
+                for (let i = 0; i < rating_words.length; i++) {
+                    const firstGlobalQuestionRatingWord = rating_words[i]
+                    const currentRatingWord = rowsData.rating_words[i]
+                    if (currentRatingWord !== firstGlobalQuestionRatingWord) onHandleRatingWordChange(idx, i, firstGlobalQuestionRatingWord)
+                }
+            }
+        }
 
         return (
                 <div className='added-cards mt-1' key={idx} >
@@ -41,11 +78,18 @@ function Question(props) {
                             <Row>
                             <div className='d-flex justify-content-between'>
                                 <h5>{`Асуулт(${idx + 1})`}</h5>
-                                <div className=''>
-                                    <Button  color="danger" size='sm' outline onClick={() => removeQuestion(idx)} disabled={readOnly}>
-                                        Устгах
-                                    </Button>
-                                </div>
+                                <Row>
+                                    <Col className=''>
+                                        <Button  color="primary" size='sm' outline onClick={() => copyQuestion(idx)} disabled={readOnly}>
+                                            Хуулах
+                                        </Button>
+                                    </Col>
+                                    <Col className=''>
+                                        <Button  color="danger" size='sm' outline onClick={() => removeQuestion(idx, questions, setQuestions)} disabled={readOnly}>
+                                            Устгах
+                                        </Button>
+                                    </Col>
+                                </Row>
                             </div>
                                 <Col md={6} className=''>
                                     <Label className="form-label" htmlFor="kind">
@@ -61,7 +105,7 @@ function Question(props) {
                                         value={kind ? qtypeOption.find((c) => c.id === kind ) : ''}
                                         placeholder={'-- Сонгоно уу --'}
                                         noOptionsMessage={() => 'Хоосон байна.'}
-                                        isDisabled={readOnly}
+                                        isDisabled={surveyType === 'satisfaction' ? true : readOnly}
                                         onChange={(val) => {
                                             handleChange(idx, val?.id, 'kind')
                                         }}
@@ -97,11 +141,11 @@ function Question(props) {
                                                 <X size={15} color='red' className=''></X>
                                             </div>
                                             <div className="orgLogoDiv image-responsive" onChange={(e) => handleChange(idx, '', e.target.name,)}>
-                                                <img id={`logoImg${idx}`} className="image-responsive" src={imageUrl ? imageUrl : image ? image : empty} onClick={() => {readOnly ?  "" : clickLogoImage(idx)}}/>
+                                                <img id={`logoImg${idx}`} className="image-responsive" src={imageUrl ? imageUrl : image ? image : empty} onClick={() => {readOnly ?  "" : clickLogoImage(`${titleIndex}-${idx}`)}}/>
                                                 <input
                                                     accept="image/*"
                                                     type="file"
-                                                    id={`logoInput${idx}`}
+                                                    id={`logoInput${titleIndex}-${idx}`}
                                                     name="image"
                                                     className="form-control d-none image-responsive"
                                                     onChange={(e) => handleChange(idx, e.target.files, e.target.name)}
@@ -123,7 +167,7 @@ function Question(props) {
                                                 <Input
                                                     type='number'
                                                     bsSize='sm'
-                                                    disabled={readOnly}
+                                                    disabled={surveyType === 'satisfaction' && isNotFirstGlobalQuestion ? true : readOnly}
                                                     name="rating_max_count"
                                                     id='rating_max_count'
                                                     placeholder='Үнэлгээний дээд тоо'
@@ -132,34 +176,24 @@ function Question(props) {
                                                 />
                                             </Col>
                                         </Row>
-                                        <Row>
-                                            <Col md={6} sm={12} className='mt-1'>
-                                                <Label htmlFor="low_rating_word">Доод үнэлгээг илэрхийлэх үг</Label>
-                                                <Input
-                                                    type='text'
-                                                    name='low_rating_word'
-                                                    bsSize='sm'
-                                                    disabled={readOnly}
-                                                    placeholder='Доод үнэлгээг илэрхийлэх үг'
-                                                    defaultValue={low_rating_word}
-                                                    onChange={(e) => handleChange(idx, e.target.value, e.target.name)}
-                                                />
-                                            </Col>
-                                        </Row>
-                                        <Row>
-                                            <Col md={6} sm={12} className='mt-1'>
-                                                <Label htmlFor="high_rating_word">Дээд үнэлгээг илэрхийлэх үг</Label>
-                                                <Input
-                                                    type='text'
-                                                    bsSize='sm'
-                                                    disabled={readOnly}
-                                                    placeholder='Дээд үнэлгээг илэрхийлэх үг'
-                                                    name='high_rating_word'
-                                                    defaultValue={high_rating_word}
-                                                    onChange={(e) => handleChange(idx, e.target.value, e.target.name)}
-                                                />
-                                            </Col>
-                                        </Row>
+                                        {
+                                            Array.from({ length: rating_max_count }, (_, i) =>
+                                                <Row key={i}>
+                                                    <Col md={6} sm={12} className='mt-1'>
+                                                        <Label htmlFor={`rating_words_${i}`}>{i + 1} {t('үнэлгээг илэрхийлэх үг')}</Label>
+                                                        <Input
+                                                            type='text'
+                                                            name={`rating_words_${i}`}
+                                                            bsSize='sm'
+                                                            disabled={surveyType === 'satisfaction' && isNotFirstGlobalQuestion ? true : readOnly}
+                                                            placeholder={`${i + 1} ${t('үнэлгээг илэрхийлэх үг')}`}
+                                                            defaultValue={rating_words[i]}
+                                                            onChange={(e) => onHandleRatingWordChange(idx, i, e.target.value)}
+                                                        />
+                                                    </Col>
+                                                </Row>
+                                            )
+                                        }
                                     </>
                                 :
                                     kind == 5
