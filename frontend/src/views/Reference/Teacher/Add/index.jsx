@@ -62,12 +62,13 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
     const { school_id } = useContext(SchoolContext)
 
     // ** Hook
-    const { control, handleSubmit, reset, setError, formState: { errors }, setValue } = useForm(validate(validateSchema));
+    const { control, handleSubmit, reset, setError, formState: { errors }, setValue, getValues, watch } = useForm(validate(validateSchema));
 
     const [is_loading, setLoader] = useState(false)
     const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
 
     const [department, setDepartmentData] = useState([]);
+    const [orgOption, setOrgOption] = useState([]);
 	const [position, setOrgPositionData] = useState([]);
 
     // Loader
@@ -76,13 +77,22 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
     // Api
 	const teacherApi = useApi().hrms.teacher
     const departmentApi = useApi().hrms.department
+    const orgApi = useApi().hrms.subschool
     const orgPositionApi = useApi().hrms.position
 
     /* Тэнхим жагсаалт авах функц */
 	async function getDepartmentOption() {
-		const { success, data } = await fetchData(departmentApi.getSelectSchool())
+		const { success, data } = await fetchData(departmentApi.getSelectSchool(getValues('sub_org')))
 		if (success) {
 			setDepartmentData(data)
+		}
+	}
+
+    /* Сургууль жагсаалт авах функц */
+	async function getSchool() {
+		const { success, data } = await fetchData(orgApi.get())
+		if (success) {
+			setOrgOption(data)
 		}
 	}
 
@@ -95,12 +105,15 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
 	}
 
     useEffect(() => {
-        getDepartmentOption()
         getPositionOption()
+        getSchool()
     },[])
 
+    useEffect(() => {
+        getDepartmentOption()
+    },[watch('sub_org')])
+
     async function onSubmit(cdata) {
-        cdata['sub_org']=school_id
         cdata = convertDefaultValue(cdata)
 
         if (editData && editData?.id) {
@@ -176,6 +189,38 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
                 </ModalHeader>
                 <ModalBody className="flex-grow-1">
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
+                        <Col md={12}>
+                            <Label className="form-label" for="sub_org">
+                                {t('Сургууль')}
+                            </Label>
+                            <Controller
+                                control={control}
+                                defaultValue=''
+                                name="sub_org"
+                                render={({ field: { value, onChange} }) => {
+                                    return (
+                                        <Select
+                                            name="sub_org"
+                                            id="sub_org"
+                                            classNamePrefix='select'
+                                            isClearable
+                                            className={classnames('react-select opacity-100', { 'is-invalid': errors.sub_org})}
+                                            placeholder={t('-- Сонгоно уу --')}
+                                            options={orgOption || []}
+                                            value={value && orgOption.find((c) => c.id === value)}
+                                            noOptionsMessage={() => t('Хоосон байна.')}
+                                            onChange={(val) => {
+                                                onChange(val?.id || '')
+                                            }}
+                                            styles={ReactSelectStyles}
+                                            getOptionValue={(option) => option.id}
+                                            getOptionLabel={(option) => option.name}
+                                        />
+                                    )
+                                }}
+                            ></Controller>
+                            {errors.sub_org && <FormFeedback className='d-block'>{errors.sub_org.message}</FormFeedback>}
+                        </Col>
                         <Col md={12}>
                             <Label className="form-label" for="salbar">
                                 {t('Тэнхим')}
