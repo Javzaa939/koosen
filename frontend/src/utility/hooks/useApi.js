@@ -346,7 +346,7 @@ function useApi(isDisplay=false) {
 			},
 			/* Дүрэм журмын файлын тохиргоо */
 			rule:{
-				get: (limit=10000000, page=1, sort='', search='', school=school_id || '') => instance.get(`/settings/rule/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&schoolId=${school}`),
+				get: (limit='Бүгд', page=1, sort='', search='', school=school_id || '') => instance.get(`/settings/rule/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&schoolId=${school}`),
 				put: (data) => instance.put(`/settings/rule/`, data),
 				delete: (id) => instance.delete(`/settings/rule/${id}/`),
 			},
@@ -1050,7 +1050,7 @@ function useApi(isDisplay=false) {
 
 			// based on TeacherScore model
 			teacherScore: {
-				get: ({limit=10000000, page=1, sort='', search='', school=school_id || '', lesson='', is_fall='', data}) => instance.put(`/score/teacher-score/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&school=${school}&lesson=${lesson}&isFall=${is_fall}`, data),
+				get: ({limit='Бүгд', page=1, sort='', search='', school=school_id || '', lesson='', is_fall='', data}) => instance.put(`/score/teacher-score/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&school=${school}&lesson=${lesson}&isFall=${is_fall}`, data),
 				getReportSchool: () => instance.get(`/score/teacher-score/report/school/`),
 			},
 
@@ -1578,7 +1578,7 @@ function useApi(isDisplay=false) {
 			getDetail: (page, limit, search, test_id) => instance.get(`learning/challenge/details/?page=${page}&limit=${limit}&search=${search}&test_id=${test_id}`),
 			getTestResult: (cdata) => instance.post(`learning/challenge/result/`,cdata),
 			getDifficultyLevels: () => instance.get(`learning/challenge/questions/difficulty_levels/`),
-			getReport: ({page=1, limit=10000000, sort='', search='', report_type='', exam='', group='', profession='', student='', lesson_year='', lesson_season=''}) => instance.get(`learning/challenge/report/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&report_type=${report_type}&exam=${exam}&group=${group}&profession=${profession}&student=${student}&school=${school_id}&lesson_year=${lesson_year}&lesson_season=${lesson_season}`),
+			getReport: ({page=1, limit='Бүгд', sort='', search='', report_type='', exam='', group='', profession='', student='', lesson_year='', lesson_season=''}) => instance.get(`learning/challenge/report/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&report_type=${report_type}&exam=${exam}&group=${group}&profession=${profession}&student=${student}&school=${school_id}&lesson_year=${lesson_year}&lesson_season=${lesson_season}`),
 			getDetailTable: (page,limit,search,department,group,test_id,student_id, lesson_year, lesson_season) => instance.get(`learning/challenge/details/table/?page=${page}&limit=${limit}&search=${search}&test_id=${test_id}&department=${department}&group=${group}&student_id=${student_id}&lesson_year=${lesson_year}&lesson_season=${lesson_season}`),
 
 			chart1: (dep, year, season, teacher, lesson) => instance.get(`learning/challenge/analysis/?dep=${dep}&year=${year}&season=${season}&teacher=${teacher}&lesson=${lesson}`),
@@ -1989,7 +1989,7 @@ function useApi(isDisplay=false) {
 		},
 
 		online_lesson: {
-			get_lessons: (limit=10000000, page=1, sort='', search='', school=school_id || '', dep_id='', teacher_id='', start_date='', end_date='') => instance.get(`/online_lesson/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&school=${school}&dep_id=${dep_id}&teacher_id=${teacher_id}&start_date=${start_date}&end_date=${end_date}`),
+			get_lessons: (limit='Бүгд', page=1, sort='', search='', school=school_id || '', dep_id='', teacher_id='', start_date='', end_date='') => instance.get(`/online_lesson/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&school=${school}&dep_id=${dep_id}&teacher_id=${teacher_id}&start_date=${start_date}&end_date=${end_date}`),
 			getOne: (pk) => instance.get(`/online_lesson/${pk}/`),
 
 			deletePlan: (pk) => instance.delete(`/online_lesson/plan/${pk}/`),
@@ -2065,9 +2065,11 @@ function useApi(isDisplay=false) {
 		},
 		// Зайн сургалт
 		remote:{
-			get: (limit, page, search) => instance.get(`online_lesson/remote/?limit=${limit}&page=${page}&search=${search}`),
+			get: (limit, page, sort='', search) => instance.get(`online_lesson/remote/?limit=${limit}&page=${page}&sorting=${sort}&search=${search}`),
 			getOne: (id) => instance.get(`online_lesson/remote/${id}/`),
 			post : (data) => instance.post(`online_lesson/remote/`,data),
+			put : (data, id) => instance.put(`online_lesson/remote/${id}/`,data),
+			delete: (id) => instance.delete(`online_lesson/remote/${id}/`),
 
 			students: {
 				get: ({ limit = 'Бүгд', page = 1, search = '', elearnId = '' }) => instance.get(`online_lesson/remote/students/?limit=${limit}&page=${page}&search=${search}&elearnId=${elearnId}`),
@@ -2078,11 +2080,15 @@ function useApi(isDisplay=false) {
 			onlineInfo: {
 				get: ({ limit = 'Бүгд', page = 1, search = '', elearnId = '' }) => instance.get(`online_lesson/remote/online-info/?limit=${limit}&page=${page}&search=${search}&elearnId=${elearnId}`),
 				post : (data) => instance.post(`online_lesson/remote/online-info/`,data),
+				put : (data, id) => instance.put(`online_lesson/remote/online-info/${id}/`,data),
+				delete: (id) => instance.delete(`online_lesson/remote/online-info/${id}/`),
 			},
 
 			onlineSubInfo: {
 				get: ({ limit = 'Бүгд', page = 1, search = '', elearnId = '' }) => instance.get(`online_lesson/remote/online-sub-info/?limit=${limit}&page=${page}&search=${search}&elearnId=${elearnId}`),
 				post : (data) => instance.post(`online_lesson/remote/online-sub-info/`,data),
+				put : (data, id) => instance.put(`online_lesson/remote/online-sub-info/${id}/`,data),
+				delete: (id) => instance.delete(`online_lesson/remote/online-sub-info/${id}/`),
 			}
 		},
 

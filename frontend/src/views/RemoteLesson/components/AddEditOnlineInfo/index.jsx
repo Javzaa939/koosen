@@ -1,6 +1,5 @@
 import { t } from 'i18next';
-import { Fragment, useCallback, useEffect, useState } from 'react';
-import { X } from 'react-feather';
+import { Fragment, useCallback, useEffect } from 'react';
 import { useForm, Controller } from "react-hook-form";
 
 import {
@@ -19,8 +18,6 @@ import useLoader from '@hooks/useLoader';
 import '@styles/react/libs/flatpickr/flatpickr.scss';
 import { convertDefaultValue } from "@utils";
 
-import empty from "@src/assets/images/empty-image.jpg";
-import { onChangeFile } from '@src/views/RemoteLesson/utils';
 import ScrollSelectFilter from '../ScrollSelectFilter';
 
 const AddEditOnlineInfo = ({ open, handleModal, refreshDatas, editData, elearnId }) => {
@@ -29,25 +26,27 @@ const AddEditOnlineInfo = ({ open, handleModal, refreshDatas, editData, elearnId
     const remoteApi = useApi().remote
 
     useEffect(() => {
-        if (editData && Object.keys(editData).length > 0) {
-            for (let key in editData) {
-                if (editData[key] !== null && editData[key] !== undefined) {
-                    setValue(key, editData[key])
-                } else {
-                    setValue(key, '')
-                }
-                if (key === 'lesson') {
-                    setValue(key, editData[key]?.id || '');
-                }
+        if (editData) {
+            const { related_info_name, ...editDataCleaned } = editData
+
+            for (let key in editDataCleaned) {
+                if (editDataCleaned[key] !== null && editDataCleaned[key] !== undefined) {
+                    let finalValue = editDataCleaned[key]
+                    if (key == 'related_info') finalValue = { title: editData['related_info_name'], id: finalValue }
+                    setValue(key, finalValue)
+                } else setValue(key, '')
             }
         }
-    }, [editData]);
+    }, [editData])
 
     async function onSubmit(cdata) {
         cdata.elearn = elearnId
         cdata.related_info = cdata.related_info.id
         cdata = convertDefaultValue(cdata)
-        const { success, errors } = await fetchData(remoteApi.onlineInfo.post(cdata))
+        let apiFunc = null
+        if (editData) apiFunc = () => remoteApi.onlineInfo.put(cdata, editData.id)
+        else apiFunc = () => remoteApi.onlineInfo.post(cdata)
+        const { success, errors } = await fetchData(apiFunc())
 
         if (success) {
             reset()
@@ -145,7 +144,7 @@ const AddEditOnlineInfo = ({ open, handleModal, refreshDatas, editData, elearnId
                             <Button className='me-2' color="primary" type="submit">
                                 {t('Хадгалах')}
                             </Button>
-                            <Button color="secondary" outline type="reset" onClick={handleModal}>
+                            <Button color="secondary" outline type="reset" onClick={() => handleModal()}>
                                 {t('Буцах')}
                             </Button>
                         </Col>

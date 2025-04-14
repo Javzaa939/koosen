@@ -1335,7 +1335,7 @@ def get_cdn_url(endpoint):
 
     # Орчиноос шалтгаалж url авах
     if settings.DEBUG is True:
-        cdn_urls = 'http://127.0.0.1:8001/cdn/'
+        cdn_urls = 'http://192.168.1.7:8003/cdn/'
     else:
         #NOTE cdn-server domain-тай болох үед url тавих
         cdn_urls = ''
@@ -1356,7 +1356,7 @@ def get_cdn_urls():
 
     # Орчиноос шалтгаалж url авах
     if settings.DEBUG:
-        path = 'http://192.168.1.18:8000/cdn/'
+        path = 'http://192.168.1.7:8003/cdn/'
 
     return path
 
@@ -1796,3 +1796,80 @@ def pearson_corel(x, y):
         [start_x, start_y],
         [end_x, end_y],
     ]
+
+
+# to save file in CDN and remove from dict (e.g. from request.data)
+def save_file_to_cdn_and_remove_from_dict(request, dict_where_to_remove, field_names_to_remove, dir_name, request_file_field_name, request_file_index, field_name_to_add):
+    file = request.FILES.getlist(request_file_field_name)
+    file_path_in_cdn = None
+
+    if file:
+        file = file[request_file_index]
+        _, full_path, error = create_file_in_cdn_silently(dir_name, file)
+
+        if error:
+            dict_where_to_remove[field_name_to_add] = file
+            return None, error
+        else:
+            for field_name_to_remove in field_names_to_remove:
+                del dict_where_to_remove[field_name_to_remove]
+            file_path_in_cdn = full_path
+
+    return file_path_in_cdn, None
+
+
+"""
+    to get "POST" data in "json-parsed" types and keep all list items of QueryDict/formData for their specified keys in 2nd argument (keep_list)
+    Required to use JSON.stringify() first for all "not file fields" on frontend to pass formData
+"""
+def convert_stringified_querydict_to_dict(post_data,keep_list=[],is_keep_only_not_singles=True):
+    if keep_list:
+        post_data_dict = post_data.dict()
+
+        for keep_item in keep_list:
+            post_data_list = post_data.getlist(keep_item)
+
+            if is_keep_only_not_singles and len(post_data_list) == 1:
+                post_data_dict[keep_item] = post_data_list[0]
+            else:
+                post_data_dict[keep_item] = post_data_list
+
+        post_data = post_data_dict
+    result = {}
+
+    for key in post_data.keys():
+        if isinstance(post_data[key], list):
+            if not isinstance(result.get(key), list):
+                result[key]= []
+
+            values = []
+
+            if keep_list:
+                values = post_data[key]
+            else:
+                values = post_data.getlist(key)
+
+            for value in values:
+                if key in keep_list:
+                    result[key].append(value)
+                else:
+                    result[key].append(json.loads(value))
+        else:
+            if key in keep_list:
+                result[key] = post_data[key]
+            else:
+                if post_data[key] == 'undefined':
+                    post_data[key] = 'null'
+
+                result[key] = json.loads(post_data[key])
+
+    return result
+
+
+# to check string for URL syntax
+def is_url(string):
+    try:
+        result = urlparse(string)
+        return all([result.scheme, result.netloc])
+    except:
+        return False

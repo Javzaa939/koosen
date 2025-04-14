@@ -42,7 +42,7 @@ from core.models import (
 )
 
 from main.utils.file import split_root_path
-from main.utils.function.utils import create_file_in_cdn_silently, create_file_to_cdn, remove_file_from_cdn, get_file_from_cdn, str2bool
+from main.utils.function.utils import convert_stringified_querydict_to_dict, create_file_in_cdn_silently, create_file_to_cdn, has_permission, is_url, remove_file_from_cdn, get_file_from_cdn, save_file_to_cdn_and_remove_from_dict, str2bool
 
 @permission_classes([IsAuthenticated])
 class OnlineLessonListAPIView(
@@ -816,10 +816,11 @@ class SummarizeLessonMaterialAPIView(
 
 @permission_classes([IsAuthenticated])
 class RemoteLessonAPIView(
+    mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
-    mixins.RetrieveModelMixin,
     generics.GenericAPIView
 ):
     '''Зайн сургалтын api'''
@@ -831,6 +832,7 @@ class RemoteLessonAPIView(
     filter_backends = [SearchFilter]
     search_fields = ['lesson__name', 'lesson__code', 'teacher__first_name', 'title']
 
+    # region to override mixins' methods to take instance and save cdn file path
     def create(self, data):
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
@@ -838,101 +840,65 @@ class RemoteLessonAPIView(
 
         return serializer
 
-    # to save file in django server if CDN does not work
-    def save_file_to_cdn_and_remove_from_dict(self, dict_where_to_remove, field_names_to_remove, dir_name, request_file_field_name, request_file_index, field_name_to_add):
-        file = self.request.FILES.getlist(request_file_field_name)
-        file_path_in_cdn = None
+    def update(self, data, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
 
-        if file:
-            file = file[request_file_index]
-            relative_path, _, error = create_file_in_cdn_silently(dir_name, file)
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
 
-            if error:
-                dict_where_to_remove[field_name_to_add] = file
-                return None, error
-            else:
-                for field_name_to_remove in field_names_to_remove:
-                    del dict_where_to_remove[field_name_to_remove]
-                file_path_in_cdn = relative_path
+        return serializer
+    # endregion
 
-        return file_path_in_cdn, None
+    # region custom methods
+    def post_put(self):
+        request = self.request
 
-    """
-        to get "POST" data in "json-parsed" types and keep all list items of QueryDict/formData for their specified keys in 2nd argument (keep_list)
-        Required to use JSON.stringify() first for all "not file fields" on frontend to pass formData
-    """
-    def convert_stringified_querydict_to_dict(self,post_data,keep_list=[],is_keep_only_not_singles=True):
-        if keep_list:
-            post_data_dict = post_data.dict()
-
-            for keep_item in keep_list:
-                post_data_list = post_data.getlist(keep_item)
-
-                if is_keep_only_not_singles and len(post_data_list) == 1:
-                    post_data_dict[keep_item] = post_data_list[0]
-                else:
-                    post_data_dict[keep_item] = post_data_list
-
-            post_data = post_data_dict
-        result = {}
-
-        for key in post_data.keys():
-            if isinstance(post_data[key], list):
-                if not isinstance(result.get(key), list):
-                    result[key]= []
-
-                values = []
-
-                if keep_list:
-                    values = post_data[key]
-                else:
-                    values = post_data.getlist(key)
-
-                for value in values:
-                    if key in keep_list:
-                        result[key].append(value)
-                    else:
-                        result[key].append(json.loads(value))
-            else:
-                if key in keep_list:
-                    result[key] = post_data[key]
-                else:
-                    if post_data[key] == 'undefined':
-                        post_data[key] = 'null'
-
-                    result[key] = json.loads(post_data[key])
-
-        return result
-
-    def get(self,request,pk=None):
-        if pk:
-            datas = self.retrieve(request, pk).data
-            return request.send_data(datas)
-        serializer = self.list(request).data
-
-        return request.send_data(serializer)
-
-    def post(self, request):
-        result = request.send_info("INF_001")
+        if request.method == 'POST':
+            result = request.send_info("INF_001")
+        elif request.method == 'PUT':
+            result = request.send_info("INF_002")
 
         try:
             upload_to = self.queryset.model._meta.get_field('image').upload_to
+            file_keys = request.FILES.keys()
 
             # to get "POST" data in "json-parsed" types and keep all list items of QueryDict/formData for their specified keys in 2nd argument (keep_list)
-            data = self.convert_stringified_querydict_to_dict(request.data,request.FILES.keys())
+            data = convert_stringified_querydict_to_dict(request.data,file_keys)
 
             # to require fields
             if not data.get('title'):
                 raise ValidationError({ 'title': ['Хоосон байна'] })
 
             teacher_instance = Teachers.objects.filter(user_id=request.user.id).first()
-            data['created_user'] = teacher_instance.id
-            file_path_in_cdn, _ = self.save_file_to_cdn_and_remove_from_dict(data,['image'],upload_to,'image',0,'image')
+
+            if request.method == 'POST':
+                data['created_user'] = teacher_instance.id
+
+            data['teacher'] = teacher_instance.id
+            file_path_in_cdn = None
+
+            if file_keys:
+                file_path_in_cdn, _ = save_file_to_cdn_and_remove_from_dict(request,data,['image'],upload_to,'image',0,'image')
+
+                if not file_path_in_cdn:
+                    return request.send_error('CDN_error', 'Файл хадгалахад алдаа гарсан байна (CDN).')
+            else:
+                data['image'] = None
 
             with transaction.atomic():
-                elearn_instance = self.create(data).instance
+                elearn_instance = None
 
-                # to save file if CDN is alive
+                if request.method == 'POST':
+                    elearn_instance = self.create(data).instance
+                elif request.method == 'PUT':
+                    elearn_instance = self.update(data).instance
+
                 if file_path_in_cdn:
                     elearn_instance.image = file_path_in_cdn
                     elearn_instance.save()
@@ -944,13 +910,55 @@ class RemoteLessonAPIView(
             result = request.send_error("ERR_002")
 
         return result
+    # endregion
+
+    # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
+    @has_permission(must_permissions=['"lms-online-lesson-read"'])
+    def get(self,request,pk=None):
+        if pk:
+            datas = self.retrieve(request, pk).data
+            return request.send_data(datas)
+
+        # region to sort by one or multiple fields
+        sorting = self.request.GET.get('sorting', '')
+
+        if sorting:
+            self.queryset = self.queryset.order_by(*sorting.split(','))
+        # endregion
+
+        serializer = self.list(request).data
+
+        return request.send_data(serializer)
+
+    # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
+    @has_permission(must_permissions=['lms-study-lessonstandart-create'])
+    def post(self, request):
+        return self.post_put()
+
+    # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
+    @has_permission(must_permissions=['lms-study-lessonstandart-update'])
+    def put(self,request,pk=None):
+        return self.post_put()
+
+    # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
+    @has_permission(must_permissions=['lms-study-lessonstandart-delete'])
+    def delete(self, request, pk=None):
+        result = request.send_info("INF_003")
+
+        try:
+            self.destroy(request)
+        except Exception:
+            traceback.print_exc()
+            result = request.send_error("ERR_002")
+
+        return result
 
 
 @permission_classes([IsAuthenticated])
 class RemoteLessonStudentsAPIView(
+    mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
-    mixins.RetrieveModelMixin,
     generics.GenericAPIView
 ):
     '''Зайн сургалтын api/students'''
@@ -962,6 +970,8 @@ class RemoteLessonStudentsAPIView(
     filter_backends = [SearchFilter]
     search_fields = ['code', 'first_name']
 
+    # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
+    @has_permission(must_permissions=['"lms-online-lesson-read"'])
     def get(self,request,pk=None):
         elearn_id = request.query_params.get('elearnId')
         self.queryset = self.queryset.filter(elearn__id=elearn_id)
@@ -973,6 +983,8 @@ class RemoteLessonStudentsAPIView(
 
         return request.send_data(serializer)
 
+    # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
+    @has_permission(must_permissions=['lms-study-lessonstandart-update'])
     def put(self, request):
         result = request.send_info("INF_001")
 
@@ -996,6 +1008,8 @@ class RemoteLessonStudentsAPIView(
 
         return result
 
+    # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
+    @has_permission(must_permissions=['lms-study-lessonstandart-delete'])
     def delete(self, request, pk):
         result = request.send_info("INF_001")
 
@@ -1013,9 +1027,11 @@ class RemoteLessonStudentsAPIView(
 
 @permission_classes([IsAuthenticated])
 class RemoteLessonOnlineInfoAPIView(
+    mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
-    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
     generics.GenericAPIView
 ):
     '''Зайн сургалтын api/OnlineInfo'''
@@ -1027,6 +1043,37 @@ class RemoteLessonOnlineInfoAPIView(
     filter_backends = [SearchFilter]
     search_fields = ['title']
 
+    # region custom methods
+    def post_put(self):
+        request = self.request
+
+        if request.method == 'POST':
+            result = request.send_info("INF_001")
+        elif request.method == 'PUT':
+            result = request.send_info("INF_002")
+
+        try:
+            # to require fields
+            if not request.data.get('title'):
+                raise ValidationError({ 'title': ['Хоосон байна'] })
+
+            with transaction.atomic():
+                if request.method == 'POST':
+                    self.create(request)
+                elif request.method == 'PUT':
+                    self.update(request)
+        except ValidationError as serializer_errors:
+            traceback.print_exc()
+            result = request.send_error_valid(serializer_errors.detail)
+        except Exception:
+            traceback.print_exc()
+            result = request.send_error("ERR_002")
+
+        return result
+    # endregion
+
+    # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
+    @has_permission(must_permissions=['"lms-online-lesson-read"'])
     def get(self,request,pk=None):
         elearn_id = request.query_params.get('elearnId')
         self.queryset = self.queryset.filter(elearn__id=elearn_id)
@@ -1038,19 +1085,22 @@ class RemoteLessonOnlineInfoAPIView(
 
         return request.send_data(serializer)
 
+    # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
+    @has_permission(must_permissions=['lms-study-lessonstandart-create'])
     def post(self, request):
-        result = request.send_info("INF_001")
+        return self.post_put()
 
+    # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
+    @has_permission(must_permissions=['lms-study-lessonstandart-update'])
+    def put(self,request,pk=None):
+        return self.post_put()
+
+    # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
+    @has_permission(must_permissions=['lms-study-lessonstandart-delete'])
+    def delete(self, request, pk=None):
+        result = request.send_info("INF_003")
         try:
-            # to require fields
-            if not request.data.get('title'):
-                raise ValidationError({ 'title': ['Хоосон байна'] })
-
-            with transaction.atomic():
-                self.create(request)
-        except ValidationError as serializer_errors:
-            traceback.print_exc()
-            result = request.send_error_valid(serializer_errors.detail)
+            self.destroy(request)
         except Exception:
             traceback.print_exc()
             result = request.send_error("ERR_002")
@@ -1060,12 +1110,14 @@ class RemoteLessonOnlineInfoAPIView(
 
 @permission_classes([IsAuthenticated])
 class RemoteLessonOnlineSubInfoAPIView(
+    mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
-    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
     generics.GenericAPIView
 ):
-    '''Зайн сургалтын api/OnlineInfo'''
+    '''Зайн сургалтын api/OnlineSubInfo'''
 
     queryset = OnlineSubInfo.objects
     serializer_class = OnlineSubInfoSerializer
@@ -1074,6 +1126,113 @@ class RemoteLessonOnlineSubInfoAPIView(
     filter_backends = [SearchFilter]
     search_fields = ['title']
 
+    # region to override mixins' methods to take instance and save cdn file path
+    def create(self, data):
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+
+        return serializer
+
+    def update(self, data, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return serializer
+    # endregion
+
+    # region custom methods
+    def post_put(self):
+        request = self.request
+
+        if request.method == 'POST':
+            result = request.send_info("INF_001")
+        elif request.method == 'PUT':
+            result = request.send_info("INF_002")
+
+        try:
+            upload_to = ELearn._meta.get_field('image').upload_to
+            not_stringified_data = convert_stringified_querydict_to_dict(request.data,['file'])
+            stringified_data = not_stringified_data.pop('json_data')
+
+            # region to collect only necessary fields
+            cleaned_data = {
+                'title': stringified_data['title'],
+                'parent_title': stringified_data['parent_title'],
+                'file_type': stringified_data['file_type'],
+            }
+
+            if stringified_data['file_type'] == OnlineSubInfo.TEXT:
+                cleaned_data['text'] = stringified_data['text']
+            else:
+                cleaned_data['file'] = not_stringified_data['file']
+            # endregion
+
+            # region to require fields
+            if not cleaned_data.get('title'):
+                raise ValidationError({ 'title': ['Хоосон байна'] })
+
+            if cleaned_data['file_type'] == OnlineSubInfo.TEXT:
+                # to check for emptiness of QUILL lib. editor value
+                if not cleaned_data.get('text') or cleaned_data.get('text') == '<p><br></p>':
+                    raise ValidationError({ 'text': ['Хоосон байна'] })
+            # endregion
+
+            file_path = None
+
+            if cleaned_data['file_type'] in [OnlineSubInfo.VIDEO, OnlineSubInfo.PDF]:
+                # to require field
+                # to check for emptiness using 'null' because file fields are not stringified
+                if not cleaned_data.get('file') or cleaned_data.get('file') == 'null':
+                    raise ValidationError({ 'file': ['Хоосон байна'] })
+
+                if request.FILES.keys():
+                    file = request.FILES.getlist('file')[0]
+                    _, file_path, _ = create_file_in_cdn_silently(upload_to, file)
+
+                    if not file_path:
+                        return request.send_error('CDN_error', 'Файл хадгалахад алдаа гарсан байна (CDN).')
+
+                # to save URL of file
+                elif is_url(cleaned_data['file']):
+                    file_path = cleaned_data['file']
+                else:
+                    raise ValidationError({ 'file': ['Файл хадгалахад алдаа гарсан байна'] })
+
+                # to remove from dict because serializer requires file in filefield, but it is always string of CDN path or user URL
+                del cleaned_data['file']
+
+            with transaction.atomic():
+                instance = None
+
+                if request.method == 'POST':
+                    instance = self.create(cleaned_data).instance
+                elif request.method == 'PUT':
+                    instance = self.update(cleaned_data, partial=True).instance
+
+                if file_path:
+                    instance.file = file_path
+                    instance.save()
+        except ValidationError as serializer_errors:
+            traceback.print_exc()
+            result = request.send_error_valid(serializer_errors.detail)
+        except Exception:
+            traceback.print_exc()
+            result = request.send_error("ERR_002")
+
+        return result
+    # endregion
+
+    # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
+    @has_permission(must_permissions=['"lms-online-lesson-read"'])
     def get(self,request,pk=None):
         elearn_id = request.query_params.get('elearnId')
         self.queryset = self.queryset.filter(parent_title__elearn__id=elearn_id)
@@ -1085,22 +1244,25 @@ class RemoteLessonOnlineSubInfoAPIView(
 
         return request.send_data(serializer)
 
+    # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
+    @has_permission(must_permissions=['lms-study-lessonstandart-create'])
     def post(self, request):
-        result = request.send_info("INF_001")
+        return self.post_put()
+
+    # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
+    @has_permission(must_permissions=['lms-study-lessonstandart-update'])
+    def put(self,request,pk=None):
+        return self.post_put()
+
+    # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
+    @has_permission(must_permissions=['lms-study-lessonstandart-delete'])
+    def delete(self, request, pk=None):
+        result = request.send_info("INF_003")
 
         try:
-            # to require fields
-            if not request.data.get('title'):
-                raise ValidationError({ 'title': ['Хоосон байна'] })
-
-            with transaction.atomic():
-                self.create(request)
-        except ValidationError as serializer_errors:
-            traceback.print_exc()
-            result = request.send_error_valid(serializer_errors.detail)
+            self.destroy(request)
         except Exception:
             traceback.print_exc()
             result = request.send_error("ERR_002")
 
         return result
-

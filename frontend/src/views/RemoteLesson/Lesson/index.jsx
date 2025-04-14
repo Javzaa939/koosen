@@ -5,12 +5,13 @@ import { ChevronsLeft } from 'react-feather'
 import { useTranslation } from 'react-i18next'
 import { CiUser } from 'react-icons/ci'
 import { PiCertificate, PiExam } from 'react-icons/pi'
-import { useParams } from 'react-router-dom'
+import { useLocation, useParams } from 'react-router-dom'
 import { Badge, Card, CardBody, CardTitle, Col, Row } from 'reactstrap'
 import GroupStudentBlock from '../components/GroupStudentBlock'
 import StudentListBlock from '../components/StudentListBlock'
 import OnlineInfoBlock from '../components/OnlineInfoBlock'
 import useApiCustom from '../hooks/useApiCustom'
+import OnlineSubInfoDetailsBlock from '../components/OnlineSubInfoDetailsBlock'
 
 function Lesson() {
     // #region to paginate students in datatable
@@ -39,12 +40,12 @@ function Lesson() {
     const { id } = useParams()
     const remoteApi = useApi().remote
 
-    // #region API usage
     // to get Elearn basic data
-    const { data: datas, isLoading: isLoadingElearn } = useApiCustom({
-        apiFunction: () => remoteApi.getOne(id),
-    })
+    const location = useLocation()
+    const { selectedELearn } = location.state || {}
+    const { title, students, start_date, end_date, is_end_exam, is_certificate } = selectedELearn || {}
 
+    // #region API usage
     // #region to get Elearn's students data
     const [refreshStudents, setRefreshStudents] = useState(false)
 
@@ -95,9 +96,17 @@ function Lesson() {
     // #endregion API usage
 
     const { isLoading: isLoadingGeneral, Loader, fetchData } = useLoader({});
-    const isLoading = isLoadingGeneral || isLoadingStudents || isLoadingElearn || isLoadingOnlineInfo || isLoadingOnlineSubInfo
+    const isLoading = isLoadingGeneral || isLoadingStudents || isLoadingOnlineInfo || isLoadingOnlineSubInfo
 
     const { t } = useTranslation();
+
+    // #region to act on OnlineSubInfo select
+    const [selectedOnlineSubInfo, setSelectedOnlineSubInfo] = useState()
+
+    function handleSelectOnlineSubInfo(onlineSubInfoData, onlineInfoTitle) {
+        setSelectedOnlineSubInfo({ onlineSubInfoData: onlineSubInfoData, onlineInfoTitle: onlineInfoTitle })
+    }
+    // #endregion
 
     return (
         <>
@@ -109,29 +118,29 @@ function Lesson() {
                         <CardBody>
                             <CardTitle tag="h4">{t("Сургалтын мэдээлэл")}</CardTitle>
                             <div>
-                                <h2 className=''>{datas?.title}</h2>
+                                <h2 className=''>{title}</h2>
                             </div>
                             <div>
                                 <div className='d-flex justify-content-between'>
                                     <div>
                                         <div>
-                                            <span>Эхлэх хугацаа: {datas?.start_date && new Date(datas?.start_date)?.toISOString()?.split('T')[0]}</span>
+                                            <span>Эхлэх хугацаа: {start_date && new Date(start_date)?.toISOString()?.split('T')[0]}</span>
                                         </div>
                                         <div>
-                                            <span>Дуусах хугацаа: {datas?.end_date && new Date(datas?.end_date)?.toISOString()?.split('T')[0]}</span>
+                                            <span>Дуусах хугацаа: {end_date && new Date(end_date)?.toISOString()?.split('T')[0]}</span>
                                         </div>
                                     </div>
-                                    <div className='d-flex gap-25'>
-                                        <Badge color='primary' pill title='Оюутны тоо' className='d-flex align-items-center gap-25'>
-                                            <CiUser style={{ width: "12px", height: "12px" }} /> {datas?.students?.length || 0}
+                                    <p className="d-flex align-items-center justify-content-center fw-medium gap-1 mb-0">
+                                        <Badge color='primary' pill title='Оюутны тоо' className='d-flex align-items-center gap-25' style={{ height: "24px" }}>
+                                            <CiUser style={{ width: "12px", height: "12px" }} /> {students?.length || 0}
                                         </Badge>
-                                        <Badge color={datas?.is_end_exam ? `light-success` : 'light-secondary'} pill title={datas?.is_end_exam ? 'Төгсөлтийн шалгалттай' : 'Төгсөлтийн шалгалтгүй'} className='d-flex align-items-center gap-25'>
+                                        {is_end_exam && <Badge color={`light-success`} pill title={'Төгсөлтийн шалгалттай'} className='d-flex align-items-center gap-25'>
                                             <PiExam style={{ width: "24px", height: "24px" }} />
-                                        </Badge>
-                                        <Badge color={datas?.is_certificate ? `light-danger` : 'light-secondary'} pill title={datas?.is_certificate ? 'Сертификаттай' : 'Сертификатгүй'} className='d-flex align-items-center gap-25'>
+                                        </Badge>}
+                                        {is_certificate && <Badge color={`light-danger`} pill title={'Сертификаттай'} className='d-flex align-items-center gap-25'>
                                             <PiCertificate style={{ width: "24px", height: "24px" }} />
-                                        </Badge>
-                                    </div>
+                                        </Badge>}
+                                    </p>
                                 </div>
                             </div>
                         </CardBody>
@@ -168,18 +177,18 @@ function Lesson() {
                         onlineSubInfoDatas={onlineSubInfoDatas}
                         getOnlineSubInfoDatas={() => setRefreshOnlineSubInfo((current) => !current)}
                         elearnId={id}
+                        handleSelectOnlineSubInfo={handleSelectOnlineSubInfo}
+                        fetchData={fetchData}
+                        remoteApi={remoteApi}
                     />
                 </Col>
                 <Col md={8}>
-                    {/* <OnlineSubInfoDetailsBlock
+                    <OnlineSubInfoDetailsBlock
                         t={t}
-                        datas={null}
-                        getDatas={null}
-                        isLoading={null}
-                        fetchData={fetchData}
-                        remoteApi={remoteApi}
-                        elearnId={id}
-                    /> */}
+                        getOnlineSubInfoDatas={() => setRefreshOnlineSubInfo((current) => !current)}
+                        selectedELearn={selectedELearn}
+                        selectedOnlineSubInfo={selectedOnlineSubInfo}
+                    />
                 </Col>
             </Row>
         </>

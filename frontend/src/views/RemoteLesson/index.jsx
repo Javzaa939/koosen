@@ -1,25 +1,22 @@
 import { useEffect, useState } from 'react';
-import { Plus, Search } from 'react-feather';
+import { Edit, Plus, Search, Trash2 } from 'react-feather';
 import { CiUser } from "react-icons/ci";
 import { FaAngleDoubleRight } from "react-icons/fa";
 import { PiCertificate, PiExam } from "react-icons/pi";
-import { Badge, Button, Card, CardBody, CardHeader, CardTitle, Col, Input, PopoverBody, PopoverHeader, Progress, Row, UncontrolledPopover } from 'reactstrap';
+import { Badge, Button, Card, CardBody, CardHeader, CardTitle, Col, Input, PopoverBody, PopoverHeader, Progress, Row, UncontrolledPopover, UncontrolledTooltip } from 'reactstrap';
 import { Link } from 'react-router-dom';
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import { getPagination } from '@utils';
-import empty from "@src/assets/images/empty-image.jpg";
 
-import Addmodal from './components/Add';
+import AddEditModal from './components/AddEditModal';
 import './style.scss';
 import DisplayQuill from './components/DisplayQuill';
+import useModal from '@src/utility/hooks/useModal';
 
 function RemoteLesson() {
-    // const datas = sample
     const [datas, setDatas] = useState([])
-
-    const [addModal, setAddModal] = useState(false)
 
     // Хуудаслалтын анхны утга
     const [currentPage, setCurrentPage] = useState(1)
@@ -34,18 +31,15 @@ function RemoteLesson() {
     const [total_count, setTotalCount] = useState(1)
 
     // Эрэмбэлэлт
-    const [sortField, setSort] = useState('')
-
-    function toggleAddModal() {
-        setAddModal(!addModal)
-    }
+    const [sortField, setSort] = useState('-id')
 
     const { isLoading, fetchData, Loader } = useLoader({ isSmall: true });
 
     const remoteApi = useApi().remote
 
     async function getDatas() {
-        const { success, data } = await fetchData(remoteApi.get(rowsPerPage, currentPage, searchValue));
+        const { success, data } = await fetchData(remoteApi.get(rowsPerPage, currentPage, sortField, searchValue));
+
         if (success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
@@ -81,17 +75,39 @@ function RemoteLesson() {
         getDatas()
     }
 
+    // #region to handle modals
+    const [addEditModal, setAddEditModal] = useState(false)
+    const [editData, setEditData] = useState()
+
+    const { showWarning } = useModal()
+
+    function toggleAddEditModal(data) {
+        if (addEditModal) setEditData()
+        else setEditData(data)
+
+        setAddEditModal(!addEditModal)
+    }
+
+    async function handleDelete(id) {
+        const { success } = await fetchData(remoteApi.delete(id))
+        if (success) getDatas()
+    }
+    // #endregion
+
     return (
         <>
-            <Addmodal
-                open={addModal}
-                handleModal={toggleAddModal}
+            {/* to reset modal values 'key' prop is used, because reset() function does not work sometimes I could not find reason */}
+            <AddEditModal
+                key={editData?.id}
+                open={addEditModal}
+                handleModal={toggleAddEditModal}
                 refreshDatas={getDatas}
+                editData={editData}
             />
             <Card>
                 <CardHeader>
                     <CardTitle>Зайн сургалт</CardTitle>
-                    <Button color='primary' onClick={() => toggleAddModal()}><Plus size={14} /> Үүсгэх</Button>
+                    <Button color='primary' onClick={() => toggleAddEditModal()}><Plus size={14} /> Үүсгэх</Button>
                 </CardHeader>
             </Card>
             <div className='d-flex justify-content-between align-items-center mb-1'>
@@ -126,24 +142,25 @@ function RemoteLesson() {
                     :
                     <Row className='gy-6 mb-6'>
                         {datas.map((data, idx) => {
-                            const { id, title, teacher_info, students, is_end_exam, is_certificate, image: imageOriginal, description } = data
-                            const image = imageOriginal || empty
+                            const { id, title, teacher_info, students, is_end_exam, is_certificate, description, image_path: imageOriginal } = data
+                            const image = imageOriginal
+
                             return (
                                 <Col sm={6} lg={3} key={idx} className='m-0 p-50'>
                                     <Card className="p-50 h-100 shadow-none border bg-white">
-                                        {
-                                            imageOriginal
-                                            &&
-                                            <div className="rounded-2 text-center mb-1">
-                                                <img className="img-fluid" src={image} alt={title}
-                                                    onError={({ currentTarget }) => {
-                                                        currentTarget.onerror = null; // prevents looping
-                                                        currentTarget.src = empty
-                                                    }}
-                                                />
-                                            </div>
-                                        }
                                         <CardBody className="p-1 pt-50 d-flex flex-column h-100">
+                                            {
+                                                imageOriginal
+                                                &&
+                                                <div className="rounded-2 text-center mb-1">
+                                                    <img className="img-fluid" src={image} alt={title}
+                                                        onError={({ currentTarget }) => {
+                                                            currentTarget.onerror = null; // prevents looping
+                                                            currentTarget.src = empty
+                                                        }}
+                                                    />
+                                                </div>
+                                            }
                                             <div className="d-flex justify-content-between align-items-center mb-1">
                                                 <div>
                                                     Багш: <span className='text-decoration-underline' id={`teacher_${idx}`} style={{ cursor: 'help' }}>{teacher_info?.full_name}</span>
@@ -166,18 +183,15 @@ function RemoteLesson() {
                                                     </UncontrolledPopover>
                                                 </div>
                                                 <p className="d-flex align-items-center justify-content-center fw-medium gap-1 mb-0">
-                                                    <Badge color={is_end_exam ? `light-success` : 'light-secondary'} pill title={is_end_exam ? 'Төгсөлтийн шалгалттай' : 'Төгсөлтийн шалгалтгүй'} className='d-flex align-items-center gap-25'>
+                                                    {is_end_exam && <Badge color={`light-success`} pill title={'Төгсөлтийн шалгалттай'} className='d-flex align-items-center gap-25'>
                                                         <PiExam style={{ width: "24px", height: "24px" }} />
-                                                    </Badge>
-                                                    <Badge color={is_certificate ? `light-danger` : 'light-secondary'} pill title={is_certificate ? 'Сертификаттай' : 'Сертификатгүй'} className='d-flex align-items-center gap-25'>
+                                                    </Badge>}
+                                                    {is_certificate && <Badge color={`light-danger`} pill title={'Сертификаттай'} className='d-flex align-items-center gap-25'>
                                                         <PiCertificate style={{ width: "24px", height: "24px" }} />
-                                                    </Badge>
+                                                    </Badge>}
                                                 </p>
                                             </div>
                                             <span className="h5">{title}</span>
-                                            <p className="mt-25">
-                                                <DisplayQuill content={description} />
-                                            </p>
                                             <div className='mt-auto'>
                                                 <p className="d-flex align-items-center mb-50">
                                                     <Badge color='primary' pill title='Оюутны тоо' className='d-flex align-items-center gap-25'>
@@ -185,13 +199,46 @@ function RemoteLesson() {
                                                     </Badge>
                                                 </p>
                                                 <Progress value={75} style={{ height: '8px' }} className="mb-1" />
-                                                <div className='text-end'>
+                                                <div className='d-flex justify-content-between'>
+                                                    <div className='d-flex'>
+                                                        <div>
+                                                            <a
+                                                                role="button"
+                                                                onClick={() => toggleAddEditModal(data)}
+                                                                id={`complaintListDatatableEdit${id}`}
+                                                                className='me-1'
+                                                            >
+                                                                <Badge color="light-success"><Edit width={"10px"} /></Badge>
+                                                            </a>
+                                                            <UncontrolledTooltip placement='top' target={`complaintListDatatableEdit${id}`} >Засах</UncontrolledTooltip>
+                                                        </div>
+                                                        <div>
+                                                            <a
+                                                                role="button"
+                                                                onClick={() => showWarning({
+                                                                    header: {
+                                                                        title: `Сургалт устгах`,
+                                                                    },
+                                                                    question: `Та энэ сургалтыг устгахдаа итгэлтэй байна уу?`,
+                                                                    onClick: () => handleDelete(id),
+                                                                    btnText: 'Устгах',
+                                                                })}
+                                                                className='me-1'
+                                                                id={`complaintListDatatableCancel${id}`}
+                                                            >
+                                                                <Badge color="light-danger" ><Trash2 width={"10px"} /></Badge>
+                                                            </a>
+                                                            <UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${id}`} >Устгах</UncontrolledTooltip>
+                                                        </div>
+                                                    </div>
                                                     <Button
                                                         tag={Link}
                                                         to={`/remote_lesson/${id}`}
                                                         color="primary"
                                                         outline
-                                                        className="btn-label-primary border"
+                                                        className="btn-label-primary border my-auto"
+                                                        state={{ selectedELearn: data }}
+                                                        size='sm'
                                                     >
                                                         <span className="me-50">Дэлгэрэнгүй</span> <FaAngleDoubleRight />
                                                     </Button>

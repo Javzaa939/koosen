@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { X } from 'react-feather';
-import { Controller } from 'react-hook-form';
+import { Controller, useWatch } from 'react-hook-form';
 import { Col, FormFeedback, Input, Label, Row } from 'reactstrap';
 import ReactQuill from 'react-quill';
 import 'quill/dist/quill.snow.css'
@@ -12,12 +12,20 @@ export default function Elearn({
 	t,
 	control,
 	errors,
+	setValue
 }) {
 	// #region to save file
-	const [image_old, setImageOld] = useState('')
+	// to get path from duplicated image field, because CDN path in django's filefield became changed
+	const image_path = useWatch({
+		control,
+		name: 'image_path',
+	});
+
+	const [image_old, setImageOld] = useState(image_path)
 
 	const handleDeleteImage = () => {
 		setImageOld('')
+		setValue('image', '')
 	}
 
 	const clickLogoImage = () => {
@@ -32,7 +40,7 @@ export default function Elearn({
 	const modules = {
 		toolbar: [
 			[{ 'font': [] }, { 'size': ['small', 'medium', 'large', 'huge'] }],
-			[{ 'header': '1' }, { 'header': '2' }, { 'font': [] }],
+			[{ 'header': '1' }, { 'header': '2' }],
 			[{ 'align': [] }],
 			['bold', 'italic', 'underline', 'strike'],
 			[{ 'list': 'ordered' }, { 'list': 'bullet' }],
@@ -51,7 +59,7 @@ export default function Elearn({
 		'size', 'link',
 		// 'image',
 		'color', 'background',
-		'clean'
+		'clean', 'font', 'blockquote'
 	];
 	// #endregion
 
@@ -82,11 +90,11 @@ export default function Elearn({
 			</Col>
 			<Col md={12} className="mt-50">
 				<style>
-				{`
-					.custom-quill .ql-container {
-						min-height: 100px;
-					}
-				`}
+					{`
+						.custom-quill .ql-container {
+							min-height: 100px;
+						}
+					`}
 				</style>
 				<Label className="form-label" for="description">
 					{t('Тайлбар')}

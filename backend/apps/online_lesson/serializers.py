@@ -379,29 +379,32 @@ class TeacherSerializer(serializers.ModelSerializer):
 class ELearnSerializer(serializers.ModelSerializer):
 
     teacher_info = TeacherSerializer(source='teacher', read_only=True)
+    image_path = serializers.SerializerMethodField()
 
     class Meta:
         model = ELearn
         fields = "__all__"
 
+    # to get orignal field value, because Django automatically adds MEDIA and other url parts at the start of path in filefields so this another field is needed
+    def get_image_path(self, obj):
+        result = obj.image.name if obj.image else None
+        return result
+
 
 class OnlineInfoSerializer(serializers.ModelSerializer):
 
-    online_sub_info_count = serializers.SerializerMethodField()
+    related_info_name = serializers.CharField(source='related_info.title', default='')
 
     class Meta:
         model = OnlineInfo
         fields = "__all__"
-
-    def get_online_sub_info_count(self, obj):
-        result = OnlineSubInfo.objects.filter(parent_title=obj).count()
-        return result
 
 
 class OnlineSubInfoSerializer(serializers.ModelSerializer):
 
     quezquestions_count = serializers.SerializerMethodField()
     file_type_name = serializers.SerializerMethodField()
+    file_path = serializers.SerializerMethodField()
 
     class Meta:
         model = OnlineSubInfo
@@ -414,3 +417,12 @@ class OnlineSubInfoSerializer(serializers.ModelSerializer):
     def get_file_type_name(self, obj):
         file_type_name = obj.get_file_type_display()
         return file_type_name
+
+    # to get orignal field value, because Django automatically adds MEDIA and other url parts at the start of path in filefields so this another field is needed
+    def get_file_path(self, obj):
+        result = obj.file.name if obj.file else None
+        print(result)
+        print('result', result)
+        print('result', result)
+        print('result', result)
+        return result
