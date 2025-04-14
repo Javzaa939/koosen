@@ -32,9 +32,12 @@ const fileTypeOptions = [
     // { id: QUIZ, name: "Шалгалт" },
 ]
 
-const inputNameFileType = 'file_type'
-const inputNameText = 'text'
-const inputNameFile = 'file'
+const formFieldNames = {
+    title: 'title',
+    file_type: 'file_type',
+    file: 'file',
+    text: 'text',
+}
 
 const AddEditOnlineSubInfo = ({ open, handleModal, refreshDatas, editData, elearnId, onlineInfoId }) => {
     const { control, handleSubmit, setError, setValue, reset, formState: { errors }, watch } = useForm()
@@ -43,19 +46,13 @@ const AddEditOnlineSubInfo = ({ open, handleModal, refreshDatas, editData, elear
     const remoteApi = useApi().remote
 
     useEffect(() => {
-        if (editData && Object.keys(editData).length > 0) {
+        if (editData) {
             for (let key in editData) {
-                if (editData[key] !== null && editData[key] !== undefined) {
-                    setValue(key, editData[key])
-                } else {
-                    setValue(key, '')
-                }
-                if (key === 'lesson') {
-                    setValue(key, editData[key]?.id || '');
-                }
+                if (editData[key] !== null && editData[key] !== undefined) setValue(key, editData[key])
+                else setValue(key, '')
             }
         }
-    }, [editData]);
+    }, [editData])
 
     async function onSubmit(cdata) {
         cdata.elearn = elearnId
@@ -64,7 +61,12 @@ const AddEditOnlineSubInfo = ({ open, handleModal, refreshDatas, editData, elear
         const formData = new FormData()
         formData.append('json_data', JSON.stringify(cdata))
         formData.append('file', cdata['file'])
-        const { success, errors } = await fetchData(remoteApi.onlineSubInfo.post(formData))
+        let apiFunc = null
+
+        if (editData) apiFunc = () => remoteApi.onlineSubInfo.put(formData, editData.id)
+        else apiFunc = () => remoteApi.onlineSubInfo.post(formData)
+
+        const { success, errors } = await fetchData(apiFunc())
 
         if (success) {
             reset()
@@ -78,7 +80,7 @@ const AddEditOnlineSubInfo = ({ open, handleModal, refreshDatas, editData, elear
         }
     }
 
-    const [radioFileType, setRadioFileType] = useState(`${inputNameFile}-file`)
+    const [radioFileType, setRadioFileType] = useState(`${formFieldNames.file}-file`)
 
     return (
         <Fragment>
@@ -112,7 +114,7 @@ const AddEditOnlineSubInfo = ({ open, handleModal, refreshDatas, editData, elear
                             <Controller
                                 defaultValue=''
                                 control={control}
-                                name='title'
+                                name={formFieldNames.title}
                                 render={({ field }) => (
                                     <Input
                                         {...field}
@@ -125,16 +127,16 @@ const AddEditOnlineSubInfo = ({ open, handleModal, refreshDatas, editData, elear
                                     />
                                 )}
                             />
-                            {errors.title && <FormFeedback className='d-block'>{t(errors.title.message)}</FormFeedback>}
+                            {errors[formFieldNames.title] && <FormFeedback className='d-block'>{t(errors[formFieldNames.title].message)}</FormFeedback>}
                         </Col>
                         <Col md={6}>
-                            <Label className="form-label" for={inputNameFileType}>
+                            <Label className="form-label" for={formFieldNames.file_type}>
                                 {t('Материалын төрөл')}
                             </Label>
                             <Controller
                                 control={control}
                                 defaultValue=''
-                                name={inputNameFileType}
+                                name={formFieldNames.file_type}
                                 render={({ field }) => {
                                     return (
                                         <Select
@@ -158,16 +160,16 @@ const AddEditOnlineSubInfo = ({ open, handleModal, refreshDatas, editData, elear
                                     )
                                 }}
                             ></Controller>
-                            {errors[inputNameFileType] && <FormFeedback className='d-block'>{t(errors[inputNameFileType].message)}</FormFeedback>}
+                            {errors[formFieldNames.file_type] && <FormFeedback className='d-block'>{t(errors[formFieldNames.file_type].message)}</FormFeedback>}
                         </Col>
-                        {[PDF, VIDEO].includes(formValues[inputNameFileType]) && <Col md={12} className='mt-1 text-center'>
-                            <Label className="form-label" for={inputNameFile}>
+                        {[PDF, VIDEO].includes(formValues[formFieldNames.file_type]) && <Col md={12} className='mt-1 text-center'>
+                            <Label className="form-label" for={formFieldNames.file}>
                                 {t('Файл')}
                             </Label>
                             <Controller
                                 control={control}
                                 defaultValue=''
-                                name={inputNameFile}
+                                name={formFieldNames.file}
                                 render={({ field: { ref, ...rest } }) => {
                                     return (
                                         <Row className='mt-1'>
@@ -208,8 +210,8 @@ const AddEditOnlineSubInfo = ({ open, handleModal, refreshDatas, editData, elear
                                                         onChange={(e) => {
                                                             rest.onChange(e?.target?.files?.[0] ?? '')
                                                         }}
-                                                        accept={formValues[inputNameFileType] === VIDEO ? 'video/*' : 'application/pdf'}
-                                                        warning={formValues[inputNameFileType] === VIDEO ? 'Файл оруулна уу. Зөвхөн VIDEO файл хүлээж авна' : 'Файл оруулна уу. Зөвхөн .pdf файл хүлээж авна'}
+                                                        accept={formValues[formFieldNames.file_type] === VIDEO ? 'video/*' : 'application/pdf'}
+                                                        warning={formValues[formFieldNames.file_type] === VIDEO ? 'Файл оруулна уу. Зөвхөн VIDEO файл хүлээж авна' : 'Файл оруулна уу. Зөвхөн .pdf файл хүлээж авна'}
                                                     />
                                                     :
                                                     <>
@@ -230,14 +232,14 @@ const AddEditOnlineSubInfo = ({ open, handleModal, refreshDatas, editData, elear
                                 }}
                             ></Controller>
                         </Col>}
-                        {formValues[inputNameFileType] === TEXT && <Col md={12} className='mt-1'>
-                            <Label className="form-label" for={inputNameText}>
+                        {formValues[formFieldNames.file_type] === TEXT && <Col md={12} className='mt-1'>
+                            <Label className="form-label" for={formFieldNames.text}>
                                 {t('ТEXT төрлийн мэдээлэл')}
                             </Label>
                             <Controller
                                 control={control}
                                 defaultValue=''
-                                name={inputNameText}
+                                name={formFieldNames.text}
                                 render={({ field: { ref, ...rest } }) => {
                                     return (
                                         <Editor
@@ -247,7 +249,7 @@ const AddEditOnlineSubInfo = ({ open, handleModal, refreshDatas, editData, elear
                                     )
                                 }}
                             ></Controller>
-                            {errors[inputNameText] && <FormFeedback className='d-block'>{t(errors[inputNameText].message)}</FormFeedback>}
+                            {errors[formFieldNames.text] && <FormFeedback className='d-block'>{t(errors[formFieldNames.text].message)}</FormFeedback>}
                         </Col>}
                         <Col md={12} className="text-center mt-2">
                             <Button className='me-2' color="primary" type="submit">

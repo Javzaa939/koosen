@@ -1083,7 +1083,6 @@ class RemoteLessonOnlineInfoAPIView(
 
         return request.send_data(serializer)
 
-
     # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
     @has_permission(must_permissions=['lms-study-lessonstandart-create'])
     def post(self, request):
@@ -1110,12 +1109,14 @@ class RemoteLessonOnlineInfoAPIView(
 
 @permission_classes([IsAuthenticated])
 class RemoteLessonOnlineSubInfoAPIView(
+    mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
-    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
     generics.GenericAPIView
 ):
-    '''Зайн сургалтын api/OnlineInfo'''
+    '''Зайн сургалтын api/OnlineSubInfo'''
 
     queryset = OnlineSubInfo.objects
     serializer_class = OnlineSubInfoSerializer
@@ -1124,12 +1125,109 @@ class RemoteLessonOnlineSubInfoAPIView(
     filter_backends = [SearchFilter]
     search_fields = ['title']
 
+    # region to override mixins' methods to take instance and save cdn file path
     def create(self, data):
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
 
         return serializer
+
+    def update(self, data, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return serializer
+    # endregion
+
+    # region custom methods
+    def post_put(self):
+        request = self.request
+
+        if request.method == 'POST':
+            result = request.send_info("INF_001")
+        elif request.method == 'PUT':
+            result = request.send_info("INF_002")
+
+        try:
+            upload_to = ELearn._meta.get_field('image').upload_to
+            not_stringified_data = convert_stringified_querydict_to_dict(request.data,['file'])
+            stringified_data = not_stringified_data.pop('json_data')
+
+            # region to collect only necessary fields
+            cleaned_data = {
+                'title': stringified_data['title'],
+                'file_type': stringified_data['file_type'],
+            }
+
+            if stringified_data['file_type'] == OnlineSubInfo.TEXT:
+                cleaned_data['text'] = stringified_data['text']
+            else:
+                cleaned_data['file'] = not_stringified_data['file']
+            # endregion
+
+            # region to require fields
+            if not cleaned_data.get('title'):
+                raise ValidationError({ 'title': ['Хоосон байна'] })
+
+            if cleaned_data['file_type'] == OnlineSubInfo.TEXT:
+                # to check for emptiness of QUILL lib. editor value
+                if not cleaned_data.get('text') or cleaned_data.get('text') == '<p><br></p>':
+                    raise ValidationError({ 'text': ['Хоосон байна'] })
+            # endregion
+
+            file_path = None
+
+            if cleaned_data['file_type'] in [OnlineSubInfo.VIDEO, OnlineSubInfo.PDF]:
+                # to require field
+                # to check for emptiness using 'null' because file fields are not stringified
+                if not cleaned_data.get('file') or cleaned_data.get('file') == 'null':
+                    raise ValidationError({ 'file': ['Хоосон байна'] })
+
+                if request.FILES.keys():
+                    file = request.FILES.getlist('file')[0]
+                    _, file_path, _ = create_file_in_cdn_silently(upload_to, file)
+
+                    if not file_path:
+                        return request.send_error('CDN_error', 'Файл хадгалахад алдаа гарсан байна (CDN).')
+
+                # to save URL of file
+                elif is_url(cleaned_data['file']):
+                    file_path = cleaned_data['file']
+                else:
+                    raise ValidationError({ 'file': ['Файл хадгалахад алдаа гарсан байна'] })
+
+                # to remove from dict because serializer requires file in filefield, but it is always string of CDN path or user URL
+                del cleaned_data['file']
+
+            with transaction.atomic():
+                instance = None
+
+                if request.method == 'POST':
+                    instance = self.create(cleaned_data).instance
+                elif request.method == 'PUT':
+                    instance = self.update(cleaned_data, partial=True).instance
+
+                if file_path:
+                    instance.file = file_path
+                    instance.save()
+        except ValidationError as serializer_errors:
+            traceback.print_exc()
+            result = request.send_error_valid(serializer_errors.detail)
+        except Exception:
+            traceback.print_exc()
+            result = request.send_error("ERR_002")
+
+        return result
+    # endregion
 
     # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
     @has_permission(must_permissions=['"lms-online-lesson-read"'])
@@ -1147,54 +1245,22 @@ class RemoteLessonOnlineSubInfoAPIView(
     # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
     @has_permission(must_permissions=['lms-study-lessonstandart-create'])
     def post(self, request):
-        result = request.send_info("INF_001")
+        return self.post_put()
+
+    # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
+    @has_permission(must_permissions=['lms-study-lessonstandart-update'])
+    def put(self,request,pk=None):
+        return self.post_put()
+
+    # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
+    @has_permission(must_permissions=['lms-study-lessonstandart-delete'])
+    def delete(self, request, pk=None):
+        result = request.send_info("INF_003")
 
         try:
-            file_keys = ['file']
-            upload_to = ELearn._meta.get_field('image').upload_to
-            data = convert_stringified_querydict_to_dict(request.data,file_keys)
-            request_data = data.get('json_data')
-
-            # to remove from dict because serializer requires file in filefield
-            if file_keys[0] in request_data:
-                del request_data[file_keys[0]]
-
-            # region to require fields
-            if not request_data.get('title'):
-                raise ValidationError({ 'title': ['Хоосон байна'] })
-
-            if (
-                not data.get(file_keys[0]) and
-                not request_data.get('text')
-            ):
-                raise ValidationError({ file_keys[0]: ['Хоосон байна'], 'text': ['Хоосон байна'] })
-            # endregion
-
-            file_path = None
-
-            if request.FILES.keys():
-                file = request.FILES.getlist(file_keys[0])[0]
-                _, file_path, _ = create_file_in_cdn_silently(upload_to, file)
-
-                if not file_path:
-                    return request.send_error('CDN_error', 'Файл хадгалахад алдаа гарсан байна (CDN).')
-
-            # to save URL of file
-            elif is_url(data[file_keys[0]]):
-                file_path = data[file_keys[0]]
-
-            with transaction.atomic():
-                instance = self.create(request_data).instance
-
-                if file_path:
-                    instance.file = file_path
-                    instance.save()
-        except ValidationError as serializer_errors:
-            traceback.print_exc()
-            result = request.send_error_valid(serializer_errors.detail)
+            self.destroy(request)
         except Exception:
             traceback.print_exc()
             result = request.send_error("ERR_002")
 
         return result
-

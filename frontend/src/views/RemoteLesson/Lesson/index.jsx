@@ -42,8 +42,8 @@ function Lesson() {
 
     // to get Elearn basic data
     const location = useLocation()
-    const { selectedELearn = {} } = location.state || {}
-    const { title, students, start_date, end_date, is_end_exam, is_certificate } = selectedELearn
+    const { selectedELearn } = location.state || {}
+    const { title, students, start_date, end_date, is_end_exam, is_certificate } = selectedELearn || {}
 
     // #region API usage
     // #region to get Elearn's students data

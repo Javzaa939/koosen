@@ -49,6 +49,15 @@ export default function OnlineInfoBlock({
 	}
 	// #endregion
 
+	// #region to handle 'delete' modal
+	const { showWarning } = useModal()
+
+	async function handleDelete(id) {
+		const { success } = await fetchData(remoteApi.onlineInfo.delete(id))
+		if (success) getDatas()
+	}
+	// #endregion
+
 	// #region addEditModal for onlineSubInfo
 	const [addEditOnlineSubInfoModal, setOnlineSubInfoAddEditModal] = useState(false)
 	const [onlineInfoId, setOnlineInfoId] = useState('')
@@ -62,15 +71,6 @@ export default function OnlineInfoBlock({
 	// to control accordion
 	const [open, setOpen] = useState('1');
 	const toggle = (id) => open === id ? setOpen() : setOpen(id)
-
-	// #region to handle 'delete' modal
-	const { showWarning } = useModal()
-
-	async function handleDelete(id) {
-		const { success } = await fetchData(remoteApi.onlineInfo.delete(id))
-		if (success) getDatas()
-	}
-	// #endregion
 
 	return (
 		<>
@@ -100,7 +100,7 @@ export default function OnlineInfoBlock({
 									role="button"
 									onClick={() => toggleAddEditModal()}
 									id={`complaintListDatatableAdd`}
-									className='me-1'
+									className='ms-1'
 								>
 									<Badge color="primary"><Plus width={"10px"} /></Badge>
 								</a>
@@ -131,7 +131,7 @@ export default function OnlineInfoBlock({
 														role="button"
 														onClick={(e) => { toggleAddEditModal(onlineInfosItem); e.stopPropagation(); }}
 														id={`complaintListDatatableEdit${id}`}
-														className='me-1'
+														className='ms-1'
 													>
 														<Badge color="light-success"><Edit width={"10px"} /></Badge>
 													</a>
@@ -151,7 +151,7 @@ export default function OnlineInfoBlock({
 															})
 															e.stopPropagation()
 														}}
-														className='me-1'
+														className='ms-1'
 														id={`complaintListDatatableCancel${id}`}
 													>
 														<Badge color="light-danger" ><Trash2 width={"10px"} /></Badge>
@@ -163,7 +163,7 @@ export default function OnlineInfoBlock({
 														role="button"
 														onClick={(e) => { toggleAddOnlineSubInfoModal(id); e.stopPropagation(); }}
 														id={`complaintListDatatableAdd${id}`}
-														className='me-1'
+														className='ms-1'
 													>
 														<Badge color="primary"><Plus width={"10px"} /></Badge>
 													</a>
@@ -178,6 +178,11 @@ export default function OnlineInfoBlock({
 											datas={online_sub_infos_filtered}
 											handleSelectOnlineSubInfo={handleSelectOnlineSubInfo}
 											onlineInfoTitle={title}
+											getOnlineSubInfoDatas={getOnlineSubInfoDatas}
+											elearnId={elearnId}
+											onlineInfoId={id}
+											fetchData={fetchData}
+											remoteApi={remoteApi}
 										/>
 									</AccordionBody>
 								</AccordionItem>

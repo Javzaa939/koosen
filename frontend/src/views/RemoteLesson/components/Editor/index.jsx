@@ -99,13 +99,13 @@ export default function Editor({
 					onChange(quill.root.innerHTML);
 				});
 			}
+
+			if (value !== quill.root.innerHTML) quill.root.innerHTML = value
 		}
 	}, [quill]);
 
 	useEffect(() => {
-		if (quill && value !== quill.root.innerHTML) {
-			quill.root.innerHTML = value;
-		}
+		if (quill && value !== quill.root.innerHTML) quill.root.innerHTML = value
 	}, [value]);
 
 	return (
