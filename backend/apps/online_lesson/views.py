@@ -888,6 +888,8 @@ class RemoteLessonAPIView(
 
                 if not file_path_in_cdn:
                     return request.send_error('CDN_error', 'Файл хадгалахад алдаа гарсан байна (CDN).')
+            else:
+                data['image'] = None
 
             with transaction.atomic():
                 elearn_instance = None

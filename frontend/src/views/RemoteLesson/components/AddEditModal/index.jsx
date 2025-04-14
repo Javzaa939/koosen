@@ -31,6 +31,7 @@ const AddEditModal = ({ open, handleModal, refreshDatas, editData }) => {
                 if (editDataCleaned[key] !== null && editDataCleaned[key] !== undefined) {
                     let finalValue = editDataCleaned[key]
                     if (['start_date', 'end_date'].includes(key)) finalValue = typeof editDataCleaned[key] === 'string' ? editDataCleaned[key].split('T')[0] : ''
+                    if (key == 'image' && editData['image_path']) finalValue = editData['image_path']
                     setValue(key, finalValue)
                 } else setValue(key, '')
             }
@@ -42,57 +43,9 @@ const AddEditModal = ({ open, handleModal, refreshDatas, editData }) => {
         const formData = new FormData()
 
         for (let key in cdata) {
-            if (key === 'onlineInfo') {
-                const cdataOnlineInfo = cdata[key]
-
-                for (let i = 0; i < cdataOnlineInfo.length; i++) {
-                    const cdataOnlineInfoItem = cdataOnlineInfo[i]
-
-                    for (let keyOnlineInfoItem in cdataOnlineInfoItem) {
-                        if (keyOnlineInfoItem === 'onlineSubInfo') {
-                            const cdataSubOnlineInfo = cdataOnlineInfoItem[keyOnlineInfoItem]
-
-                            for (let i2 = 0; i2 < cdataSubOnlineInfo.length; i2++) {
-                                const cdataSubOnlineInfoItem = cdataSubOnlineInfo[i2]
-
-                                for (let keySubOnlineInfoItem in cdataSubOnlineInfoItem) {
-                                    if (keySubOnlineInfoItem === 'quezQuestions') {
-                                        const cdataQuezQuestions = cdataSubOnlineInfoItem[keySubOnlineInfoItem]
-
-                                        for (let i3 = 0; i3 < cdataQuezQuestions.length; i3++) {
-                                            const cdataQuezQuestionsItem = cdataQuezQuestions[i3]
-
-                                            for (let keyQuezQuestionsItem in cdataQuezQuestionsItem) {
-                                                if (keyQuezQuestionsItem === 'quezChoices') {
-                                                    const cdataQuezChoices = cdataQuezQuestionsItem[keyQuezQuestionsItem]
-
-                                                    for (let i4 = 0; i4 < cdataQuezChoices.length; i4++) {
-                                                        const cdataQuezChoicesItem = cdataQuezChoices[i4]
-
-                                                        for (let keyQuezChoicesItem in cdataQuezChoicesItem) {
-                                                            if (keyQuezChoicesItem === 'image' && cdataQuezChoicesItem[keyQuezChoicesItem]) {
-                                                                formData.append(`quez_choices_${keyQuezChoicesItem}`, cdataQuezChoicesItem[keyQuezChoicesItem][0])
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                formData.append(key, JSON.stringify(cdata[key]))
-            } else if (key === 'students') {
-                if (cdata[key]) {
-                    const cdataNew = cdata[key].map(item => item.id)
-                    formData.append(key, JSON.stringify(cdataNew))
-                }
-            } else if (key === 'image' && cdata[key]) formData.append(key, cdata[key][0])
-            else formData.append(key, JSON.stringify(cdata[key]))
+            if (key === 'image' && cdata[key] && typeof cdata[key] !== 'string') {
+                formData.append(key, cdata[key][0])
+            } else formData.append(key, JSON.stringify(cdata[key]))
         }
 
         let apiFunc = null
