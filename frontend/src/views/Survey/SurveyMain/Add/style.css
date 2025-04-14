@@ -54,3 +54,7 @@
 	height: auto;
 
 }
+
+.custom-quill .ql-container {
+	min-height: 100px;
+}

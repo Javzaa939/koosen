@@ -16,6 +16,7 @@ import useLoader from "@hooks/useLoader"
 
 import classnames from "classnames";
 import "./checkbox.css"
+import StateCustomPagination from "../../../Detail/Scope/components/StateCustomPagination";
 
 function Student({ onChosenScopeChange }) {
 
@@ -26,11 +27,19 @@ function Student({ onChosenScopeChange }) {
 
 	const [selectedValue, setSelectedValue] = useState('')
 
+	// #region pagination
+	const [currentPage, setCurrentPage] = useState(1)
+	const [totalPageCount, setTotalPageCount] = useState(1)
+	const [recordsLimit, setRecordsLimit] = useState(25)
+	// endregion
+
 	const surveyApi = useApi().survey.surveyrange;
 
 	async function getDatas() {
-		const { success, data } = await fetchData(surveyApi.get('student', selectedValue));
+		const { success, data: apiResult } = await fetchData(surveyApi.get({ limit: recordsLimit, page: currentPage, types: 'student', selectedValue: selectedValue }));
 		if (success) {
+			const data = apiResult?.results
+			setTotalPageCount(apiResult?.count)
 			var formattedData ={}
 			if (selectedValue === 'is_org') {
 				formattedData = {
@@ -203,7 +212,7 @@ function Student({ onChosenScopeChange }) {
 										onChange={(e) => setSelectedValue(e.target.name)}
 									/>
 									<Label className='form-check-label' for={'is_pro'}>
-										{'Хөтөлбөр'}
+										{'Мэргэжил'}
 									</Label>
 								</div>
 								<div className="mb-1">
@@ -235,6 +244,13 @@ function Student({ onChosenScopeChange }) {
 							</div>
 						)}
 						<div className={classnames('cardMaster rounded border p-1')}>
+							{totalPageCount && <StateCustomPagination
+								refreshDatas={getDatas}
+								current_page={currentPage}
+								setParentStateLimit={setRecordsLimit}
+								setParentStatePage={setCurrentPage}
+								totalCount={totalPageCount}
+							/>}
 							<div className="checkbox">
 								<TreeView
 									data={flattenTree(formatData)}

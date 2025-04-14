@@ -4,6 +4,7 @@ import { Modal, ModalBody, ModalHeader, Row, Collapse, Button, Badge } from "rea
 import './detail.css'
 import DisplayQuestions from "./DisplayQuestions"
 import Scope from './Scope'
+import DisplayQuill from "../../components/DisplayQuill";
 
 
 
@@ -55,14 +56,14 @@ function Detail({ open, openModal, data }){
                 toggle={openModal}
                 className="modal-dialog-centered modal-lg"
             >
-                <ModalHeader close={closeBtn}>Судалгааны мэдээлэл</ModalHeader>
+                <ModalHeader close={closeBtn} style={{ justifyContent: 'space-between' }}>Судалгааны мэдээлэл</ModalHeader>
 
                 <ModalBody>
                     <div className="m-1">
                         <b>Гарчиг:</b> {data.title}
                     </div>
                     <div className="m-1">
-                        <b>Дэлгэрэнгүй:</b>{data.description}
+                        <b>Дэлгэрэнгүй:</b> <DisplayQuill content={data.description} />
                     </div>
                     <Row className="d-flex justify-content-center mt-3 mb-3">
                     <Row className="d-flex flex-wrap justify-content-center">

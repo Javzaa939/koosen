@@ -11,6 +11,7 @@ from django.db.models import F, Func, Value, CharField, Count
 from django.db.models.functions import TruncDay
 
 from lms.models import (
+    SurveyQuestionTitle,
     SurveyQuestions,
     QuestionChoices,
     Employee,
@@ -22,7 +23,9 @@ from lms.models import (
     ProfessionDefinition,
     Group,
     Notification,
-    SurveyChoices
+    SurveyChoices,
+    SoulSurvey,
+    TimeTable
 )
 
 from core.models import (
@@ -49,7 +52,7 @@ from .serializers import (
 from lms.models import get_choice_survey_image_path
 from lms.models import get_image_survey_path
 
-from main.utils.function.utils import remove_key_from_dict, json_load, null_to_none, has_permission, get_active_student, str2bool
+from main.utils.function.utils import remove_key_from_dict, json_load, null_to_none, has_permission, get_active_student, str2bool, get_active_year_season
 from main.utils.function.pagination import CustomPagination
 
 from main.utils.file import save_file_question, remove_folder
@@ -439,46 +442,6 @@ class PolleeApiView(
 
 
 @permission_classes([IsAuthenticated])
-class SurveyListAPIView(
-    mixins.CreateModelMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView
-):
-    queryset = Survey.objects.all()
-    serializer_class = SurveyListSerializer
-
-    filter_backends = [SearchFilter]
-    search_fields = ['start_date','end_date', 'title']
-
-    pagination_class = CustomPagination
-
-    @has_permission(must_permissions=['lms-survey-list-read'])
-    def get(self, request, pk=None):
-
-        time_type = self.request.query_params.get('time_type')
-        user = request.user
-        worker = Employee.objects.filter(user=user).first()
-
-        self.queryset = self.queryset.filter(created_by=worker)
-
-        if time_type:
-            state_filters = Survey.get_state_filter(time_type)
-
-            self.queryset = self.queryset.filter(**state_filters)
-
-        if pk:
-            row_data = self.retrieve(request, pk).data
-            return request.send_data(row_data)
-
-        all_list = self.list(request).data
-
-        return request.send_data(all_list)
-
-
-@permission_classes([IsAuthenticated])
 class SurveyRangeAPIView(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
@@ -491,35 +454,36 @@ class SurveyRangeAPIView(
     # queryset = Teachers.objects.all()
     # serializer_class = SurveyRangeSerializer
 
+    pagination_class = CustomPagination
+
     def get(self, request, pk=None):
 
         types = request.query_params.get('types')
         selected_value = request.query_params.get('selected_value')
 
-        c_queryset = []
+        if not types or not selected_value:
+
+            return request.send_data(None)
+
+        c_queryset = None
+        c_serializer = None
 
         # Багш үед
         if types == 'teacher':
             # Салбарын жагсаалт
             if selected_value == 'is_org':
                 c_queryset = SubOrgs.objects.filter(is_school=True)
-                all_data = SurveySchoolSerializer(c_queryset, many=True).data
-
-                return request.send_data(all_data)
+                c_serializer = SurveySchoolSerializer
 
             # Тэнхимийн жагсаалт
             if selected_value == 'is_dep':
                 c_queryset = Salbars.objects.all()
-                all_data = DepartmentSerializer(c_queryset, many=True).data
-
-                return request.send_data(all_data)
+                c_serializer = DepartmentSerializer
 
             # Багш нарын жагсаалт
             if selected_value == 'is_teacher':
                 c_queryset = Teachers.objects.all()
-                all_data = TeacherSerializer(c_queryset, many=True).data
-
-                return request.send_data(all_data)
+                c_serializer = TeacherSerializer
 
         # Оюутан үед
         if types == 'student':
@@ -527,39 +491,33 @@ class SurveyRangeAPIView(
             # Салбарын жагсаалт
             if selected_value == 'is_org':
                 c_queryset = SubOrgs.objects.filter(is_school=True)
-                all_data = SurveySchoolStudentSerializer(c_queryset, many=True).data
-
-                return request.send_data(all_data)
+                c_serializer = SurveySchoolStudentSerializer
 
             # Тэнхимийн жагсаалт
             if selected_value == 'is_dep':
                 c_queryset = Salbars.objects.all()
-                all_data = DepartmentStudentSerializer(c_queryset, many=True).data
-
-                return request.send_data(all_data)
+                c_serializer = DepartmentStudentSerializer
 
             # Мэргэжлүүдийн жагсаалт
             if selected_value == 'is_pro':
                 c_queryset = ProfessionDefinition.objects.all()
-                all_data = ProfessionDefinitionStudentSerializer(c_queryset, many=True).data
-
-                return request.send_data(all_data)
+                c_serializer = ProfessionDefinitionStudentSerializer
 
             # Ангиудын жагсаалт
             if selected_value == 'is_group':
-                c_queryset = Group.objects.all()
-                all_data = GroupStudentSerializer(c_queryset, many=True).data
-
-                return request.send_data(all_data)
+                c_queryset = Group.objects.all().filter(is_finish=False)
+                c_serializer = GroupStudentSerializer
 
             # Оюутнуудын жагсаалт
             if selected_value == 'is_student':
-                c_queryset = Student.objects.all()
-                all_data = StudentSurveySerializer(c_queryset, many=True).data
+                c_queryset = Student.objects.all().filter(status__code=1)
+                c_serializer = StudentSurveySerializer
 
-                return request.send_data(all_data)
+        self.queryset = c_queryset
+        self.serializer_class = c_serializer
+        get_result = self.list(request).data
 
-        return request.send_data(list(c_queryset))
+        return request.send_data(get_result)
 
 
 @permission_classes([IsAuthenticated])
@@ -606,6 +564,7 @@ class SurveyAPIView(
 
         user = request.user
         array_key = 'oyutans'
+        surveyType = datas.get('surveyType')
 
         worker = Employee.objects.filter(user=user).first()
 
@@ -680,9 +639,9 @@ class SurveyAPIView(
         if not is_all:
             datas[array_key] = selected_ids
 
-        with transaction.atomic():
-            sid = transaction.savepoint()
-            try:
+        try:
+            with transaction.atomic():
+                sid = transaction.savepoint()
                 question_ids = list()
 
                 # Асуултыг хадгалах хэсэг
@@ -692,12 +651,15 @@ class SurveyAPIView(
                     question['is_rate_teacher'] = False
                     question['created_by'] = worker
 
+                    if surveyType == 'satisfaction':
+                        question['is_required'] = True
+
                     qkind = question.get("kind")
                     image_name = question.get('imageName')
 
                     question_img = None
 
-                        # Асуултын сонголтууд
+                    # Асуултын сонголтууд
                     choices = question.get('choices')
 
                     # Асуултын зураг хадгалах хэсэг
@@ -706,7 +668,16 @@ class SurveyAPIView(
                             question_img = img
                             break
 
-                    question = remove_key_from_dict(question, [ 'image', 'choices'])
+                    # region to add question title
+                    # TODO: optimize to not make sql query inside loop - just take once for each title, maybe
+                    question_title_obj, question_title_obj_created = SurveyQuestionTitle.objects.get_or_create(
+                        name=question['titleName']
+                    )
+
+                    question['title'] = question_title_obj
+                    # endregion
+
+                    question = remove_key_from_dict(question, [ 'image', 'choices', 'titleName' ])
 
                     if 'imageName' in question:
                         del question['imageName']
@@ -783,6 +754,15 @@ class SurveyAPIView(
                 # Судалгаа ерөнхий мэдээлэл үүсгэх хэсэг
                 datas['questions'] = question_ids
 
+                # region Сэтгэл ханамжийн судалгаа properties
+                soul_type = Survey.SOUL_TYPE_TEACHERS_LESSONS if datas.get('soul_type') == 'true' else Survey.SOUL_TYPE_GENERAL
+
+                if surveyType == 'satisfaction':
+                    datas['is_soul'] = True
+                    datas['is_required'] = True
+                    datas['soul_type'] = soul_type
+                # endregion
+
                 serializer = self.get_serializer(data=datas)
 
                 serializer.is_valid(raise_exception=False)
@@ -818,11 +798,38 @@ class SurveyAPIView(
                     'important' if survey_obj.is_required else 'normal'
                 )
 
-            except Exception as e:
-                print(e)
-                transaction.savepoint_rollback(sid)
+                # region to link to SoulSurvey model
+                if surveyType == 'satisfaction' and soul_type == Survey.SOUL_TYPE_TEACHERS_LESSONS:
+                    lesson_year, lesson_season_id = get_active_year_season()
 
-                return request.send_error('ERR_002')
+                    lessons_teachers = (
+                        TimeTable.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season_id)
+                        .order_by('lesson', 'teacher')
+                        .distinct('lesson', 'teacher')
+                        .values_list('lesson', 'teacher')
+                    )
+
+                    instances = []
+
+                    for lesson_id, teacher_id in lessons_teachers:
+                        soul_survey_data = {
+                            'lesson_year': lesson_year,
+                            'lesson_season_id': lesson_season_id,
+                            'survey_id': survey_id,
+                            'teacher_id': teacher_id,
+                            'lesson_id': lesson_id
+                        }
+
+                        instances.append(SoulSurvey(**soul_survey_data))
+
+                    SoulSurvey.objects.bulk_create(instances)
+                # endregion
+
+        except Exception as e:
+            print(e)
+            transaction.savepoint_rollback(sid)
+
+            return request.send_error('ERR_002')
 
         return request.send_info('INF_001')
 
@@ -896,9 +903,9 @@ class SurveyAPIView(
         if not is_all:
             datas[array_key] = selected_ids
 
-        with transaction.atomic():
-            sid = transaction.savepoint()
-            try:
+        try:
+            with transaction.atomic():
+                sid = transaction.savepoint()
                 question_ids = list()
 
                 for question in questions:
@@ -1016,11 +1023,11 @@ class SurveyAPIView(
                             'important' if survey_obj.is_required else 'normal'
                 )
 
-            except Exception as e:
-                print(e)
-                transaction.savepoint_rollback(sid)
+        except Exception as e:
+            print(e)
+            transaction.savepoint_rollback(sid)
 
-                return request.send_error('ERR_002')
+            return request.send_error('ERR_002')
 
         return request.send_info('INF_001')
 
@@ -1029,8 +1036,8 @@ class SurveyAPIView(
         survey = self.get_object()
         questions = survey.questions.all()
 
-        with transaction.atomic():
-            try:
+        try:
+            with transaction.atomic():
                 for question in questions:
 
                     # Хэрвээ асуултанд зураг байвал устгана
@@ -1056,10 +1063,11 @@ class SurveyAPIView(
                     question.delete()
 
                 survey.questions.clear()
-
+                SoulSurvey.objects.filter(survey=pk).delete()
                 self.destroy(request, pk)
-            except Exception as e:
-                return request.send_error("ERR_002")
+        except Exception as e:
+            print(e)
+            return request.send_error("ERR_002")
 
         return request.send_info("INF_003")
 

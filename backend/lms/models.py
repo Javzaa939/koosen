@@ -7,6 +7,7 @@ from datetime import datetime as dt
 from django.utils import timezone
 
 from django.db import models
+from django.db.models.functions import Lower
 from django.conf import settings
 from core.models import *
 from shortuuidfield import ShortUUIDField
@@ -3680,7 +3681,6 @@ def get_choice_survey_image_path(instance):
     return os.path.join('survey', 'questions', "answer_%s" % str(instance.id))
 
 
-
 class SurveyChoices(models.Model):
     """ Өөрийгөө сорих шалгалтын сонголттой асуултын сонголтууд """
 
@@ -3689,6 +3689,24 @@ class SurveyChoices(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class SurveyQuestionTitle(models.Model):
+    """ Судалгааны асуултын сэдэв """
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                Lower('name'),
+                name='unique_name_ci'
+            )
+        ]
+
+    name = models.CharField(max_length=255, null=True, verbose_name='Сэдвийн нэр')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
 
 class SurveyQuestions(models.Model):
     """ Сургалтын алба судалгааны асуултууд """
@@ -3709,6 +3727,7 @@ class SurveyQuestions(models.Model):
 
     kind = models.IntegerField(choices=KIND_CHOICES, null=False, blank=False, verbose_name='Асуултын төрөл')
     question = models.CharField(max_length=1000, null=False, blank=False, verbose_name="Асуулт")
+    title = models.ForeignKey(SurveyQuestionTitle, on_delete=models.SET_NULL, null=True, verbose_name='Асуултын ерөнхий сэдэв')
 
     is_required = models.BooleanField(default=False, verbose_name="Заавал санал өгөх эсэх")
     is_rate_teacher = models.BooleanField(default=False, verbose_name='Багшийн үнэлэх асуулт эсэх')
@@ -3719,6 +3738,12 @@ class SurveyQuestions(models.Model):
     rating_max_count = models.IntegerField(default=0, verbose_name="Үнэлгээний дээд тоо", null=True, blank=True)
     low_rating_word = models.CharField(max_length=100, verbose_name="Доод үнэлгээг илэрхийлэх үг")
     high_rating_word = models.CharField(max_length=100, verbose_name="Дээд үнэлгээг илэрхийлэх үг")
+    rating_words = ArrayField(
+        models.CharField(max_length=100),
+        blank=True,
+        null=True,
+        verbose_name='Үнэлгээний илэрхийлэх үг'
+    )
 
     # KIND_MULTI_CHOICE үед
     max_choice_count = models.IntegerField(default=0, verbose_name="Сонголтын хязгаар", null=True, blank=True)
@@ -3748,6 +3773,14 @@ class Survey(models.Model):
         verbose_name='Багш нарыг хадгална'
     )
 
+    SOUL_TYPE_GENERAL = 1
+    SOUL_TYPE_TEACHERS_LESSONS = 2
+
+    SOUL_TYPE_CHOICES = (
+        (SOUL_TYPE_GENERAL, 'Ерөнхий судалгаа'),
+        (SOUL_TYPE_TEACHERS_LESSONS, '"Багш-хичээл" судалгаа'),
+    )
+
     is_all = models.BooleanField(default=False, verbose_name='Бүгд')
     scope_kind = models.IntegerField(choices=Notification.SCOPE_KIND_CHOICES, null=False, blank=False)
 
@@ -3763,6 +3796,8 @@ class Survey(models.Model):
 
     is_required = models.BooleanField(default=False, verbose_name="Заавал бөглөх эсэх")
     is_hide_employees = models.BooleanField(default=False, verbose_name="Бөглөсөн албан хаагчдыг нуух эсэх")
+    is_soul = models.BooleanField(default=False, verbose_name="Сэтгэл ханамжийн судалгаа эсэх")
+    soul_type = models.PositiveIntegerField(choices=SOUL_TYPE_CHOICES, null=True, blank=True, verbose_name='Сэтгэл ханамжийн судалгаа төрөл')
 
     created_school = models.ForeignKey(SubOrgs, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Харьяалагдах алба нэгж", )
     created_department = models.ForeignKey(Salbars, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Салбар")
@@ -3791,6 +3826,20 @@ class Survey(models.Model):
             },
         }.get(state_name)
 
+
+class SoulSurvey(models.Model):
+    """ Сэтгэл ханамжийн судалгаа """
+
+    lesson_year = models.CharField(max_length=20, null=True, verbose_name="Хичээлийн жил")
+    lesson_season = models.ForeignKey(Season, on_delete=models.PROTECT, verbose_name='Судалгаа')
+    survey = models.ForeignKey(Survey, on_delete=models.PROTECT, verbose_name='Судалгаа')
+    teacher = models.ForeignKey(Teachers, on_delete=models.PROTECT, verbose_name='Багш')
+    lesson = models.ForeignKey(LessonStandart, on_delete=models.PROTECT, verbose_name='Хичээлийн стандарт', null=True)
+
+    class Meta:
+        unique_together = ('lesson_year', 'lesson_season', 'survey', 'teacher', 'lesson')
+
+
 class Pollee(models.Model):
     """ Судалгаанд оролцогчид """
 
@@ -3800,7 +3849,8 @@ class Pollee(models.Model):
     # KIND_ONE_CHOICE болон KIND_MULTI_CHOICE үед
     choosed_choices = models.ManyToManyField(SurveyChoices, verbose_name="Сонгосон сонголтууд", blank=True)
 
-    survey = models.ForeignKey(Survey, on_delete=models.CASCADE, verbose_name='Судалгаа')
+    survey = models.ForeignKey(Survey, on_delete=models.CASCADE, verbose_name='Судалгаа', null=True)
+    soul_survey = models.ForeignKey(SoulSurvey, on_delete=models.CASCADE, verbose_name='Сэтгэл ханамжийн судалгаа', null=True)
 
     teacher = models.ForeignKey(Teachers, on_delete=models.CASCADE, null=True, blank=True, verbose_name='Багш')
     student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True, blank=True, verbose_name='Оюутан')

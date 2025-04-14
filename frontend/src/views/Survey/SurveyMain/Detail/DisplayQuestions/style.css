@@ -83,13 +83,7 @@
             font-weight: 200;
             font-size: 12px;
         }
-        .rating {
-          margin: 10px;
-        }
-        .rating > label {
-          width: 0.4em;
-          font-size: 10px;
-        }
+
         .custom-me{
           margin-right: 0px;
         }
@@ -112,13 +106,7 @@ width: 100%;
         .ratingnumber {
           margin: 0;
         }
-        .rating {
-          margin: 20px;
-        }
-        .rating > label {
-          width: 0.4em;
-          font-size: 10px;
-        }
+
         .custom-me{
           margin-right: 2px;
         }
@@ -130,32 +118,24 @@ width: 100%;
     @media only screen and (min-width: 601px) and (max-width: 767px) {
       .card-contain {
         /* width: 100%; */
-min-width: 450px;
+        min-width: 450px;
+      }
 
-    }
-        .rating {
-
-          margin: 15px;
-        }
-        .custom-me{
-          margin-right: 15px;
-        }
-        .custom-ms{
-          margin-left: 15px;
-        }
+      .custom-me{
+        margin-right: 15px;
+      }
+      .custom-ms{
+        margin-left: 15px;
+      }
     }
 
     /* For larger screens (desktop): */
     @media only screen and (min-width: 768px) {
-   
         .fontsizec {
             font-weight: 200;
             font-size: 14px;
         }
-        .rating {
 
-          margin: 20px;
-        }
         .custom-me{
           margin-right: 20px;
         }
@@ -176,10 +156,7 @@ min-width: 450px;
           font-weight: 200;
           font-size: 14px;
       }
-      .rating {
 
-        margin: 20px;
-      }
       .custom-me{
         margin-right: 20px;
       }
@@ -197,10 +174,7 @@ min-width: 450px;
         font-weight: 200;
         font-size: 14px;
     }
-    .rating {
 
-      margin: 20px;
-    }
     .custom-me{
       margin-right: 20px;
     }
@@ -232,44 +206,6 @@ min-width: 450px;
 .bradius-20 {
       border-radius: 20px;
 }
-
-.rating {
-    display: flex;
-    flex-direction: row-reverse;
-    justify-content: center;
-
-  }
-
-  .rating > input {
-    display: none;
-  }
-
-  .rating > label {
-    position: relative;
-    width: 0.2em;
-    font-size: 40px;
-    color: #5e5873;;
-    cursor: pointer;
-  }
-
-  .rating > label::before {
-    content: "\2605";
-    position: absolute;
-    opacity: 0;
-  }
-
-  .rating > label:hover:before,
-  .rating > label:hover ~ label:before {
-    opacity: 1 !important;
-  }
-
-  .rating > input:checked ~ .label_star::before {
-    opacity: 1;
-  }
-
-  .rating:hover > input:checked ~ label:before {
-    opacity: 0.4;
-  }
 
 .ratingnumber {
   margin: 0;
@@ -311,3 +247,13 @@ min-width: 450px;
   .rate > label:hover ~ input:checked ~ label {
     color: #c59b08;
   } */
+
+  .questionRating table,
+  .questionRating thead,
+  .questionRating tbody,
+  .questionRating tfoot,
+  .questionRating tr,
+  .questionRating td,
+  .questionRating th {
+    border: 0;
+  }
