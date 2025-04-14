@@ -142,12 +142,25 @@ function RemoteLesson() {
                     :
                     <Row className='gy-6 mb-6'>
                         {datas.map((data, idx) => {
-                            const { id, title, teacher_info, students, is_end_exam, is_certificate, description } = data
+                            const { id, title, teacher_info, students, is_end_exam, is_certificate, description, image_path: imageOriginal } = data
+                            const image = imageOriginal
 
                             return (
                                 <Col sm={6} lg={3} key={idx} className='m-0 p-50'>
                                     <Card className="p-50 h-100 shadow-none border bg-white">
                                         <CardBody className="p-1 pt-50 d-flex flex-column h-100">
+                                            {
+                                                imageOriginal
+                                                &&
+                                                <div className="rounded-2 text-center mb-1">
+                                                    <img className="img-fluid" src={image} alt={title}
+                                                        onError={({ currentTarget }) => {
+                                                            currentTarget.onerror = null; // prevents looping
+                                                            currentTarget.src = empty
+                                                        }}
+                                                    />
+                                                </div>
+                                            }
                                             <div className="d-flex justify-content-between align-items-center mb-1">
                                                 <div>
                                                     Багш: <span className='text-decoration-underline' id={`teacher_${idx}`} style={{ cursor: 'help' }}>{teacher_info?.full_name}</span>
@@ -179,23 +192,6 @@ function RemoteLesson() {
                                                 </p>
                                             </div>
                                             <span className="h5">{title}</span>
-                                            <p className="mt-25">
-                                                {description && <>
-                                                    {/* to limit ELearn card-item height */}
-                                                    <style>
-                                                        {`
-                                                            .custom-quill .ql-editor {
-                                                                max-height: 130px;
-                                                                overflow: hidden;
-                                                            }
-                                                        `}
-                                                    </style>
-                                                    <DisplayQuill
-                                                        content={description}
-                                                        className={'custom-quill'}
-                                                    />
-                                                </>}
-                                            </p>
                                             <div className='mt-auto'>
                                                 <p className="d-flex align-items-center mb-50">
                                                     <Badge color='primary' pill title='Оюутны тоо' className='d-flex align-items-center gap-25'>
