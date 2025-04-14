@@ -2063,6 +2063,28 @@ function useApi(isDisplay=false) {
 			put: (datas, pk) => instance.put(`online_lesson/lesson_students/${pk}/`, datas),
 			delete: (student, pk) => instance.delete(`online_lesson/lesson_students/${pk}/?student=${student}`)
 		},
+		// Зайн сургалт
+		remote:{
+			get: (limit, page, search) => instance.get(`online_lesson/remote/?limit=${limit}&page=${page}&search=${search}`),
+			getOne: (id) => instance.get(`online_lesson/remote/${id}/`),
+			post : (data) => instance.post(`online_lesson/remote/`,data),
+
+			students: {
+				get: ({ limit = 'Бүгд', page = 1, search = '', elearnId = '' }) => instance.get(`online_lesson/remote/students/?limit=${limit}&page=${page}&search=${search}&elearnId=${elearnId}`),
+				put : (data) => instance.put(`online_lesson/remote/students/`,data),
+				delete: (elearnId, id) => instance.delete(`/online_lesson/remote/students/${id}/?elearnId=${elearnId}`),
+			},
+
+			onlineInfo: {
+				get: ({ limit = 'Бүгд', page = 1, search = '', elearnId = '' }) => instance.get(`online_lesson/remote/online-info/?limit=${limit}&page=${page}&search=${search}&elearnId=${elearnId}`),
+				post : (data) => instance.post(`online_lesson/remote/online-info/`,data),
+			},
+
+			onlineSubInfo: {
+				get: ({ limit = 'Бүгд', page = 1, search = '', elearnId = '' }) => instance.get(`online_lesson/remote/online-sub-info/?limit=${limit}&page=${page}&search=${search}&elearnId=${elearnId}`),
+				post : (data) => instance.post(`online_lesson/remote/online-sub-info/`,data),
+			}
+		},
 
 		// суралцагчийн хөтөч
 		browser: {

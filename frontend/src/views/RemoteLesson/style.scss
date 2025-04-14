@@ -1,0 +1,13 @@
+.lesson_card {
+    background-color: #ffffff;
+    max-width: 400px;
+}
+
+.accordion-custom {
+    --bs-accordion-btn-bg: var(--bs-card-bg);
+    --bs-accordion-active-bg: var(--bs-accordion-btn-bg)
+}
+
+.card-body-custom {
+    padding: 0;
+}

@@ -1,0 +1,141 @@
+import { convertDefaultValue } from "@utils";
+import { useCallback } from "react";
+import { Controller, useForm } from "react-hook-form";
+
+import {
+	Button,
+	Card,
+	CardHeader,
+	CardTitle,
+	Col,
+	Form,
+	FormFeedback,
+	Row
+} from "reactstrap";
+
+import useApi from "@hooks/useApi";
+import useLoader from "@hooks/useLoader";
+import classnames from "classnames";
+import ScrollSelectFilter from "../ScrollSelectFilter";
+
+export default function GroupStudentBlock({
+	t,
+	remoteApi,
+	elearnId,
+	refreshData
+}) {
+	const { isLoading, Loader, fetchData } = useLoader({});
+	const { control, handleSubmit, setError, formState: { errors }, watch } = useForm({})
+	const formValuesOriginal = watch()
+
+	// to get id from objects on form inputs
+	const formValues = {
+		groups: formValuesOriginal?.groups?.map(item => item.id) || '',
+		students: formValuesOriginal?.students?.map(item => item.id) || '',
+	}
+
+	const studentApi = useApi().student
+
+	// to prevent getdatas every render on select inputs
+	const getGroups = useCallback((pageLocal, searchTextLocal = '', recordsLimitPerPageLocal) => studentApi.group.get(recordsLimitPerPageLocal, pageLocal, '', searchTextLocal, '', '', '', '', ''), [])
+	const getStudents = useCallback((pageLocal, searchTextLocal = '', recordsLimitPerPageLocal) => studentApi.get(recordsLimitPerPageLocal, pageLocal, '', searchTextLocal, '', '', '', formValues.groups, '', '', '', ''), [formValuesOriginal?.groups])
+
+	async function onSubmit(formCdata, requestType) {
+		let cdata = {}
+		cdata.elearnId = elearnId
+		cdata[requestType] = formValues[requestType]
+		cdata = convertDefaultValue(cdata)
+		const { success, error } = await fetchData(remoteApi.students.put(cdata))
+
+		if (success) {
+			refreshData()
+		}
+		else {
+			/** Алдааны мессэжийг input дээр харуулна */
+			for (let key in error) {
+				setError(error[key].field, { type: 'custom', message: error[key].msg });
+			}
+		}
+	}
+
+	return (
+		<Card xs={4} className="bg-white">
+			<CardHeader className="rounded border">
+				<CardTitle tag="h4">{t("Суралцагч нэмэх")}</CardTitle>
+			</CardHeader>
+			{isLoading && Loader}
+			<Row className="m-0">
+				<Col className="p-0">
+					<Form onSubmit={handleSubmit((cdata) => onSubmit(cdata, 'groups'))} className="h-100">
+						<div className='added-cards mb-0 text-center h-100'>
+							<div className={classnames('cardMaster p-1 rounded border h-100 d-flex flex-column')}>
+								<h4>{t('Анги сонгоно уу')}</h4>
+								<div className="mt-auto">
+									<Controller
+										defaultValue={[]}
+										control={control}
+										name="groups"
+										render={({ field: { ref, ...rest } }) =>
+											<ScrollSelectFilter
+												{...rest}
+												fieldName={rest.name}
+												getApi={getGroups}
+												getOptionLabel={(option) => `${option.name} (${option.degree?.degree_code})`}
+												getOptionValue={(option) => option.id}
+												isMulti={true}
+												optionValueFieldName={'id'}
+											/>
+										}
+									/>
+									{errors['groups'] && <FormFeedback className='d-block'>{t(errors['groups'].message)}</FormFeedback>}
+									<Button
+										className="me-0 mt-1"
+										color="primary"
+										type="submit"
+									>
+										{t("Хадгалах")}
+									</Button>
+								</div>
+							</div>
+						</div>
+					</Form>
+				</Col>
+				<Col className="p-0">
+					<Form onSubmit={handleSubmit((cdata) => onSubmit(cdata, 'students'))} className="h-100">
+						<div className='added-cards mb-0 text-center h-100'>
+							<div className={classnames('cardMaster p-1 rounded border h-100 d-flex flex-column')}>
+								<h4>{t('Оюутныг кодоор сонгох')}</h4>
+								<div className="mt-auto">
+									<Controller
+										defaultValue={[]}
+										control={control}
+										name="students"
+										render={({ field: { ref, ...rest } }) =>
+											<ScrollSelectFilter
+												{...rest}
+												fieldName={rest.name}
+												getApi={getStudents}
+												getOptionLabel={(option) => `${option.code} ${option.last_name?.charAt(0)}. ${option.first_name}`}
+												getOptionValue={(option) => option.id}
+												isMulti={true}
+												optionValueFieldName={'id'}
+											/>
+										}
+									/>
+									{errors['students'] && <FormFeedback className='d-block'>{t(errors['students'].message)}</FormFeedback>}
+									<Button
+										className="me-0 mt-1"
+										color="primary"
+										type="submit"
+									>
+										{t("Хадгалах")}
+									</Button>
+								</div>
+							</div>
+						</div>
+					</Form>
+				</Col>
+			</Row>
+		</Card>
+	)
+}

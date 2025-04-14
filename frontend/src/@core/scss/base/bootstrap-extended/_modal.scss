@@ -5,6 +5,7 @@
 
   .modal-header {
     background-color: $body-bg;
+    justify-content: space-between;
 
     // close button
     .btn-close {

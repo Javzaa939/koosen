@@ -4520,14 +4520,14 @@ class QuezQuestions(models.Model):
 
     # KIND_RATING үед
     rating_max_count = models.IntegerField(default=0, verbose_name="Үнэлгээний дээд тоо", null=True, blank=True)
-    low_rating_word = models.CharField(max_length=100, verbose_name="Доод үнэлгээг илэрхийлэх үг")
-    high_rating_word = models.CharField(max_length=100, verbose_name="Дээд үнэлгээг илэрхийлэх үг")
+    low_rating_word = models.CharField(max_length=100, verbose_name="Доод үнэлгээг илэрхийлэх үг", null=True)
+    high_rating_word = models.CharField(max_length=100, verbose_name="Дээд үнэлгээг илэрхийлэх үг", null=True)
 
     # KIND_MULTI_CHOICE үед
     max_choice_count = models.IntegerField(default=0, verbose_name="Сонголтын хязгаар", null=True, blank=True)
 
     # KIND_ONE_CHOICE болон KIND_MULTI_CHOICE үед
-    choices = models.ManyToManyField(QuezChoices)
+    choices = models.ManyToManyField(QuezChoices, null=True)
 
     created_by = models.ForeignKey(Teachers, on_delete=models.CASCADE, related_name="+")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -4639,11 +4639,12 @@ class ELearn(models.Model):
 
     lesson = models.ForeignKey(LessonStandart, on_delete=models.CASCADE, verbose_name='Хичээл', null=True)
     title = models.TextField(null=True, verbose_name='Хичээлийн нэр гарчиг')
+    description = models.CharField(verbose_name='Тайлбар', max_length=1000, null=True)
 
     teacher = models.ForeignKey(Teachers, on_delete=models.CASCADE, verbose_name='Багш', null=True)
     image = models.FileField(upload_to='online', verbose_name='Зураг', null=True)
 
-    students = models.ManyToManyField(Student, verbose_name='Хичээл үзэх оюутнууд')
+    students = models.ManyToManyField(Student, null=True, blank=True, verbose_name='Хичээл үзэх оюутнууд')
 
     start_date = models.DateTimeField(null=True, verbose_name='Эхлэх хугацаа')
     end_date = models.DateTimeField(null=True, verbose_name='Дуусах хугацаа')
@@ -4683,7 +4684,7 @@ class OnlineSubInfo(models.Model):
     file_type = models.IntegerField(choices=MATERIAL_TYPE, default=TEXT, verbose_name='Материалын төрөл')
     text = models.TextField(null=True, verbose_name='ТEXT төрлийн мэдээлэл')
     file = models.FileField(null=True, verbose_name='ФАЙЛ төрлийн мэдээлэл')
-    quiz = models.ForeignKey(QuezQuestions, on_delete=models.CASCADE, verbose_name='Цахим сургалтын сорил шалгалт')
+    quiz = models.ManyToManyField(QuezQuestions, null=True, verbose_name='Цахим сургалтын сорил шалгалт')
 
 
 class OnlineWeek(models.Model):

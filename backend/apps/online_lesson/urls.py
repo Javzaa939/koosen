@@ -45,4 +45,17 @@ urlpatterns = [
     path('lesson_students/<int:pk>/', LessonStudentsAPIView.as_view()),
 
     path('test/<int:pk>/',OnlineLessonTestAPIView.as_view()),
+
+    path('remote/',RemoteLessonAPIView.as_view()),
+    path('remote/<int:pk>/',RemoteLessonAPIView.as_view()),
+
+    path('remote/students/',RemoteLessonStudentsAPIView.as_view()),
+    path('remote/students/<int:pk>/',RemoteLessonStudentsAPIView.as_view()),
+
+    path('remote/online-info/',RemoteLessonOnlineInfoAPIView.as_view()),
+    path('remote/online-info/<int:pk>/',RemoteLessonOnlineInfoAPIView.as_view()),
+
+    path('remote/online-sub-info/',RemoteLessonOnlineSubInfoAPIView.as_view()),
+    path('remote/online-sub-info/<int:pk>/',RemoteLessonOnlineSubInfoAPIView.as_view()),
+
 ]

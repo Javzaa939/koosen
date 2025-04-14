@@ -442,7 +442,7 @@ class StudentRegisterAPIView(
 
         # Ангиар хайлт хийх
         if group:
-            queryset = queryset.filter(group_id=group)
+            queryset = queryset.filter(group_id__in=group.split(','))
 
         if status:
             queryset = queryset.filter(status=status)
