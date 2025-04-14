@@ -62,8 +62,8 @@ const AddEditOnlineSubInfo = ({ open, handleModal, refreshDatas, editData, elear
     }, [editData])
 
     async function onSubmit(cdata) {
-        cdata.elearn = elearnId
-        cdata.parent_title = onlineInfoId
+        cdata['elearn'] = elearnId
+        cdata['parent_title'] = onlineInfoId
         cdata = convertDefaultValue(cdata)
         const formData = new FormData()
         formData.append('json_data', JSON.stringify(cdata))
@@ -262,7 +262,7 @@ const AddEditOnlineSubInfo = ({ open, handleModal, refreshDatas, editData, elear
                             <Button className='me-2' color="primary" type="submit">
                                 {t('Хадгалах')}
                             </Button>
-                            <Button color="secondary" outline type="reset" onClick={() => handleModal()}>
+                            <Button color="secondary" outline type="reset" onClick={() => { handleModal(), reset()}}>
                                 {t('Буцах')}
                             </Button>
                         </Col>

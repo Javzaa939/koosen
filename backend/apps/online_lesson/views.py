@@ -1099,7 +1099,6 @@ class RemoteLessonOnlineInfoAPIView(
     @has_permission(must_permissions=['lms-study-lessonstandart-delete'])
     def delete(self, request, pk=None):
         result = request.send_info("INF_003")
-
         try:
             self.destroy(request)
         except Exception:
@@ -1167,6 +1166,7 @@ class RemoteLessonOnlineSubInfoAPIView(
             # region to collect only necessary fields
             cleaned_data = {
                 'title': stringified_data['title'],
+                'parent_title': stringified_data['parent_title'],
                 'file_type': stringified_data['file_type'],
             }
 

@@ -1335,7 +1335,7 @@ def get_cdn_url(endpoint):
 
     # Орчиноос шалтгаалж url авах
     if settings.DEBUG is True:
-        cdn_urls = 'http://127.0.0.1:8001/cdn/'
+        cdn_urls = 'http://192.168.1.7:8003/cdn/'
     else:
         #NOTE cdn-server domain-тай болох үед url тавих
         cdn_urls = ''
@@ -1356,7 +1356,7 @@ def get_cdn_urls():
 
     # Орчиноос шалтгаалж url авах
     if settings.DEBUG:
-        path = 'http://192.168.1.18:8000/cdn/'
+        path = 'http://192.168.1.7:8003/cdn/'
 
     return path
 
