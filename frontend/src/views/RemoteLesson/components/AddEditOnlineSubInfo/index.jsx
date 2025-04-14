@@ -76,11 +76,11 @@ const AddEditOnlineSubInfo = ({ open, handleModal, refreshDatas, editData, elear
                     editData !== undefined
                         ?
                         <ModalHeader className='bg-transparent pb-0' cssModule={{ 'modal-title': 'w-100 text-center' }}>
-                            <h4>{t('Цахим хичээлийн хэсэг засах')}</h4>
+                            <h4>{t('Цахим хичээл засах')}</h4>
                         </ModalHeader>
                         :
                         <ModalHeader className='bg-transparent pb-0' cssModule={{ 'modal-title': 'w-100 text-center' }}>
-                            <h4>{t('Цахим хичээлийн хэсэг нэмэх')}</h4>
+                            <h4>{t('Цахим хичээл нэмэх')}</h4>
                         </ModalHeader>
                 }
                 <ModalBody className="flex-grow-50 mb-3 t-0">

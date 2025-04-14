@@ -48,7 +48,7 @@ export default function StudentListBlock({
 	return (
 		<Card md={12} className='bg-white'>
 			<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
-				<CardTitle tag="h4">{t("Сургалт өгөх оюутнуудын жагсаалт")}</CardTitle>
+				<CardTitle tag="h4">{t("Сургалтанд хамрагдаж буй суралцагчдын жагсаалт")}</CardTitle>
 			</CardHeader>
 			<Col className='mt-2 my-1 mx-1 d-flex align-items-center mobile-datatable-search'>
 				<Input
