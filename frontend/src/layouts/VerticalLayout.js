@@ -334,12 +334,10 @@ const VerticalLayout = (props) =>
 
                         /** ----------------------------- Судалгаа ---------------------------- */
                         /** Судалгаа бүртгэх */
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-survey-question-read', 'takesurvey')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-survey-list-read', 'takesurvey')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-survey-result-read', 'surveyreg')
 
                         /** ----------------------------- Багшийг үнэлэх ---------------------------- */
-                        /** Судалгааны асуулт */
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-survey-question-read', 'evaluation1')
 
                         /** Эрдэм шинжилгээ асуулт */
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science1')
