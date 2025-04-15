@@ -12,23 +12,11 @@ export default function OnlineSubInfoBlock({
 	handleSelectOnlineSubInfo,
 	onlineInfoTitle,
 	getOnlineSubInfoDatas,
-	elearnId,
 	onlineInfoId,
 	fetchData,
-	remoteApi
+	remoteApi,
+	toggleAddOnlineSubInfoModal
 }) {
-	// #region addEditModal
-	const [addEditModal, setAddEditModal] = useState(false)
-	const [editData, setEditData] = useState()
-
-	function toggleAddEditModal(data) {
-		if (addEditModal) setEditData()
-		else setEditData(data)
-
-		setAddEditModal(!addEditModal)
-	}
-	// #endregion
-
 	// #region to handle 'delete' modal
 	const { showWarning } = useModal()
 
@@ -48,67 +36,58 @@ export default function OnlineSubInfoBlock({
 	return datas.map((onlineSubInfosItem, onlineSubInfosInd) => {
 		const { id, title, quezquestions_count, file_type_name, file_type } = onlineSubInfosItem
 
-		return <Fragment key={onlineSubInfosInd}>
-			{addEditModal && <AddEditOnlineSubInfo
-				open={addEditModal}
-				handleModal={toggleAddEditModal}
-				refreshDatas={getOnlineSubInfoDatas}
-				elearnId={elearnId}
-				onlineInfoId={onlineInfoId}
-				editData={editData}
-			/>}
-			<Button
-				color='Link'
-				className="d-flex justify-content-between p-1 w-100 text-start"
-				onClick={() => handleSelectOnlineSubInfoLocal(onlineSubInfosItem, onlineInfoTitle)}
-				style={activeOnlineSubInfo === id ? { backgroundColor: '#fcfcfc' } : {}}
-			>
-				<div className='d-flex flex-column'>
-					<span className="h5 mb-50">{title}</span>
-					<span className="text-body fw-normal">
-						{
-							file_type === QUIZ ?
-								`${quezquestions_count} ${t('асуултууд')}`
-								:
-								file_type_name
-						}
-					</span>
+		return <Button
+			key={onlineSubInfosInd}
+			color='Link'
+			className="d-flex justify-content-between p-1 w-100 text-start"
+			onClick={() => handleSelectOnlineSubInfoLocal(onlineSubInfosItem, onlineInfoTitle)}
+			style={activeOnlineSubInfo === id ? { backgroundColor: '#fcfcfc' } : {}}
+		>
+			<div className='d-flex flex-column'>
+				<span className="h5 mb-50">{title}</span>
+				<span className="text-body fw-normal">
+					{
+						file_type === QUIZ ?
+							`${quezquestions_count} ${t('асуултууд')}`
+							:
+							file_type_name
+					}
+				</span>
+			</div>
+			<div className='d-flex'>
+				<div>
+					<a
+						role="button"
+						onClick={(e) => { toggleAddOnlineSubInfoModal(onlineSubInfosItem, onlineInfoId); e.stopPropagation(); }}
+						id={`complaintListDatatableEdit${id}`}
+						className='ms-1'
+					>
+						<Badge color="light-success"><Edit width={"10px"} /></Badge>
+					</a>
+					<UncontrolledTooltip placement='top' target={`complaintListDatatableEdit${id}`} >{t('Засах')}</UncontrolledTooltip>
 				</div>
-				<div className='d-flex'>
-					<div>
-						<a
-							role="button"
-							onClick={(e) => { toggleAddEditModal(onlineSubInfosItem); e.stopPropagation(); }}
-							id={`complaintListDatatableEdit${id}`}
-							className='ms-1'
-						>
-							<Badge color="light-success"><Edit width={"10px"} /></Badge>
-						</a>
-						<UncontrolledTooltip placement='top' target={`complaintListDatatableEdit${id}`} >{t('Засах')}</UncontrolledTooltip>
-					</div>
-					<div>
-						<a
-							role="button"
-							onClick={(e) => {
-								showWarning({
-									header: {
-										title: t(`Дэд бүлэг устгах`),
-									},
-									question: t(`Та энэ дэд бүлгийг устгахдаа итгэлтэй байна уу?`),
-									onClick: () => handleDelete(id),
-									btnText: t('Устгах'),
-								})
-								e.stopPropagation()
-							}}
-							className='ms-1'
-							id={`complaintListDatatableCancel${id}`}
-						>
-							<Badge color="light-danger" ><Trash2 width={"10px"} /></Badge>
-						</a>
-						<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${id}`} >{t('Устгах')}</UncontrolledTooltip>
-					</div>
+				<div>
+					<a
+						role="button"
+						onClick={(e) => {
+							showWarning({
+								header: {
+									title: t(`Дэд бүлэг устгах`),
+								},
+								question: t(`Та энэ дэд бүлгийг устгахдаа итгэлтэй байна уу?`),
+								onClick: () => handleDelete(id),
+								btnText: t('Устгах'),
+							})
+							e.stopPropagation()
+						}}
+						className='ms-1'
+						id={`complaintListDatatableCancel${id}`}
+					>
+						<Badge color="light-danger" ><Trash2 width={"10px"} /></Badge>
+					</a>
+					<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${id}`} >{t('Устгах')}</UncontrolledTooltip>
 				</div>
-			</Button>
-		</Fragment>
+			</div>
+		</Button>
 	})
 }

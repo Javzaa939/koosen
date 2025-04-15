@@ -95,7 +95,7 @@ export default function QuizBlock({
 		if (data) {
 			if (addEditQuezChoices) setEditQuezChoicesData()
 			else setEditQuezChoicesData(data)
-		}
+		} else setEditQuezChoicesData()
 
 		setQuezQuestionsId(quezQuestionsIdLocal)
 		setQuezChoicesAddEditModal(!addEditQuezChoices)

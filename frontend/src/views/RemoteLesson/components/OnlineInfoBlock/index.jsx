@@ -61,9 +61,15 @@ export default function OnlineInfoBlock({
 	// #region addEditModal for OnlineSubInfo
 	const [addEditOnlineSubInfoModal, setOnlineSubInfoAddEditModal] = useState(false)
 	const [onlineInfoId, setOnlineInfoId] = useState('')
+	const [editOnlineSubInfoData, setEditOnlineSubInfoData] = useState()
 
-	function toggleAddOnlineSubInfoModal(onlineInfoId) {
-		setOnlineInfoId(onlineInfoId)
+	function toggleAddOnlineSubInfoModal(data, onlineInfoIdLocal) {
+		if (data) {
+			if (addEditOnlineSubInfoModal) setEditOnlineSubInfoData()
+			else setEditOnlineSubInfoData(data)
+		} else setEditOnlineSubInfoData()
+
+		setOnlineInfoId(onlineInfoIdLocal)
 		setOnlineSubInfoAddEditModal(!addEditOnlineSubInfoModal)
 	}
 	// #endregion
@@ -87,6 +93,7 @@ export default function OnlineInfoBlock({
 				refreshDatas={getOnlineSubInfoDatas}
 				elearnId={elearnId}
 				onlineInfoId={onlineInfoId}
+				editData={editOnlineSubInfoData}
 			/>}
 			<Card>
 				<CardHeader className="border-bottom d-block">
@@ -161,7 +168,7 @@ export default function OnlineInfoBlock({
 												<div>
 													<a
 														role="button"
-														onClick={(e) => { toggleAddOnlineSubInfoModal(id); e.stopPropagation(); }}
+														onClick={(e) => { toggleAddOnlineSubInfoModal(null, id); e.stopPropagation(); }}
 														id={`complaintListDatatableAdd${id}`}
 														className='ms-1'
 													>
@@ -180,10 +187,10 @@ export default function OnlineInfoBlock({
 												handleSelectOnlineSubInfo={handleSelectOnlineSubInfo}
 												onlineInfoTitle={title}
 												getOnlineSubInfoDatas={getOnlineSubInfoDatas}
-												elearnId={elearnId}
 												onlineInfoId={id}
 												fetchData={fetchData}
 												remoteApi={remoteApi}
+												toggleAddOnlineSubInfoModal={toggleAddOnlineSubInfoModal}
 											/>
 										</AccordionBody>
 									</div>
