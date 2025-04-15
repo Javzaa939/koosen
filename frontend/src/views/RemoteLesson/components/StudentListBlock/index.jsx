@@ -46,7 +46,7 @@ export default function StudentListBlock({
 	}
 
 	return (
-		<Card md={12} className='bg-white'>
+		<Card className='bg-white'>
 			<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
 				<CardTitle tag="h4">{t("Сургалт өгөх оюутнуудын жагсаалт")}</CardTitle>
 			</CardHeader>

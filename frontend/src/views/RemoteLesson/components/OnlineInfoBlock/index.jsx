@@ -88,7 +88,7 @@ export default function OnlineInfoBlock({
 				elearnId={elearnId}
 				onlineInfoId={onlineInfoId}
 			/>}
-			<Card md={12}>
+			<Card>
 				<CardHeader className="border-bottom d-block">
 					<Row>
 						<Col>

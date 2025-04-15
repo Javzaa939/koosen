@@ -136,7 +136,7 @@ export default function QuizBlock({
 				quezQuestionsId={quezQuestionsId}
 				editData={editQuezChoicesData}
 			/>} */}
-			<Card md={12}>
+			<Card className="w-100">
 				<CardHeader className="border-bottom d-block">
 					<Row>
 						<Col>
@@ -161,7 +161,7 @@ export default function QuizBlock({
 					<Accordion open={open} toggle={toggle} className="accordion-custom">
 						{
 							quezQuestionsDatas.map((quezQuestionsDatasItem, quezQuestionsDatasInd) => {
-								const { id, title } = quezQuestionsDatasItem
+								const { id, question } = quezQuestionsDatasItem
 								const quezChoicesFiltered = quezChoicesDatas.filter(item => item.quez_question_id === id)
 
 								return <AccordionItem key={quezQuestionsDatasInd}>
@@ -169,7 +169,7 @@ export default function QuizBlock({
 										<Row className="w-100">
 											<Col>
 												<span className="d-flex flex-column">
-													<span className="h5 mb-0">{title}</span>
+													<span className="h5 mb-0">{question}</span>
 													<span className="text-body fw-normal">{0} / {quezChoicesFiltered.length} {t('хариулт')}</span>
 												</span>
 											</Col>
@@ -191,9 +191,9 @@ export default function QuizBlock({
 														onClick={(e) => {
 															showWarning({
 																header: {
-																	title: t(`Бүлэг устгах`),
+																	title: t(`Асуултыг устгах`),
 																},
-																question: t(`Та энэ бүлгийг устгахдаа итгэлтэй байна уу?`),
+																question: t(`Та энэ асуултыг устгахдаа итгэлтэй байна уу?`),
 																onClick: () => handleDelete(id),
 																btnText: t('Устгах'),
 															})

@@ -92,9 +92,9 @@ export default function OnlineSubInfoBlock({
 							onClick={(e) => {
 								showWarning({
 									header: {
-										title: t(`Бүлэг устгах`),
+										title: t(`Дэд бүлэг устгах`),
 									},
-									question: t(`Та энэ бүлгийг устгахдаа итгэлтэй байна уу?`),
+									question: t(`Та энэ дэд бүлгийг устгахдаа итгэлтэй байна уу?`),
 									onClick: () => handleDelete(id),
 									btnText: t('Устгах'),
 								})
