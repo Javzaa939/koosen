@@ -26,6 +26,7 @@ import useApi from "@src/utility/hooks/useApi";
 import useLoader from "@src/utility/hooks/useLoader";
 import AddEditQuezQuestions from "../AddEditQuezQuestions";
 import useApiCustom from "../../hooks/useApiCustom";
+import { KIND_MULTI_CHOICE, KIND_ONE_CHOICE, KIND_RATING } from "../../utils";
 
 export default function QuizBlock({
 	onlineSubInfoData,
@@ -62,7 +63,7 @@ export default function QuizBlock({
 	// #endregion
 
 	// #region to get QuezQuestions data
-    const [refreshQuezQuestions, setRefreshQuezQuestions] = useState(false)
+	const [refreshQuezQuestions, setRefreshQuezQuestions] = useState(false)
 
 	function refreshQuezQuestionsFunc() {
 		setRefreshQuezQuestions((current) => !current)
@@ -100,7 +101,7 @@ export default function QuizBlock({
 	// #endregion
 
 	// #region to get QuezChoices data
-    const [refreshQuezChoices, setRefreshQuezChoices] = useState(false)
+	const [refreshQuezChoices, setRefreshQuezChoices] = useState(false)
 
 	function refreshQuezChoicesFunc() {
 		setRefreshQuezChoices((current) => !current)
@@ -161,7 +162,7 @@ export default function QuizBlock({
 					<Accordion open={open} toggle={toggle} className="accordion-custom">
 						{
 							quezQuestionsDatas.map((quezQuestionsDatasItem, quezQuestionsDatasInd) => {
-								const { id, question } = quezQuestionsDatasItem
+								const { id, question, kind } = quezQuestionsDatasItem
 								const quezChoicesFiltered = quezChoicesDatas.filter(item => item.quez_question_id === id)
 
 								return <AccordionItem key={quezQuestionsDatasInd}>
@@ -206,17 +207,17 @@ export default function QuizBlock({
 													</a>
 													<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${id}`} >{t('Устгах')}</UncontrolledTooltip>
 												</div>
-												<div>
+												{[KIND_ONE_CHOICE, KIND_MULTI_CHOICE, KIND_RATING].includes(kind) && <div>
 													<a
 														role="button"
-														onClick={(e) => { toggleAddEditQuezChoices(null,id); e.stopPropagation(); }}
+														onClick={(e) => { toggleAddEditQuezChoices(null, id); e.stopPropagation(); }}
 														id={`complaintListDatatableAdd${id}`}
 														className='ms-1'
 													>
 														<Badge color="primary"><Plus width={"10px"} /></Badge>
 													</a>
 													<UncontrolledTooltip placement='top' target={`complaintListDatatableAdd${id}`} >{t('Хариулт нэмэх')}</UncontrolledTooltip>
-												</div>
+												</div>}
 											</Col>
 										</Row>
 									</AccordionHeader>

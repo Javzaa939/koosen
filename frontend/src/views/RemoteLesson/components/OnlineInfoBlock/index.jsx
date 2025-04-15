@@ -99,12 +99,12 @@ export default function OnlineInfoBlock({
 								<a
 									role="button"
 									onClick={() => toggleAddEditModal()}
-									id={`complaintListDatatableAdd`}
+									id={`onlineInfoAdd`}
 									className='ms-1'
 								>
 									<Badge color="primary"><Plus width={"10px"} /></Badge>
 								</a>
-								<UncontrolledTooltip placement='top' target={`complaintListDatatableAdd`} >{t('Бүлэг нэмэх')}</UncontrolledTooltip>
+								<UncontrolledTooltip placement='top' target={`onlineInfoAdd`} >{t('Бүлэг нэмэх')}</UncontrolledTooltip>
 							</div>
 						</Col>
 					</Row>
