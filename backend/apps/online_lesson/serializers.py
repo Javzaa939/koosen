@@ -446,6 +446,7 @@ class QuezQuestionsSerializer(serializers.ModelSerializer):
 class QuezChoicesSerializer(serializers.ModelSerializer):
 
     image_path = serializers.SerializerMethodField()
+    quez_question_id = serializers.SerializerMethodField()
 
     class Meta:
         model = QuezChoices
@@ -454,4 +455,14 @@ class QuezChoicesSerializer(serializers.ModelSerializer):
     # to get orignal field value, because Django automatically adds MEDIA and other url parts at the start of path in filefields so this another field is needed
     def get_image_path(self, obj):
         result = obj.image.name if obj.image else None
+        return result
+
+    def get_quez_question_id(self, obj):
+        result = None
+
+        try:
+            result = QuezQuestions.objects.get(choices__id=obj.id).id
+        except Exception:
+            traceback.print_exc()
+
         return result

@@ -27,6 +27,8 @@ import useLoader from "@src/utility/hooks/useLoader";
 import AddEditQuezQuestions from "../AddEditQuezQuestions";
 import useApiCustom from "../../hooks/useApiCustom";
 import { KIND_MULTI_CHOICE, KIND_ONE_CHOICE, KIND_RATING } from "../../utils";
+import AddEditQuezChoices from "../AddEditQuezChoices";
+import QuezChoicesBlock from "../QuezChoicesBlock";
 
 export default function QuizBlock({
 	onlineSubInfoData,
@@ -130,13 +132,13 @@ export default function QuizBlock({
 				onlineSubInfoId={onlineSubInfoId}
 				editData={editData}
 			/>}
-			{/* {addEditQuezChoices && <AddEditQuezChoices
+			{addEditQuezChoices && <AddEditQuezChoices
 				open={addEditQuezChoices}
 				handleModal={toggleAddEditQuezChoices}
 				refreshDatas={refreshQuezChoicesFunc}
 				quezQuestionsId={quezQuestionsId}
 				editData={editQuezChoicesData}
-			/>} */}
+			/>}
 			<Card className="w-100">
 				<CardHeader className="border-bottom d-block">
 					<Row>
@@ -223,12 +225,14 @@ export default function QuizBlock({
 									</AccordionHeader>
 									<div className="override-accordion-body-styles">
 										<AccordionBody accordionId={`quezQuestionsDatas_${quezQuestionsDatasInd}`}>
-											{/* <QuezChoicesBlock
+											<QuezChoicesBlock
 												t={t}
 												datas={quezChoicesFiltered}
 												refreshQuezChoices={refreshQuezChoicesFunc}
 												quezQuestionsId={id}
-											/> */}
+												fetchData={fetchData}
+												remoteApi={remoteApi}
+											/>
 										</AccordionBody>
 									</div>
 								</AccordionItem>

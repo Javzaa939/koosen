@@ -1,64 +1,39 @@
-import { t } from 'i18next';
-import { Fragment, useEffect, useState } from 'react';
-import { useForm, Controller, useWatch } from "react-hook-form";
 import '@styles/react/libs/flatpickr/flatpickr.scss';
-import classNames from 'classnames';
-import Select from 'react-select'
+import { t } from 'i18next';
+import { useEffect, useState } from 'react';
 import { X } from 'react-feather';
+import { Controller, useForm } from "react-hook-form";
 
 import {
+    Button,
     Col,
+    Form,
     FormFeedback,
     Input,
     Label,
-    Button,
-    Form,
     Modal,
     ModalBody,
     ModalHeader,
     Row
 } from "reactstrap";
 
-import { ReactSelectStyles } from '@src/utility/Utils';
-import empty from "@src/assets/images/empty-image.jpg";
-import { KIND_BOOLEAN, KIND_ESTIMATE_CHOICE, KIND_JISHIH_CHOICE, KIND_MULTI_CHOICE, KIND_ONE_CHOICE, KIND_PROJECT_CHOICE, KIND_RATING, KIND_SHORT_CHOICE, KIND_TEXT, KIND_TOVCH_CHOICE, onChangeFile } from '@src/views/RemoteLesson/utils';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
+import empty from "@src/assets/images/empty-image.jpg";
+import { onChangeFile } from '@src/views/RemoteLesson/utils';
 import { convertDefaultValue } from "@utils";
 
-import Editor from '../Editor';
-import InputFile from '../InputFile';
-
 const formFieldNames = {
-    kind: 'kind',
-    question: 'question',
+    choices: 'choices',
     image: 'image',
     score: 'score',
-    yes_or_no: 'yes_or_no',
-    rating_max_count: 'rating_max_count',
-    low_rating_word: 'low_rating_word',
-    high_rating_word: 'high_rating_word',
-    max_choice_count: 'max_choice_count',
 }
 
-const kindOptions = [
-    { id: KIND_ONE_CHOICE, name: 'Нэг сонголт' },
-    { id: KIND_SHORT_CHOICE, name: 'Богино нөхөх хариулт' },
-    { id: KIND_JISHIH_CHOICE, name: 'Харгалзуулах, жиших' },
-    { id: KIND_ESTIMATE_CHOICE, name: 'Тооцоолж бодох' },
-    { id: KIND_PROJECT_CHOICE, name: 'Төсөл боловсруулах' },
-    { id: KIND_TOVCH_CHOICE, name: 'Товч хариулт' },
-    { id: KIND_MULTI_CHOICE, name: 'Олон сонголт' },
-    { id: KIND_BOOLEAN, name: 'Үнэн, Худлыг олох' },
-    { id: KIND_TEXT, name: 'Эссэ бичих' },
-    { id: KIND_RATING, name: 'Үнэлгээ' },
-]
-
-export default function AddEditQuezQuestions({
+export default function AddEditQuezChoices({
     open,
     handleModal: handleModalOriginal,
     refreshDatas,
-    onlineSubInfoId,
+    quezQuestionsId,
     editData,
 }) {
     const { control, handleSubmit, setError, setValue, reset, formState: { errors }, watch } = useForm({
@@ -96,15 +71,15 @@ export default function AddEditQuezQuestions({
     }, [editData])
 
     async function onSubmit(cdata) {
-        cdata['onlineSubInfoId'] = onlineSubInfoId
+        cdata['quezQuestionsId'] = quezQuestionsId
         cdata = convertDefaultValue(cdata)
         const formData = new FormData()
         formData.append('json_data', JSON.stringify(cdata))
         formData.append('image', cdata['image']?.[0] ?? '')
         let apiFunc = null
 
-        if (editData) apiFunc = () => remoteApi.quezQuestions.put(formData, editData.id)
-        else apiFunc = () => remoteApi.quezQuestions.post(formData)
+        if (editData) apiFunc = () => remoteApi.quezChoices.put(formData, editData.id)
+        else apiFunc = () => remoteApi.quezChoices.post(formData)
 
         const { success, errors } = await fetchData(apiFunc())
 
@@ -119,8 +94,6 @@ export default function AddEditQuezQuestions({
             }
         }
     }
-
-    const [radioFileType, setRadioFileType] = useState(`${formFieldNames.file}-file`)
 
     // #region to save file
     // to get path from duplicated image field, because CDN path in django's filefield became changed
@@ -155,71 +128,39 @@ export default function AddEditQuezQuestions({
                 editData !== undefined
                     ?
                     <ModalHeader className='bg-transparent pb-0' cssModule={{ 'modal-title': 'w-100 text-center' }}>
-                        <h4>{t('Асуулт засах')}</h4>
+                        <h4>{t('Хариулт засах')}</h4>
                     </ModalHeader>
                     :
                     <ModalHeader className='bg-transparent pb-0' cssModule={{ 'modal-title': 'w-100 text-center' }}>
-                        <h4>{t('Асуулт нэмэх')}</h4>
+                        <h4>{t('Хариулт нэмэх')}</h4>
                     </ModalHeader>
             }
             <ModalBody className="flex-grow-50 mb-3 t-0">
                 {isLoading && Loader}
                 <Row tag={Form} onSubmit={handleSubmit(onSubmit)}>
                     <Col md={12}>
-                        <Label className='form-label' for={formFieldNames.question}>
-                            {t('Асуулт')}
+                        <Label className='form-label' for={formFieldNames.choices}>
+                            {t('Сонголт')}
                         </Label>
                         <Controller
                             control={control}
-                            name={formFieldNames.question}
+                            name={formFieldNames.choices}
                             render={({ field }) => (
                                 <Input
                                     {...field}
                                     type='text'
                                     id={field.name}
                                     bsSize='sm'
-                                    placeholder={t('Асуулт')}
+                                    placeholder={t('Сонголт')}
                                     invalid={errors[field.name] && true}
                                 />
                             )}
                         />
-                        {errors[formFieldNames.question] && <FormFeedback className='d-block'>{t(errors[formFieldNames.question].message)}</FormFeedback>}
-                    </Col>
-                    <Col md={6} className="mt-50">
-                        <Label className="form-label" for={formFieldNames.kind}>
-                            {t('Асуултын төрөл')}
-                        </Label>
-                        <Controller
-                            control={control}
-                            name={formFieldNames.kind}
-                            render={({ field }) => {
-                                return (
-                                    <Select
-                                        name={field.name}
-                                        id={field.name}
-                                        classNamePrefix='select'
-                                        isClearable
-                                        className={classNames('react-select', { 'is-invalid': errors[field.name] })}
-                                        isLoading={isLoading}
-                                        placeholder={t('-- Сонгоно уу --')}
-                                        options={kindOptions || []}
-                                        value={field.value && kindOptions.find((c) => c.id === field.value)}
-                                        noOptionsMessage={() => t('Хоосон байна.')}
-                                        onChange={(val) => {
-                                            field.onChange(val?.id || '')
-                                        }}
-                                        styles={ReactSelectStyles}
-                                        getOptionValue={(option) => option.id}
-                                        getOptionLabel={(option) => option.name}
-                                    />
-                                )
-                            }}
-                        ></Controller>
-                        {errors[formFieldNames.kind] && <FormFeedback className='d-block'>{t(errors[formFieldNames.kind].message)}</FormFeedback>}
+                        {errors[formFieldNames.choices] && <FormFeedback className='d-block'>{t(errors[formFieldNames.choices].message)}</FormFeedback>}
                     </Col>
                     <Col md={6} className="mt-50">
                         <Label className="form-label" for={formFieldNames.score}>
-                            {t('Асуултын оноо')}
+                            {t('Зөв хариултын оноо')}
                         </Label>
                         <Controller
                             control={control}
@@ -231,7 +172,7 @@ export default function AddEditQuezQuestions({
                                         type='number'
                                         id={field.name}
                                         bsSize='sm'
-                                        placeholder={t('Асуултын оноо')}
+                                        placeholder={t('Зөв хариултын оноо')}
                                         invalid={errors[field.name] && true}
                                     />
                                 )

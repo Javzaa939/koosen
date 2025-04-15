@@ -9,11 +9,11 @@ import { Link } from 'react-router-dom';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import { getPagination } from '@utils';
+import empty from "@src/assets/images/empty-image.jpg";
+import useModal from '@src/utility/hooks/useModal';
 
 import AddEditModal from './components/AddEditModal';
 import './style.scss';
-import DisplayQuill from './components/DisplayQuill';
-import useModal from '@src/utility/hooks/useModal';
 
 function RemoteLesson() {
     const [datas, setDatas] = useState([])
