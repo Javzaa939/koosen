@@ -1344,7 +1344,8 @@ class RemoteLessonQuezQuestionsAPIView(
             cleaned_data = {
                 'question': stringified_data['question'],
                 'kind': stringified_data['kind'],
-                'image': not_stringified_data['image']
+                'image': not_stringified_data['image'],
+                'score': stringified_data['score'],
             }
 
             if request.method == 'POST':

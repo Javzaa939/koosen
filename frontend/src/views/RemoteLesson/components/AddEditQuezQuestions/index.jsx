@@ -218,6 +218,28 @@ export default function AddEditQuezQuestions({
                             ></Controller>
                             {errors[formFieldNames.kind] && <FormFeedback className='d-block'>{t(errors[formFieldNames.kind].message)}</FormFeedback>}
                         </Col>
+                        <Col md={6} className="mt-50">
+                            <Label className="form-label" for={formFieldNames.score}>
+                                {t('Асуултын оноо')}
+                            </Label>
+                            <Controller
+                                control={control}
+                                name={formFieldNames.score}
+                                render={({ field }) => {
+                                    return (
+                                        <Input
+                                            {...field}
+                                            type='number'
+                                            id={field.name}
+                                            bsSize='sm'
+                                            placeholder={t('Асуултын оноо')}
+                                            invalid={errors[field.name] && true}
+                                        />
+                                    )
+                                }}
+                            ></Controller>
+                            {errors[formFieldNames.score] && <FormFeedback className='d-block'>{t(errors[formFieldNames.score].message)}</FormFeedback>}
+                        </Col>
                         <Col md={12} className="mt-50">
                             <Label for={formFieldNames.image} className='d-block text-center'><span>{t('Зураг')}</span></Label>
                             <Row>
