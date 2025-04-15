@@ -70,6 +70,7 @@ export default function QuizBlock({
 
 	const getQuezQuestions = () => remoteApi.quezQuestions.get({
 		onlineSubInfoId: onlineSubInfoId,
+		sort: 'id'
 	})
 
 	const { data: quezQuestionsDatasOriginal, isLoading: isLoadingQuezQuestions } = useApiCustom({
@@ -77,7 +78,7 @@ export default function QuizBlock({
 		deps: [refreshQuezQuestions]
 	})
 
-	const quezQuestionsDatas = quezQuestionsDatasOriginal || []
+	const quezQuestionsDatas = quezQuestionsDatasOriginal?.results || []
 	// #endregion
 	// #endregion QuezQuestions code block
 
@@ -109,30 +110,32 @@ export default function QuizBlock({
 		onlineSubInfoId: onlineSubInfoId,
 	})
 
-	const { data: quezChoicesDatas, isLoading: isLoadingQuezChoices } = useApiCustom({
+	const { data: quezChoicesDatasOriginal, isLoading: isLoadingQuezChoices } = useApiCustom({
 		apiFunction: getQuezChoices,
 		deps: [refreshQuezChoices]
 	})
+
+	const quezChoicesDatas = quezChoicesDatasOriginal?.results || []
 	// #endregion
 	// #endregion QuezChoices code block
 
 	return (
 		<>
 			{isLoading || isLoadingQuezQuestions || isLoadingQuezChoices && Loader}
-			<AddEditQuezQuestions
+			{addEditModal && <AddEditQuezQuestions
 				open={addEditModal}
 				handleModal={toggleAddEditModal}
 				refreshDatas={refreshQuezQuestionsFunc}
 				onlineSubInfoId={onlineSubInfoId}
 				editData={editData}
-			/>
-			{/* <AddEditQuezChoices
+			/>}
+			{/* {addEditQuezChoices && <AddEditQuezChoices
 				open={addEditQuezChoices}
 				handleModal={toggleAddEditQuezChoices}
 				refreshDatas={refreshQuezChoicesFunc}
 				quezQuestionsId={quezQuestionsId}
 				editData={editQuezChoicesData}
-			/> */}
+			/>} */}
 			<Card md={12}>
 				<CardHeader className="border-bottom d-block">
 					<Row>
@@ -144,12 +147,12 @@ export default function QuizBlock({
 								<a
 									role="button"
 									onClick={() => toggleAddEditModal()}
-									id={`complaintListDatatableAdd`}
+									id={`quezQuestionsAdd`}
 									className='ms-1'
 								>
 									<Badge color="primary"><Plus width={"10px"} /></Badge>
 								</a>
-								<UncontrolledTooltip placement='top' target={`complaintListDatatableAdd`} >{t('Асуулт нэмэх')}</UncontrolledTooltip>
+								<UncontrolledTooltip placement='top' target={`quezQuestionsAdd`} >{t('Асуулт нэмэх')}</UncontrolledTooltip>
 							</div>
 						</Col>
 					</Row>

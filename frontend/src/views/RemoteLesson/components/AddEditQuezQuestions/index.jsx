@@ -21,7 +21,7 @@ import {
 
 import { ReactSelectStyles } from '@src/utility/Utils';
 import empty from "@src/assets/images/empty-image.jpg";
-import { onChangeFile } from '@src/views/RemoteLesson/utils';
+import { KIND_BOOLEAN, KIND_ESTIMATE_CHOICE, KIND_JISHIH_CHOICE, KIND_MULTI_CHOICE, KIND_ONE_CHOICE, KIND_PROJECT_CHOICE, KIND_RATING, KIND_SHORT_CHOICE, KIND_TEXT, KIND_TOVCH_CHOICE, onChangeFile } from '@src/views/RemoteLesson/utils';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import { convertDefaultValue } from "@utils";
@@ -30,34 +30,51 @@ import Editor from '../Editor';
 import InputFile from '../InputFile';
 
 const formFieldNames = {
-    // OnlineSubInfo model fields
-    title: 'title',
-    file_type: 'file_type',
-    file: 'file',
-    text: 'text',
-
-    // QuezQuestions (QUIZ) model fields
-    quezQuestions: {
-        kind: 'kind',
-        question: 'question',
-        image: 'image',
-        score: 'score',
-        yes_or_no: 'yes_or_no',
-        rating_max_count: 'rating_max_count',
-        low_rating_word: 'low_rating_word',
-        high_rating_word: 'high_rating_word',
-        max_choice_count: 'max_choice_count',
-    }
+    kind: 'kind',
+    question: 'question',
+    image: 'image',
+    score: 'score',
+    yes_or_no: 'yes_or_no',
+    rating_max_count: 'rating_max_count',
+    low_rating_word: 'low_rating_word',
+    high_rating_word: 'high_rating_word',
+    max_choice_count: 'max_choice_count',
 }
+
+const kindOptions = [
+    { id: KIND_ONE_CHOICE, name: 'Нэг сонголт' },
+    { id: KIND_SHORT_CHOICE, name: 'Богино нөхөх хариулт' },
+    { id: KIND_JISHIH_CHOICE, name: 'Харгалзуулах, жиших' },
+    { id: KIND_ESTIMATE_CHOICE, name: 'Тооцоолж бодох' },
+    { id: KIND_PROJECT_CHOICE, name: 'Төсөл боловсруулах' },
+    { id: KIND_TOVCH_CHOICE, name: 'Товч хариулт' },
+    { id: KIND_MULTI_CHOICE, name: 'Олон сонголт' },
+    { id: KIND_BOOLEAN, name: 'Үнэн, Худлыг олох' },
+    { id: KIND_TEXT, name: 'Эссэ бичих' },
+    { id: KIND_RATING, name: 'Үнэлгээ' },
+]
 
 export default function AddEditQuezQuestions({
     open,
-    handleModal,
+    handleModal: handleModalOriginal,
     refreshDatas,
     onlineSubInfoId,
     editData,
 }) {
-    const { control, handleSubmit, setError, setValue, reset, formState: { errors }, watch } = useForm()
+    const { control, handleSubmit, setError, setValue, reset, formState: { errors }, watch } = useForm({
+        defaultValues: {
+            ...Object.keys(formFieldNames).reduce((acc, current) => {
+                acc[current] = ''
+                return acc
+            }, [{}])
+        }
+    })
+
+    const handleModal = () => {
+        reset()
+        handleModalOriginal()
+    }
+
     const formValues = watch()
     const { fetchData, isLoading, Loader } = useLoader({ isFullScreen: true });
     const remoteApi = useApi().remote
@@ -69,7 +86,7 @@ export default function AddEditQuezQuestions({
                 const value = editData[key]
 
                 if (value !== null && value !== undefined) {
-                    if (key == 'file' && editData['file_path']) finalValue = editData['file_path']
+                    if (key == 'image' && editData['image_path']) finalValue = editData['image_path']
                     else finalValue = value
                 }
 
@@ -83,7 +100,7 @@ export default function AddEditQuezQuestions({
         cdata = convertDefaultValue(cdata)
         const formData = new FormData()
         formData.append('json_data', JSON.stringify(cdata))
-        formData.append('image', cdata['image'])
+        formData.append('image', cdata['image']?.[0] ?? '')
         let apiFunc = null
 
         if (editData) apiFunc = () => remoteApi.quezQuestions.put(formData, editData.id)
@@ -107,20 +124,19 @@ export default function AddEditQuezQuestions({
 
     // #region to save file
     // to get path from duplicated image field, because CDN path in django's filefield became changed
-    const image_path = useWatch({
-        control,
-        name: 'image_path',
-    });
+    const [image_old, setImageOld] = useState(formValues?.image_path)
 
-    const [image_old, setImageOld] = useState(image_path)
+    useEffect(()=>{
+        if (formValues?.image_path) setImageOld(formValues?.image_path)
+    },[formValues?.image_path])
 
     const handleDeleteImage = () => {
         setImageOld('')
-        setValue(formFieldNames.quezQuestions.image, '')
+        setValue(formFieldNames.image, '')
     }
 
     const clickLogoImage = () => {
-        const logoInput = document.getElementById(formFieldNames.quezQuestions.image)
+        const logoInput = document.getElementById(formFieldNames.image)
         logoInput.click()
     }
     // #endregion
@@ -151,13 +167,12 @@ export default function AddEditQuezQuestions({
                     {isLoading && Loader}
                     <Row tag={Form} onSubmit={handleSubmit(onSubmit)}>
                         <Col md={12}>
-                            <Label className='form-label' for={formFieldNames.quezQuestions.question}>
+                            <Label className='form-label' for={formFieldNames.question}>
                                 {t('Асуулт')}
                             </Label>
                             <Controller
-                                defaultValue=''
                                 control={control}
-                                name={formFieldNames.quezQuestions.question}
+                                name={formFieldNames.question}
                                 render={({ field }) => (
                                     <Input
                                         {...field}
@@ -169,10 +184,42 @@ export default function AddEditQuezQuestions({
                                     />
                                 )}
                             />
-                            {errors[formFieldNames.quezQuestions.question] && <FormFeedback className='d-block'>{t(errors[formFieldNames.quezQuestions.question].message)}</FormFeedback>}
+                            {errors[formFieldNames.question] && <FormFeedback className='d-block'>{t(errors[formFieldNames.question].message)}</FormFeedback>}
+                        </Col>
+                        <Col md={6} className="mt-50">
+                            <Label className="form-label" for={formFieldNames.kind}>
+                                {t('Асуултын төрөл')}
+                            </Label>
+                            <Controller
+                                control={control}
+                                name={formFieldNames.kind}
+                                render={({ field }) => {
+                                    return (
+                                        <Select
+                                            name={field.name}
+                                            id={field.name}
+                                            classNamePrefix='select'
+                                            isClearable
+                                            className={classNames('react-select', { 'is-invalid': errors[field.name] })}
+                                            isLoading={isLoading}
+                                            placeholder={t('-- Сонгоно уу --')}
+                                            options={kindOptions || []}
+                                            value={field.value && kindOptions.find((c) => c.id === field.value)}
+                                            noOptionsMessage={() => t('Хоосон байна.')}
+                                            onChange={(val) => {
+                                                field.onChange(val?.id || '')
+                                            }}
+                                            styles={ReactSelectStyles}
+                                            getOptionValue={(option) => option.id}
+                                            getOptionLabel={(option) => option.name}
+                                        />
+                                    )
+                                }}
+                            ></Controller>
+                            {errors[formFieldNames.kind] && <FormFeedback className='d-block'>{t(errors[formFieldNames.kind].message)}</FormFeedback>}
                         </Col>
                         <Col md={12} className="mt-50">
-                            <Label for={formFieldNames.quezQuestions.image} className='d-block text-center'><span>{t('Зураг')}</span></Label>
+                            <Label for={formFieldNames.image} className='d-block text-center'><span>{t('Зураг')}</span></Label>
                             <Row>
                                 <Col className='d-flex justify-content-center'>
                                     <div>
@@ -182,9 +229,8 @@ export default function AddEditQuezQuestions({
                                         <div className="orgLogoDiv image-responsive">
                                             <img className="image-responsive w-100" src={image_old ? image_old : empty} onClick={() => { clickLogoImage() }} />
                                             <Controller
-                                                defaultValue=''
                                                 control={control}
-                                                name={formFieldNames.quezQuestions.image}
+                                                name={formFieldNames.image}
                                                 render={({ field }) => (
                                                     <input
                                                         accept="image/*"
@@ -209,7 +255,7 @@ export default function AddEditQuezQuestions({
                             <Button className='me-2' color="primary" type="submit">
                                 {t('Хадгалах')}
                             </Button>
-                            <Button color="secondary" outline type="reset" onClick={() => { handleModal(), reset() }}>
+                            <Button color="secondary" outline type="reset" onClick={() => handleModal()}>
                                 {t('Буцах')}
                             </Button>
                         </Col>

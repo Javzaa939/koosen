@@ -18,8 +18,24 @@ import useLoader from '@hooks/useLoader';
 import '@styles/react/libs/flatpickr/flatpickr.scss';
 import Elearn from '../Elearn';
 
-const AddEditModal = ({ open, handleModal, refreshDatas, editData }) => {
-    const { control, handleSubmit, setError, setValue, reset, formState: { errors } } = useForm()
+const AddEditModal = ({ open, handleModal: handleModalOriginal, refreshDatas, editData }) => {
+    const { control, handleSubmit, setError, setValue, reset, formState: { errors } } = useForm({
+        defaultValues: {
+            title: '',
+            description: '',
+            is_end_exam: false,
+            is_certificate: false,
+            start_date: '',
+            end_date: '',
+            image: '',
+        }
+    })
+
+    const handleModal = () => {
+        reset()
+        handleModalOriginal()
+    }
+
     const { fetchData, isLoading, Loader } = useLoader({ isFullScreen: true });
     const remoteApi = useApi().remote
 

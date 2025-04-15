@@ -20,8 +20,19 @@ import { convertDefaultValue } from "@utils";
 
 import ScrollSelectFilter from '../ScrollSelectFilter';
 
-const AddEditOnlineInfo = ({ open, handleModal, refreshDatas, editData, elearnId }) => {
-    const { control, handleSubmit, setError, setValue, reset, formState: { errors } } = useForm()
+const AddEditOnlineInfo = ({ open, handleModal: handleModalOriginal, refreshDatas, editData, elearnId }) => {
+    const { control, handleSubmit, setError, setValue, reset, formState: { errors } } = useForm({
+        defaultValues: {
+            title: '',
+            related_info: '',
+        }
+    })
+
+    const handleModal = () => {
+        reset()
+        handleModalOriginal()
+    }
+
     const { fetchData, isLoading, Loader } = useLoader({ isFullScreen: true });
     const remoteApi = useApi().remote
 
@@ -101,7 +112,6 @@ const AddEditOnlineInfo = ({ open, handleModal, refreshDatas, editData, elearnId
                                         {t('Хичээлийн нэр гарчиг')}
                                     </Label>
                                     <Controller
-                                        defaultValue=''
                                         control={control}
                                         name='title'
                                         render={({ field }) => (
@@ -123,7 +133,6 @@ const AddEditOnlineInfo = ({ open, handleModal, refreshDatas, editData, elearnId
                                         {t('Өмнөх бүлгээс хамаарах эсэх')}
                                     </Label>
                                     <Controller
-                                        defaultValue={''}
                                         control={control}
                                         name='related_info'
                                         render={({ field: { ref, ...rest } }) =>

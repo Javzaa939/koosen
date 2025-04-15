@@ -917,20 +917,24 @@ class RemoteLessonAPIView(
     # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
     @has_permission(must_permissions=['"lms-online-lesson-read"'])
     def get(self,request,pk=None):
-        if pk:
-            datas = self.retrieve(request, pk).data
-            return request.send_data(datas)
+        try:
+            if pk:
+                datas = self.retrieve(request, pk).data
+                return request.send_data(datas)
 
-        # region to sort by one or multiple fields
-        sorting = self.request.GET.get('sorting', '')
+            # region to sort by one or multiple fields
+            sorting = self.request.GET.get('sorting', '')
 
-        if sorting:
-            self.queryset = self.queryset.order_by(*sorting.split(','))
-        # endregion
+            if sorting:
+                self.queryset = self.queryset.order_by(*sorting.split(','))
+            # endregion
 
-        serializer = self.list(request).data
+            serializer = self.list(request).data
 
-        return request.send_data(serializer)
+            return request.send_data(serializer)
+        except Exception:
+            traceback.print_exc()
+            return request.send_error("ERR_002")
 
     # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
     @has_permission(must_permissions=['lms-study-lessonstandart-create'])
@@ -975,15 +979,18 @@ class RemoteLessonStudentsAPIView(
     # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
     @has_permission(must_permissions=['"lms-online-lesson-read"'])
     def get(self,request,pk=None):
-        elearn_id = request.query_params.get('elearnId')
-        self.queryset = self.queryset.filter(elearn__id=elearn_id)
+        try:
+            elearn_id = request.query_params.get('elearnId')
+            self.queryset = self.queryset.filter(elearn__id=elearn_id)
 
-        if pk:
-            datas = self.retrieve(request, pk).data
-            return request.send_data(datas)
-        serializer = self.list(request).data
-
-        return request.send_data(serializer)
+            if pk:
+                datas = self.retrieve(request, pk).data
+                return request.send_data(datas)
+            serializer = self.list(request).data
+            return request.send_data(serializer)
+        except Exception:
+            traceback.print_exc()
+            return request.send_error("ERR_002")
 
     # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
     @has_permission(must_permissions=['lms-study-lessonstandart-update'])
@@ -1077,15 +1084,18 @@ class RemoteLessonOnlineInfoAPIView(
     # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
     @has_permission(must_permissions=['"lms-online-lesson-read"'])
     def get(self,request,pk=None):
-        elearn_id = request.query_params.get('elearnId')
-        self.queryset = self.queryset.filter(elearn__id=elearn_id)
+        try:
+            elearn_id = request.query_params.get('elearnId')
+            self.queryset = self.queryset.filter(elearn__id=elearn_id)
 
-        if pk:
-            datas = self.retrieve(request, pk).data
-            return request.send_data(datas)
-        serializer = self.list(request).data
-
-        return request.send_data(serializer)
+            if pk:
+                datas = self.retrieve(request, pk).data
+                return request.send_data(datas)
+            serializer = self.list(request).data
+            return request.send_data(serializer)
+        except Exception:
+            traceback.print_exc()
+            return request.send_error("ERR_002")
 
     # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
     @has_permission(must_permissions=['lms-study-lessonstandart-create'])
@@ -1237,15 +1247,18 @@ class RemoteLessonOnlineSubInfoAPIView(
     # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
     @has_permission(must_permissions=['"lms-online-lesson-read"'])
     def get(self,request,pk=None):
-        elearn_id = request.query_params.get('elearnId')
-        self.queryset = self.queryset.filter(parent_title__elearn__id=elearn_id)
+        try:
+            elearn_id = request.query_params.get('elearnId')
+            self.queryset = self.queryset.filter(parent_title__elearn__id=elearn_id)
 
-        if pk:
-            datas = self.retrieve(request, pk).data
-            return request.send_data(datas)
-        serializer = self.list(request).data
-
-        return request.send_data(serializer)
+            if pk:
+                datas = self.retrieve(request, pk).data
+                return request.send_data(datas)
+            serializer = self.list(request).data
+            return request.send_data(serializer)
+        except Exception:
+            traceback.print_exc()
+            return request.send_error("ERR_002")
 
     # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
     @has_permission(must_permissions=['lms-study-lessonstandart-create'])
@@ -1323,67 +1336,45 @@ class RemoteLessonQuezQuestionsAPIView(
 
         try:
             upload_to = ELearn._meta.get_field('image').upload_to
-            not_stringified_data = convert_stringified_querydict_to_dict(request.data,['file'])
+            not_stringified_data = convert_stringified_querydict_to_dict(request.data,['image'])
             stringified_data = not_stringified_data.pop('json_data')
+            teacher_instance = Teachers.objects.filter(user_id=request.user.id).first()
 
-            # region to collect only necessary fields
+            # region to collect only fields that are necessary for serializer
             cleaned_data = {
-                'title': stringified_data['title'],
-                'parent_title': stringified_data['parent_title'],
-                'file_type': stringified_data['file_type'],
+                'question': stringified_data['question'],
+                'kind': stringified_data['kind'],
+                'image': not_stringified_data['image']
             }
 
-            if stringified_data['file_type'] == OnlineSubInfo.TEXT:
-                cleaned_data['text'] = stringified_data['text']
-
-            if cleaned_data['file_type'] in [OnlineSubInfo.VIDEO, OnlineSubInfo.PDF]:
-                cleaned_data['file'] = not_stringified_data['file']
-            # endregion
-
-            # region to require fields
-            if not cleaned_data.get('title'):
-                raise ValidationError({ 'title': ['Хоосон байна'] })
-
-            if cleaned_data['file_type'] == OnlineSubInfo.TEXT:
-                # to check for emptiness of QUILL lib. editor value
-                if not cleaned_data.get('text') or cleaned_data.get('text') == '<p><br></p>':
-                    raise ValidationError({ 'text': ['Хоосон байна'] })
+            if request.method == 'POST':
+                cleaned_data['created_by'] = teacher_instance.id
             # endregion
 
             file_path = None
 
-            if cleaned_data['file_type'] in [OnlineSubInfo.VIDEO, OnlineSubInfo.PDF]:
-                # to require field
-                # to check for emptiness using 'null' because file fields are not stringified
-                if not cleaned_data.get('file') or cleaned_data.get('file') == 'null':
-                    raise ValidationError({ 'file': ['Хоосон байна'] })
+            if request.FILES.keys():
+                file = request.FILES.getlist('image')[0]
+                _, file_path, _ = create_file_in_cdn_silently(upload_to, file)
 
-                if request.FILES.keys():
-                    file = request.FILES.getlist('file')[0]
-                    _, file_path, _ = create_file_in_cdn_silently(upload_to, file)
+                if not file_path:
+                    return request.send_error('CDN_error', 'Файл хадгалахад алдаа гарсан байна (CDN).')
 
-                    if not file_path:
-                        return request.send_error('CDN_error', 'Файл хадгалахад алдаа гарсан байна (CDN).')
-
-                # to save URL of file
-                elif is_url(cleaned_data['file']):
-                    file_path = cleaned_data['file']
-                else:
-                    raise ValidationError({ 'file': ['Файл хадгалахад алдаа гарсан байна'] })
-
-                # to remove from dict because serializer requires file in filefield, but it is always string of CDN path or user URL
-                del cleaned_data['file']
+            # to remove from dict because serializer requires file in filefield, but it is always string of CDN path or user URL
+            del cleaned_data['image']
 
             with transaction.atomic():
                 instance = None
 
                 if request.method == 'POST':
                     instance = self.create(cleaned_data).instance
+                    online_sub_info_instance = OnlineSubInfo.objects.get(id=stringified_data['onlineSubInfoId'])
+                    online_sub_info_instance.quiz.add(instance)
                 elif request.method == 'PUT':
                     instance = self.update(cleaned_data, partial=True).instance
 
                 if file_path:
-                    instance.file = file_path
+                    instance.image = file_path
                     instance.save()
         except ValidationError as serializer_errors:
             traceback.print_exc()
@@ -1398,42 +1389,48 @@ class RemoteLessonQuezQuestionsAPIView(
     # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
     @has_permission(must_permissions=['"lms-online-lesson-read"'])
     def get(self,request,pk=None):
-        # elearn_id = request.query_params.get('elearnId')
-        # self.queryset = self.queryset.filter(parent_title__elearn__id=elearn_id)
+        try:
+            online_sub_info_id = request.query_params.get('onlineSubInfoId')
+            self.queryset = self.queryset.filter(onlinesubinfo__id=online_sub_info_id)
 
-        # if pk:
-        #     datas = self.retrieve(request, pk).data
-        #     return request.send_data(datas)
-        # serializer = self.list(request).data
+            # region to sort by one or multiple fields
+            sorting = self.request.GET.get('sorting', '')
 
-        # return request.send_data(serializer)
-        return request.send_data(None)
+            if sorting:
+                self.queryset = self.queryset.order_by(*sorting.split(','))
+            # endregion
+
+            if pk:
+                datas = self.retrieve(request, pk).data
+                return request.send_data(datas)
+            serializer = self.list(request).data
+            return request.send_data(serializer)
+        except Exception:
+            traceback.print_exc()
+            return request.send_error("ERR_002")
 
     # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
     @has_permission(must_permissions=['lms-study-lessonstandart-create'])
     def post(self, request):
-        # return self.post_put()
-        return request.send_data(None)
+        return self.post_put()
 
     # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
     @has_permission(must_permissions=['lms-study-lessonstandart-update'])
     def put(self,request,pk=None):
-        # return self.post_put()
-        return request.send_data(None)
+        return self.post_put()
 
     # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
     @has_permission(must_permissions=['lms-study-lessonstandart-delete'])
     def delete(self, request, pk=None):
-        # result = request.send_info("INF_003")
+        result = request.send_info("INF_003")
 
-        # try:
-        #     self.destroy(request)
-        # except Exception:
-        #     traceback.print_exc()
-        #     result = request.send_error("ERR_002")
+        try:
+            self.destroy(request)
+        except Exception:
+            traceback.print_exc()
+            result = request.send_error("ERR_002")
 
-        # return result
-        return request.send_data(None)
+        return result
 
 
 @permission_classes([IsAuthenticated])
@@ -1563,15 +1560,6 @@ class RemoteLessonQuezChoicesAPIView(
     # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
     @has_permission(must_permissions=['"lms-online-lesson-read"'])
     def get(self,request,pk=None):
-        # elearn_id = request.query_params.get('elearnId')
-        # self.queryset = self.queryset.filter(parent_title__elearn__id=elearn_id)
-
-        # if pk:
-        #     datas = self.retrieve(request, pk).data
-        #     return request.send_data(datas)
-        # serializer = self.list(request).data
-
-        # return request.send_data(serializer)
         return request.send_data(None)
 
     # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions

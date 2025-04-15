@@ -49,15 +49,14 @@ export default function OnlineSubInfoBlock({
 		const { id, title, quezquestions_count, file_type_name, file_type } = onlineSubInfosItem
 
 		return <Fragment key={onlineSubInfosInd}>
-			<AddEditOnlineSubInfo
-				key={id}
+			{addEditModal && <AddEditOnlineSubInfo
 				open={addEditModal}
 				handleModal={toggleAddEditModal}
 				refreshDatas={getOnlineSubInfoDatas}
 				elearnId={elearnId}
 				onlineInfoId={onlineInfoId}
 				editData={editData}
-			/>
+			/>}
 			<Button
 				color='Link'
 				className="d-flex justify-content-between p-1 w-100 text-start"

@@ -96,14 +96,12 @@ function RemoteLesson() {
 
     return (
         <>
-            {/* to reset modal values 'key' prop is used, because reset() function does not work sometimes I could not find reason */}
-            <AddEditModal
-                key={editData?.id}
+            {addEditModal && <AddEditModal
                 open={addEditModal}
                 handleModal={toggleAddEditModal}
                 refreshDatas={getDatas}
                 editData={editData}
-            />
+            />}
             <Card>
                 <CardHeader>
                     <CardTitle>Зайн сургалт</CardTitle>

@@ -74,20 +74,20 @@ export default function OnlineInfoBlock({
 
 	return (
 		<>
-			<AddEditOnlineInfo
+			{addEditModal && <AddEditOnlineInfo
 				open={addEditModal}
 				handleModal={toggleAddEditModal}
 				refreshDatas={getDatas}
 				elearnId={elearnId}
 				editData={editData}
-			/>
-			<AddEditOnlineSubInfo
+			/>}
+			{addEditOnlineSubInfoModal && <AddEditOnlineSubInfo
 				open={addEditOnlineSubInfoModal}
 				handleModal={toggleAddOnlineSubInfoModal}
 				refreshDatas={getOnlineSubInfoDatas}
 				elearnId={elearnId}
 				onlineInfoId={onlineInfoId}
-			/>
+			/>}
 			<Card md={12}>
 				<CardHeader className="border-bottom d-block">
 					<Row>
