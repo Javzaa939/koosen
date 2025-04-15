@@ -162,7 +162,7 @@ export default function QuizBlock({
 					<Accordion open={open} toggle={toggle} className="accordion-custom">
 						{
 							quezQuestionsDatas.map((quezQuestionsDatasItem, quezQuestionsDatasInd) => {
-								const { id, question, kind } = quezQuestionsDatasItem
+								const { id, question, kind, kind_name } = quezQuestionsDatasItem
 								const quezChoicesFiltered = quezChoicesDatas.filter(item => item.quez_question_id === id)
 
 								return <AccordionItem key={quezQuestionsDatasInd}>
@@ -171,7 +171,7 @@ export default function QuizBlock({
 											<Col>
 												<span className="d-flex flex-column">
 													<span className="h5 mb-0">{question}</span>
-													<span className="text-body fw-normal">{0} / {quezChoicesFiltered.length} {t('хариулт')}</span>
+													<span className="text-body fw-normal">{kind_name}{[KIND_ONE_CHOICE, KIND_MULTI_CHOICE, KIND_RATING].includes(kind) && <> | {quezChoicesFiltered.length} {t('хариултууд')}</>}</span>
 												</span>
 											</Col>
 											<Col md={2} className="d-flex justify-content-end align-items-center">

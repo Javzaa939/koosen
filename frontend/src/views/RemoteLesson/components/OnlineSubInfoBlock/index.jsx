@@ -68,7 +68,7 @@ export default function OnlineSubInfoBlock({
 					<span className="text-body fw-normal">
 						{
 							file_type === QUIZ ?
-								`${0} / ${quezquestions_count} ${t('асуултууд')}`
+								`${quezquestions_count} ${t('асуултууд')}`
 								:
 								file_type_name
 						}

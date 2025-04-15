@@ -427,6 +427,7 @@ class OnlineSubInfoSerializer(serializers.ModelSerializer):
 class QuezQuestionsSerializer(serializers.ModelSerializer):
 
     image_path = serializers.SerializerMethodField()
+    kind_name = serializers.SerializerMethodField()
 
     class Meta:
         model = QuezQuestions
@@ -436,6 +437,10 @@ class QuezQuestionsSerializer(serializers.ModelSerializer):
     def get_image_path(self, obj):
         result = obj.image.name if obj.image else None
         return result
+
+    def get_kind_name(self, obj):
+        kind_name = obj.get_kind_display()
+        return kind_name
 
 
 class QuezChoicesSerializer(serializers.ModelSerializer):

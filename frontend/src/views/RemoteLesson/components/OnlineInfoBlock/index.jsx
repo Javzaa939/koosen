@@ -122,7 +122,7 @@ export default function OnlineInfoBlock({
 											<Col>
 												<span className="d-flex flex-column">
 													<span className="h5 mb-0">{title}</span>
-													<span className="text-body fw-normal">{0} / {online_sub_infos_filtered.length} {t('дэд бүлэг')}</span>
+													<span className="text-body fw-normal">{online_sub_infos_filtered.length} {t('дэд бүлгүүд')}</span>
 												</span>
 											</Col>
 											<Col md={2} className="d-flex justify-content-end align-items-center">
