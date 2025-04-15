@@ -100,7 +100,7 @@ export default function AddEditQuezChoices({
     const [image_old, setImageOld] = useState(formValues?.image_path)
 
     useEffect(() => {
-        if (formValues?.image_path) setImageOld(formValues?.image_path)
+        if (formValues?.image_path && !image_old) setImageOld(formValues?.image_path)
     }, [formValues?.image_path])
 
     const handleDeleteImage = () => {
@@ -203,8 +203,7 @@ export default function AddEditQuezChoices({
                                                     onChange={(e) => {
                                                         field.onChange(e.target.files)
                                                         onChangeFile(e, setImageOld)
-                                                    }
-                                                    }
+                                                    }}
                                                 />
                                             )}
                                         />

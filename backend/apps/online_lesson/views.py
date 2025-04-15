@@ -1510,8 +1510,10 @@ class RemoteLessonQuezChoicesAPIView(
                 if not file_path:
                     return request.send_error('CDN_error', 'Файл хадгалахад алдаа гарсан байна (CDN).')
 
-            # to remove from dict because serializer requires file in filefield, but it is always string of CDN path or user URL
-            del cleaned_data['image']
+                # to remove from dict because serializer requires file in filefield, but it is always string of CDN path or user URL
+                del cleaned_data['image']
+            else:
+                cleaned_data['image'] = None
 
             with transaction.atomic():
                 instance = None

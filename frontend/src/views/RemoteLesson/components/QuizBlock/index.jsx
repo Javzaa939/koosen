@@ -232,6 +232,7 @@ export default function QuizBlock({
 												quezQuestionsId={id}
 												fetchData={fetchData}
 												remoteApi={remoteApi}
+												toggleAddEditQuezChoices={toggleAddEditQuezChoices}
 											/>
 										</AccordionBody>
 									</div>
