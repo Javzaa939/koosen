@@ -58,4 +58,10 @@ urlpatterns = [
     path('remote/online-sub-info/',RemoteLessonOnlineSubInfoAPIView.as_view()),
     path('remote/online-sub-info/<int:pk>/',RemoteLessonOnlineSubInfoAPIView.as_view()),
 
+    path('remote/quez-questions/',RemoteLessonQuezQuestionsAPIView.as_view()),
+    path('remote/quez-questions/<int:pk>/',RemoteLessonQuezQuestionsAPIView.as_view()),
+
+    path('remote/quez-choices/',RemoteLessonQuezChoicesAPIView.as_view()),
+    path('remote/quez-choices/<int:pk>/',RemoteLessonQuezChoicesAPIView.as_view()),
+
 ]

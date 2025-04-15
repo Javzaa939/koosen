@@ -82,7 +82,7 @@ export default function Elearn({
 							id='title'
 							bsSize='sm'
 							placeholder={t('Сургалтын нэр')}
-							invalid={errors.name && true}
+							invalid={errors[field.name] && true}
 						/>
 					)}
 				/>

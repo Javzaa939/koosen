@@ -2,16 +2,13 @@ import { Badge, Card, CardBody } from 'reactstrap';
 import '../../style.scss';
 import DisplayQuill from '../DisplayQuill';
 import { Bookmark, Share } from 'react-feather';
-import { PDF, TEXT, VIDEO } from '../../utils';
+import { PDF, QUIZ, TEXT, VIDEO } from '../../utils';
+import Quiz from '../QuizBlock';
 
 export default function OnlineSubInfoDetailsBlock({
 	t,
-	getOnlineSubInfoDatas,
-	selectedELearn,
 	selectedOnlineSubInfo,
 }) {
-	const { teacher_info, description, students } = selectedELearn || {}
-	const { full_name } = teacher_info || {}
 	const { onlineSubInfoData, onlineInfoTitle } = selectedOnlineSubInfo || {}
 	const { title, file_path, file_type, text } = onlineSubInfoData || {}
 
@@ -35,20 +32,26 @@ export default function OnlineSubInfoDetailsBlock({
 								text && <DisplayQuill content={text} />
 								:
 								file_type === VIDEO ?
-										<video
-											controls
-											src={file_path}
-											width={"90%"}
-											height={'350px'}
-											className='justify-content-center'
-										>
-											{t('Видео тоглуулахад алдаа гарлаа')}.
-										</video>
+									<video
+										controls
+										src={file_path}
+										width={"90%"}
+										height={'350px'}
+										className='justify-content-center'
+									>
+										{t('Видео тоглуулахад алдаа гарлаа')}.
+									</video>
 									:
 									file_type === PDF ?
 										<iframe src={file_path} width="100%" height="640" allowFullScreen frameBorder="0" style={{ border: 'none' }}></iframe>
 										:
-										t('Дэд бүлэг сонгоно уу')
+										file_type === QUIZ ?
+											<Quiz
+												onlineSubInfoData={onlineSubInfoData}
+												t={t}
+											/>
+											:
+											t('Дэд бүлэг сонгоно уу')
 						}
 					</CardBody>
 				</div>

@@ -1798,8 +1798,8 @@ def pearson_corel(x, y):
     ]
 
 
-# to save file in CDN and remove from dict (e.g. from request.data)
 def save_file_to_cdn_and_remove_from_dict(request, dict_where_to_remove, field_names_to_remove, dir_name, request_file_field_name, request_file_index, field_name_to_add):
+    # to save file in CDN and remove from dict (e.g. from request.data)
     file = request.FILES.getlist(request_file_field_name)
     file_path_in_cdn = None
 
@@ -1818,11 +1818,11 @@ def save_file_to_cdn_and_remove_from_dict(request, dict_where_to_remove, field_n
     return file_path_in_cdn, None
 
 
-"""
-    to get "POST" data in "json-parsed" types and keep all list items of QueryDict/formData for their specified keys in 2nd argument (keep_list)
-    Required to use JSON.stringify() first for all "not file fields" on frontend to pass formData
-"""
 def convert_stringified_querydict_to_dict(post_data,keep_list=[],is_keep_only_not_singles=True):
+    """
+        to get "POST" data in "json-parsed" types and keep all list items of QueryDict/formData for their specified keys in 2nd argument (keep_list)
+        Required to use JSON.stringify() first for all "not file fields" on frontend to pass formData
+    """
     if keep_list:
         post_data_dict = post_data.dict()
 
@@ -1866,8 +1866,8 @@ def convert_stringified_querydict_to_dict(post_data,keep_list=[],is_keep_only_no
     return result
 
 
-# to check string for URL syntax
 def is_url(string):
+    # to check string for URL syntax
     try:
         result = urlparse(string)
         return all([result.scheme, result.netloc])

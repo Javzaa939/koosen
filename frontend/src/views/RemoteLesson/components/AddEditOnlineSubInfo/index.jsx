@@ -23,20 +23,34 @@ import { convertDefaultValue } from "@utils";
 
 import Editor from '../Editor';
 import InputFile from '../InputFile';
-import { PDF, TEXT, VIDEO } from '../../utils';
+import { PDF, QUIZ, TEXT, VIDEO } from '../../utils';
 
 const fileTypeOptions = [
     { id: PDF, name: "PDF" },
     { id: VIDEO, name: "Video хичээл" },
     { id: TEXT, name: "TEXT" },
-    // { id: QUIZ, name: "Шалгалт" },
+    { id: QUIZ, name: "Шалгалт" },
 ]
 
 const formFieldNames = {
+    // OnlineSubInfo model fields
     title: 'title',
     file_type: 'file_type',
     file: 'file',
     text: 'text',
+
+    // QuezQuestions (QUIZ) model fields
+    quezQuestions: {
+        kind: 'kind',
+        question: 'question',
+        image: 'image',
+        score: 'score',
+        yes_or_no: 'yes_or_no',
+        rating_max_count: 'rating_max_count',
+        low_rating_word: 'low_rating_word',
+        high_rating_word: 'high_rating_word',
+        max_choice_count: 'max_choice_count',
+    }
 }
 
 const AddEditOnlineSubInfo = ({ open, handleModal, refreshDatas, editData, elearnId, onlineInfoId }) => {
@@ -262,7 +276,7 @@ const AddEditOnlineSubInfo = ({ open, handleModal, refreshDatas, editData, elear
                             <Button className='me-2' color="primary" type="submit">
                                 {t('Хадгалах')}
                             </Button>
-                            <Button color="secondary" outline type="reset" onClick={() => { handleModal(), reset()}}>
+                            <Button color="secondary" outline type="reset" onClick={() => { handleModal(), reset() }}>
                                 {t('Буцах')}
                             </Button>
                         </Col>

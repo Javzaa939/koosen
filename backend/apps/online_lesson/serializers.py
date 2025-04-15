@@ -6,7 +6,7 @@ from rest_framework import serializers
 
 from student.serializers import StudentSimpleListSerializer
 from core.serializers import TeachersSerializer
-from lms.models import OnlineInfo, OnlineLesson,Challenge, LessonMaterial, OnlineSubInfo, OnlineWeek , Announcement, HomeWork,  HomeWorkStudent, OnlineWeekStudent, QuezQuestions, Student, WeekMaterials, ELearn
+from lms.models import OnlineInfo, OnlineLesson,Challenge, LessonMaterial, OnlineSubInfo, OnlineWeek , Announcement, HomeWork,  HomeWorkStudent, OnlineWeekStudent, QuezChoices, QuezQuestions, Student, WeekMaterials, ELearn
 from core.models import Teachers, SubOrgs
 
 from main.utils.file import split_root_path
@@ -421,8 +421,32 @@ class OnlineSubInfoSerializer(serializers.ModelSerializer):
     # to get orignal field value, because Django automatically adds MEDIA and other url parts at the start of path in filefields so this another field is needed
     def get_file_path(self, obj):
         result = obj.file.name if obj.file else None
-        print(result)
-        print('result', result)
-        print('result', result)
-        print('result', result)
+        return result
+
+
+class QuezQuestionsSerializer(serializers.ModelSerializer):
+
+    image_path = serializers.SerializerMethodField()
+
+    class Meta:
+        model = QuezQuestions
+        fields = "__all__"
+
+    # to get orignal field value, because Django automatically adds MEDIA and other url parts at the start of path in filefields so this another field is needed
+    def get_image_path(self, obj):
+        result = obj.image.name if obj.image else None
+        return result
+
+
+class QuezChoicesSerializer(serializers.ModelSerializer):
+
+    image_path = serializers.SerializerMethodField()
+
+    class Meta:
+        model = QuezChoices
+        fields = "__all__"
+
+    # to get orignal field value, because Django automatically adds MEDIA and other url parts at the start of path in filefields so this another field is needed
+    def get_image_path(self, obj):
+        result = obj.image.name if obj.image else None
         return result

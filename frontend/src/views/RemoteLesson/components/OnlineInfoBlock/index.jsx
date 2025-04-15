@@ -58,7 +58,7 @@ export default function OnlineInfoBlock({
 	}
 	// #endregion
 
-	// #region addEditModal for onlineSubInfo
+	// #region addEditModal for OnlineSubInfo
 	const [addEditOnlineSubInfoModal, setOnlineSubInfoAddEditModal] = useState(false)
 	const [onlineInfoId, setOnlineInfoId] = useState('')
 
@@ -172,19 +172,21 @@ export default function OnlineInfoBlock({
 											</Col>
 										</Row>
 									</AccordionHeader>
-									<AccordionBody accordionId={`onlineInfos_${onlineInfosInd}`}>
-										<OnlineSubInfoBlock
-											t={t}
-											datas={online_sub_infos_filtered}
-											handleSelectOnlineSubInfo={handleSelectOnlineSubInfo}
-											onlineInfoTitle={title}
-											getOnlineSubInfoDatas={getOnlineSubInfoDatas}
-											elearnId={elearnId}
-											onlineInfoId={id}
-											fetchData={fetchData}
-											remoteApi={remoteApi}
-										/>
-									</AccordionBody>
+									<div className="override-accordion-body-styles">
+										<AccordionBody accordionId={`onlineInfos_${onlineInfosInd}`}>
+											<OnlineSubInfoBlock
+												t={t}
+												datas={online_sub_infos_filtered}
+												handleSelectOnlineSubInfo={handleSelectOnlineSubInfo}
+												onlineInfoTitle={title}
+												getOnlineSubInfoDatas={getOnlineSubInfoDatas}
+												elearnId={elearnId}
+												onlineInfoId={id}
+												fetchData={fetchData}
+												remoteApi={remoteApi}
+											/>
+										</AccordionBody>
+									</div>
 								</AccordionItem>
 							})
 						}

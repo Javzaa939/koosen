@@ -185,8 +185,6 @@ function Lesson() {
                 <Col md={8}>
                     <OnlineSubInfoDetailsBlock
                         t={t}
-                        getOnlineSubInfoDatas={() => setRefreshOnlineSubInfo((current) => !current)}
-                        selectedELearn={selectedELearn}
                         selectedOnlineSubInfo={selectedOnlineSubInfo}
                     />
                 </Col>

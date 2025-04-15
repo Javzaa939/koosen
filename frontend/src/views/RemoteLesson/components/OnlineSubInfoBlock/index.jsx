@@ -38,6 +38,13 @@ export default function OnlineSubInfoBlock({
 	}
 	// #endregion
 
+	const [activeOnlineSubInfo, setActiveOnlineSubInfo] = useState()
+
+	function handleSelectOnlineSubInfoLocal(onlineSubInfosItem, onlineInfoTitle) {
+		handleSelectOnlineSubInfo(onlineSubInfosItem, onlineInfoTitle)
+		setActiveOnlineSubInfo(onlineSubInfosItem.id)
+	}
+
 	return datas.map((onlineSubInfosItem, onlineSubInfosInd) => {
 		const { id, title, quezquestions_count, file_type_name, file_type } = onlineSubInfosItem
 
@@ -53,8 +60,9 @@ export default function OnlineSubInfoBlock({
 			/>
 			<Button
 				color='Link'
-				className="d-flex justify-content-between p-50 w-100"
-				onClick={() => handleSelectOnlineSubInfo(onlineSubInfosItem, onlineInfoTitle)}
+				className="d-flex justify-content-between p-1 w-100 text-start"
+				onClick={() => handleSelectOnlineSubInfoLocal(onlineSubInfosItem, onlineInfoTitle)}
+				style={activeOnlineSubInfo === id ? { backgroundColor: '#fcfcfc' } : {}}
 			>
 				<div className='d-flex flex-column'>
 					<span className="h5 mb-50">{title}</span>
