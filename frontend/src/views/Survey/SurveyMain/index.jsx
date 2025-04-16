@@ -20,7 +20,6 @@ import Select from 'react-select'
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
-import useUpdateEffect from '@hooks/useUpdateEffect'
 
 import AuthContext from "@context/AuthContext"
 
@@ -57,13 +56,10 @@ const Survey = () => {
 	const [total_count, setTotalCount] = useState(1);
 
 	// Loader
-	const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: false });
+	const { Loader, isLoading, fetchData } = useLoader({});
 
 	// Modal
 	const [showModal, setShowModal] = useState(false);
-
-	const [nestedModal, setNestedModal] = useState(false);
-    const [closeAll, setCloseAll] = useState(false);
 
 	const handleModal = () => {
 		setModal(!modal)
@@ -145,8 +141,7 @@ const Survey = () => {
 	async function handleSearch() {
         if (searchValue.length > 0) getDatas()
     }
-
-	useUpdateEffect(() => {
+	useEffect(() => {
 		if (searchValue.length == 0) {
 			getDatas();
 		} else {
@@ -166,6 +161,11 @@ const Survey = () => {
 		[isEdit]
 	)
 
+
+
+    const [nestedModal, setNestedModal] = useState(false);
+    const [closeAll, setCloseAll] = useState(false);
+
     const toggleNested = () => {
         setNestedModal(!nestedModal);
         setCloseAll(false);
@@ -179,7 +179,9 @@ const Survey = () => {
 
 	return (
 		<Fragment>
-			{isLoading && Loader}
+			{isLoading && (
+				Loader
+			)}
 			<Card>
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
 					<CardTitle tag="h4">{t("Судалгааны жагсаалт")}</CardTitle>
@@ -218,7 +220,7 @@ const Survey = () => {
 				</Col>
 				<Row className="justify-content-between mx-0 mt-1" sm={12}>
 					<Col
-						className="d-flex align-items-center justify-content-start m-50"
+						className="d-flex align-items-center justify-content-start"
 						md={6}
 						sm={12}
 					>
@@ -243,7 +245,7 @@ const Survey = () => {
 							</Label>
 						</Col>
 					</Col>
-					<Col className='d-flex align-items-end mobile-datatable-search m-50'>
+					<Col className='d-flex align-items-end mobile-datatable-search '>
                         <Input
                             className='dataTable-filter mb-50'
                             type='text'
@@ -265,7 +267,7 @@ const Survey = () => {
                         </Button>
                     </Col>
 				</Row>
-				<div className="react-dataTable react-dataTable-selectable-rows mx-1 mt-1">
+				<div className="react-dataTable react-dataTable-selectable-rows mx-1 mt-1" id="datatableLeftTwoRightOne">
 					<DataTable
 						noHeader
 						pagination

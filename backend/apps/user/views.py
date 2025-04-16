@@ -359,3 +359,17 @@ class UserForgotPasswordConfirmAPI(
             print(e)
             transaction.savepoint_rollback(sid)
             return request.send_error("ERR_002", e)
+
+# from django.contrib.auth.hashers import make_password
+
+# from core.models import User
+# user = User.objects.filter(email='elselt@admin.mn').first()
+# print(user)
+
+# password = 'elselt@2025'
+# hash_password = make_password(password)
+
+# print(hash_password)
+
+# user.password = hash_password
+# user.save()

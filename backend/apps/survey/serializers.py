@@ -145,7 +145,6 @@ class SurveyListSerializer(serializers.ModelSerializer):
     start_date = serializers.SerializerMethodField()
     end_date = serializers.SerializerMethodField()
     scope = serializers.SerializerMethodField()
-    oyutans = serializers.SerializerMethodField()
     teachers = serializers.SerializerMethodField()
     created_at = serializers.SerializerMethodField()
 
@@ -167,14 +166,6 @@ class SurveyListSerializer(serializers.ModelSerializer):
 
     def get_scope(self, obj):
         return obj.get_scope_kind_display()
-
-    def get_oyutans(self, obj):
-
-        oyutan_ids = obj.oyutans if obj.oyutans is not None else []
-
-        oyutans_data = Student.objects.filter(id__in=oyutan_ids)
-        serializer = SurveyPolleeDetailSerializers(oyutans_data, many=True)
-        return serializer.data
 
     def get_teachers(self, obj):
 

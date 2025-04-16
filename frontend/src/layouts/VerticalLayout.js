@@ -334,11 +334,10 @@ const VerticalLayout = (props) =>
 
                         /** ----------------------------- Судалгаа ---------------------------- */
                         /** Судалгаа бүртгэх */
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-survey-read', 'surveymain')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-survey-list-read', 'takesurvey')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-survey-result-read', 'surveyreg')
 
                         /** ----------------------------- Багшийг үнэлэх ---------------------------- */
-                        /** Судалгааны асуулт */
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-survey-question-read', 'evaluation1')
 
                         /** Эрдэм шинжилгээ асуулт */
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science1')
@@ -413,6 +412,9 @@ const VerticalLayout = (props) =>
 
                         /** Хандах эрх */
                         if (menus.id === 'role' && !user.permissions?.includes('lms-role-read'))  delete newMenu[idx];
+
+                        /** ----------------------------- Цахим сургалт ---------------------------- */
+                        if (menus.id === 'remotelesson' && !user.permissions?.includes('lms-elearn-list-read'))  delete newMenu[idx];
                     }
                 })
                 setCNavigation(newMenu)

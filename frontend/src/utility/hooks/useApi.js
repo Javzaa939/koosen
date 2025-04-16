@@ -1699,7 +1699,7 @@ function useApi(isDisplay=false) {
 
 			surveyrange:{
 				// types болон selected_value дамжиж ирэх үед back-руу дамжуулна
-				get:(types, selectedValue) => instance.get(`survey/surveyrange/?types=${types}&selected_value=${selectedValue}`),
+				get: ({ limit='Бүгд', page=1, types='', selectedValue='' }) => instance.get(`survey/surveyrange/?limit=${limit}&page=${page}&types=${types}&selected_value=${selectedValue}`),
 			},
 			get:(limit, page, selectedTime, search) => instance.get(`survey/?limit=${limit}&page=${page}&time_type=${selectedTime}&search=${search}`),
 			getList: (search) => instance.get(`survey/list/?search=${search}`),

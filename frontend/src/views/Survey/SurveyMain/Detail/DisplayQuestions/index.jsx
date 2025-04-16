@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 
 import "./style.css";
 
@@ -89,39 +89,58 @@ function displayMultiChoice(title, idx, imageUrl, image, qIdx, replyHandleChange
 }
 
 // Үнэлгээ
-function makeRatingAns(textLow, textHigh, numStars, qIdx, replyHandleChange) {
+function makeRatingAns(ratingWords, qIdx, replyHandleChange) {
 	function radios() {
 		let radios = [];
-		for (let idx = 1; idx <= numStars; idx++) {
+
+		for (let idx = 0; idx < ratingWords.length; idx++) {
 			radios.push(
-				<div key={`rating-${idx}-${qIdx}`}>
-					<div className="rating">
-						<input
-							type="radio"
-							name={`rating-${qIdx}`}
-							value={idx}
-							id={`radio-${qIdx}-${idx}-in`}
-							className="form-check-input "
-							disabled
-						/>
-						<label
-							htmlFor={`radio-${qIdx}-${idx}-in`}
-							className="d-flex justify-content-center label_star"
-						>
-						☆
-						</label>
-					</div>
-				</div>
+				<td key={`rating-${idx}-${qIdx}`} style={{ padding: '20px' }}>
+					<table>
+						<tbody>
+							<tr>
+								<td>
+									<label
+										htmlFor={`radio-${qIdx}-${idx}-in`}
+										style={{
+											writingMode: 'vertical-rl',
+											transform: 'rotate(180deg)',
+											cursor: 'pointer'
+										}}
+									>
+										{ratingWords[idx]}
+									</label>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<input
+										type="radio"
+										name={`rating-${qIdx}`}
+										id={`radio-${qIdx}-${idx}-in`}
+										className="form-check-input"
+										disabled
+										value={idx}
+									/>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</td>
 			);
 	  	}
 	  	return radios;
 	}
 	return (
-	  <div className="d-flex align-items-center custom-m">
-			<div className="custom-me">{textLow}</div>
-			{radios()}
-			<div className="custom-ms">{textHigh}</div>
-	  </div>
+		<div className='questionRating' style={{ overflow: 'auto' }}>
+			<table>
+				<tbody>
+					<tr style={{ verticalAlign: 'bottom' }}>
+						{radios()}
+					</tr>
+				</tbody>
+			</table>
+		</div>
 	);
 }
 function DisplayQuestions({ questions }) {
@@ -137,8 +156,7 @@ function DisplayQuestions({ questions }) {
 				imageUrl,
 				image,
 				rating_max_count,
-				low_rating_word,
-				high_rating_word,
+				rating_words,
 				choices,
 				id
 			} = rowsData;
@@ -195,9 +213,7 @@ function DisplayQuestions({ questions }) {
 					{
 						kind === KIND_RATING &&
 							makeRatingAns(
-								low_rating_word,
-								high_rating_word,
-								rating_max_count,
+								rating_words,
 								idx,
 						)
 					}

@@ -31,15 +31,30 @@ const Scope = ({ setSubmitDatas, stepper, data, editData }) => {
         setChosenScope(newData);
     };
 
+    // to clear old data, because user can press next and back buttons and change values, so we need to reset values of step because otherwise old values can be remained
+    function clearStepData() {
+        delete data.is_all
+
+        // from teacher component
+        delete data.selected_ids
+        delete data.is_teacher
+        delete data.isAllTeacher
+
+        // from student component. distinct ones
+        delete data.isAllStudent
+    }
+
     function handleNextButton(){
-        setSubmitDatas(chosenScope)
+        clearStepData()
+        setSubmitDatas({ ...data, ...chosenScope })
         stepper.next()
     }
 
     function setAllStudent() {
+        clearStepData()
 		const newData = {'is_all': true};
 
-		setSubmitDatas(newData);
+        setSubmitDatas({ ...data, ...newData });
         stepper.next()
 	}
 

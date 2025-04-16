@@ -69,7 +69,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 							onClick = {
 								() => {handleSend(row)}}
 							>
-							<Badge color="light-info" pill><Eye width={"15px"} /></Badge>
+							<Badge color="light-info" className="p-50" pill><Eye width={"15px"} /></Badge>
 						</a>
                     	<UncontrolledTooltip placement='top' target={`complaintListDatatableDetail${row.id}`}>Загвар харах</UncontrolledTooltip>
 						{
@@ -86,7 +86,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 									})}
 									id={`complaintListDatatableCancel${row?.id}`}
 							>
-								<Badge color="light-danger" pill><X width={"15px"} /></Badge>
+								<Badge color="light-danger" className="ms-50 p-50" pill><X width={"15px"} /></Badge>
 							</a>
 							<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${row.id}`} >Устгах</UncontrolledTooltip>
 							</>
