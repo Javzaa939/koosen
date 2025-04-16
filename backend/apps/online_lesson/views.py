@@ -44,7 +44,7 @@ from core.models import (
 )
 
 from main.utils.file import split_root_path
-from main.utils.function.utils import convert_stringified_querydict_to_dict, create_file_in_cdn_silently, create_file_to_cdn, has_permission, is_url, remove_file_from_cdn, get_file_from_cdn, save_file_to_cdn_and_remove_from_dict, str2bool
+from main.utils.function.utils import convert_stringified_querydict_to_dict, create_file_in_cdn_silently, create_file_to_cdn, has_permission, is_url, remove_file_from_cdn, get_file_from_cdn, str2bool
 
 @permission_classes([IsAuthenticated])
 class OnlineLessonListAPIView(
@@ -858,8 +858,16 @@ class RemoteLessonAPIView(
     # endregion
 
     # region custom methods
+    def rollbackCDN(relative_path):
+        if relative_path:
+            cdn_rollback_result = remove_file_from_cdn(relative_path)
+
+            if not cdn_rollback_result:
+                print('CDN rollback failed during removing with path:', relative_path)
+
     def post_put(self):
         request = self.request
+        relative_path = None
 
         if request.method == 'POST':
             result = request.send_info("INF_001")
@@ -884,11 +892,13 @@ class RemoteLessonAPIView(
 
             data['teacher'] = teacher_instance.id
             file_path_in_cdn = None
+            file = request.FILES.get('image')
 
-            if file_keys:
-                file_path_in_cdn, _ = save_file_to_cdn_and_remove_from_dict(request,data,['image'],upload_to,'image',0,'image')
+            if file:
+                relative_path, file_path_in_cdn, error = create_file_in_cdn_silently(upload_to, file)
 
-                if not file_path_in_cdn:
+                if error:
+                    print(error)
                     return request.send_error('CDN_error', 'Файл хадгалахад алдаа гарсан байна (CDN).')
             elif data['image']:
                 # to save existinig URL of file or new URL if URL was used instead of file itself
@@ -913,9 +923,11 @@ class RemoteLessonAPIView(
         except ValidationError as serializer_errors:
             traceback.print_exc()
             result = request.send_error_valid(serializer_errors.detail)
+            self.rollbackCDN(relative_path)
         except Exception:
             traceback.print_exc()
             result = request.send_error("ERR_002")
+            self.rollbackCDN(relative_path)
 
         return result
     # endregion
@@ -1184,8 +1196,16 @@ class RemoteLessonOnlineSubInfoAPIView(
     # endregion
 
     # region custom methods
+    def rollbackCDN(relative_path):
+        if relative_path:
+            cdn_rollback_result = remove_file_from_cdn(relative_path)
+
+            if not cdn_rollback_result:
+                print('CDN rollback failed during removing with path:', relative_path)
+
     def post_put(self):
         request = self.request
+        relative_path = None
 
         if request.method == 'POST':
             result = request.send_info("INF_001")
@@ -1231,7 +1251,7 @@ class RemoteLessonOnlineSubInfoAPIView(
 
                 if request.FILES.keys():
                     file = request.FILES.getlist('file')[0]
-                    _, file_path, _ = create_file_in_cdn_silently(upload_to, file)
+                    relative_path, file_path, _ = create_file_in_cdn_silently(upload_to, file)
 
                     if not file_path:
                         return request.send_error('CDN_error', 'Файл хадгалахад алдаа гарсан байна (CDN).')
@@ -1259,9 +1279,11 @@ class RemoteLessonOnlineSubInfoAPIView(
         except ValidationError as serializer_errors:
             traceback.print_exc()
             result = request.send_error_valid(serializer_errors.detail)
+            self.rollbackCDN(relative_path)
         except Exception:
             traceback.print_exc()
             result = request.send_error("ERR_002")
+            self.rollbackCDN(relative_path)
 
         return result
     # endregion
@@ -1356,8 +1378,16 @@ class RemoteLessonQuezQuestionsAPIView(
     # endregion
 
     # region custom methods
+    def rollbackCDN(relative_path):
+        if relative_path:
+            cdn_rollback_result = remove_file_from_cdn(relative_path)
+
+            if not cdn_rollback_result:
+                print('CDN rollback failed during removing with path:', relative_path)
+
     def post_put(self):
         request = self.request
+        relative_path = None
 
         if request.method == 'POST':
             result = request.send_info("INF_001")
@@ -1389,7 +1419,7 @@ class RemoteLessonQuezQuestionsAPIView(
             file_path = None
 
             if request.FILES.keys():
-                _, file_path, _ = create_file_in_cdn_silently(upload_to, cleaned_data['image'])
+                relative_path, file_path, _ = create_file_in_cdn_silently(upload_to, cleaned_data['image'])
 
                 if not file_path:
                     return request.send_error('CDN_error', 'Файл хадгалахад алдаа гарсан байна (CDN).')
@@ -1419,9 +1449,11 @@ class RemoteLessonQuezQuestionsAPIView(
         except ValidationError as serializer_errors:
             traceback.print_exc()
             result = request.send_error_valid(serializer_errors.detail)
+            self.rollbackCDN(relative_path)
         except Exception:
             traceback.print_exc()
             result = request.send_error("ERR_002")
+            self.rollbackCDN(relative_path)
 
         return result
     # endregion
@@ -1515,8 +1547,16 @@ class RemoteLessonQuezChoicesAPIView(
     # endregion
 
     # region custom methods
+    def rollbackCDN(relative_path):
+        if relative_path:
+            cdn_rollback_result = remove_file_from_cdn(relative_path)
+
+            if not cdn_rollback_result:
+                print('CDN rollback failed during removing with path:', relative_path)
+
     def post_put(self):
         request = self.request
+        relative_path = None
 
         if request.method == 'POST':
             result = request.send_info("INF_001")
@@ -1543,7 +1583,7 @@ class RemoteLessonQuezChoicesAPIView(
             file_path = None
 
             if request.FILES.keys():
-                _, file_path, _ = create_file_in_cdn_silently(upload_to, cleaned_data['image'])
+                relative_path, file_path, _ = create_file_in_cdn_silently(upload_to, cleaned_data['image'])
 
                 if not file_path:
                     return request.send_error('CDN_error', 'Файл хадгалахад алдаа гарсан байна (CDN).')
@@ -1572,9 +1612,11 @@ class RemoteLessonQuezChoicesAPIView(
         except ValidationError as serializer_errors:
             traceback.print_exc()
             result = request.send_error_valid(serializer_errors.detail)
+            self.rollbackCDN(relative_path)
         except Exception:
             traceback.print_exc()
             result = request.send_error("ERR_002")
+            self.rollbackCDN(relative_path)
 
         return result
     # endregion
