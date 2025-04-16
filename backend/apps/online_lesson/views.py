@@ -896,6 +896,7 @@ class RemoteLessonAPIView(
 
             if file:
                 relative_path, file_path_in_cdn, error = create_file_in_cdn_silently(upload_to, file)
+                file_path_in_cdn = relative_path
 
                 if error:
                     print(error)
@@ -970,6 +971,9 @@ class RemoteLessonAPIView(
         result = request.send_info("INF_003")
 
         try:
+            instance = self.get_object()
+            relative_path = instance.image
+            self.rollbackCDN(relative_path)
             self.destroy(request)
         except Exception:
             traceback.print_exc()
@@ -1145,6 +1149,7 @@ class RemoteLessonOnlineInfoAPIView(
     @has_permission(must_permissions=['lms-study-lessonstandart-delete'])
     def delete(self, request, pk=None):
         result = request.send_info("INF_003")
+
         try:
             self.destroy(request)
         except Exception:
@@ -1251,7 +1256,8 @@ class RemoteLessonOnlineSubInfoAPIView(
 
                 if request.FILES.keys():
                     file = request.FILES.getlist('file')[0]
-                    relative_path, file_path, _ = create_file_in_cdn_silently(upload_to, file)
+                    relative_path, _, _ = create_file_in_cdn_silently(upload_to, file)
+                    file_path = relative_path
 
                     if not file_path:
                         return request.send_error('CDN_error', 'Файл хадгалахад алдаа гарсан байна (CDN).')
@@ -1328,6 +1334,9 @@ class RemoteLessonOnlineSubInfoAPIView(
         result = request.send_info("INF_003")
 
         try:
+            instance = self.get_object()
+            relative_path = instance.file
+            self.rollbackCDN(relative_path)
             self.destroy(request)
         except Exception:
             traceback.print_exc()
@@ -1419,7 +1428,8 @@ class RemoteLessonQuezQuestionsAPIView(
             file_path = None
 
             if request.FILES.keys():
-                relative_path, file_path, _ = create_file_in_cdn_silently(upload_to, cleaned_data['image'])
+                relative_path, _, _ = create_file_in_cdn_silently(upload_to, cleaned_data['image'])
+                file_path = relative_path
 
                 if not file_path:
                     return request.send_error('CDN_error', 'Файл хадгалахад алдаа гарсан байна (CDN).')
@@ -1497,6 +1507,9 @@ class RemoteLessonQuezQuestionsAPIView(
         result = request.send_info("INF_003")
 
         try:
+            instance = self.get_object()
+            relative_path = instance.image
+            self.rollbackCDN(relative_path)
             self.destroy(request)
         except Exception:
             traceback.print_exc()
@@ -1583,7 +1596,8 @@ class RemoteLessonQuezChoicesAPIView(
             file_path = None
 
             if request.FILES.keys():
-                relative_path, file_path, _ = create_file_in_cdn_silently(upload_to, cleaned_data['image'])
+                relative_path, _, _ = create_file_in_cdn_silently(upload_to, cleaned_data['image'])
+                file_path = relative_path
 
                 if not file_path:
                     return request.send_error('CDN_error', 'Файл хадгалахад алдаа гарсан байна (CDN).')
@@ -1660,6 +1674,9 @@ class RemoteLessonQuezChoicesAPIView(
         result = request.send_info("INF_003")
 
         try:
+            instance = self.get_object()
+            relative_path = instance.image
+            self.rollbackCDN(relative_path)
             self.destroy(request)
         except Exception:
             traceback.print_exc()
