@@ -1343,11 +1343,12 @@ class RemoteLessonQuezQuestionsAPIView(
             cleaned_data = {
                 'question': stringified_data['question'],
                 'kind': stringified_data['kind'],
-                'image': not_stringified_data['image'],
+                'image': request.FILES.get('image') if request.FILES.get('image') else stringified_data['image'],
                 'score': stringified_data['score'],
                 'rating_max_count': stringified_data['rating_max_count'],
                 'low_rating_word': stringified_data['low_rating_word'],
                 'high_rating_word': stringified_data['high_rating_word'],
+                'max_choice_count': stringified_data['max_choice_count'],
             }
 
             if request.method == 'POST':
@@ -1358,16 +1359,18 @@ class RemoteLessonQuezQuestionsAPIView(
             file_path = None
 
             if request.FILES.keys():
-                file = request.FILES.getlist('image')[0]
-                _, file_path, _ = create_file_in_cdn_silently(upload_to, file)
+                _, file_path, _ = create_file_in_cdn_silently(upload_to, cleaned_data['image'])
 
                 if not file_path:
                     return request.send_error('CDN_error', 'Файл хадгалахад алдаа гарсан байна (CDN).')
+            elif cleaned_data['image']:
+                # to save existinig URL of file or new URL if URL was used instead of file itself
+                file_path = cleaned_data['image']
 
+            # to clear field value if key exists and value is null
+            if cleaned_data['image']:
                 # to remove from dict because serializer requires file in filefield, but it is always string of CDN path or user URL
                 del cleaned_data['image']
-            else:
-                cleaned_data['image'] = None
 
             with transaction.atomic():
                 instance = None
