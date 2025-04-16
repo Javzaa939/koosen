@@ -150,7 +150,7 @@ function RemoteLesson() {
                                             {
                                                 imageOriginal
                                                 &&
-                                                <div className="rounded-2 text-center mb-1">
+                                                <div className="rounded-2 text-center mb-1" style={{ height: '200px', overflow: 'hidden' }}>
                                                     <img className="img-fluid" src={image} alt={title}
                                                         onError={({ currentTarget }) => {
                                                             currentTarget.onerror = null; // prevents looping
