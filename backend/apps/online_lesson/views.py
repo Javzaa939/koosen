@@ -890,8 +890,14 @@ class RemoteLessonAPIView(
 
                 if not file_path_in_cdn:
                     return request.send_error('CDN_error', 'Файл хадгалахад алдаа гарсан байна (CDN).')
-            else:
-                data['image'] = None
+            elif data['image']:
+                # to save existinig URL of file or new URL if URL was used instead of file itself
+                file_path_in_cdn = data['image']
+
+            # to clear field value if key exists and value is null and to keep it using removing for serializer and setting using instance.save()
+            if data['image']:
+                # to remove from dict because serializer requires file in filefield, but it is always string of CDN path or user URL
+                del data['image']
 
             with transaction.atomic():
                 elearn_instance = None
@@ -1391,7 +1397,7 @@ class RemoteLessonQuezQuestionsAPIView(
                 # to save existinig URL of file or new URL if URL was used instead of file itself
                 file_path = cleaned_data['image']
 
-            # to clear field value if key exists and value is null
+            # to clear field value if key exists and value is null and to keep it using removing for serializer and setting using instance.save()
             if cleaned_data['image']:
                 # to remove from dict because serializer requires file in filefield, but it is always string of CDN path or user URL
                 del cleaned_data['image']
@@ -1545,7 +1551,7 @@ class RemoteLessonQuezChoicesAPIView(
                 # to save existinig URL of file or new URL if URL was used instead of file itself
                 file_path = cleaned_data['image']
 
-            # to clear field value if key exists and value is null
+            # to clear field value if key exists and value is null and to keep it using removing for serializer and setting using instance.save()
             if cleaned_data['image']:
                 # to remove from dict because serializer requires file in filefield, but it is always string of CDN path or user URL
                 del cleaned_data['image']
