@@ -97,8 +97,8 @@ export default function AddEditQuezQuestions({
     }, [editData])
 
     async function onSubmit(cdata) {
-        cdata['onlineSubInfoId'] = onlineSubInfoId
         cdata = getOnlySpecifiedFields(cdata, Array.from(visibleFieldsRef.current))
+        cdata['onlineSubInfoId'] = onlineSubInfoId
         cdata = convertDefaultValue(cdata)
 
         // to clear all unspecified fields, because they will be left by default, for example after kind changing from rating to one-choice then rating fields (max rating count, etc) will be stayed as trash
@@ -254,7 +254,7 @@ export default function AddEditQuezQuestions({
                         ></Controller>
                         {errors[formFieldNames.score] && <FormFeedback className='d-block'>{t(errors[formFieldNames.score].message)}</FormFeedback>}
                     </Col>
-                    <Col className="mt-50" md={formValues[formFieldNames.kind] === KIND_RATING ? 6 : 12}>
+                    <Col className="mt-50" md={[KIND_RATING, KIND_MULTI_CHOICE].includes(formValues[formFieldNames.kind]) ? 6 : 12}>
                         <Label for={formFieldNames.image} className='d-block text-center'><span>{t('Зураг')}</span></Label>
                         <Row>
                             <Col className='d-flex justify-content-center'>
@@ -365,6 +365,36 @@ export default function AddEditQuezQuestions({
                                         }}
                                     />
                                     {errors[formFieldNames.rating_max_count] && <FormFeedback className='d-block'>{t(errors[formFieldNames.rating_max_count].message)}</FormFeedback>}
+                                </Col>
+                            </Row>
+                        </Col>
+                    }
+                    {formValues[formFieldNames.kind] === KIND_MULTI_CHOICE &&
+                        <Col>
+                            <Row>
+                                <Col md={6} className="mt-50 d-flex flex-column justify-content-between">
+                                    <Label className='form-label' for={formFieldNames.max_choice_count}>
+                                        {t('Сонголтын хязгаар')}
+                                    </Label>
+                                    <Controller
+                                        control={control}
+                                        name={formFieldNames.max_choice_count}
+                                        render={({ field }) => {
+                                            useVisibleFields(field.name, visibleFieldsRef)
+
+                                            return (
+                                                <Input
+                                                    {...field}
+                                                    type='text'
+                                                    id={field.name}
+                                                    bsSize='sm'
+                                                    placeholder={t('Сонголтын хязгаар')}
+                                                    invalid={errors[field.name] && true}
+                                                />
+                                            )
+                                        }}
+                                    />
+                                    {errors[formFieldNames.max_choice_count] && <FormFeedback className='d-block'>{t(errors[formFieldNames.max_choice_count].message)}</FormFeedback>}
                                 </Col>
                             </Row>
                         </Col>
