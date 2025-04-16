@@ -111,6 +111,7 @@ export default function QuizBlock({
 
 	const getQuezChoices = () => remoteApi.quezChoices.get({
 		onlineSubInfoId: onlineSubInfoId,
+        sort: 'id',
 	})
 
 	const { data: quezChoicesDatasOriginal, isLoading: isLoadingQuezChoices } = useApiCustom({

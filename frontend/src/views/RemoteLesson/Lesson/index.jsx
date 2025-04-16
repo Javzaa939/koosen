@@ -54,6 +54,7 @@ function Lesson() {
         page: currentPage,
         search: searchValue,
         elearnId: id,
+        sort: 'id',
     })
 
     const { data: studentsDatasOriginal, isLoading: isLoadingStudents } = useApiCustom({
@@ -73,6 +74,7 @@ function Lesson() {
 
     const getOnlineInfo = () => remoteApi.onlineInfo.get({
         elearnId: id,
+        sort: 'id',
     })
 
     const { data: onlineInfoDatas, isLoading: isLoadingOnlineInfo } = useApiCustom({
@@ -86,6 +88,7 @@ function Lesson() {
 
     const getOnlineSubInfo = () => remoteApi.onlineSubInfo.get({
         elearnId: id,
+        sort: 'id'
     })
 
     const { data: onlineSubInfoDatas, isLoading: isLoadingOnlineSubInfo } = useApiCustom({

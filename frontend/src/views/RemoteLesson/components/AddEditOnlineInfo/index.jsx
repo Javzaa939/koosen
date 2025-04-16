@@ -76,7 +76,8 @@ const AddEditOnlineInfo = ({ open, handleModal: handleModalOriginal, refreshData
         limit: recordsLimitPerPageLocal,
         page: pageLocal,
         search: searchTextLocal,
-        elearnId: elearnId
+        elearnId: elearnId,
+        sort: 'id'
     }), [])
     // #endregion
 

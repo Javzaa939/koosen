@@ -986,6 +986,14 @@ class RemoteLessonStudentsAPIView(
             if pk:
                 datas = self.retrieve(request, pk).data
                 return request.send_data(datas)
+
+            # region to sort by one or multiple fields
+            sorting = self.request.GET.get('sorting', '')
+
+            if sorting:
+                self.queryset = self.queryset.order_by(*sorting.split(','))
+            # endregion
+
             serializer = self.list(request).data
             return request.send_data(serializer)
         except Exception:
@@ -1091,6 +1099,14 @@ class RemoteLessonOnlineInfoAPIView(
             if pk:
                 datas = self.retrieve(request, pk).data
                 return request.send_data(datas)
+
+            # region to sort by one or multiple fields
+            sorting = self.request.GET.get('sorting', '')
+
+            if sorting:
+                self.queryset = self.queryset.order_by(*sorting.split(','))
+            # endregion
+
             serializer = self.list(request).data
             return request.send_data(serializer)
         except Exception:
@@ -1254,6 +1270,14 @@ class RemoteLessonOnlineSubInfoAPIView(
             if pk:
                 datas = self.retrieve(request, pk).data
                 return request.send_data(datas)
+
+            # region to sort by one or multiple fields
+            sorting = self.request.GET.get('sorting', '')
+
+            if sorting:
+                self.queryset = self.queryset.order_by(*sorting.split(','))
+            # endregion
+
             serializer = self.list(request).data
             return request.send_data(serializer)
         except Exception:
