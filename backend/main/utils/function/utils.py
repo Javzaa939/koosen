@@ -1704,39 +1704,6 @@ def create_file_in_cdn_silently(relative_path, file):
     return cdn_relative_path, cdn_full_path, failure
 
 
-def delete_file_from_cdn_silently(file_path):
-    """
-    ver. 20241205
-    Supports:
-    - full path returning
-    - exceptions handling
-
-    :param relative_path: path without schema, domain and other static parts
-    :param file: file like type object
-
-    returns: tuple of:
-    1. string: relative path - standart return from create_file_to_cdn()['full_path'] method
-    2. string: full path
-    3. string: failure message
-    """
-
-    cdn_response = None
-    error = None
-
-    try:
-        cdn_response = remove_file_from_cdn(file_path)
-
-    except Exception as e:
-        error = e.__str__()
-
-    failure = None
-
-    if not cdn_response:
-        failure = (f'File: {file_path}. Delete error: {error}. CDN response: {cdn_response}')
-
-    return False if failure else True, failure
-
-
 def undefined_to_none(datas=[]):
     """ str undefined утгыг None руу хөрвүүлэх """
     for idx, value in enumerate(datas):
