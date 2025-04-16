@@ -52,6 +52,20 @@ export default function AddEditQuezChoices({
 
     const formValues = watch()
     const { fetchData, isLoading, Loader } = useLoader({ isFullScreen: true });
+    const { Loader: LoaderNotFullScreen } = useLoader({});
+
+    const LoaderNotFullScreenAdaptive =
+        <>
+            <style>
+                {`
+                    .overrided-loader-style .background-glassmd {
+                        height: unset;
+                    }
+                `}
+            </style>
+            <div className='overrided-loader-style'>{LoaderNotFullScreen}</div>
+        </>
+
     const remoteApi = useApi().remote
 
     useEffect(() => {
@@ -98,14 +112,19 @@ export default function AddEditQuezChoices({
     // #region to save file
     // to get path from duplicated image field, because CDN path in django's filefield became changed
     const [image_old, setImageOld] = useState(formValues?.image_path)
+    const [isLoadingImage, setIsLoadingImage] = useState(false)
 
     useEffect(() => {
-        if (formValues?.image_path && !image_old) setImageOld(formValues?.image_path)
+        if (formValues?.image_path && !image_old) {
+            setImageOld(formValues?.image_path)
+            setIsLoadingImage(true)
+        }
     }, [formValues?.image_path])
 
     const handleDeleteImage = () => {
         setImageOld('')
         setValue(formFieldNames.image, '')
+        setIsLoadingImage(false)
     }
 
     const clickLogoImage = () => {
@@ -188,8 +207,12 @@ export default function AddEditQuezChoices({
                                     <div className='d-flex justify-content-end'>
                                         <X size={15} color='red' onClick={() => { handleDeleteImage(image_old) }}></X>
                                     </div>
-                                    <div className="orgLogoDiv image-responsive">
-                                        <img className="image-responsive w-100" src={image_old ? image_old : empty} onClick={() => { clickLogoImage() }} />
+                                    <div className="orgLogoDiv image-responsive position-relative">
+                                        {isLoadingImage && LoaderNotFullScreenAdaptive}
+                                        <img className="image-responsive w-100" src={image_old ? image_old : empty} onClick={() => { clickLogoImage() }}
+                                            onLoad={() => setIsLoadingImage(false)}
+                                            onError={() => setIsLoadingImage(false)}
+                                        />
                                         <Controller
                                             control={control}
                                             name={formFieldNames.image}
