@@ -858,7 +858,7 @@ class RemoteLessonAPIView(
     # endregion
 
     # region custom methods
-    def rollbackCDN(relative_path):
+    def rollbackCDN(self, relative_path):
         if relative_path:
             cdn_rollback_result = remove_file_from_cdn(relative_path)
 
@@ -1201,7 +1201,7 @@ class RemoteLessonOnlineSubInfoAPIView(
     # endregion
 
     # region custom methods
-    def rollbackCDN(relative_path):
+    def rollbackCDN(self, relative_path):
         if relative_path:
             cdn_rollback_result = remove_file_from_cdn(relative_path)
 
@@ -1387,7 +1387,7 @@ class RemoteLessonQuezQuestionsAPIView(
     # endregion
 
     # region custom methods
-    def rollbackCDN(relative_path):
+    def rollbackCDN(self, relative_path):
         if relative_path:
             cdn_rollback_result = remove_file_from_cdn(relative_path)
 
@@ -1560,7 +1560,7 @@ class RemoteLessonQuezChoicesAPIView(
     # endregion
 
     # region custom methods
-    def rollbackCDN(relative_path):
+    def rollbackCDN(self, relative_path):
         if relative_path:
             cdn_rollback_result = remove_file_from_cdn(relative_path)
 
