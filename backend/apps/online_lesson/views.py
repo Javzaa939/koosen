@@ -1175,7 +1175,7 @@ class RemoteLessonOnlineSubInfoAPIView(
             not_stringified_data = convert_stringified_querydict_to_dict(request.data,['file'])
             stringified_data = not_stringified_data.pop('json_data')
 
-            # region to collect only necessary fields
+            # region to collect only fields that are necessary for serializer
             cleaned_data = {
                 'title': stringified_data['title'],
                 'parent_title': stringified_data['parent_title'],
@@ -1345,6 +1345,9 @@ class RemoteLessonQuezQuestionsAPIView(
                 'kind': stringified_data['kind'],
                 'image': not_stringified_data['image'],
                 'score': stringified_data['score'],
+                'rating_max_count': stringified_data['rating_max_count'],
+                'low_rating_word': stringified_data['low_rating_word'],
+                'high_rating_word': stringified_data['high_rating_word'],
             }
 
             if request.method == 'POST':
@@ -1374,6 +1377,7 @@ class RemoteLessonQuezQuestionsAPIView(
                     online_sub_info_instance = OnlineSubInfo.objects.get(id=stringified_data['onlineSubInfoId'])
                     online_sub_info_instance.quiz.add(instance)
                 elif request.method == 'PUT':
+                    # to skip if "no key" and override if "key exists, so if it is null then it will be cleared". That is reason why partal=True is used
                     instance = self.update(cleaned_data, partial=True).instance
 
                 if file_path:

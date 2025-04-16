@@ -28,3 +28,18 @@ export const KIND_JISHIH_CHOICE = 7
 export const KIND_ESTIMATE_CHOICE = 8
 export const KIND_PROJECT_CHOICE = 9
 export const KIND_TOVCH_CHOICE = 10
+
+export function nullifyLackFields(dictData, fields) {
+	fields.forEach(field => {
+		if (!Object.prototype.hasOwnProperty.call(dictData, field))
+			dictData[field] = null
+	})
+
+	return dictData
+}
+
+export function getOnlySpecifiedFields(allFieldsDict, gettingFieldNames) {
+	return Object.fromEntries(
+		Object.entries(allFieldsDict).filter(([key]) => gettingFieldNames.includes(key))
+	)
+}

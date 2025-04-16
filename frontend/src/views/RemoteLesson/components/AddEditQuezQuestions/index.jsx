@@ -1,6 +1,6 @@
 import { t } from 'i18next';
-import { Fragment, useEffect, useState } from 'react';
-import { useForm, Controller, useWatch } from "react-hook-form";
+import { useEffect, useRef, useState } from 'react';
+import { useForm, Controller } from "react-hook-form";
 import '@styles/react/libs/flatpickr/flatpickr.scss';
 import classNames from 'classnames';
 import Select from 'react-select'
@@ -21,13 +21,12 @@ import {
 
 import { ReactSelectStyles } from '@src/utility/Utils';
 import empty from "@src/assets/images/empty-image.jpg";
-import { KIND_BOOLEAN, KIND_ESTIMATE_CHOICE, KIND_JISHIH_CHOICE, KIND_MULTI_CHOICE, KIND_ONE_CHOICE, KIND_PROJECT_CHOICE, KIND_RATING, KIND_SHORT_CHOICE, KIND_TEXT, KIND_TOVCH_CHOICE, onChangeFile } from '@src/views/RemoteLesson/utils';
+import { nullifyLackFields, getOnlySpecifiedFields, KIND_BOOLEAN, KIND_ESTIMATE_CHOICE, KIND_JISHIH_CHOICE, KIND_MULTI_CHOICE, KIND_ONE_CHOICE, KIND_PROJECT_CHOICE, KIND_RATING, KIND_SHORT_CHOICE, KIND_TEXT, KIND_TOVCH_CHOICE, onChangeFile } from '@src/views/RemoteLesson/utils';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import { convertDefaultValue } from "@utils";
 
-import Editor from '../Editor';
-import InputFile from '../InputFile';
+import { useVisibleFields } from '../../hooks/useVisibleFields';
 
 const formFieldNames = {
     kind: 'kind',
@@ -61,6 +60,8 @@ export default function AddEditQuezQuestions({
     onlineSubInfoId,
     editData,
 }) {
+    const visibleFieldsRef = useRef(new Set())
+
     const { control, handleSubmit, setError, setValue, reset, formState: { errors }, watch } = useForm({
         defaultValues: {
             ...Object.keys(formFieldNames).reduce((acc, current) => {
@@ -97,7 +98,13 @@ export default function AddEditQuezQuestions({
 
     async function onSubmit(cdata) {
         cdata['onlineSubInfoId'] = onlineSubInfoId
+        cdata = getOnlySpecifiedFields(cdata, Array.from(visibleFieldsRef.current))
         cdata = convertDefaultValue(cdata)
+
+        // to clear all unspecified fields, because they will be left by default, for example after kind changing from rating to one-choice then rating fields (max rating count, etc) will be stayed as trash
+        const allFormNames = Object.keys(formFieldNames).map(key => formFieldNames[key])
+        cdata = nullifyLackFields(cdata, allFormNames)
+
         const formData = new FormData()
         formData.append('json_data', JSON.stringify(cdata))
         formData.append('image', cdata['image']?.[0] ?? '')
@@ -172,16 +179,20 @@ export default function AddEditQuezQuestions({
                         <Controller
                             control={control}
                             name={formFieldNames.question}
-                            render={({ field }) => (
-                                <Input
-                                    {...field}
-                                    type='text'
-                                    id={field.name}
-                                    bsSize='sm'
-                                    placeholder={t('Асуулт')}
-                                    invalid={errors[field.name] && true}
-                                />
-                            )}
+                            render={({ field }) => {
+                                useVisibleFields(field.name, visibleFieldsRef)
+
+                                return (
+                                    <Input
+                                        {...field}
+                                        type='text'
+                                        id={field.name}
+                                        bsSize='sm'
+                                        placeholder={t('Асуулт')}
+                                        invalid={errors[field.name] && true}
+                                    />
+                                )
+                            }}
                         />
                         {errors[formFieldNames.question] && <FormFeedback className='d-block'>{t(errors[formFieldNames.question].message)}</FormFeedback>}
                     </Col>
@@ -193,6 +204,8 @@ export default function AddEditQuezQuestions({
                             control={control}
                             name={formFieldNames.kind}
                             render={({ field }) => {
+                                useVisibleFields(field.name, visibleFieldsRef)
+
                                 return (
                                     <Select
                                         name={field.name}
@@ -225,6 +238,8 @@ export default function AddEditQuezQuestions({
                             control={control}
                             name={formFieldNames.score}
                             render={({ field }) => {
+                                useVisibleFields(field.name, visibleFieldsRef)
+
                                 return (
                                     <Input
                                         {...field}
@@ -239,7 +254,7 @@ export default function AddEditQuezQuestions({
                         ></Controller>
                         {errors[formFieldNames.score] && <FormFeedback className='d-block'>{t(errors[formFieldNames.score].message)}</FormFeedback>}
                     </Col>
-                    <Col md={12} className="mt-50">
+                    <Col className="mt-50" md={formValues[formFieldNames.kind] === KIND_RATING ? 6 : 12}>
                         <Label for={formFieldNames.image} className='d-block text-center'><span>{t('Зураг')}</span></Label>
                         <Row>
                             <Col className='d-flex justify-content-center'>
@@ -252,26 +267,108 @@ export default function AddEditQuezQuestions({
                                         <Controller
                                             control={control}
                                             name={formFieldNames.image}
-                                            render={({ field }) => (
-                                                <input
-                                                    accept="image/*"
-                                                    type="file"
-                                                    id={field.name}
-                                                    name={field.name}
-                                                    className="form-control d-none image-responsive"
-                                                    onChange={(e) => {
-                                                        field.onChange(e.target.files)
-                                                        onChangeFile(e, setImageOld)
-                                                    }
-                                                    }
-                                                />
-                                            )}
+                                            render={({ field }) => {
+                                                useVisibleFields(field.name, visibleFieldsRef)
+
+                                                return (
+                                                    <input
+                                                        accept="image/*"
+                                                        type="file"
+                                                        id={field.name}
+                                                        name={field.name}
+                                                        className="form-control d-none image-responsive"
+                                                        onChange={(e) => {
+                                                            field.onChange(e.target.files)
+                                                            onChangeFile(e, setImageOld)
+                                                        }
+                                                        }
+                                                    />
+                                                )
+                                            }}
                                         />
                                     </div>
                                 </div>
                             </Col>
                         </Row>
                     </Col>
+                    {formValues[formFieldNames.kind] === KIND_RATING &&
+                        <Col>
+                            <Row>
+                                <Col md={6} className="mt-50 d-flex flex-column justify-content-between">
+                                    <Label className='form-label' for={formFieldNames.high_rating_word}>
+                                        {t('Дээд үнэлгээг илэрхийлэх үг')}
+                                    </Label>
+                                    <Controller
+                                        control={control}
+                                        name={formFieldNames.high_rating_word}
+                                        render={({ field }) => {
+                                            useVisibleFields(field.name, visibleFieldsRef)
+
+                                            return (
+                                                <Input
+                                                    {...field}
+                                                    type='text'
+                                                    id={field.name}
+                                                    bsSize='sm'
+                                                    placeholder={t('Дээд үнэлгээг илэрхийлэх үг')}
+                                                    invalid={errors[field.name] && true}
+                                                />
+                                            )
+                                        }}
+                                    />
+                                    {errors[formFieldNames.high_rating_word] && <FormFeedback className='d-block'>{t(errors[formFieldNames.high_rating_word].message)}</FormFeedback>}
+                                </Col>
+                                <Col md={6} className="mt-50 d-flex flex-column justify-content-between">
+                                    <Label className='form-label' for={formFieldNames.low_rating_word}>
+                                        {t('Доод үнэлгээг илэрхийлэх үг')}
+                                    </Label>
+                                    <Controller
+                                        control={control}
+                                        name={formFieldNames.low_rating_word}
+                                        render={({ field }) => {
+                                            useVisibleFields(field.name, visibleFieldsRef)
+
+                                            return (
+                                                <Input
+                                                    {...field}
+                                                    type='text'
+                                                    id={field.name}
+                                                    bsSize='sm'
+                                                    placeholder={t('Доод үнэлгээг илэрхийлэх үг')}
+                                                    invalid={errors[field.name] && true}
+                                                />
+                                            )
+                                        }}
+                                    />
+                                    {errors[formFieldNames.low_rating_word] && <FormFeedback className='d-block'>{t(errors[formFieldNames.low_rating_word].message)}</FormFeedback>}
+                                </Col>
+                                <Col md={6} className="mt-50 d-flex flex-column justify-content-between">
+                                    <Label className='form-label' for={formFieldNames.rating_max_count}>
+                                        {t('Үнэлгээний дээд тоо')}
+                                    </Label>
+                                    <Controller
+                                        control={control}
+                                        name={formFieldNames.rating_max_count}
+                                        render={({ field }) => {
+                                            useVisibleFields(field.name, visibleFieldsRef)
+
+                                            return (
+                                                <Input
+                                                    {...field}
+                                                    type='number'
+                                                    id={field.name}
+                                                    bsSize='sm'
+                                                    placeholder={t('Үнэлгээний дээд тоо')}
+                                                    invalid={errors[field.name] && true}
+                                                />
+                                            )
+                                        }}
+                                    />
+                                    {errors[formFieldNames.rating_max_count] && <FormFeedback className='d-block'>{t(errors[formFieldNames.rating_max_count].message)}</FormFeedback>}
+                                </Col>
+                            </Row>
+                        </Col>
+                    }
                     <Col md={12} className="text-center mt-2">
                         <Button className='me-2' color="primary" type="submit">
                             {t('Хадгалах')}
