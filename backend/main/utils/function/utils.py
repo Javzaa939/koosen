@@ -1765,26 +1765,6 @@ def pearson_corel(x, y):
     ]
 
 
-def save_file_to_cdn_and_remove_from_dict(request, dict_where_to_remove, field_names_to_remove, dir_name, request_file_field_name, request_file_index, field_name_to_add):
-    # to save file in CDN and remove from dict (e.g. from request.data)
-    file = request.FILES.getlist(request_file_field_name)
-    file_path_in_cdn = None
-
-    if file:
-        file = file[request_file_index]
-        _, full_path, error = create_file_in_cdn_silently(dir_name, file)
-
-        if error:
-            dict_where_to_remove[field_name_to_add] = file
-            return None, error
-        else:
-            for field_name_to_remove in field_names_to_remove:
-                del dict_where_to_remove[field_name_to_remove]
-            file_path_in_cdn = full_path
-
-    return file_path_in_cdn, None
-
-
 def convert_stringified_querydict_to_dict(post_data,keep_list=[],is_keep_only_not_singles=True):
     """
         to get "POST" data in "json-parsed" types and keep all list items of QueryDict/formData for their specified keys in 2nd argument (keep_list)
