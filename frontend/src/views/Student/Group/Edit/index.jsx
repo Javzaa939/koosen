@@ -178,7 +178,7 @@ const EditModal = ({ open, handleModal, group_id, refreshDatas }) => {
             }
         })
         cdata['is_finish'] = is_finish
-        cdata['finish_students'] = add_students
+        cdata['finish_students'] = selected_students
         const { success, error } = await fetchData(groupApi.put(cdata, group_id))
         if(success) {
             reset()

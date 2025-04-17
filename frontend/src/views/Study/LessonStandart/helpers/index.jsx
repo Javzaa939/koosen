@@ -1,5 +1,3 @@
-import {useContext } from 'react'
-import css from '@mstyle/style.module.css'
 import { Badge,UncontrolledTooltip } from 'reactstrap';
 
 import { t } from 'i18next';
@@ -8,12 +6,8 @@ import { X, Edit, Edit2 } from 'react-feather'
 
 import useModal from '@hooks/useModal'
 
-import SchoolContext from '@context/SchoolContext'
-
 // Хүснэгтийн баганууд
 export function getColumns (currentPage, rowsPerPage, total_count, editModal, handleDelete, user, handleScoreEdit) {
-
-	const { school_id } = useContext(SchoolContext)
 
 	const { showWarning } = useModal()
 
@@ -33,20 +27,19 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 		},
 		{
 			header: 'code',
-			name: `${t('Хичээлийн код')}`,
-            cell: (row) => (row?.code ),
-			minWidth: "80px",
+			name: `${t('Индекс')}`,
+            cell: (row) => row?.code,
 			sortable: true,
+			minWidth: "150px",
 			center: true
 		},
 		{
 			header: 'name',
-			name: `${t('Хичээлийн нэр')}`,
+			name: `${t('Нэр')}`,
 			selector: (row) => <span title={row?.name}>{row?.name}</span>,
-
             sortable: true,
-			minWidth: "100px",
-			left: true,
+			minWidth: "300px",
+			center: true,
 			wrap: true
 		},
 		{
@@ -54,23 +47,41 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			name: `${t('Багц цаг')}`,
 			selector: (row) => row?.ckredit,
             sortable: true,
-			minWidth: "250px",
-			maxWidth: "50px",
+			maxWidth: "150px",
 			center: true
+        },
+		{
+			name: `${t('Холбоотой хөтөлбөр')}`,
+			selector: (row) => <span title={row?.professions}>{row?.professions}</span>,
+			minWidth: "230px",
+			width: "400px",
+			wrap: true
+        },
+		{
+			name: `${t('Дүнтэй эсэх')}`,
+			selector: (row) => (
+				<div>
+					<Badge color={row?.is_score ? 'success' : 'primary'}>{row?.is_score ? 'Байгаа' : 'Байхгүй'}</Badge>
+				</div>
+			),
+            left: true,
+			minWidth: "150px",
         },
 		{
 			header: 'department__name',
 			name: `${t('Тэнхим')}`,
-			selector: (row) => row?.department?.name,
+			selector: (row) => <span title={row?.department?.name}>{row?.department?.name}</span>,
             sortable: true,
-			minWidth: "80px",
-			center: true
+            center: true,
+			minWidth: "180px",
+			wrap: true,
         },
 		{
-			header: '',
 			name: `${t('Заах багш')}`,
-			selector: (row) => row?.teachers?.teacher_name,
-            center: true
+			selector: (row) => <span title={row?.teachers?.teacher_name}>{row?.teachers?.teacher_name}</span>,
+            center: true,
+			minWidth: "250px",
+			wrap: true,
         },
 	]
 

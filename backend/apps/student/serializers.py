@@ -441,25 +441,17 @@ class StudentGroupRegisterSerailizer(serializers.ModelSerializer):
         model = Group
         fields = "__all__"
 
-    def validate(self,data):
-        name = data.get('name')
-
-        # Нэг анги дээр суралцаж буй төлөвтэй анги байвал шинээр үүсгэхгүй
-        if Group.objects.filter(name=name, is_finish = False).exists():
-            raise ValidationError(f"'{name}'- анги бүртгэгдсэн байна")
-
-        return data
-
 
 class StudentGroupRegisterListSerailizer(serializers.ModelSerializer):
 
-    name =  serializers.SerializerMethodField()
     profession = ProfessionDefinitionSerializer(many=False)
     learning_status = LearningListSerializer(many=False)
     degree = ProfessionalDegreeListSerializer(many=False)
     teacher = TeacherListSerializer(many=False)
     department = DepartmentRegisterSerailizer(many=False)
     students = serializers.SerializerMethodField()
+    year = serializers.SerializerMethodField()
+
     class Meta:
         model = Group
         fields = "__all__"
@@ -469,14 +461,10 @@ class StudentGroupRegisterListSerailizer(serializers.ModelSerializer):
 
         return list(all_data)
 
-    def get_name(self,obj):
-        name = obj.name
+    def get_year(self,obj):
         year = obj.join_year
 
-        #элссэн он дамжааны нэрийг нийлүүлсэн
-        return_name = name + ' ('+ year[0:4] + ')'
-
-        return return_name
+        return  year[0:4]
 # --------------------------------------- Оюутны гэр бүлийн байдал ----------------------------------------------
 
 class StudentFamilySerializer(serializers.ModelSerializer):

@@ -240,6 +240,11 @@ export default function Attachment()
         []
     )
 
+    // ** Function to handle per page
+    function handlePerPage(e) {
+        setRowsPerPage(parseInt(e.target.value))
+    }
+
     const handleRowClicked = row => {
         navigate('/student/attachment/attachment-student/', { state: row?.student?.id })
     };

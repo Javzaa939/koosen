@@ -1,28 +1,16 @@
-import {useContext } from 'react'
-
-import css from '@mstyle/style.module.css'
-
 import { X, Edit, BookOpen, Copy } from 'react-feather'
 
 import { Button,Badge, UncontrolledTooltip } from 'reactstrap'
-
-import { useNavigate } from "react-router-dom"
 
 import { useTranslation } from 'react-i18next'
 
 import useModal from '@hooks/useModal'
 
-import SchoolContext from "@context/SchoolContext"
-
 // Хүснэгтийн баганууд
 export function getColumns (currentPage, rowsPerPage, total_count, editModal, handleDelete, planhandleModal, user, copyModalHandler) {
 
-	const { school_id } = useContext(SchoolContext)
-
 	const { t } = useTranslation()
 	const { showWarning } = useModal()
-
-	const navigate = useNavigate()
 
 	const page_count = Math.ceil(total_count / rowsPerPage)
 
@@ -39,16 +27,28 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			center: true
 		},
 		{
-			header: 'name',
-			name: `${t('Хөтөлбөр')}`,
-			selector: (row) => row?.code + ' ' + row?.name + "(" + row?.duration + ')',
+			header: 'code',
+			name: `${t('Индекс')}`,
+			selector: (row) => row?.code,
             sortable: true,
-			minWidth: "350px",
-			maxWidth: "250px",
+			left: true,
+		},
+		{
+			header: 'name',
+			name: `${t('Хөтөлбөр нэр')}`,
+			selector: (row) => row?.name,
+            sortable: true,
+			minWidth: "250px",
 			left: true,
 			wrap: true,
-			center: true,
 		},
+		{
+			header: 'duration',
+			name: `${t('Хугацаа')}`,
+			selector: (row) => row?.duration,
+            sortable: true,
+			center: true,
+        },
 		{
 			header: 'degree',
 			name: `${t('Боловсролын зэрэг')}`,
@@ -59,24 +59,6 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			center: true,
         },
 		{
-			header: 'general_direct',
-			name: `${t('Хөтөлбөрийн ерөнхий чиглэл')}`,
-			selector: (row) => row?.gen_direct_type_name,
-            sortable: true,
-			minWidth: "250px",
-			maxWidth: "200px",
-			center: true,
-        },
-		{
-			header: 'dep_name',
-			name: `${t('Хөтөлбөрийн төрөлжсөн чиглэл')}`,
-			selector: (row) => <span title={row?.dep_name}>{row?.dep_name}</span>,
-			sortable: true,
-			minWidth: "200px",
-			maxWidth: "150px",
-			left: true,
-		},
-        {
 			header: 'confirm_year',
 			name: `${t('Батлагдсан он')}`,
 			selector: (row) => row?.confirm_year,
@@ -84,6 +66,24 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			maxWidth: "150px",
 			sortable: true,
 			center: true
+		},
+		{
+			header: 'volume_kr',
+			name: `${t('Нийт багц цаг')}`,
+			selector: (row) => row?.volume_kr,
+			minWidth: "200px",
+			maxWidth: "150px",
+			sortable: true,
+			center: true
+		},
+		{
+			header: 'dep_name',
+			name: `${t('Төрөлжсөн чиглэл')}`,
+			selector: (row) => <span title={row?.dep_name}>{row?.dep_name}</span>,
+			sortable: true,
+			minWidth: "200px",
+			maxWidth: "150px",
+			left: true,
 		},
 		{
 			header: 'groups',
@@ -105,7 +105,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			selector: (row) => (
 				<div style={{ width: "auto" }}>
 					{
-						user.permissions.includes('lms-study-learningplan-update')&& school_id&&
+						user.permissions.includes('lms-study-learningplan-update') &&
 						<>
 							<a role="button" onClick={(e) => { copyModalHandler(e, row)} }
 								id={`complaintCopyDatatablePlan${row?.id}`}
@@ -118,7 +118,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 
 					}
 					{
-						user.permissions.includes('lms-study-learningplan-read')&& school_id&&
+						user.permissions.includes('lms-study-learningplan-read') &&
 						<>
 							<a role="button" onClick={() => { planhandleModal(row.id)} }
 								id={`complaintListDatatablePlan${row?.id}`}
@@ -131,7 +131,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 
 					}
 					{
-						user.permissions.includes('lms-study-profession-update')&&
+						user.permissions.includes('lms-study-profession-update') &&
 						<>
 							<a role="button" onClick={() => { editModal(row.id)} }
 								id={`complaintListDatatableEdit${row?.id}`}
@@ -144,7 +144,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 						</>
 					}
 					{
-						user.permissions.includes('lms-study-profession-delete')&& school_id&&
+						user.permissions.includes('lms-study-profession-delete') &&
 						<>
 							<a role="button"
 								onClick={() => showWarning({
