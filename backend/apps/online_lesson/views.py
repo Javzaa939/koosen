@@ -1641,6 +1641,7 @@ class RemoteLessonQuezChoicesAPIView(
         try:
             online_sub_info_id = request.query_params.get('onlineSubInfoId')
             self.queryset = self.queryset.filter(quezquestions__onlinesubinfo__id=online_sub_info_id)
+            self.queryset = self.queryset.annotate(quez_question_id=F('quezquestions__id'))
 
             # region to sort by one or multiple fields
             sorting = self.request.GET.get('sorting', '')
