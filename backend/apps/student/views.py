@@ -199,7 +199,7 @@ class GroupAPIView(
 ):
     """" Анги """
 
-    queryset = Group.objects.all().order_by('level','join_year')
+    queryset = Group.objects.all().order_by('-updated_at', 'is_finish')
     serializer_class = StudentGroupRegisterSerailizer
 
     pagination_class = CustomPagination
@@ -3903,8 +3903,6 @@ class SignatureGroupAPIView(
                     datas['student_id'] = student.get('id')
                     graduate_obj, created = GraduationWork.objects.update_or_create(
                         student_id = student.get('id'),
-                        lesson_year = lesson_year,
-                        lesson_season_id = lesson_season,
                         defaults={
                             **datas
                         }

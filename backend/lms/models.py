@@ -574,6 +574,7 @@ class Group(models.Model):
     department = models.ForeignKey(Salbars, on_delete=models.SET_NULL, null=True, verbose_name="Хөтөлбөрийн баг")
     school = models.ForeignKey(SubOrgs, on_delete=models.SET_NULL, null=True, verbose_name="Сургууль")
     is_finish = models.BooleanField(default=False, verbose_name="Төгссөн эсэх")
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         unique_together = ('profession', 'degree', 'learning_status', 'join_year','name')

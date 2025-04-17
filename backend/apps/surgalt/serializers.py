@@ -1,11 +1,11 @@
 import os
 import math
 import json
-import traceback
 
 from rest_framework import serializers
 
-from django.db.models import Q, F, Count
+from django.db.models import Q, F, Count, Value, CharField
+from django.db.models.functions import Concat
 
 from django.conf import settings
 
@@ -131,11 +131,24 @@ class LessonStandartListSerializer(serializers.ModelSerializer):
     category = LessonCategorySerializer(many=False)
     department = DepartmentRegisterSerailizer(many=False)
     teachers = serializers.SerializerMethodField()
+    professions = serializers.SerializerMethodField()
+    is_score = serializers.SerializerMethodField()
     ckredit = serializers.SerializerMethodField()
 
     class Meta:
         model = LessonStandart
-        fields = "code", 'name', 'department', 'category', 'teachers', 'id', 'ckredit'
+        fields = "code", 'name', 'department', 'category', 'teachers', 'id', 'ckredit', 'professions', 'is_score'
+
+    def get_is_score(self, obj):
+        """ Тухайн хичээл дүнтэй эсэх"""
+        return ScoreRegister.objects.filter(lesson=obj).exists()
+
+    def get_professions(self, obj):
+        # Хөтөлбөрийн жагсаалт
+        check = list(LearningPlan.objects.filter(lesson=obj).annotate(prof_name=Concat("profession__code", Value(" "), "profession__name", output_field=CharField())).order_by('profession__code').values_list('prof_name', flat=True).distinct())
+
+        profession_names = ','.join(check)
+        return profession_names
 
     def get_ckredit(self, obj):
         kredit = 0.0 if math.isnan(obj.kredit) else obj.kredit
