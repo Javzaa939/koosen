@@ -2,7 +2,7 @@ import { Badge, Card, CardBody } from 'reactstrap';
 import '../../style.scss';
 import DisplayQuill from '../DisplayQuill';
 import { PDF, QUIZ, TEXT, VIDEO } from '../../utils';
-import Quiz from '../QuizBlock';
+import QuizBlock from '../QuizBlock';
 
 export default function OnlineSubInfoDetailsBlock({
 	t,
@@ -45,7 +45,7 @@ export default function OnlineSubInfoDetailsBlock({
 										<iframe src={file_path} width="100%" height="640" allowFullScreen frameBorder="0" style={{ border: 'none' }}></iframe>
 										:
 										file_type === QUIZ ?
-											<Quiz
+											<QuizBlock
 												onlineSubInfoData={onlineSubInfoData}
 												t={t}
 											/>
