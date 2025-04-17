@@ -7,7 +7,6 @@ import {
 	AccordionHeader,
 	AccordionItem,
 	Badge,
-	Button,
 	Card,
 	CardBody,
 	CardHeader,
@@ -17,17 +16,14 @@ import {
 	UncontrolledTooltip
 } from "reactstrap";
 
-import AddEditOnlineInfo from "../AddEditOnlineInfo";
-import '../../style.scss'
-import OnlineSubInfoBlock from "../OnlineSubInfoBlock";
-import AddEditOnlineSubInfo from "../AddEditOnlineSubInfo";
-import useModal from "@src/utility/hooks/useModal";
 import useApi from "@src/utility/hooks/useApi";
 import useLoader from "@src/utility/hooks/useLoader";
-import AddEditQuezQuestions from "../AddEditQuezQuestions";
+import useModal from "@src/utility/hooks/useModal";
 import useApiCustom from "../../hooks/useApiCustom";
+import '../../style.scss';
 import { KIND_MULTI_CHOICE, KIND_ONE_CHOICE, KIND_RATING } from "../../utils";
 import AddEditQuezChoices from "../AddEditQuezChoices";
+import AddEditQuezQuestions from "../AddEditQuezQuestions";
 import QuezChoicesBlock from "../QuezChoicesBlock";
 
 export default function QuizBlock({

@@ -1,7 +1,6 @@
 import { Badge, Card, CardBody } from 'reactstrap';
 import '../../style.scss';
 import DisplayQuill from '../DisplayQuill';
-import { Bookmark, Share } from 'react-feather';
 import { PDF, QUIZ, TEXT, VIDEO } from '../../utils';
 import Quiz from '../QuizBlock';
 
