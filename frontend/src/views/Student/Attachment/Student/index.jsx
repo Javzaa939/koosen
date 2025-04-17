@@ -380,7 +380,7 @@ export default function AttachmentStudent()
                             {
                                 datas?.calculated_length
                                 ?
-                                    <p><code className='text-dark'><span className='fw-bolder'>{datas?.calculated_length}</span> хичээл дээр нэмэх нь 3 гарчиг нийт <span className='fw-bolder'>({datas?.calculated_length + 3}) мөр</span></code></p>
+                                    <p><code className='text-dark'><span className='fw-bolder'>{datas?.calculated_length}</span> хичээл дээр нэмэх нь 4 гарчиг нийт <span className='fw-bolder'>({datas?.calculated_length + 4}) мөр</span></code></p>
                                 :
                                     null
                             }
