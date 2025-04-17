@@ -21,7 +21,7 @@ import useLoader from "@src/utility/hooks/useLoader";
 import useModal from "@src/utility/hooks/useModal";
 import useApiCustom from "../../hooks/useApiCustom";
 import '../../style.scss';
-import { KIND_MULTI_CHOICE, KIND_ONE_CHOICE, KIND_RATING } from "../../utils";
+import { KIND_MULTI_CHOICE, KIND_ONE_CHOICE } from "../../utils";
 import AddEditQuezChoices from "../AddEditQuezChoices";
 import AddEditQuezQuestions from "../AddEditQuezQuestions";
 import QuezChoicesBlock from "../QuezChoicesBlock";
@@ -170,7 +170,7 @@ export default function QuizBlock({
 											<Col>
 												<span className="d-flex flex-column">
 													<span className="h5 mb-0">{question}</span>
-													<span className="text-body fw-normal">{kind_name}{[KIND_ONE_CHOICE, KIND_MULTI_CHOICE, KIND_RATING].includes(kind) && <> | {quezChoicesFiltered.length} {t('хариултууд')}</>}</span>
+													<span className="text-body fw-normal">{kind_name}{[KIND_ONE_CHOICE, KIND_MULTI_CHOICE].includes(kind) && <> | {quezChoicesFiltered.length} {t('хариултууд')}</>}</span>
 												</span>
 											</Col>
 											<Col md={2} className="d-flex justify-content-end align-items-center">
@@ -206,7 +206,7 @@ export default function QuizBlock({
 													</a>
 													<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${id}`} >{t('Устгах')}</UncontrolledTooltip>
 												</div>
-												{[KIND_ONE_CHOICE, KIND_MULTI_CHOICE, KIND_RATING].includes(kind) && <div>
+												{[KIND_ONE_CHOICE, KIND_MULTI_CHOICE].includes(kind) && <div>
 													<a
 														role="button"
 														onClick={(e) => { toggleAddEditQuezChoices(null, id); e.stopPropagation(); }}
