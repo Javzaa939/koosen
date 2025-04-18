@@ -27,6 +27,7 @@ import useLoader from '@hooks/useLoader';
 import { convertDefaultValue } from "@utils";
 
 import { useVisibleFields } from '../../hooks/useVisibleFields';
+import KindBooleanBlock from '../KindBooleanBlock';
 
 const formFieldNames = {
     kind: 'kind',
@@ -148,6 +149,8 @@ export default function AddEditQuezQuestions({
     }
     // #endregion
 
+    useVisibleFields(formFieldNames.yes_or_no, visibleFieldsRef)
+
     return (
         <Modal
             isOpen={open}
@@ -254,7 +257,7 @@ export default function AddEditQuezQuestions({
                         ></Controller>
                         {errors[formFieldNames.score] && <FormFeedback className='d-block'>{t(errors[formFieldNames.score].message)}</FormFeedback>}
                     </Col>
-                    <Col className="mt-50" md={[KIND_RATING, KIND_MULTI_CHOICE].includes(formValues[formFieldNames.kind]) ? 6 : 12}>
+                    <Col className="mt-50" md={[KIND_RATING, KIND_MULTI_CHOICE, KIND_BOOLEAN].includes(formValues[formFieldNames.kind]) ? 6 : 12}>
                         <Label for={formFieldNames.image} className='d-block text-center'><span>{t('Зураг')}</span></Label>
                         <Row>
                             <Col className='d-flex justify-content-center'>
@@ -371,32 +374,40 @@ export default function AddEditQuezQuestions({
                     }
                     {formValues[formFieldNames.kind] === KIND_MULTI_CHOICE &&
                         <Col>
-                            <Row>
-                                <Col md={6} className="mt-50 d-flex flex-column justify-content-between">
-                                    <Label className='form-label' for={formFieldNames.max_choice_count}>
-                                        {t('Сонголтын хязгаар')}
-                                    </Label>
-                                    <Controller
-                                        control={control}
-                                        name={formFieldNames.max_choice_count}
-                                        render={({ field }) => {
-                                            useVisibleFields(field.name, visibleFieldsRef)
+                            <Label className='form-label' for={formFieldNames.max_choice_count}>
+                                {t('Сонголтын хязгаар')}
+                            </Label>
+                            <Controller
+                                control={control}
+                                name={formFieldNames.max_choice_count}
+                                render={({ field }) => {
+                                    useVisibleFields(field.name, visibleFieldsRef)
 
-                                            return (
-                                                <Input
-                                                    {...field}
-                                                    type='text'
-                                                    id={field.name}
-                                                    bsSize='sm'
-                                                    placeholder={t('Сонголтын хязгаар')}
-                                                    invalid={errors[field.name] && true}
-                                                />
-                                            )
-                                        }}
-                                    />
-                                    {errors[formFieldNames.max_choice_count] && <FormFeedback className='d-block'>{t(errors[formFieldNames.max_choice_count].message)}</FormFeedback>}
-                                </Col>
-                            </Row>
+                                    return (
+                                        <Input
+                                            {...field}
+                                            type='text'
+                                            id={field.name}
+                                            bsSize='sm'
+                                            placeholder={t('Сонголтын хязгаар')}
+                                            invalid={errors[field.name] && true}
+                                        />
+                                    )
+                                }}
+                            />
+                            {errors[formFieldNames.max_choice_count] && <FormFeedback className='d-block'>{t(errors[formFieldNames.max_choice_count].message)}</FormFeedback>}
+                        </Col>
+                    }
+                    {formValues[formFieldNames.kind] === KIND_BOOLEAN &&
+                        <Col>
+                            <Label className='form-label' for={formFieldNames.yes_or_no}>
+                                {t('Тийм үгүй асуултны хариулт хадгалах хэсэг')}
+                            </Label>
+                            <KindBooleanBlock
+                                control={control}
+                                name={formFieldNames.yes_or_no}
+                            />
+                            {errors[formFieldNames.yes_or_no] && <FormFeedback className='d-block'>{t(errors[formFieldNames.yes_or_no].message)}</FormFeedback>}
                         </Col>
                     }
                     <Col md={12} className="text-center mt-2">

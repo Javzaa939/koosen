@@ -1418,6 +1418,7 @@ class RemoteLessonQuezQuestionsAPIView(
                 'low_rating_word': stringified_data['low_rating_word'],
                 'high_rating_word': stringified_data['high_rating_word'],
                 'max_choice_count': stringified_data['max_choice_count'],
+                'yes_or_no': stringified_data['yes_or_no'],
             }
 
             if request.method == 'POST':
