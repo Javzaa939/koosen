@@ -3255,7 +3255,7 @@ class StudentCalculateGpaDiplomaAPIView(
                 student_id=student_id, kredit=score_register_qs.lesson.kredit,
                 score=((score_register_qs.teach_score or 0) + (score_register_qs.exam_score or 0)),
                 gpa=score_register_qs.assessment.gpa if score_register_qs.assessment else None,
-                assesment=score_register_qs.assessment if score_register_qs.assessment else score_qs.assesment,
+                assesment=score_register_qs.assessment.assesment if score_register_qs.assessment else score_qs.assesment,
                 grade_letter=score_register_qs.grade_letter
             )
 
