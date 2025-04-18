@@ -3241,8 +3241,13 @@ class StudentCalculateGpaDiplomaAPIView(
                     assesment=score_qs.assesment
                 )
 
+        update_datas = []
         for unique_id in unique_ids:
             score_register_qs = ScoreRegister.objects.filter(student_id=student_id, lesson_id=unique_id).first()
+            if not score_register_qs.assessment:
+                score_qs = Score.objects.filter(score_max__gte=score_register_qs.score_total, score_min__lte=score_register_qs.score_total).first()
+                score_register_qs.assessment = score_qs
+                update_datas.append(score_register_qs)
 
             # Дипломын хичээл бодуулах хэсгийг үүсгэх
             created_cal_qs = CalculatedGpaOfDiploma.objects.create(
@@ -3250,9 +3255,12 @@ class StudentCalculateGpaDiplomaAPIView(
                 student_id=student_id, kredit=score_register_qs.lesson.kredit,
                 score=((score_register_qs.teach_score or 0) + (score_register_qs.exam_score or 0)),
                 gpa=score_register_qs.assessment.gpa if score_register_qs.assessment else None,
-                assesment=score_register_qs.assessment.assesment if score_register_qs.assessment else None,
+                assesment=score_register_qs.assessment if score_register_qs.assessment else score_qs.assesment,
                 grade_letter=score_register_qs.grade_letter
             )
+
+        if len(update_datas) > 0:
+            ScoreRegister.objects.bulk_update(update_datas, ['assesment'])
 
         return request.send_info("INF_013", list(lesson_ids))
 
