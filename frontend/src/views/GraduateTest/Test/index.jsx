@@ -27,9 +27,11 @@ import Addmodal from "./Add";
 import Exam from "./Exam"
 import Show from "@src/views/Test/Show";
 import classNames from "classnames"
+import AuthContext from "@src/utility/context/AuthContext";
 
 const TestProgram = () => {
     const { school_id } = useContext(SchoolContext)
+	const { user } = useContext(AuthContext)
 
 	const { t } = useTranslation();
 
@@ -205,17 +207,21 @@ const TestProgram = () => {
 			<Card>
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
 					<CardTitle tag="h4" className="mt-50">{t("Төгсөлтийн шалгалтын жагсаалт")}</CardTitle>
-					<div className="d-flex flex-wrap mt-md-0 mt-1">
-						<Button
-							color="primary"
-							onClick={() => handleModal()}
-						>
-							<Plus size={15} />
-							<span className="align-middle ms-50">
-								{t("Нэмэх")}
-							</span>
-						</Button>
-					</div>
+					{
+						user?.permissions?.includes('lms-graduate-exam-create')
+						&&
+						<div className="d-flex flex-wrap mt-md-0 mt-1">
+							<Button
+								color="primary"
+								onClick={() => handleModal()}
+							>
+								<Plus size={15} />
+								<span className="align-middle ms-50">
+									{t("Нэмэх")}
+								</span>
+							</Button>
+						</div>
+					}
 				</CardHeader>
 				<Row className="m-1">
 					<Col md={3} sm={10}>
