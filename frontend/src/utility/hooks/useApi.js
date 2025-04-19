@@ -1636,7 +1636,10 @@ function useApi(isDisplay=false) {
 				postTitle: (data) =>  instance.post(`learning/graduate/title/`, data),
 				getSubTitle: (main='') => instance.get(`learning/graduate/sub-title/?main=${main}`),
 				postSubTitle: (data) =>  instance.post(`learning/graduate/sub-title/`, data),
-				getQuestion: (title) => instance.get(`learning/graduate/question/?title=${title}`)
+				getQuestion: (title) => instance.get(`learning/graduate/question/?title=${title}`),
+
+				deleteTitle : (id) => instance.delete(`learning/graduate/title/${id}/`),
+				deleteSubTitle : (id) => instance.delete(`learning/graduate/sub-title/${id}/`),
 			},
 
 			psychologicalTestQuestion:{

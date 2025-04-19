@@ -1,6 +1,6 @@
 import { useState, Fragment, useEffect } from 'react';
 import { useForm, Controller } from "react-hook-form";
-import { convertDefaultValue, ReactSelectStyles } from "@utils";
+import { convertDefaultValue, ReactSelectStyles, get_leveltype } from "@utils";
 import { t } from 'i18next';
 
 import {
@@ -19,12 +19,14 @@ import Select from 'react-select';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 
-const AddQuestion = ({ open, handleModal, lesson, refreshDatas, challenge, refreshQuestionData, status}) => {
+const AddQuestion = ({ open, handleModal, refreshDatas, challenge, refreshQuestionData, status}) => {
 
     const { control, handleSubmit, setError, watch, formState: { errors } } = useForm()
     const { fetchData } = useLoader({ isFullScreen: true });
 
-    const [select_data, setSelectDatas] = useState([])
+    const [mainDatas, setMainDatas] = useState([])
+    const [subDatas, setSubDatas] = useState([])
+
     const levels_data = [
         { id: 1, name: 'Хөнгөн' },
         { id: 2, name: 'Дунд' },
@@ -32,18 +34,30 @@ const AddQuestion = ({ open, handleModal, lesson, refreshDatas, challenge, refre
     ];
 
     const challengeAPI = useApi().challenge.question
+    const graduateApi = useApi().challenge.graduate
     const challengesAPI = useApi().challenge
 
-    async function getSelectDatas() {
-        const { success, data } = await fetchData(challengeAPI.getTitle(lesson))
+    async function getMainDatas() {
+        const { success, data } = await fetchData(graduateApi.getTitle())
         if (success) {
-            setSelectDatas(data)
+            setMainDatas(data)
+        }
+    }
+    async function getSubDatas() {
+        const { success, data } = await fetchData(graduateApi.getSubTitle(watch('subject')))
+        if (success) {
+            setSubDatas(data)
         }
     }
 
     useEffect(() => {
-        getSelectDatas()
+        getMainDatas()
     }, [])
+
+    useEffect(() => {
+        getSubDatas()
+    }, [watch('subject')])
+
 
     const numberOfQuestions = watch("number_questions");
     const percentageOfQuestions = watch("number_questions_percentage");
@@ -80,7 +94,7 @@ const AddQuestion = ({ open, handleModal, lesson, refreshDatas, challenge, refre
                     <Row tag={Form} onSubmit={handleSubmit(onSubmit)}>
                         <Col md={12}>
                             <Label className="form-label" for="subject">
-                                {t('Сэдэв сонгох')}
+                                {t('Үндсэн бүлэг сонгох')}
                             </Label>
                             <Controller
                                 control={control}
@@ -94,13 +108,40 @@ const AddQuestion = ({ open, handleModal, lesson, refreshDatas, challenge, refre
                                         classNamePrefix='select'
                                         className='react-select'
                                         placeholder={`-- Сонгоно уу --`}
-                                        options={select_data || []}
-                                        value={select_data.find((c) => c.id === value)}
+                                        options={mainDatas || []}
+                                        value={mainDatas.find((c) => c.id === value)}
                                         noOptionsMessage={() => 'Хоосон байна'}
                                         onChange={(val) => onChange(val?.id || '')}
                                         styles={ReactSelectStyles}
                                         getOptionValue={(option) => option.id}
                                         getOptionLabel={(option) => option.name}
+                                    />
+                                )}
+                            />
+                        </Col>
+                        <Col md={12}>
+                            <Label className="form-label mt-1" for="subInfo">
+                                {t('Дэд бүлэг сонгох')}
+                            </Label>
+                            <Controller
+                                control={control}
+                                defaultValue=''
+                                name="subInfo"
+                                render={({ field: { value, onChange } }) => (
+                                    <Select
+                                        id="subInfo"
+                                        name="subInfo"
+                                        isClearable
+                                        classNamePrefix='select'
+                                        className='react-select'
+                                        placeholder={`-- Сонгоно уу --`}
+                                        options={subDatas || []}
+                                        value={subDatas.find((c) => c.id === value)}
+                                        noOptionsMessage={() => 'Хоосон байна'}
+                                        onChange={(val) => onChange(val?.id || '')}
+                                        styles={ReactSelectStyles}
+                                        getOptionValue={(option) => option.id}
+                                        getOptionLabel={(option) => option.name + '(' + option?.question_count + ')'}
                                     />
                                 )}
                             />
@@ -121,8 +162,8 @@ const AddQuestion = ({ open, handleModal, lesson, refreshDatas, challenge, refre
                                         classNamePrefix='select'
                                         className='react-select'
                                         placeholder={`-- Сонгоно уу --`}
-                                        options={levels_data || []}
-                                        value={levels_data.find((c) => c.id === value)}
+                                        options={get_leveltype() || []}
+                                        value={get_leveltype().find((c) => c.id === value)}
                                         noOptionsMessage={() => 'Хоосон байна'}
                                         onChange={(val) => onChange(val?.id || '')}
                                         styles={ReactSelectStyles}

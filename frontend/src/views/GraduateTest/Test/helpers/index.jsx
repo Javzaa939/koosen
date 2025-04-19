@@ -95,7 +95,7 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
                                 onClick={() => { handleShow(row) }}
                                 id={`complaintListDatatableShow${row?.id}`}
                                 className='me-1'
-                                href={`/challenge/test/addstudent/${row?.id}/${row?.lesson?.id}`}
+                                href={`/challenge/graduate-test/addstudent/${row?.id}/`}
                             >
                                 <Badge color="light-info"><Book width={"10px"} /></Badge>
                             </a>

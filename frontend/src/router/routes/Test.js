@@ -9,8 +9,11 @@ const SeasonTest = lazy(() => import("@views/SeasonTest/Test/"))
 const SeasonTestQuestion = lazy(() => import("@views/SeasonTest/Question/"))
 const GraduateQuestion = lazy(() => import("@views/GraduateTest/Question/"))
 const GraduateTest = lazy(() => import("@views/GraduateTest/Test/"))
+
 const AddStudent = lazy(() => import("@views/Test/Test/AddStudent/"))
 const AddStudentSeason = lazy(() => import("@views/SeasonTest/Test/AddStudent/"))
+const AddStudentGraduate = lazy(() => import("@views/GraduateTest/Test/AddStudent/"))
+
 const TestReport = lazy(() => import("@views/SeasonTest/Report/"))
 
 const ExamSchedule = lazy(() => import("@views/Test/ExamSchedule"))
@@ -68,6 +71,10 @@ const TestRoutes = [
     {
         path: 'challenge-graduate/',
         element: <GraduateTest/>
+    },
+    {
+        path: '/challenge/graduate-test/addstudent/:challenge_id/',
+        element: <AddStudentGraduate/>
     },
 ]
 

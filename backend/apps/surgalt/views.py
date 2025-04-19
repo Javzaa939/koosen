@@ -5696,25 +5696,37 @@ class ChallengeSedevCountAPIView(
 
     def post(self, request):
         data = request.data
+        print(data)
         challenge_id = data.get("challenge")
         title = data.get("subject")
+        level = data.get("level_of_question")
+        subInfo = data.get("subInfo") # Төгсөлтийн шалгалт
         number_of_questions = data.get('number_questions')
         number_of_questions_percentage = data.get("number_questions_percentage")
 
         if title is not None and challenge_id is not None:
-            lesson_title = QuestionTitle.objects.filter(id=title).first()
+            if subInfo:
+                lesson_title = QuestioSubTitle.objects.filter(id=subInfo).first()
+            else:
+                lesson_title = QuestionTitle.objects.filter(id=title).first()
 
             challenge = Challenge.objects.filter(id=challenge_id).first()
 
             if challenge and lesson_title:
-                challenge_questions = ChallengeQuestions.objects.filter(
-                    title=lesson_title,
-                    level=challenge.level,
-                    title__lesson=challenge.lesson,
-                    title__is_season=(challenge.challenge_type == Challenge.SEMESTR_EXAM)
-                )
-                random_questions = None
+                if subInfo:
+                    challenge_questions = ChallengeQuestions.objects.filter(
+                        graduate_title=lesson_title,
+                        level=level,
+                    )
+                else:
+                    challenge_questions = ChallengeQuestions.objects.filter(
+                        title=lesson_title,
+                        level=challenge.level,
+                        title__lesson=challenge.lesson,
+                        title__is_season=(challenge.challenge_type == Challenge.SEMESTR_EXAM)
+                    )
 
+                random_questions = None
                 if number_of_questions:
                     if challenge.has_shuffle:
                         random_questions = challenge_questions.order_by('?')[:int(number_of_questions)]

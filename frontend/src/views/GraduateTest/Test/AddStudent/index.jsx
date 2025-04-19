@@ -27,12 +27,14 @@ import classnames from "classnames";
 import DataTable from "react-data-table-component";
 
 import AddQuestion from "../AddQuestion";
+import useModal from "@src/utility/hooks/useModal";
 
 
 function AddStudent() {
 
     const status = []
     const { t } = useTranslation();
+    const { showWarning } = useModal()
 
     const { isLoading, Loader, fetchData } = useLoader({});
     const { fetchData: fetchSelectData } = useLoader({});
@@ -56,6 +58,7 @@ function AddStudent() {
     const [question_datas, setQuestionData] = useState([]);
     const [question_count, setQuestionCount] = useState('')
     const [challenge_count, setChallengeCount] = useState('')
+    const [selectedRows, setSelectedRows] = useState([])
 
     const [modal, setModal] = useState(false);
 
@@ -210,6 +213,23 @@ function AddStudent() {
         }
     }
 
+    function onSelectedRowsChange(state) {
+        var selectedRows = state.selectedRows
+        setSelectedRows(selectedRows);
+    }
+
+    async function handleDeleteAll() {
+        let cdatas = {
+            'ids': selectedRows.map((rows) => rows?.id),
+            'challenge_id': challenge_id
+        }
+        const { success, data } = await fetchData(challengeAPI.deleteTest(cdatas));
+        if (success) {
+            getQuestionTableData();
+            setSelectedRows([])
+        }
+    }
+
     return (
         <Fragment>
             <Row className="mt-2">
@@ -218,7 +238,7 @@ function AddStudent() {
                         <CardHeader className="rounded border d-flex flex-row">
                             <Button
                                 tag={Link}
-                                to="/challenge/test"
+                                to="/challenge-graduate/"
                                 color="primary"
                                 className="btn-sm-block"
                             >
@@ -367,6 +387,21 @@ function AddStudent() {
                             </div>
                         </CardHeader>
                         <div className="react-dataTable react-dataTable-selectable-rows mx-50 rounded border my-50">
+                            {
+                                selectedRows?.length > 0 &&
+                                <div className="mb-50">
+                                    <Button color="danger"
+                                        onClick={() => showWarning({
+                                            header: {
+                                                title: `${t('Асуулт устгах')}`,
+                                            },
+                                            question: `Та сонгогдсон асуултуудыг устгахдаа итгэлтэй байна уу?`,
+                                            onClick: () => handleDeleteAll(),
+                                            btnText: 'Устгах',
+                                        })}
+                                    >Устгах ({selectedRows.length})</Button>
+                                </div>
+                            }
                             <DataTable
                                 noHeader
                                 pagination
@@ -399,6 +434,8 @@ function AddStudent() {
                                 )}
                                 fixedHeader
                                 fixedHeaderScrollHeight="62vh"
+                                selectableRows
+                                onSelectedRowsChange={(state) => onSelectedRowsChange(state)}
                             />
                         </div>
                     </Card>

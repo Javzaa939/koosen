@@ -15,7 +15,8 @@ import useApi from '@hooks/useApi';
 import { useTranslation } from 'react-i18next';
 import { validate, ReactSelectStyles } from "@utils";
 import { Controller, useForm } from 'react-hook-form'
-import { ChevronsLeft, PlusCircle } from 'react-feather';
+import { ChevronsLeft, PlusCircle, Trash2, X } from 'react-feather';
+import useModal from '@src/utility/hooks/useModal'
 
 const validateSchema = Yup.object().shape({
     name: Yup.string().trim().required("Хоосон байна"),
@@ -29,6 +30,7 @@ const subValidateSchema = Yup.object().shape({
 export default function SeasonQuestions({ setTitleToNextStep }) {
     const { t } = useTranslation()
     const navigate = useNavigate()
+    const { showWarning } = useModal()
 
     const [addLessonModal, setAddLessonModal] = useState(false)
     const [addSubModal, setAddSubModal] = useState(false)
@@ -102,12 +104,27 @@ export default function SeasonQuestions({ setTitleToNextStep }) {
         }
     }
 
+    async function handleDelete(id) {
+        const { success } = await fetchData(questionAPI.deleteTitle(id))
+        if (success) {
+            getDatas()
+            getSubDatas()
+        }
+    }
+
+    async function handleSubDelete(id) {
+        const { success } = await fetchData(questionAPI.deleteSubTitle(id))
+        if (success) {
+            getSubDatas()
+        }
+    }
+
     return (
         <Row>
             <Col md={4}>
                 <Card>
                     <CardHeader>
-                        <h5>Бүлгийн жагсаалт</h5>
+                        <h5>Үндсэн бүлгийн жагсаалт</h5>
                         <div>
                             <Button size='sm' color='primary' onClick={() => handleLessonModal()}>Нэмэх</Button>
                         </div>
@@ -124,7 +141,21 @@ export default function SeasonQuestions({ setTitleToNextStep }) {
                                     onClick={() => toggleList(clesson?.id)}
                                     action
                                 >
-                                <span className=''>{idx + 1}. {clesson?.name}</span>
+                                <div className='d-flex justify-content-between'>
+                                    <span className=''>{idx + 1}. {clesson?.name}</span>
+                                    <a>
+                                        <X color='red' size={20}
+                                        onClick={() => showWarning({
+                                            header: {
+                                                title: `${t('Бүлэг устгах')}`,
+                                            },
+                                            question: `Таны сонгосон бүлгийн бүх асуултуудыг устгахыг анхаарна уу?`,
+                                            onClick: () => handleDelete(clesson?.id),
+                                            btnText: 'Устгах',
+                                        })}
+                                        />
+                                    </a>
+                                </div>
                             </ListGroupItem>
                             )
                         }
@@ -135,7 +166,7 @@ export default function SeasonQuestions({ setTitleToNextStep }) {
             <Col md={8}>
                 <Card>
                     <CardHeader>
-                        <h6>{t('Асуултын сэдвийн жагсаалт')}</h6>
+                        <h6>{t('Асуултын дэд бүлгийн жагсаалт')}</h6>
                         <div>
                             <Button size='sm' color='primary' onClick={() => handleSubModal()}>{t('Нэмэх')}</Button>
                         </div>
@@ -148,7 +179,8 @@ export default function SeasonQuestions({ setTitleToNextStep }) {
                                     <th>{t('Үндсэн бүлэг нэр')}</th>
                                     <th>{t('Дэд бүлэг нэр')}</th>
                                     <th>{t('Асуултын тоо')}</th>
-                                    <th>{t('Үйлдэл')}</th>
+                                    <th>{t('Нэмэх')}</th>
+                                    <th>{t('Устгах')}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -164,6 +196,20 @@ export default function SeasonQuestions({ setTitleToNextStep }) {
                                                     <PlusCircle/>
                                                 </Badge>
                                                 <UncontrolledTooltip target={`add_${idx}`}>{t('Асуулт нэмэх')}</UncontrolledTooltip>
+                                            </td>
+                                            <td>
+                                                <Badge tag={'a'} color={'light-danger'} id={`add_${idx}`}
+                                                    onClick={() => showWarning({
+                                                        header: {
+                                                            title: `${t('Дэд бүлэг устгах')}`,
+                                                        },
+                                                        question: `Таны сонгосон бүлгийн бүх асуултуудыг устгахыг анхаарна уу?`,
+                                                        onClick: () => handleSubDelete(data?.id),
+                                                        btnText: 'Устгах',
+                                                    })}
+                                                >
+                                                    <Trash2/>
+                                                </Badge>
                                             </td>
                                         </tr>
                                     )

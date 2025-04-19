@@ -16,7 +16,7 @@ export function getQuestionColumns(currentPage, rowsPerPage, total_count, handle
     const columns = [
         {
             name: <span title='Онлайн асуулт сан' style={{}}>Онлайн асуулт сан</span>,
-            selector: (row) => <span className='text-center' style={{ marginTop: '3px', marginBottom: '3px' }}>{row?.title}</span>,
+            selector: (row) => <span className='text-center' style={{ marginTop: '3px', marginBottom: '3px' }}>{row?.question}</span>,
             minWidth: "40%",
             center: true,
         },
@@ -25,13 +25,7 @@ export function getQuestionColumns(currentPage, rowsPerPage, total_count, handle
             selector: (row) => (
                 <div>
                     {
-                        row?.level === 1
-                            ?
-                            <span>Хөнгөн</span>
-                            : row?.level === 2 ?
-                                <span>Дунд</span>
-                                :
-                                <span>Хүнд</span>
+                        <span>{`Түвшин-${row?.level}`}</span>
                     }
                 </div>
             ),
