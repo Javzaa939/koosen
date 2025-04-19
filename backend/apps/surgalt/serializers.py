@@ -1089,22 +1089,35 @@ class ChallengeStudentsSerializer(serializers.ModelSerializer):
 
                     # NOTE: choice_id нь array ирээд алдаа гараад байсан учир энэ нөхцлийг бичив. javzaa bichsen
                     if choice_id and isinstance(choice_id, list):
-                        choice_id = choice_id[0]
+                        for ch_id in choice_id:
+                            choice_obj = QuestionChoices.objects.filter(id=ch_id).values('score', 'challengequestions__question').first()
+                            # choice дотроо is_right-г үүсгэнэ
+                            is_right = False
 
-                    choice_obj = QuestionChoices.objects.filter(id=choice_id).values('score','challengequestions__question').first()
+                            # Оноо байвал зөв хариулт гэж үзнэ
+                            if choice_obj and choice_obj.get('score') > 0:
+                                is_right = True
 
-                    # choice дотроо is_right-г үүсгэнэ
-                    is_right = False
+                            answers.append({
+                                'question_id': question_id,
+                                'question_text': choice_obj.get('challengequestions__question') if choice_obj else '',
+                                'is_answered_right': is_right
+                            })
+                    elif choice_id:
+                        choice_obj = QuestionChoices.objects.filter(id=choice_id).values('score','challengequestions__question').first()
 
-                    # Оноо байвал зөв хариулт гэж үзнэ
-                    if choice_obj and choice_obj.get('score') > 0:
-                        is_right = True
+                        # choice дотроо is_right-г үүсгэнэ
+                        is_right = False
 
-                    answers.append({
-                        'question_id': question_id,
-                        'question_text': choice_obj.get('challengequestions__question') if choice_obj else '',
-                        'is_answered_right': is_right
-                    })
+                        # Оноо байвал зөв хариулт гэж үзнэ
+                        if choice_obj and choice_obj.get('score') > 0:
+                            is_right = True
+
+                        answers.append({
+                            'question_id': question_id,
+                            'question_text': choice_obj.get('challengequestions__question') if choice_obj else '',
+                            'is_answered_right': is_right
+                        })
 
             return answers
 
