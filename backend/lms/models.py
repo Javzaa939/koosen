@@ -3417,6 +3417,24 @@ class QuestionChoices(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+
+class QuestionMainTitle(models.Model):
+    """ Асуултын сэдэв """
+
+    name = models.CharField(max_length=255, null=True, verbose_name='Сэдвийн нэр')
+    is_open = models.BooleanField(default=False, verbose_name='Нээлттэй сэдэв эсэх')
+    created_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(Teachers, on_delete=models.CASCADE, related_name="+", null=True)
+
+
+class QuestioSubTitle(models.Model):
+    """ Дэд асуултын сэдэв """
+    main = models.ForeignKey(QuestionMainTitle, verbose_name='Үндсэн сэдэв', on_delete=models.CASCADE)
+    name = models.CharField(max_length=255, null=True, verbose_name='Сэдвийн нэр')
+    created_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(Teachers, on_delete=models.CASCADE, related_name="+", null=True)
+
+
 class QuestionTitle(models.Model):
     """ Асуултын сэдэв """
 
@@ -3485,6 +3503,7 @@ class ChallengeQuestions(models.Model):
     subject = models.ForeignKey(Lesson_title_plan, on_delete=models.SET_NULL, null=True)
 
     title = models.ManyToManyField(QuestionTitle, verbose_name='Асуултын ерөнхий сэдэв')
+    graduate_title = models.ManyToManyField(QuestioSubTitle, verbose_name='Асуултын ерөнхий сэдэв')
     level = models.IntegerField(choices=DIFFICULTY_LEVELS, default=LEVEL_NORMAL,  verbose_name='Асуултын түвшин')
 
     # KIND_RATING үед
@@ -3539,12 +3558,14 @@ class Challenge(models.Model):
     SORIL2 = 2
     SEMESTR_EXAM = 3
     SELF_TEST = 4
+    GRADUATE = 5
 
     CHALLENGE_TYPE = (
         (SORIL1, 'Явцын шалгалт'),
         (SORIL2, 'Cорил 2'),
         (SEMESTR_EXAM, 'Улирлын шалгалт'),
         (SELF_TEST, 'Өөрийгөө сорих тест'),
+        (GRADUATE, 'Төгсөлтийн шалгалт'),
     )
 
     #  Хамрах хүрээ нь

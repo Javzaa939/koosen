@@ -50,6 +50,31 @@ export default [
 					},
 				]
 			},
+			{
+				id: "graduate-challenge",
+				title: "Төгсөлтийн шалгалт",
+				icon: <Circle size={8} />,
+				children: [
+					{
+						id: "graduate-question",
+						title: "Асуултын сан",
+						icon: <Circle size={8} />,
+						navLink: "graduate-question/",
+					},
+					{
+						id: "graduate-test",
+						title: "Онлайн шалгалт",
+						icon: <Circle size={8} />,
+						navLink: "challenge-graduate/",
+					},
+					// {
+					// 	id: "examreport",
+					// 	title: "Тайлан",
+					// 	icon: <Circle size={8} />,
+					// 	navLink: "challenge-report/",
+					// },
+				]
+			},
 		]
     },
 ]

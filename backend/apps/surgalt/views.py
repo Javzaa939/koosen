@@ -14,6 +14,7 @@ from rest_framework.decorators import permission_classes
 
 from main.utils.function.pagination import CustomPagination
 from main.utils.function.utils import override_get_queryset, save_data_with_signals
+
 from main.utils.function.utils import has_permission, get_domain_url, _filter_queries, get_teacher_queryset, pearson_corel
 from main.utils.file import save_file
 from main.utils.file import remove_folder
@@ -69,7 +70,9 @@ from lms.models import (
     Lesson_teacher_scoretype,
     QuestionTitle,
     Score,
-    CalculatedGpaOfDiploma
+    CalculatedGpaOfDiploma,
+    QuestionMainTitle,
+    QuestioSubTitle
 )
 
 from core.models import (
@@ -1484,10 +1487,10 @@ class ChallengeAPIView(
         lesson = request.query_params.get('lesson')
         time_type = request.query_params.get('type')
         teacher_id = request.query_params.get('teacher')
-        season = request.query_params.get('season')
         school = request.query_params.get('school')
         lesson_year = request.query_params.get('lesson_year')
         lesson_season = request.query_params.get('lesson_season')
+        challenge_type = request.query_params.get('challenge_type')
 
         if lesson_year:
             self.queryset = self.queryset.filter(lesson_year=lesson_year)
@@ -1495,9 +1498,9 @@ class ChallengeAPIView(
         if lesson_season:
             self.queryset = self.queryset.filter(lesson_season=lesson_season)
 
-        if school:
-            school_ids = self.queryset.filter(student__school=school).values_list('id', flat=True)
-            self.queryset = self.queryset.filter(id__in=school_ids)
+        # if school:
+        #     school_ids = self.queryset.filter(student__school=school).values_list('id', flat=True)
+        #     self.queryset = self.queryset.filter(id__in=school_ids)
 
         if teacher_id:
             self.queryset = self.queryset.filter(created_by=teacher_id)
@@ -1510,10 +1513,8 @@ class ChallengeAPIView(
 
             self.queryset = self.queryset.filter(**state_filters)
 
-        if season == 'true':
-            self.queryset = self.queryset.filter(challenge_type=Challenge.SEMESTR_EXAM)
-        else:
-            self.queryset = self.queryset.exclude(challenge_type=Challenge.SEMESTR_EXAM)
+        if challenge_type:
+            self.queryset = self.queryset.filter(challenge_type=challenge_type)
 
         datas = self.list(request).data
 
@@ -5042,6 +5043,7 @@ class QuestionsTitleAPIView(
         title_id = int(title_id)
         stype = request.query_params.get('stype')
         level = request.query_params.get('level')
+        is_graduate = request.query_params.get('is_graduate')
 
         # # 0  Бүх асуулт
         if title_id == 0:
@@ -5050,7 +5052,10 @@ class QuestionsTitleAPIView(
         elif title_id == -1:
             challenge_qs = ChallengeQuestions.objects.filter(Q(title__isnull=True))
         else:
-            challenge_qs = ChallengeQuestions.objects.filter(title=title_id)
+            if is_graduate == 'true':
+                challenge_qs = ChallengeQuestions.objects.filter(graduate_title=title_id)
+            else:
+                challenge_qs = ChallengeQuestions.objects.filter(title=title_id)
 
         if stype:
             challenge_qs = challenge_qs.filter(kind=stype)
@@ -5134,7 +5139,7 @@ class QuestionsTitleListAPIView(
         teacher = None
 
         # in admin WEB teacher ID not passed (0 passed means falsy value), so may be it supposed to get titles by all teachers
-        if pk:
+        if pk and pk != 0:
             teacher = Teachers.objects.filter(id=pk).first()
             self.queryset = self.queryset.filter(created_by=teacher)
 
@@ -5143,8 +5148,6 @@ class QuestionsTitleListAPIView(
 
         if lesson:
             self.queryset = self.queryset.filter(lesson=lesson)
-        
-        print(self.queryset)
 
         if season == 'false':
             self.queryset = self.queryset.filter(is_season=False)
@@ -5152,7 +5155,7 @@ class QuestionsTitleListAPIView(
             self.queryset = self.queryset.filter(is_season=True)
 
         question_sub = ChallengeQuestions.objects.filter(title=OuterRef('id')).values('title').annotate(count=Count('id')).values('count')
-        data = self.queryset.annotate(question_count=Subquery(question_sub)).values("id", "name", 'lesson__name', 'lesson__code', 'lesson__id', 'question_count')
+        data = self.queryset.annotate(question_count=Subquery(question_sub)).values("id", "name", 'lesson__name', 'lesson__code', 'lesson__id', 'question_count', 'is_open')
 
         return request.send_data(list(data))
 
@@ -5309,6 +5312,7 @@ class TestQuestionsAPIView(
         files = request.FILES.getlist('files')
         request_data = request.data.dict()
         title = request_data.get('title')
+        graduate_title = request_data.get('main_title')
 
         user = request.user
         teacher = Teachers.objects.filter(user_id=user).first()
@@ -5353,6 +5357,9 @@ class TestQuestionsAPIView(
                     # Улирлын шалгалтынг хувьд
                     if title:
                         question_obj.title.add(QuestionTitle.objects.get(pk=title))
+
+                    if graduate_title:
+                        question_obj.graduate_title.add(QuestioSubTitle.objects.get(pk=graduate_title))
 
                     # Асуултанд зураг байвал хадгалах хэсэг
                     if question_img:
@@ -5457,12 +5464,26 @@ class QuestionExcelAPIView(generics.GenericAPIView, mixins.ListModelMixin):
     KIND_MAP = {
         'Нэг сонголт': 1,
         'Олон сонголт': 2,
-        'Тийм, Үгүй сонголт': 3,
+        'Үнэн, Худал сонголт': 3,
         'Үнэлгээ': 4,
-        'Бичвэр': 5,
+        'Эссэ бичих': 5,
+        'Богино нөхөх хариулт': 6,
+        'Харгалзуулах, жиших': 7,
+        'Тооцоолж бодох': 8,
+        'Төсөл боловсруулах': 9,
+        'Товч хариулт': 10
     }
 
     LEVEL_MAP = {
+        'Түвшин-1': 1,
+        'Түвшин-2': 2,
+        'Түвшин-3': 3,
+        'Түвшин-4': 4,
+        'Түвшин-5': 5,
+        'Түвшин-6': 6,
+    }
+
+    LEVEL_MAP_SEASON = {
         'Хөнгөн': 1,
         'Дунд': 2,
         'Хүнд': 3,
@@ -5472,6 +5493,8 @@ class QuestionExcelAPIView(generics.GenericAPIView, mixins.ListModelMixin):
         user = request.user
         teacher = Teachers.objects.filter(user_id=user).first()
         excel_file = request.FILES.get('file')
+        title = request.data.get('title')
+        graduate_title = request.data.get('main_title')
 
         if not excel_file:
             return request.send_info("INF_002")
@@ -5484,14 +5507,14 @@ class QuestionExcelAPIView(generics.GenericAPIView, mixins.ListModelMixin):
         data_dicts = [dict(zip(headers, row)) for row in data[1:]]
 
         for entry in data_dicts:
-            self.process_entry(entry, teacher)
+            self.process_entry(entry, teacher, graduate_title)
 
         return request.send_info("INF_001")
 
-    def process_entry(self, entry, teacher):
+    def process_entry(self, entry, teacher, graduate_title):
         question = entry.get('Асуулт')
 
-        if question in {"Жишээ 1","Жишээ 2","Жишээ 3"}:
+        if question in {"Жишээ 1","Жишээ 2","Жишээ 3", 'Жишээ 4', 'Жишээ 5', 'Жишээ 6', 'Жишээ 7', 'Жишээ 8', 'Жишээ 9'}:
             return
 
         level_str = entry.get('Асуултын түвшин')
@@ -5501,6 +5524,10 @@ class QuestionExcelAPIView(generics.GenericAPIView, mixins.ListModelMixin):
 
         kind = self.KIND_MAP.get(kind_str)
         level = self.LEVEL_MAP.get(level_str)
+        if graduate_title:
+            level = self.LEVEL_MAP.get(level_str)
+        else:
+            level = self.LEVEL_MAP_SEASON.get(level_str)
 
         # max_choice зөв хариулт хэд байгаагаас
         max_choice_count = len(correct_answer_index.split()) if kind == 2 else 1
@@ -5515,6 +5542,9 @@ class QuestionExcelAPIView(generics.GenericAPIView, mixins.ListModelMixin):
             created_by=teacher
         )
         challenge.save()
+        # Төгсөлтйин шалгалт бол
+        if graduate_title:
+            challenge.graduate_title.add(QuestioSubTitle.objects.get(pk=graduate_title))
 
         choice_keys = ['Хариулт 1', 'Хариулт 2', 'Хариулт 3', 'Хариулт 4', 'Хариулт 5', 'Хариулт 6']
         choice_ids = self.process_choices(entry, teacher, choice_keys, kind, score, correct_answer_index)
@@ -5580,6 +5610,7 @@ class TestTeacherApiView(
         season = self.request.query_params.get('season')
         sorting = self.request.query_params.get('sorting')
         is_season = self.request.query_params.get('season')
+        stype = self.request.query_params.get('type')
 
         # Бүрэлдэхүүн сургууль
         if sub_org:
@@ -5592,7 +5623,6 @@ class TestTeacherApiView(
         # Албан тушаалаар хайх
         if position:
             user_ids = Employee.objects.filter(org_position=position, state=Employee.STATE_WORKING).values_list('user', flat=True)
-
             queryset = queryset.filter(user_id__in=user_ids)
 
         # Sort хийх үед ажиллана
@@ -5603,7 +5633,11 @@ class TestTeacherApiView(
             queryset = queryset.order_by(sorting)
 
         if is_season == 'true':
-            title_teachers = QuestionTitle.objects.filter(is_season=True).values_list('created_by', flat=True)
+            if stype and stype == 'graduate':
+                title_teachers = QuestionTitle.objects.filter(is_graduate=True).values_list('created_by', flat=True)
+            else:
+                title_teachers = QuestionTitle.objects.filter(is_season=True).values_list('created_by', flat=True)
+
             queryset = queryset.filter(id__in=title_teachers)
         else:
             title_ids = QuestionTitle.objects.filter(is_season=False).values_list('id', flat=True)
@@ -7330,3 +7364,129 @@ class LessonSearchStudentAPIView(
         return_datas = self.list(request).data
 
         return request.send_data(return_datas)
+
+
+@permission_classes([IsAuthenticated])
+class GraduateTitleApiView(
+    generics.GenericAPIView,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin
+):
+    """ Төгсөлтийн бүлэг """
+
+    queryset = QuestionMainTitle.objects.all()
+    serializer_class = dynamic_serializer(QuestionMainTitle, "__all__", 1)
+
+    def get(self, request):
+        datas = self.queryset.values('id', 'name')
+        return request.send_data(list(datas))
+
+    def post(self, request):
+        ser = dynamic_serializer(QuestionMainTitle, "__all__", 1)
+        user_id = request.user
+        teacher = get_object_or_404(Teachers, user_id=user_id, action_status=Teachers.APPROVED)
+        datas = request.data
+        datas['created_by'] = teacher.id
+
+        serializer = ser(data=datas)
+        if serializer.is_valid(raise_exception=False):
+            self.perform_create(serializer)
+            return request.send_info("INF_001")
+        else:
+            return request.send_error_valid(serializer.errors)
+
+    def put(self, request, pk=None):
+        ""
+        datas = request.data
+        instance = self.queryset.filter(id=pk).first()
+        user_id = request.user
+        teacher = get_object_or_404(Teachers, user_id=user_id, action_status=Teachers.APPROVED)
+        datas['created_by'] = teacher.id
+
+        ser = dynamic_serializer(QuestionMainTitle, "__all__", 1)
+        serializer = ser(instance, data=datas, partial=True)
+        if serializer.is_valid(raise_exception=False):
+            self.perform_update(serializer)
+            return request.send_info("INF_002")
+
+        else:
+            return request.send_error_valid(serializer.errors)
+
+    def delete(self, request, pk=None):
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
+
+
+@permission_classes([IsAuthenticated])
+class GraduateSubTitleApiView(
+    generics.GenericAPIView,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin
+):
+    """ Төгсөлтийн дэд бүлэг """
+
+    queryset = QuestioSubTitle.objects.all()
+    serializer_class = dynamic_serializer(QuestioSubTitle, "__all__", 1)
+
+    def get(self, request):
+        main = request.query_params.get('main')
+        if main:
+            self.queryset = self.queryset.filter(main=main)
+        question_sub = ChallengeQuestions.objects.filter(graduate_title=OuterRef('id')).values('graduate_title').annotate(count=Count('id')).values('count')
+        datas = self.queryset.annotate(main_name=F('main__name'), question_count=Subquery(question_sub)).values('id', 'name', 'main_name', 'question_count')
+        return request.send_data(list(datas))
+
+    def post(self, request):
+        user_id = request.user
+        teacher = get_object_or_404(Teachers, user_id=user_id, action_status=Teachers.APPROVED)
+        datas = request.data
+        datas['created_by'] = teacher.id
+
+        ser = dynamic_serializer(QuestioSubTitle, "__all__")
+        serializer = ser(data=datas)
+        if serializer.is_valid(raise_exception=False):
+            self.perform_create(serializer)
+            return request.send_info("INF_001")
+        else:
+            return request.send_error_valid(serializer.errors)
+
+    def put(self, request, pk=None):
+        ""
+        datas = request.data
+        instance = self.queryset.filter(id=pk).first()
+        user_id = request.user
+        teacher = get_object_or_404(Teachers, user_id=user_id, action_status=Teachers.APPROVED)
+        datas['created_by'] = teacher.id
+
+        ser = dynamic_serializer(QuestioSubTitle, "__all__")
+        serializer = ser(instance, data=datas, partial=True)
+        if serializer.is_valid(raise_exception=False):
+            self.perform_update(serializer)
+            return request.send_info("INF_002")
+
+        else:
+            return request.send_error_valid(serializer.errors)
+
+    def delete(self, request, pk=None):
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
+
+
+class GraduateQuestionApiView(
+    generics.GenericAPIView
+):
+    """ Төгсөлтийн шалгалтын асуулт"""
+
+    queryset = QuestioSubTitle.objects.all()
+    serializer_class = dynamic_serializer(QuestioSubTitle, "__all__")
+    def get(self, request):
+        title = request.query_params.get('title')
+        if title:
+            self.queryset = self.queryset.filter(id=title)
+
+        question_sub = ChallengeQuestions.objects.filter(graduate_title=OuterRef('id')).values('graduate_title').annotate(count=Count('id')).values('count')
+        data = self.queryset.annotate(question_count=Subquery(question_sub)).values("id", "name", 'question_count')
+
+        return request.send_data(list(data))

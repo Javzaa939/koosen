@@ -7,6 +7,8 @@ const EQuestions = lazy(() => import("@views/Test/EQuestions/"))
 const Challenge = lazy(() => import("@views/Test/Test/"))
 const SeasonTest = lazy(() => import("@views/SeasonTest/Test/"))
 const SeasonTestQuestion = lazy(() => import("@views/SeasonTest/Question/"))
+const GraduateQuestion = lazy(() => import("@views/GraduateTest/Question/"))
+const GraduateTest = lazy(() => import("@views/GraduateTest/Test/"))
 const AddStudent = lazy(() => import("@views/Test/Test/AddStudent/"))
 const AddStudentSeason = lazy(() => import("@views/SeasonTest/Test/AddStudent/"))
 const TestReport = lazy(() => import("@views/SeasonTest/Report/"))
@@ -58,7 +60,15 @@ const TestRoutes = [
     {
         path: 'challenge/exam_schedule/',
         element: <ExamSchedule/>
-    }
+    },
+    {
+        path: '/graduate-question/',
+        element: <GraduateQuestion/>
+    },
+    {
+        path: 'challenge-graduate/',
+        element: <GraduateTest/>
+    },
 ]
 
 export default TestRoutes;

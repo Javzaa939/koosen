@@ -34,7 +34,7 @@ import { ReactSelectStyles, get_questionype, get_leveltype, get_levelseasons } f
 import EditModal from "./EditModal";
 import FileModal from "./FileModal"
 
-const QuestionsList = ({ filterId, season=false, teacher_id }) => {
+const QuestionsList = ({ filterId, season=false, teacher_id, is_graduate }) => {
 
 	const { t } = useTranslation();
 	const { skin } = useSkin()
@@ -69,9 +69,11 @@ const QuestionsList = ({ filterId, season=false, teacher_id }) => {
 
 	// API
 	const questionAPI = useApi().challenge.question
+	const graduateApi = useApi().challenge.graduate
+
 
 	async function getDatas() {
-		const { success, data } = await fetchData(questionAPI.getByTitle(currentPage, rowsPerPage, searchValue, filterId, teacher_id, stype, level));
+		const { success, data } = await fetchData(questionAPI.getByTitle(currentPage, rowsPerPage, searchValue, filterId, teacher_id, stype, level, is_graduate));
 		if (success) {
 			setDatas(data?.results);
 			setTotalCount(data?.count);
@@ -111,8 +113,7 @@ const QuestionsList = ({ filterId, season=false, teacher_id }) => {
 	}
 
 	function staticExcelHandler() {
-
-        var excelUrl = season ? '/assets/asuult_zagwar.xlsx' : '/assets/asuult_zagwar_2.xlsx'
+        var excelUrl = !season ? '/assets/asuult_zagwar_2.xlsx' : '/assets/asuult_zagwar_1.xlsx'
 
         const link = document.createElement('a');
         link.href = excelUrl;
@@ -141,7 +142,7 @@ const QuestionsList = ({ filterId, season=false, teacher_id }) => {
 					</CardTitle>
 					<div className="d-flex gap-2">
 						{
-							!season
+							(is_graduate || !season)
 							&&
 							<>
 								<Dropdown isOpen={dropdownOpen} toggle={toggle}>
@@ -261,6 +262,7 @@ const QuestionsList = ({ filterId, season=false, teacher_id }) => {
 						getDatas={getDatas}
 						title={filterId}
 						season={season}
+						is_graduate={is_graduate}
 					/>
 				)}
 				{editModal && (
@@ -270,6 +272,7 @@ const QuestionsList = ({ filterId, season=false, teacher_id }) => {
 						questionDetail={questionDetail}
 						getDatas={getDatas}
 						season={season}
+						is_graduate={is_graduate}
 					/>
 				)}
 				{fileModal && (
@@ -279,6 +282,7 @@ const QuestionsList = ({ filterId, season=false, teacher_id }) => {
 						refreshData={getDatas}
 						title={filterId}
 						season={season}
+						is_graduate={is_graduate}
 					/>
 				)}
 			</Card>

@@ -177,4 +177,13 @@ urlpatterns = [
 
     path('lessonstandart/group/score/<int:pk>/', LessonStandartGroupScoreAPIView.as_view()),
     path('lessonstandart/group/score/', LessonStandartGroupScoreAPIView.as_view()),
+
+    # Төгсөлтийн шалгалтийн сэдэв
+    path('graduate/title/', GraduateTitleApiView.as_view()),
+    path('graduate/title/<int:pk>/', GraduateTitleApiView.as_view()),
+
+    # Төгсөлтийн шалгалтийн дэд сэдэв
+    path('graduate/sub-title/', GraduateSubTitleApiView.as_view()),
+    path('graduate/sub-title/<int:pk>/', GraduateSubTitleApiView.as_view()),
+    path('graduate/question/', GraduateQuestionApiView.as_view()),
 ]
