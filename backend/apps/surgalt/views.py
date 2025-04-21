@@ -168,7 +168,7 @@ class LessonStandartAPIView(
             self.queryset = self.queryset.filter(category=category)
 
         if pk:
-            self.serializer_class = LessonStandartCreateSerializer
+            # self.serializer_class = LessonStandartCreateSerializer
             standart = self.retrieve(request, pk).data
             return request.send_data(standart)
 
