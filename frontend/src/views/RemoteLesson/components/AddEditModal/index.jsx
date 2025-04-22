@@ -18,8 +18,24 @@ import useLoader from '@hooks/useLoader';
 import '@styles/react/libs/flatpickr/flatpickr.scss';
 import Elearn from '../Elearn';
 
-const AddEditModal = ({ open, handleModal, refreshDatas, editData }) => {
-    const { control, handleSubmit, setError, setValue, reset, formState: { errors } } = useForm()
+const AddEditModal = ({ open, handleModal: handleModalOriginal, refreshDatas, editData }) => {
+    const { control, handleSubmit, setError, setValue, reset, formState: { errors } } = useForm({
+        defaultValues: {
+            title: '',
+            description: '',
+            is_end_exam: false,
+            is_certificate: false,
+            start_date: '',
+            end_date: '',
+            image: '',
+        }
+    })
+
+    const handleModal = () => {
+        reset()
+        handleModalOriginal()
+    }
+
     const { fetchData, isLoading, Loader } = useLoader({ isFullScreen: true });
     const remoteApi = useApi().remote
 
@@ -67,50 +83,48 @@ const AddEditModal = ({ open, handleModal, refreshDatas, editData }) => {
     }
 
     return (
-        <Fragment>
-            <Modal
-                isOpen={open}
-                toggle={handleModal}
-                className="modal-dialog-centered"
-                contentClassName="pt-0"
-                fade={true}
-                backdrop='static'
-            >
-                <ModalHeader toggle={handleModal}></ModalHeader>
-                {
-                    editData !== undefined
-                        ?
-                        <ModalHeader className='bg-transparent pb-0' cssModule={{ 'modal-title': 'w-100 text-center' }}>
-                            <h4>{t('Зайн сургалт засах')}</h4>
-                        </ModalHeader>
-                        :
-                        <ModalHeader className='bg-transparent pb-0' cssModule={{ 'modal-title': 'w-100 text-center' }}>
-                            <h4>{t('Зайн сургалт нэмэх')}</h4>
-                        </ModalHeader>
-                }
-                <ModalBody className="flex-grow-50 mb-3 t-0">
-                    {isLoading && Loader}
-                    <Row tag={Form} onSubmit={handleSubmit(onSubmit)}>
-                        <Col md={12}>
-                            <Elearn
-                                t={t}
-                                control={control}
-                                errors={errors}
-                                setValue={setValue}
-                            />
-                        </Col>
-                        <Col md={12} className="text-center mt-2">
-                            <Button className='me-2' color="primary" type="submit">
-                                {t('Хадгалах')}
-                            </Button>
-                            <Button color="secondary" outline type="reset" onClick={() => handleModal()}>
-                                {t('Буцах')}
-                            </Button>
-                        </Col>
-                    </Row>
-                </ModalBody>
-            </Modal>
-        </Fragment>
+        <Modal
+            isOpen={open}
+            toggle={handleModal}
+            className="modal-dialog-centered"
+            contentClassName="pt-0"
+            fade={true}
+            backdrop='static'
+        >
+            <ModalHeader toggle={handleModal}></ModalHeader>
+            {
+                editData !== undefined
+                    ?
+                    <ModalHeader className='bg-transparent pb-0' cssModule={{ 'modal-title': 'w-100 text-center' }}>
+                        <h4>{t('Зайн сургалт засах')}</h4>
+                    </ModalHeader>
+                    :
+                    <ModalHeader className='bg-transparent pb-0' cssModule={{ 'modal-title': 'w-100 text-center' }}>
+                        <h4>{t('Зайн сургалт нэмэх')}</h4>
+                    </ModalHeader>
+            }
+            <ModalBody className="flex-grow-50 mb-3 t-0">
+                {isLoading && Loader}
+                <Row tag={Form} onSubmit={handleSubmit(onSubmit)}>
+                    <Col md={12}>
+                        <Elearn
+                            t={t}
+                            control={control}
+                            errors={errors}
+                            setValue={setValue}
+                        />
+                    </Col>
+                    <Col md={12} className="text-center mt-2">
+                        <Button className='me-2' color="primary" type="submit">
+                            {t('Хадгалах')}
+                        </Button>
+                        <Button color="secondary" outline type="reset" onClick={() => handleModal()}>
+                            {t('Буцах')}
+                        </Button>
+                    </Col>
+                </Row>
+            </ModalBody>
+        </Modal>
     )
 }
 

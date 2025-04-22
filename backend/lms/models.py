@@ -4601,7 +4601,7 @@ class QuezQuestions(models.Model):
     max_choice_count = models.IntegerField(default=0, verbose_name="Сонголтын хязгаар", null=True, blank=True)
 
     # KIND_ONE_CHOICE болон KIND_MULTI_CHOICE үед
-    choices = models.ManyToManyField(QuezChoices, null=True)
+    choices = models.ManyToManyField(QuezChoices, blank=True)
 
     created_by = models.ForeignKey(Teachers, on_delete=models.CASCADE, related_name="+")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -4718,7 +4718,7 @@ class ELearn(models.Model):
     teacher = models.ForeignKey(Teachers, on_delete=models.CASCADE, verbose_name='Багш', null=True)
     image = models.FileField(upload_to='online', verbose_name='Зураг', null=True)
 
-    students = models.ManyToManyField(Student, null=True, blank=True, verbose_name='Хичээл үзэх оюутнууд')
+    students = models.ManyToManyField(Student, blank=True, verbose_name='Хичээл үзэх оюутнууд')
 
     start_date = models.DateTimeField(null=True, verbose_name='Эхлэх хугацаа')
     end_date = models.DateTimeField(null=True, verbose_name='Дуусах хугацаа')
@@ -4758,7 +4758,33 @@ class OnlineSubInfo(models.Model):
     file_type = models.IntegerField(choices=MATERIAL_TYPE, default=TEXT, verbose_name='Материалын төрөл')
     text = models.TextField(null=True, verbose_name='ТEXT төрлийн мэдээлэл')
     file = models.FileField(null=True, verbose_name='ФАЙЛ төрлийн мэдээлэл')
-    quiz = models.ManyToManyField(QuezQuestions, null=True, verbose_name='Цахим сургалтын сорил шалгалт')
+    quiz = models.ManyToManyField(QuezQuestions, blank=True, verbose_name='Цахим сургалтын сорил шалгалт')
+
+
+class ELearnProgress(models.Model):
+    """ Цахим хичээл оролцогчид """
+
+    online_sub_info = models.ForeignKey(OnlineSubInfo, on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+
+    current_try_number = models.IntegerField(default=0, null=True, verbose_name="Сургалт өгсөн оролдлогийн тоо")
+
+    start_time = models.DateTimeField(verbose_name='Сургалт эхэлсэн хугацаа',null=False)
+    end_time = models.DateTimeField(verbose_name='Сургалт дуусгасан хугацаа', null=True)
+
+    answer = models.TextField(null=True, verbose_name='Хариулт')
+
+    # KIND_ONE_CHOICE болон KIND_MULTI_CHOICE үед
+    choosed_choices = models.ManyToManyField(QuezChoices, verbose_name="Сонгосон сонголтууд", blank=True)
+
+    score = models.FloatField(null=True, verbose_name='Оюутны авсан оноо')
+    take_score = models.FloatField(null=True, verbose_name='Оюутны авах оноо')
+    score_set_by = models.ForeignKey(Teachers, on_delete=models.SET_NULL, verbose_name='Оюутны авсан оноог өгсөн багш', null=True)
+
+    question = models.ForeignKey(QuezQuestions, on_delete=models.CASCADE, verbose_name="Асуулт")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
 class OnlineWeek(models.Model):

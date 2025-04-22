@@ -70,7 +70,6 @@ export default function Elearn({
 					{t('Сургалтын нэр')}
 				</Label>
 				<Controller
-					defaultValue=''
 					control={control}
 					id='title'
 					name='title'
@@ -82,7 +81,7 @@ export default function Elearn({
 							id='title'
 							bsSize='sm'
 							placeholder={t('Сургалтын нэр')}
-							invalid={errors.name && true}
+							invalid={errors[field.name] && true}
 						/>
 					)}
 				/>
@@ -100,7 +99,6 @@ export default function Elearn({
 					{t('Тайлбар')}
 				</Label>
 				<Controller
-					defaultValue={''}
 					control={control}
 					name="description"
 					render={({ field }) => (
@@ -120,7 +118,6 @@ export default function Elearn({
 			</Col>
 			<Col md={6} className="mt-50">
 				<Controller
-					defaultValue={false}
 					control={control}
 					id='is_end_exam'
 					name='is_end_exam'
@@ -143,7 +140,6 @@ export default function Elearn({
 			</Col>
 			<Col md={6} className="mt-50">
 				<Controller
-					defaultValue={false}
 					control={control}
 					id='is_certificate'
 					name='is_certificate'
@@ -169,7 +165,6 @@ export default function Elearn({
 					{t('Хичээл эхлэх хугацаа')}
 				</Label>
 				<Controller
-					defaultValue=''
 					control={control}
 					id="start_date"
 					name="start_date"
@@ -191,7 +186,6 @@ export default function Elearn({
 					{t('Хичээл дуусах хугацаа')}
 				</Label>
 				<Controller
-					defaultValue=''
 					control={control}
 					id="end_date"
 					name="end_date"
@@ -219,7 +213,6 @@ export default function Elearn({
 							<div className="orgLogoDiv image-responsive">
 								<img className="image-responsive w-100" src={image_old ? image_old : empty} onClick={() => { clickLogoImage() }} />
 								<Controller
-									defaultValue=''
 									control={control}
 									name={`image`}
 									render={({ field }) => (

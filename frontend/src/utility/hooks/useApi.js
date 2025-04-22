@@ -2083,24 +2083,38 @@ function useApi(isDisplay=false) {
 			delete: (id) => instance.delete(`online_lesson/remote/${id}/`),
 
 			students: {
-				get: ({ limit = 'Бүгд', page = 1, search = '', elearnId = '' }) => instance.get(`online_lesson/remote/students/?limit=${limit}&page=${page}&search=${search}&elearnId=${elearnId}`),
+				get: ({ limit = 'Бүгд', page = 1, sort='', search = '', elearnId = '' }) => instance.get(`online_lesson/remote/students/?limit=${limit}&page=${page}&sorting=${sort}&search=${search}&elearnId=${elearnId}`),
 				put : (data) => instance.put(`online_lesson/remote/students/`,data),
 				delete: (elearnId, id) => instance.delete(`/online_lesson/remote/students/${id}/?elearnId=${elearnId}`),
 			},
 
 			onlineInfo: {
-				get: ({ limit = 'Бүгд', page = 1, search = '', elearnId = '' }) => instance.get(`online_lesson/remote/online-info/?limit=${limit}&page=${page}&search=${search}&elearnId=${elearnId}`),
+				get: ({ limit = 'Бүгд', page = 1, sort='', search = '', elearnId = '' }) => instance.get(`online_lesson/remote/online-info/?limit=${limit}&page=${page}&sorting=${sort}&search=${search}&elearnId=${elearnId}`),
 				post : (data) => instance.post(`online_lesson/remote/online-info/`,data),
 				put : (data, id) => instance.put(`online_lesson/remote/online-info/${id}/`,data),
 				delete: (id) => instance.delete(`online_lesson/remote/online-info/${id}/`),
 			},
 
 			onlineSubInfo: {
-				get: ({ limit = 'Бүгд', page = 1, search = '', elearnId = '' }) => instance.get(`online_lesson/remote/online-sub-info/?limit=${limit}&page=${page}&search=${search}&elearnId=${elearnId}`),
+				get: ({ limit = 'Бүгд', page = 1, sort='', search = '', elearnId = '' }) => instance.get(`online_lesson/remote/online-sub-info/?limit=${limit}&page=${page}&sorting=${sort}&search=${search}&elearnId=${elearnId}`),
 				post : (data) => instance.post(`online_lesson/remote/online-sub-info/`,data),
 				put : (data, id) => instance.put(`online_lesson/remote/online-sub-info/${id}/`,data),
 				delete: (id) => instance.delete(`online_lesson/remote/online-sub-info/${id}/`),
-			}
+			},
+
+			quezQuestions: {
+				get: ({ limit = 'Бүгд', page = 1, sort='', search = '', onlineSubInfoId = '' }) => instance.get(`online_lesson/remote/quez-questions/?limit=${limit}&page=${page}&sorting=${sort}&search=${search}&onlineSubInfoId=${onlineSubInfoId}`),
+				post : (data) => instance.post(`online_lesson/remote/quez-questions/`,data),
+				put : (data, id) => instance.put(`online_lesson/remote/quez-questions/${id}/`,data),
+				delete: (id) => instance.delete(`online_lesson/remote/quez-questions/${id}/`),
+			},
+
+			quezChoices: {
+				get: ({ limit = 'Бүгд', page = 1, sort='', search = '', onlineSubInfoId = '' }) => instance.get(`online_lesson/remote/quez-choices/?limit=${limit}&page=${page}&sorting=${sort}&search=${search}&onlineSubInfoId=${onlineSubInfoId}`),
+				post : (data) => instance.post(`online_lesson/remote/quez-choices/`,data),
+				put : (data, id) => instance.put(`online_lesson/remote/quez-choices/${id}/`,data),
+				delete: (id) => instance.delete(`online_lesson/remote/quez-choices/${id}/`),
+			},
 		},
 
 		// суралцагчийн хөтөч

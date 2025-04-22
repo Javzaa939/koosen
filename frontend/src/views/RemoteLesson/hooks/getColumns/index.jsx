@@ -1,4 +1,4 @@
-import { Edit, Trash2 } from 'react-feather'
+import { Trash2 } from 'react-feather'
 import { Badge } from 'reactstrap';
 import useModal from "@hooks/useModal"
 

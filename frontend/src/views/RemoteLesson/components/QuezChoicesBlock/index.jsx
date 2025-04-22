@@ -1,63 +1,46 @@
 import useModal from '@src/utility/hooks/useModal';
-import { useState } from 'react';
 import { Edit, Trash2 } from 'react-feather';
 import { Badge, Button, UncontrolledTooltip } from 'reactstrap';
 import '../../style.scss';
-import { QUIZ } from '../../utils';
 
-export default function OnlineSubInfoBlock({
+export default function QuezChoicesBlock({
 	t,
-	datas = [],
-	handleSelectOnlineSubInfo,
-	onlineInfoTitle,
-	getOnlineSubInfoDatas,
-	onlineInfoId,
+	datas,
+	refreshQuezChoices,
+	quezQuestionsId,
 	fetchData,
 	remoteApi,
-	toggleAddOnlineSubInfoModal
+	toggleAddEditQuezChoices,
 }) {
 	// #region to handle 'delete' modal
 	const { showWarning } = useModal()
 
 	async function handleDelete(id) {
-		const { success } = await fetchData(remoteApi.onlineSubInfo.delete(id))
-		if (success) getOnlineSubInfoDatas()
+		const { success } = await fetchData(remoteApi.quezChoices.delete(id))
+		if (success) refreshQuezChoices()
 	}
 	// #endregion
 
-	const [activeOnlineSubInfo, setActiveOnlineSubInfo] = useState()
-
-	function handleSelectOnlineSubInfoLocal(onlineSubInfosItem, onlineInfoTitle) {
-		handleSelectOnlineSubInfo(onlineSubInfosItem, onlineInfoTitle)
-		setActiveOnlineSubInfo(onlineSubInfosItem.id)
-	}
-
-	return datas.map((onlineSubInfosItem, onlineSubInfosInd) => {
-		const { id, title, quezquestions_count, file_type_name, file_type } = onlineSubInfosItem
+	return datas.map((quezChoicesItem, quezChoicesInd) => {
+		const { id, choices, score } = quezChoicesItem
 
 		return <Button
-			key={onlineSubInfosInd}
+			key={quezChoicesInd}
 			color='Link'
 			className="d-flex justify-content-between p-1 w-100 text-start"
-			onClick={() => handleSelectOnlineSubInfoLocal(onlineSubInfosItem, onlineInfoTitle)}
-			style={activeOnlineSubInfo === id ? { backgroundColor: '#fcfcfc' } : {}}
+			onClick={null}
 		>
 			<div className='d-flex flex-column'>
-				<span className="h5 mb-50">{title}</span>
+				<span className="h5 mb-50">{choices}</span>
 				<span className="text-body fw-normal">
-					{
-						file_type === QUIZ ?
-							`${quezquestions_count} ${t('асуултууд')}`
-							:
-							file_type_name
-					}
+					{t('Зөв хариултын оноо')}: {score}
 				</span>
 			</div>
 			<div className='d-flex'>
 				<div>
 					<a
 						role="button"
-						onClick={(e) => { toggleAddOnlineSubInfoModal(onlineSubInfosItem, onlineInfoId); e.stopPropagation(); }}
+						onClick={(e) => { toggleAddEditQuezChoices(quezChoicesItem, quezQuestionsId); e.stopPropagation(); }}
 						id={`complaintListDatatableEdit${id}`}
 						className='ms-1'
 					>
@@ -71,9 +54,9 @@ export default function OnlineSubInfoBlock({
 						onClick={(e) => {
 							showWarning({
 								header: {
-									title: t(`Дэд бүлэг устгах`),
+									title: t(`Хариулт устгах`),
 								},
-								question: t(`Та энэ дэд бүлгийг устгахдаа итгэлтэй байна уу?`),
+								question: t(`Та энэ хариулт устгахдаа итгэлтэй байна уу?`),
 								onClick: () => handleDelete(id),
 								btnText: t('Устгах'),
 							})

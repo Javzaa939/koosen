@@ -40,10 +40,26 @@ function Lesson() {
     const { id } = useParams()
     const remoteApi = useApi().remote
 
-    // to get Elearn basic data
+    // #region to get Elearn basic data
     const location = useLocation()
-    const { selectedELearn } = location.state || {}
+    let elearnData = null
+    let isLoadingElearn = false
+
+    if (location.state) elearnData = location.state
+    else {
+        const getElearn = () => remoteApi.getOne(id)
+
+        const { data: elearnDatas, isLoading: isLoadingElearnLocal } = useApiCustom({
+            apiFunction: getElearn
+        })
+
+        elearnData = { selectedELearn: elearnDatas }
+        isLoadingElearn = isLoadingElearnLocal
+    }
+
+    const { selectedELearn } = elearnData
     const { title, students, start_date, end_date, is_end_exam, is_certificate } = selectedELearn || {}
+    // #endregion
 
     // #region API usage
     // #region to get Elearn's students data
@@ -54,6 +70,7 @@ function Lesson() {
         page: currentPage,
         search: searchValue,
         elearnId: id,
+        sort: 'id',
     })
 
     const { data: studentsDatasOriginal, isLoading: isLoadingStudents } = useApiCustom({
@@ -73,6 +90,7 @@ function Lesson() {
 
     const getOnlineInfo = () => remoteApi.onlineInfo.get({
         elearnId: id,
+        sort: 'id',
     })
 
     const { data: onlineInfoDatas, isLoading: isLoadingOnlineInfo } = useApiCustom({
@@ -86,6 +104,7 @@ function Lesson() {
 
     const getOnlineSubInfo = () => remoteApi.onlineSubInfo.get({
         elearnId: id,
+        sort: 'id'
     })
 
     const { data: onlineSubInfoDatas, isLoading: isLoadingOnlineSubInfo } = useApiCustom({
@@ -96,7 +115,7 @@ function Lesson() {
     // #endregion API usage
 
     const { isLoading: isLoadingGeneral, Loader, fetchData } = useLoader({});
-    const isLoading = isLoadingGeneral || isLoadingStudents || isLoadingOnlineInfo || isLoadingOnlineSubInfo
+    const isLoading = isLoadingGeneral || isLoadingStudents || isLoadingOnlineInfo || isLoadingOnlineSubInfo || isLoadingElearn
 
     const { t } = useTranslation();
 
@@ -185,8 +204,6 @@ function Lesson() {
                 <Col md={8}>
                     <OnlineSubInfoDetailsBlock
                         t={t}
-                        getOnlineSubInfoDatas={() => setRefreshOnlineSubInfo((current) => !current)}
-                        selectedELearn={selectedELearn}
                         selectedOnlineSubInfo={selectedOnlineSubInfo}
                     />
                 </Col>

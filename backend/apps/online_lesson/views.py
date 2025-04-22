@@ -32,6 +32,8 @@ from .serializers import (
     HomeWorkSerializer,
     HomeWorkStudentSerializer,
     LectureStudentSerializer,
+    QuezChoicesSerializer,
+    QuezQuestionsSerializer,
     StudentSerializer,
     ELearnSerializer
 )
@@ -42,7 +44,7 @@ from core.models import (
 )
 
 from main.utils.file import split_root_path
-from main.utils.function.utils import convert_stringified_querydict_to_dict, create_file_in_cdn_silently, create_file_to_cdn, has_permission, is_url, remove_file_from_cdn, get_file_from_cdn, save_file_to_cdn_and_remove_from_dict, str2bool
+from main.utils.function.utils import convert_stringified_querydict_to_dict, create_file_in_cdn_silently, create_file_to_cdn, has_permission, is_url, remove_file_from_cdn, get_file_from_cdn, str2bool
 
 @permission_classes([IsAuthenticated])
 class OnlineLessonListAPIView(
@@ -856,8 +858,16 @@ class RemoteLessonAPIView(
     # endregion
 
     # region custom methods
+    def rollbackCDN(self, relative_path):
+        if relative_path:
+            cdn_rollback_result = remove_file_from_cdn(relative_path)
+
+            if not cdn_rollback_result:
+                print('CDN rollback failed during removing with path:', relative_path)
+
     def post_put(self):
         request = self.request
+        relative_path = None
 
         if request.method == 'POST':
             result = request.send_info("INF_001")
@@ -882,14 +892,23 @@ class RemoteLessonAPIView(
 
             data['teacher'] = teacher_instance.id
             file_path_in_cdn = None
+            file = request.FILES.get('image')
 
-            if file_keys:
-                file_path_in_cdn, _ = save_file_to_cdn_and_remove_from_dict(request,data,['image'],upload_to,'image',0,'image')
+            if file:
+                relative_path, file_path_in_cdn, error = create_file_in_cdn_silently(upload_to, file)
+                file_path_in_cdn = relative_path
 
-                if not file_path_in_cdn:
+                if error:
+                    print(error)
                     return request.send_error('CDN_error', 'Файл хадгалахад алдаа гарсан байна (CDN).')
-            else:
-                data['image'] = None
+            elif data['image']:
+                # to save existinig URL of file or new URL if URL was used instead of file itself
+                file_path_in_cdn = data['image']
+
+            # to clear field value if key exists and value is null and to keep it using removing for serializer and setting using instance.save()
+            if data['image']:
+                # to remove from dict because serializer requires file in filefield, but it is always string of CDN path or user URL
+                del data['image']
 
             with transaction.atomic():
                 elearn_instance = None
@@ -905,9 +924,11 @@ class RemoteLessonAPIView(
         except ValidationError as serializer_errors:
             traceback.print_exc()
             result = request.send_error_valid(serializer_errors.detail)
+            self.rollbackCDN(relative_path)
         except Exception:
             traceback.print_exc()
             result = request.send_error("ERR_002")
+            self.rollbackCDN(relative_path)
 
         return result
     # endregion
@@ -915,20 +936,24 @@ class RemoteLessonAPIView(
     # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
     @has_permission(must_permissions=['"lms-online-lesson-read"'])
     def get(self,request,pk=None):
-        if pk:
-            datas = self.retrieve(request, pk).data
-            return request.send_data(datas)
+        try:
+            if pk:
+                datas = self.retrieve(request, pk).data
+                return request.send_data(datas)
 
-        # region to sort by one or multiple fields
-        sorting = self.request.GET.get('sorting', '')
+            # region to sort by one or multiple fields
+            sorting = self.request.GET.get('sorting', '')
 
-        if sorting:
-            self.queryset = self.queryset.order_by(*sorting.split(','))
-        # endregion
+            if sorting:
+                self.queryset = self.queryset.order_by(*sorting.split(','))
+            # endregion
 
-        serializer = self.list(request).data
+            serializer = self.list(request).data
 
-        return request.send_data(serializer)
+            return request.send_data(serializer)
+        except Exception:
+            traceback.print_exc()
+            return request.send_error("ERR_002")
 
     # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
     @has_permission(must_permissions=['lms-study-lessonstandart-create'])
@@ -946,6 +971,9 @@ class RemoteLessonAPIView(
         result = request.send_info("INF_003")
 
         try:
+            instance = self.get_object()
+            relative_path = instance.image
+            self.rollbackCDN(relative_path)
             self.destroy(request)
         except Exception:
             traceback.print_exc()
@@ -973,15 +1001,26 @@ class RemoteLessonStudentsAPIView(
     # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
     @has_permission(must_permissions=['"lms-online-lesson-read"'])
     def get(self,request,pk=None):
-        elearn_id = request.query_params.get('elearnId')
-        self.queryset = self.queryset.filter(elearn__id=elearn_id)
+        try:
+            elearn_id = request.query_params.get('elearnId')
+            self.queryset = self.queryset.filter(elearn__id=elearn_id)
 
-        if pk:
-            datas = self.retrieve(request, pk).data
-            return request.send_data(datas)
-        serializer = self.list(request).data
+            if pk:
+                datas = self.retrieve(request, pk).data
+                return request.send_data(datas)
 
-        return request.send_data(serializer)
+            # region to sort by one or multiple fields
+            sorting = self.request.GET.get('sorting', '')
+
+            if sorting:
+                self.queryset = self.queryset.order_by(*sorting.split(','))
+            # endregion
+
+            serializer = self.list(request).data
+            return request.send_data(serializer)
+        except Exception:
+            traceback.print_exc()
+            return request.send_error("ERR_002")
 
     # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
     @has_permission(must_permissions=['lms-study-lessonstandart-update'])
@@ -1075,15 +1114,26 @@ class RemoteLessonOnlineInfoAPIView(
     # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
     @has_permission(must_permissions=['"lms-online-lesson-read"'])
     def get(self,request,pk=None):
-        elearn_id = request.query_params.get('elearnId')
-        self.queryset = self.queryset.filter(elearn__id=elearn_id)
+        try:
+            elearn_id = request.query_params.get('elearnId')
+            self.queryset = self.queryset.filter(elearn__id=elearn_id)
 
-        if pk:
-            datas = self.retrieve(request, pk).data
-            return request.send_data(datas)
-        serializer = self.list(request).data
+            if pk:
+                datas = self.retrieve(request, pk).data
+                return request.send_data(datas)
 
-        return request.send_data(serializer)
+            # region to sort by one or multiple fields
+            sorting = self.request.GET.get('sorting', '')
+
+            if sorting:
+                self.queryset = self.queryset.order_by(*sorting.split(','))
+            # endregion
+
+            serializer = self.list(request).data
+            return request.send_data(serializer)
+        except Exception:
+            traceback.print_exc()
+            return request.send_error("ERR_002")
 
     # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
     @has_permission(must_permissions=['lms-study-lessonstandart-create'])
@@ -1099,6 +1149,7 @@ class RemoteLessonOnlineInfoAPIView(
     @has_permission(must_permissions=['lms-study-lessonstandart-delete'])
     def delete(self, request, pk=None):
         result = request.send_info("INF_003")
+
         try:
             self.destroy(request)
         except Exception:
@@ -1150,8 +1201,16 @@ class RemoteLessonOnlineSubInfoAPIView(
     # endregion
 
     # region custom methods
+    def rollbackCDN(self, relative_path):
+        if relative_path:
+            cdn_rollback_result = remove_file_from_cdn(relative_path)
+
+            if not cdn_rollback_result:
+                print('CDN rollback failed during removing with path:', relative_path)
+
     def post_put(self):
         request = self.request
+        relative_path = None
 
         if request.method == 'POST':
             result = request.send_info("INF_001")
@@ -1163,7 +1222,7 @@ class RemoteLessonOnlineSubInfoAPIView(
             not_stringified_data = convert_stringified_querydict_to_dict(request.data,['file'])
             stringified_data = not_stringified_data.pop('json_data')
 
-            # region to collect only necessary fields
+            # region to collect only fields that are necessary for serializer
             cleaned_data = {
                 'title': stringified_data['title'],
                 'parent_title': stringified_data['parent_title'],
@@ -1172,7 +1231,8 @@ class RemoteLessonOnlineSubInfoAPIView(
 
             if stringified_data['file_type'] == OnlineSubInfo.TEXT:
                 cleaned_data['text'] = stringified_data['text']
-            else:
+
+            if cleaned_data['file_type'] in [OnlineSubInfo.VIDEO, OnlineSubInfo.PDF]:
                 cleaned_data['file'] = not_stringified_data['file']
             # endregion
 
@@ -1196,7 +1256,8 @@ class RemoteLessonOnlineSubInfoAPIView(
 
                 if request.FILES.keys():
                     file = request.FILES.getlist('file')[0]
-                    _, file_path, _ = create_file_in_cdn_silently(upload_to, file)
+                    relative_path, _, _ = create_file_in_cdn_silently(upload_to, file)
+                    file_path = relative_path
 
                     if not file_path:
                         return request.send_error('CDN_error', 'Файл хадгалахад алдаа гарсан байна (CDN).')
@@ -1224,9 +1285,11 @@ class RemoteLessonOnlineSubInfoAPIView(
         except ValidationError as serializer_errors:
             traceback.print_exc()
             result = request.send_error_valid(serializer_errors.detail)
+            self.rollbackCDN(relative_path)
         except Exception:
             traceback.print_exc()
             result = request.send_error("ERR_002")
+            self.rollbackCDN(relative_path)
 
         return result
     # endregion
@@ -1234,15 +1297,201 @@ class RemoteLessonOnlineSubInfoAPIView(
     # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
     @has_permission(must_permissions=['"lms-online-lesson-read"'])
     def get(self,request,pk=None):
-        elearn_id = request.query_params.get('elearnId')
-        self.queryset = self.queryset.filter(parent_title__elearn__id=elearn_id)
+        try:
+            elearn_id = request.query_params.get('elearnId')
+            self.queryset = self.queryset.filter(parent_title__elearn__id=elearn_id)
 
-        if pk:
-            datas = self.retrieve(request, pk).data
-            return request.send_data(datas)
-        serializer = self.list(request).data
+            if pk:
+                datas = self.retrieve(request, pk).data
+                return request.send_data(datas)
 
-        return request.send_data(serializer)
+            # region to sort by one or multiple fields
+            sorting = self.request.GET.get('sorting', '')
+
+            if sorting:
+                self.queryset = self.queryset.order_by(*sorting.split(','))
+            # endregion
+
+            serializer = self.list(request).data
+            return request.send_data(serializer)
+        except Exception:
+            traceback.print_exc()
+            return request.send_error("ERR_002")
+
+    # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
+    @has_permission(must_permissions=['lms-study-lessonstandart-create'])
+    def post(self, request):
+        return self.post_put()
+
+    # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
+    @has_permission(must_permissions=['lms-study-lessonstandart-update'])
+    def put(self,request,pk=None):
+        return self.post_put()
+
+    # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
+    @has_permission(must_permissions=['lms-study-lessonstandart-delete'])
+    def delete(self, request, pk=None):
+        result = request.send_info("INF_003")
+        try:
+            instance = self.get_object()
+            relative_path = instance.file.name
+            if not ('http' in relative_path and 'https' in relative_path):
+                self.rollbackCDN(relative_path)
+
+            self.destroy(request)
+        except Exception:
+            traceback.print_exc()
+            result = request.send_error("ERR_002")
+
+        return result
+
+
+@permission_classes([IsAuthenticated])
+class RemoteLessonQuezQuestionsAPIView(
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView
+):
+    '''Зайн сургалтын api/QuezQuestions'''
+
+    queryset = QuezQuestions.objects
+    serializer_class = QuezQuestionsSerializer
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['question']
+
+    # region to override mixins' methods to take instance and save cdn file path
+    def create(self, data):
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+
+        return serializer
+
+    def update(self, data, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return serializer
+    # endregion
+
+    # region custom methods
+    def rollbackCDN(self, relative_path):
+        if relative_path:
+            cdn_rollback_result = remove_file_from_cdn(relative_path)
+
+            if not cdn_rollback_result:
+                print('CDN rollback failed during removing with path:', relative_path)
+
+    def post_put(self):
+        request = self.request
+        relative_path = None
+
+        if request.method == 'POST':
+            result = request.send_info("INF_001")
+        elif request.method == 'PUT':
+            result = request.send_info("INF_002")
+
+        try:
+            upload_to = ELearn._meta.get_field('image').upload_to
+            not_stringified_data = convert_stringified_querydict_to_dict(request.data,['image'])
+            stringified_data = not_stringified_data.pop('json_data')
+
+            # region to collect only fields that are necessary for serializer
+            cleaned_data = {
+                'question': stringified_data['question'],
+                'kind': stringified_data['kind'],
+                'image': request.FILES.get('image') if request.FILES.get('image') else stringified_data['image'],
+                'score': stringified_data['score'],
+                'rating_max_count': stringified_data['rating_max_count'],
+                'low_rating_word': stringified_data['low_rating_word'],
+                'high_rating_word': stringified_data['high_rating_word'],
+                'max_choice_count': stringified_data['max_choice_count'],
+                'yes_or_no': stringified_data['yes_or_no'],
+            }
+
+            if request.method == 'POST':
+                teacher_instance = Teachers.objects.filter(user_id=request.user.id).first()
+                cleaned_data['created_by'] = teacher_instance.id
+            # endregion
+
+            file_path = None
+
+            if request.FILES.keys():
+                relative_path, _, _ = create_file_in_cdn_silently(upload_to, cleaned_data['image'])
+                file_path = relative_path
+
+                if not file_path:
+                    return request.send_error('CDN_error', 'Файл хадгалахад алдаа гарсан байна (CDN).')
+            elif cleaned_data['image']:
+                # to save existinig URL of file or new URL if URL was used instead of file itself
+                file_path = cleaned_data['image']
+
+            # to clear field value if key exists and value is null and to keep it using removing for serializer and setting using instance.save()
+            if cleaned_data['image']:
+                # to remove from dict because serializer requires file in filefield, but it is always string of CDN path or user URL
+                del cleaned_data['image']
+
+            with transaction.atomic():
+                instance = None
+
+                if request.method == 'POST':
+                    instance = self.create(cleaned_data).instance
+                    online_sub_info_instance = OnlineSubInfo.objects.get(id=stringified_data['onlineSubInfoId'])
+                    online_sub_info_instance.quiz.add(instance)
+                elif request.method == 'PUT':
+                    # to skip if "no key" and override if "key exists, so if it is null then it will be cleared". That is reason why partal=True is used
+                    instance = self.update(cleaned_data, partial=True).instance
+
+                if file_path:
+                    instance.image = file_path
+                    instance.save()
+        except ValidationError as serializer_errors:
+            traceback.print_exc()
+            result = request.send_error_valid(serializer_errors.detail)
+            self.rollbackCDN(relative_path)
+        except Exception:
+            traceback.print_exc()
+            result = request.send_error("ERR_002")
+            self.rollbackCDN(relative_path)
+
+        return result
+    # endregion
+
+    # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
+    @has_permission(must_permissions=['"lms-online-lesson-read"'])
+    def get(self,request,pk=None):
+        try:
+            online_sub_info_id = request.query_params.get('onlineSubInfoId')
+            self.queryset = self.queryset.filter(onlinesubinfo__id=online_sub_info_id)
+
+            # region to sort by one or multiple fields
+            sorting = self.request.GET.get('sorting', '')
+
+            if sorting:
+                self.queryset = self.queryset.order_by(*sorting.split(','))
+            # endregion
+
+            if pk:
+                datas = self.retrieve(request, pk).data
+                return request.send_data(datas)
+            serializer = self.list(request).data
+            return request.send_data(serializer)
+        except Exception:
+            traceback.print_exc()
+            return request.send_error("ERR_002")
 
     # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
     @has_permission(must_permissions=['lms-study-lessonstandart-create'])
@@ -1260,6 +1509,177 @@ class RemoteLessonOnlineSubInfoAPIView(
         result = request.send_info("INF_003")
 
         try:
+            instance = self.get_object()
+            relative_path = instance.image
+            self.rollbackCDN(relative_path)
+            self.destroy(request)
+        except Exception:
+            traceback.print_exc()
+            result = request.send_error("ERR_002")
+
+        return result
+
+
+@permission_classes([IsAuthenticated])
+class RemoteLessonQuezChoicesAPIView(
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView
+):
+    '''Зайн сургалтын api/QuezChoices'''
+
+    queryset = QuezChoices.objects
+    serializer_class = QuezChoicesSerializer
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['choices']
+
+    # region to override mixins' methods to take instance and save cdn file path
+    def create(self, data):
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+
+        return serializer
+
+    def update(self, data, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return serializer
+    # endregion
+
+    # region custom methods
+    def rollbackCDN(self, relative_path):
+        if relative_path:
+            cdn_rollback_result = remove_file_from_cdn(relative_path)
+
+            if not cdn_rollback_result:
+                print('CDN rollback failed during removing with path:', relative_path)
+
+    def post_put(self):
+        request = self.request
+        relative_path = None
+
+        if request.method == 'POST':
+            result = request.send_info("INF_001")
+        elif request.method == 'PUT':
+            result = request.send_info("INF_002")
+
+        try:
+            upload_to = ELearn._meta.get_field('image').upload_to
+            not_stringified_data = convert_stringified_querydict_to_dict(request.data,['image'])
+            stringified_data = not_stringified_data.pop('json_data')
+
+            # region to collect only fields that are necessary for serializer
+            cleaned_data = {
+                'choices': stringified_data['choices'],
+                'image': request.FILES.get('image') if request.FILES.get('image') else stringified_data['image'],
+                'score': stringified_data['score'],
+            }
+
+            if request.method == 'POST':
+                teacher_instance = Teachers.objects.filter(user_id=request.user.id).first()
+                cleaned_data['created_by'] = teacher_instance.id
+            # endregion
+
+            file_path = None
+
+            if request.FILES.keys():
+                relative_path, _, _ = create_file_in_cdn_silently(upload_to, cleaned_data['image'])
+                file_path = relative_path
+
+                if not file_path:
+                    return request.send_error('CDN_error', 'Файл хадгалахад алдаа гарсан байна (CDN).')
+            elif cleaned_data['image']:
+                # to save existinig URL of file or new URL if URL was used instead of file itself
+                file_path = cleaned_data['image']
+
+            # to clear field value if key exists and value is null and to keep it using removing for serializer and setting using instance.save()
+            if cleaned_data['image']:
+                # to remove from dict because serializer requires file in filefield, but it is always string of CDN path or user URL
+                del cleaned_data['image']
+
+            with transaction.atomic():
+                instance = None
+
+                if request.method == 'POST':
+                    instance = self.create(cleaned_data).instance
+                    quez_questions_instance = QuezQuestions.objects.get(id=stringified_data['quezQuestionsId'])
+                    quez_questions_instance.choices.add(instance)
+                elif request.method == 'PUT':
+                    instance = self.update(cleaned_data, partial=True).instance
+
+                if file_path:
+                    instance.image = file_path
+                    instance.save()
+        except ValidationError as serializer_errors:
+            traceback.print_exc()
+            result = request.send_error_valid(serializer_errors.detail)
+            self.rollbackCDN(relative_path)
+        except Exception:
+            traceback.print_exc()
+            result = request.send_error("ERR_002")
+            self.rollbackCDN(relative_path)
+
+        return result
+    # endregion
+
+    # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
+    @has_permission(must_permissions=['"lms-online-lesson-read"'])
+    def get(self,request,pk=None):
+        try:
+            online_sub_info_id = request.query_params.get('onlineSubInfoId')
+            self.queryset = self.queryset.filter(quezquestions__onlinesubinfo__id=online_sub_info_id)
+            self.queryset = self.queryset.annotate(quez_question_id=F('quezquestions__id'))
+
+            # region to sort by one or multiple fields
+            sorting = self.request.GET.get('sorting', '')
+
+            if sorting:
+                self.queryset = self.queryset.order_by(*sorting.split(','))
+            # endregion
+
+            if pk:
+                datas = self.retrieve(request, pk).data
+                return request.send_data(datas)
+            serializer = self.list(request).data
+            return request.send_data(serializer)
+        except Exception:
+            traceback.print_exc()
+            return request.send_error("ERR_002")
+
+    # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
+    @has_permission(must_permissions=['lms-study-lessonstandart-create'])
+    def post(self, request):
+        return self.post_put()
+
+    # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
+    @has_permission(must_permissions=['lms-study-lessonstandart-update'])
+    def put(self,request,pk=None):
+        return self.post_put()
+
+    # NOTE: there are no 'remote lesson' permissions, so i used atleast somehow related permissions
+    @has_permission(must_permissions=['lms-study-lessonstandart-delete'])
+    def delete(self, request, pk=None):
+        result = request.send_info("INF_003")
+
+        try:
+            instance = self.get_object()
+            relative_path = instance.image
+            self.rollbackCDN(relative_path)
             self.destroy(request)
         except Exception:
             traceback.print_exc()

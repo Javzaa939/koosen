@@ -1704,39 +1704,6 @@ def create_file_in_cdn_silently(relative_path, file):
     return cdn_relative_path, cdn_full_path, failure
 
 
-def delete_file_from_cdn_silently(file_path):
-    """
-    ver. 20241205
-    Supports:
-    - full path returning
-    - exceptions handling
-
-    :param relative_path: path without schema, domain and other static parts
-    :param file: file like type object
-
-    returns: tuple of:
-    1. string: relative path - standart return from create_file_to_cdn()['full_path'] method
-    2. string: full path
-    3. string: failure message
-    """
-
-    cdn_response = None
-    error = None
-
-    try:
-        cdn_response = remove_file_from_cdn(file_path)
-
-    except Exception as e:
-        error = e.__str__()
-
-    failure = None
-
-    if not cdn_response:
-        failure = (f'File: {file_path}. Delete error: {error}. CDN response: {cdn_response}')
-
-    return False if failure else True, failure
-
-
 def undefined_to_none(datas=[]):
     """ str undefined утгыг None руу хөрвүүлэх """
     for idx, value in enumerate(datas):
@@ -1798,31 +1765,11 @@ def pearson_corel(x, y):
     ]
 
 
-# to save file in CDN and remove from dict (e.g. from request.data)
-def save_file_to_cdn_and_remove_from_dict(request, dict_where_to_remove, field_names_to_remove, dir_name, request_file_field_name, request_file_index, field_name_to_add):
-    file = request.FILES.getlist(request_file_field_name)
-    file_path_in_cdn = None
-
-    if file:
-        file = file[request_file_index]
-        _, full_path, error = create_file_in_cdn_silently(dir_name, file)
-
-        if error:
-            dict_where_to_remove[field_name_to_add] = file
-            return None, error
-        else:
-            for field_name_to_remove in field_names_to_remove:
-                del dict_where_to_remove[field_name_to_remove]
-            file_path_in_cdn = full_path
-
-    return file_path_in_cdn, None
-
-
-"""
-    to get "POST" data in "json-parsed" types and keep all list items of QueryDict/formData for their specified keys in 2nd argument (keep_list)
-    Required to use JSON.stringify() first for all "not file fields" on frontend to pass formData
-"""
 def convert_stringified_querydict_to_dict(post_data,keep_list=[],is_keep_only_not_singles=True):
+    """
+        to get "POST" data in "json-parsed" types and keep all list items of QueryDict/formData for their specified keys in 2nd argument (keep_list)
+        Required to use JSON.stringify() first for all "not file fields" on frontend to pass formData
+    """
     if keep_list:
         post_data_dict = post_data.dict()
 
@@ -1866,8 +1813,8 @@ def convert_stringified_querydict_to_dict(post_data,keep_list=[],is_keep_only_no
     return result
 
 
-# to check string for URL syntax
 def is_url(string):
+    # to check string for URL syntax
     try:
         result = urlparse(string)
         return all([result.scheme, result.netloc])

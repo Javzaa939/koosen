@@ -9,11 +9,11 @@ import { Link } from 'react-router-dom';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import { getPagination } from '@utils';
+import empty from "@src/assets/images/empty-image.jpg";
+import useModal from '@src/utility/hooks/useModal';
 
 import AddEditModal from './components/AddEditModal';
 import './style.scss';
-import DisplayQuill from './components/DisplayQuill';
-import useModal from '@src/utility/hooks/useModal';
 
 function RemoteLesson() {
     const [datas, setDatas] = useState([])
@@ -96,14 +96,12 @@ function RemoteLesson() {
 
     return (
         <>
-            {/* to reset modal values 'key' prop is used, because reset() function does not work sometimes I could not find reason */}
-            <AddEditModal
-                key={editData?.id}
+            {addEditModal && <AddEditModal
                 open={addEditModal}
                 handleModal={toggleAddEditModal}
                 refreshDatas={getDatas}
                 editData={editData}
-            />
+            />}
             <Card>
                 <CardHeader>
                     <CardTitle>Зайн сургалт</CardTitle>
@@ -152,7 +150,7 @@ function RemoteLesson() {
                                             {
                                                 imageOriginal
                                                 &&
-                                                <div className="rounded-2 text-center mb-1">
+                                                <div className="rounded-2 text-center mb-1" style={{ height: '200px', overflow: 'hidden' }}>
                                                     <img className="img-fluid" src={image} alt={title}
                                                         onError={({ currentTarget }) => {
                                                             currentTarget.onerror = null; // prevents looping
