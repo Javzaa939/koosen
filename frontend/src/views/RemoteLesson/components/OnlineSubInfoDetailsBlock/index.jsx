@@ -33,7 +33,7 @@ export default function OnlineSubInfoDetailsBlock({
 								file_type === VIDEO ?
 									<video
 										controls
-										src={file_path}
+										src={file_path?.includes('https') ? file_path : process.env.REACT_APP_CDN_URL + '' + file_path}
 										width={"90%"}
 										height={'350px'}
 										className='justify-content-center'
@@ -42,7 +42,7 @@ export default function OnlineSubInfoDetailsBlock({
 									</video>
 									:
 									file_type === PDF ?
-										<iframe src={file_path} width="100%" height="640" allowFullScreen frameBorder="0" style={{ border: 'none' }}></iframe>
+										<iframe src={process.env.REACT_APP_CDN_URL + '' +file_path} width="100%" height="640" allowFullScreen frameBorder="0" style={{ border: 'none' }}></iframe>
 										:
 										file_type === QUIZ ?
 											<QuizBlock

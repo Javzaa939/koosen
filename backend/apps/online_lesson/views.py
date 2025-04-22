@@ -1332,11 +1332,12 @@ class RemoteLessonOnlineSubInfoAPIView(
     @has_permission(must_permissions=['lms-study-lessonstandart-delete'])
     def delete(self, request, pk=None):
         result = request.send_info("INF_003")
-
         try:
             instance = self.get_object()
-            relative_path = instance.file
-            self.rollbackCDN(relative_path)
+            relative_path = instance.file.name
+            if not ('http' in relative_path and 'https' in relative_path):
+                self.rollbackCDN(relative_path)
+
             self.destroy(request)
         except Exception:
             traceback.print_exc()
