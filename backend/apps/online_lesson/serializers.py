@@ -420,7 +420,7 @@ class OnlineSubInfoSerializer(serializers.ModelSerializer):
 
     # to get orignal field value, because Django automatically adds MEDIA and other url parts at the start of path in filefields so this another field is needed
     def get_file_path(self, obj):
-        result = obj.file.name if obj.file else None
+        result = obj.file.name if obj.file else ''
         if not settings.DEBUG:
             result = result.replace('dxis/', '')
         return result
