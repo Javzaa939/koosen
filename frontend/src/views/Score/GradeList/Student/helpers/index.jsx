@@ -111,7 +111,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, seasonNameOpt
 		{
 			header: 'student__first_name',
 			name: t("Оюутны нэр"),
-			selector: (row) => row?.student?.code + ' ' +  row?.student?.last_name + ' ' + row?.student?.first_name,
+			selector: (row) => row?.student?.code + ' ' +  row?.student?.last_name?.[0] + '. ' + row?.student?.first_name,
             center: true,
 			sortable: true,
 			minWidth: "150px",
