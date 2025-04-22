@@ -1,0 +1,47 @@
+.orgLogoDiv{
+	height: 200px;
+	width: 425px;
+	border: 1px dashed #d8d6de;
+    border-radius: 0.357rem;
+}
+.orgLogoDiv img{
+	object-fit: cover;
+	width: 100%;
+	height: 100%;
+}
+
+.choiceImgDiv{
+	height: 50px;
+	width: 250px;
+	border: 1px dashed #d8d6de;
+    border-radius: 0.357rem;
+}
+
+.choiceImgDiv img{
+	object-fit: cover;
+	width: 100%;
+	height: 100%;
+}
+
+.showImgDiv{
+	height: 200px;
+	width: 425px;
+}
+
+.showImgDiv img{
+	object-fit: cover;
+	width: 100%;
+	height: 100%;
+}
+
+
+.showChoiceDiv {
+	height: 50px;
+	width: 250px;
+}
+
+.showChoiceDiv img{
+	object-fit: cover;
+	width: 100%;
+	height: 100%;
+}

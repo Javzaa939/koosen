@@ -1113,8 +1113,8 @@ function useApi(isDisplay=false) {
 
 				getLessonList:(limit, page, sort,search,lesson,lesson_year, lesson_season, group) =>
 					instance.get(`/print/lesson/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson=${lesson}&select_year=${lesson_year}&select_season=${lesson_season}&group=${group}&school=${school_id}`),
-				getStudentList:(limit, page, sort,search,group,lesson_year, lesson_season) =>
-					instance.get(`/print/student/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&group=${group}&select_year=${lesson_year}&select_season=${lesson_season}&school=${school_id}`),
+				getStudentList:(limit, page, sort,search,group,lesson_year, lesson_season,  start, end, lesson='') =>
+					instance.get(`/print/student/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&group=${group}&select_year=${lesson_year}&select_season=${lesson_season}&school=${school_id}&start=${start}&end=${end}&lesson=${lesson}`),
 			},
 			/** Төгсөлтийн ажил*/
 			graduationwork:{
@@ -1521,9 +1521,9 @@ function useApi(isDisplay=false) {
 			}
 		},
 		challenge: {
-			get: (page, limit, lesson, type, teacher, search, is_season=false, lesson_year=cyear_name, lesson_season=cseason_id) =>
-				instance.get(`learning/challenge/?page=${page}&limit=${limit}&lesson=${lesson}&type=${type}&teacher=${teacher}&search=${search}&season=${is_season}&school=${school_id}&lesson_year=${lesson_year}&lesson_season=${lesson_season}`),
-			getTeacherList: (limit, page, sort, search, sub_org, salbar, position="", is_season=false) => instance.get(`/learning/teacher/list/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&sub_org=${sub_org}&salbar=${salbar}&position=${position}&season=${is_season}`),
+			get: (page, limit, lesson, type, teacher, search, is_season=false, lesson_year=cyear_name, lesson_season=cseason_id, challenge_type=1) =>
+				instance.get(`learning/challenge/?page=${page}&limit=${limit}&lesson=${lesson}&type=${type}&teacher=${teacher}&search=${search}&season=${is_season}&school=${school_id}&lesson_year=${lesson_year}&lesson_season=${lesson_season}&challenge_type=${challenge_type}`),
+			getTeacherList: (limit, page, sort, search, sub_org, salbar, position="", is_season=false, type='') => instance.get(`/learning/teacher/list/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&sub_org=${sub_org}&salbar=${salbar}&position=${position}&season=${is_season}&type=${type}`),
 			getTeacherLessonList: (limit, page, sort, search, teacher_id, exam_type=2) => instance.get(`/learning/teacher/lesson/list/${teacher_id}/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&exam_type=${exam_type}`),
 			getAll: (challenge) => {
 				var c_challenge = ''
@@ -1616,7 +1616,7 @@ function useApi(isDisplay=false) {
 					}
 					return instance.delete(`learning/questions/?year=${cyear_name}&season=${cseason_id}${remove_ids}`)
 				},
-				getByTitle: (page, limit, search, titleId, teacher_id, stype='', level='') => instance.get(`learning/questions/title/${teacher_id}/?page=${page}&limit=${limit}&search=${search}&titleId=${titleId}&stype=${stype}&level=${level}`),
+				getByTitle: (page, limit, search, titleId, teacher_id, stype='', level='',  is_graduate=false) => instance.get(`learning/questions/title/${teacher_id}/?page=${page}&limit=${limit}&search=${search}&titleId=${titleId}&stype=${stype}&level=${level}&is_graduate=${is_graduate}`),
 				getTitle: (lesson='', is_season=false, teacher_id=0) => instance.get(`learning/questions/title/list/${teacher_id}/?lesson=${lesson}&season=${is_season}`),
 				getLevel: (lesson='') => instance.get(`learning/questions/level/list/?lesson=${lesson}`),
 				postTitle: (datas) => instance.post(`learning/questions/title/`, datas),
@@ -1629,6 +1629,17 @@ function useApi(isDisplay=false) {
 				postExcel:(datas) => instance.post(`learning/questions/excel/` , datas),
 
 
+			},
+
+			graduate: {
+				getTitle: () => instance.get(`learning/graduate/title/`),
+				postTitle: (data) =>  instance.post(`learning/graduate/title/`, data),
+				getSubTitle: (main='') => instance.get(`learning/graduate/sub-title/?main=${main}`),
+				postSubTitle: (data) =>  instance.post(`learning/graduate/sub-title/`, data),
+				getQuestion: (title) => instance.get(`learning/graduate/question/?title=${title}`),
+
+				deleteTitle : (id) => instance.delete(`learning/graduate/title/${id}/`),
+				deleteSubTitle : (id) => instance.delete(`learning/graduate/sub-title/${id}/`),
 			},
 
 			psychologicalTestQuestion:{

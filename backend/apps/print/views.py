@@ -2,8 +2,8 @@ import math
 from datetime import datetime
 from dateutil import parser
 from django.db import transaction
-from django.db.models import F, Subquery, OuterRef, Count, Value, CharField,Q
-from django.db.models.functions import Substr,Concat
+from django.db.models import F, Subquery, OuterRef, FloatField, Q, CharField
+from django.db.models.functions import Coalesce, Concat
 from collections import defaultdict
 
 from lms.models import Student, TimeTable_to_group, TimeTable_to_student
@@ -1038,9 +1038,16 @@ class StudentListAPIView(
         sorting = self.request.query_params.get('sorting')
         school = self.request.query_params.get('school')
 
+        start = self.request.query_params.get('start')
+        end = self.request.query_params.get('end')
+        lesson = self.request.query_params.get('lesson')
+
         # оюутангаар хайлт хийнэ
         if group:
             queryset = queryset.filter(student__group=group)
+
+        if lesson:
+            queryset = queryset.filter(lesson=lesson)
 
         # Сонгогдсон хичээлийн жил улирлаар хайх
         if select_season:
@@ -1051,6 +1058,10 @@ class StudentListAPIView(
 
         if school:
             queryset = queryset.filter(school=school)
+
+        if start and end:
+            score_ids = queryset.annotate(score_total=Coalesce(F('exam_score'), 0, output_field=FloatField()) + Coalesce(F('teach_score'), 0, output_field=FloatField())).filter(score_total__gte=start, score_total__lte=end).values_list('id', flat=True)
+            queryset = queryset.filter(id__in=score_ids)
 
         if sorting:
             if not isinstance(sorting, str):

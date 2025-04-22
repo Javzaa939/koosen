@@ -356,10 +356,12 @@ const VerticalLayout = (props) =>
                         /** Шалгалтын асуулт */
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-exam-question-read', 'e-challenge')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-season-question-read', 'season-equistion')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-graduate-question-read', 'graduate-question')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-graduate-question-read', 'graduate-challenge')
                         /** Шалгалт */
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-exam-read', 'just-challenge')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-season-exam-read', 'season-challenge')
-
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-graduate-exam-read', 'graduate-test')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-exam-report-read', 'examreport')
 
 

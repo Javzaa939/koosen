@@ -47,7 +47,7 @@ const MainInformation = ({ getNavigateData }) => {
     const [selectedTeachers, setSelectedTeachers] = useState([])
     const [select_school, setSelectSchool] = useState('')
     const [select_department, setSelectDepartment] = useState('')
-    const [datas, setDatas ] = useState([])
+    const [datas, setDatas ] = useState({})
 
     const { user } = useContext(AuthContext)
     const { school_id } = useContext(SchoolContext)
@@ -152,16 +152,18 @@ const MainInformation = ({ getNavigateData }) => {
 
     useEffect(() => {
         if (Object.keys(datas).length > 0) {
-            var teacher_ids = []
-            datas['teachers']?.teachers?.map((teacher, idx) => {
-                var selected = teacher_option.find((e) => e.id === teacher?.id)
-                if (selected != undefined) {
-                    teacher_ids.push(selected)
-                }
+            if (datas?.teachers) {
+                var teacher_ids = []
+                datas?.teachers?.teachers?.map((teacher, idx) => {
+                    var selected = teacher_option?.find((e) => e.id === teacher?.id)
+                    if (selected != undefined) {
+                        teacher_ids.push(selected)
+                    }
+                })
                 setSelectedTeachers(teacher_ids)
-            })
+            }
         }
-    },[teacher_option,datas])
+    },[teacher_option, datas])
 
 
 	async function onSubmit(cdata) {

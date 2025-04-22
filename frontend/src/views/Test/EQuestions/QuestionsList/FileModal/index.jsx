@@ -17,7 +17,7 @@ import {
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 
-const FileModal = ({ isOpen, handleModal, refreshData }) => {
+const FileModal = ({ isOpen, handleModal, refreshData, title, season, is_graduate }) => {
 
     const defaultExt = ['csv', 'xlsx']
     const [isLoading, setLoader] = useState(false)
@@ -57,6 +57,11 @@ const FileModal = ({ isOpen, handleModal, refreshData }) => {
             const formData = new FormData()
             formData.append('file', file)
             formData.append('ext', fileExt)
+            if (is_graduate) {
+                formData.append('main_title', title)
+            } else {
+                formData.append('title', title)
+            }
 
             const { success, error }  = await fetchData(fileApi.postExcel(formData))
             if (success) {

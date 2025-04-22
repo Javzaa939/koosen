@@ -52,6 +52,12 @@ export function getColumns (currentPage, rowsPerPage, datas, helpers_data, handl
             wrap:true,
         },
         {
+            name: `${'Авч байгаа оноо'}`,
+            selector: (row) => row?.challenge[0]?.still_score,
+            minWidth: "100px",
+            wrap:true,
+        },
+        {
             name: `${'Авсан оноо'}`,
             selector: (row, idx) => {
                 var student_score =  0

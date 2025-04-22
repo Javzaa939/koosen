@@ -18,7 +18,8 @@ import useLoader from "@hooks/useLoader";
 import QuestionsList from "./QuestionsList";
 import AddTitle from "./AddTitle";
 import useModal from "@hooks/useModal";
-const EQuestions = ({ teacher_id, title_id, is_season }) => {
+const EQuestions = ({ teacher_id, title_id, is_season, is_graduate=false }) => {
+    console.log(is_graduate)
     const [datas, setDatas] = useState([]);
     const [titleModal, setTitleModal] = useState({ type: false, editId: null })
     const [activeTitle, setActiveTitle] = useState(title_id)
@@ -29,7 +30,7 @@ const EQuestions = ({ teacher_id, title_id, is_season }) => {
     const questionAPI = useApi().challenge.question
 
     async function getAllTitle() {
-        const { success, data } = await fetchData(questionAPI.getTitle('', is_season, teacher_id))
+        const { success, data } = await fetchData(questionAPI.getTitle('', is_season, teacher_id, is_graduate, title_id))
         if (success) {
             setDatas(data)
         }
@@ -37,7 +38,6 @@ const EQuestions = ({ teacher_id, title_id, is_season }) => {
 
     useEffect(() => {
         getAllTitle()
-
     }, [])
 
     useEffect(() => {
@@ -152,7 +152,7 @@ const EQuestions = ({ teacher_id, title_id, is_season }) => {
                 }
 
                 <Col lg={is_season ? 12 : 8} xxl={is_season ? 12 : 9}>
-                    <QuestionsList filterId={activeTitle} teacher_id={teacher_id} season={is_season}/>
+                    <QuestionsList filterId={activeTitle} teacher_id={teacher_id} season={is_season} is_graduate={is_graduate}/>
                 </Col>
 
             </Row>

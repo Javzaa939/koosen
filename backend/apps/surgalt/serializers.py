@@ -1058,10 +1058,46 @@ class ChallengeStudentsSerializer(serializers.ModelSerializer):
     student_name = serializers.SerializerMethodField()
     student_code = serializers.SerializerMethodField()
     answer_json = serializers.SerializerMethodField()
+    still_score = serializers.SerializerMethodField()
 
     class Meta:
         model = ChallengeStudents
-        fields = ['challenge', 'score', 'take_score', 'answer_json', "tried", "id", "student_name", "student_code", 'answer']
+        fields = ['challenge', 'score', 'take_score', 'answer_json', "tried", "id", "student_name", "student_code", 'answer', 'still_score']
+
+    def get_still_score(self, obj):
+        """ Өгч байгаа шалгалт """
+        score = 0
+
+        try:
+            if obj.answer:
+                answer_json = obj.answer.replace("'", '"')
+                answer_json = json.loads(answer_json)
+
+                # Тестэн доторх асуултууд
+                for question_id, choice_id in answer_json.items():
+                    #Асуултан доторх хариулт
+
+                    # NOTE: choice_id нь array ирээд алдаа гараад байсан учир энэ нөхцлийг бичив. javzaa bichsen
+                    if choice_id and isinstance(choice_id, list):
+                        for ch_id in choice_id:
+                            choice_obj = QuestionChoices.objects.filter(id=ch_id).values('score', 'challengequestions__question').first()
+
+                            # Оноо байвал зөв хариулт гэж үзнэ
+                            if choice_obj and choice_obj.get('score') > 0:
+                                score += choice_obj.get('score')
+
+                    elif choice_id:
+                        choice_obj = QuestionChoices.objects.filter(id=choice_id).values('score','challengequestions__question').first()
+
+                        # Оноо байвал зөв хариулт гэж үзнэ
+                        if choice_obj and choice_obj.get('score') > 0:
+                            score += choice_obj.get('score')
+
+            return score
+
+        except json.JSONDecodeError:
+            return None
+
 
     def get_student_name(self, obj):
         data = Student.objects.filter(id=obj.student.id).values('first_name').first()
@@ -1089,22 +1125,35 @@ class ChallengeStudentsSerializer(serializers.ModelSerializer):
 
                     # NOTE: choice_id нь array ирээд алдаа гараад байсан учир энэ нөхцлийг бичив. javzaa bichsen
                     if choice_id and isinstance(choice_id, list):
-                        choice_id = choice_id[0]
+                        for ch_id in choice_id:
+                            choice_obj = QuestionChoices.objects.filter(id=ch_id).values('score', 'challengequestions__question').first()
+                            # choice дотроо is_right-г үүсгэнэ
+                            is_right = False
 
-                    choice_obj = QuestionChoices.objects.filter(id=choice_id).values('score','challengequestions__question').first()
+                            # Оноо байвал зөв хариулт гэж үзнэ
+                            if choice_obj and choice_obj.get('score') > 0:
+                                is_right = True
 
-                    # choice дотроо is_right-г үүсгэнэ
-                    is_right = False
+                            answers.append({
+                                'question_id': question_id,
+                                'question_text': choice_obj.get('challengequestions__question') if choice_obj else '',
+                                'is_answered_right': is_right
+                            })
+                    elif choice_id:
+                        choice_obj = QuestionChoices.objects.filter(id=choice_id).values('score','challengequestions__question').first()
 
-                    # Оноо байвал зөв хариулт гэж үзнэ
-                    if choice_obj and choice_obj.get('score') > 0:
-                        is_right = True
+                        # choice дотроо is_right-г үүсгэнэ
+                        is_right = False
 
-                    answers.append({
-                        'question_id': question_id,
-                        'question_text': choice_obj.get('challengequestions__question') if choice_obj else '',
-                        'is_answered_right': is_right
-                    })
+                        # Оноо байвал зөв хариулт гэж үзнэ
+                        if choice_obj and choice_obj.get('score') > 0:
+                            is_right = True
+
+                        answers.append({
+                            'question_id': question_id,
+                            'question_text': choice_obj.get('challengequestions__question') if choice_obj else '',
+                            'is_answered_right': is_right
+                        })
 
             return answers
 

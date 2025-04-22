@@ -24,13 +24,14 @@ import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 
 import Addmodal from "./Add";
-import EditModal from "./Edit";
-// import Show from "../Show";
-// import Exam from "./Exam"
+import Exam from "./Exam"
+import Show from "@src/views/Test/Show";
 import classNames from "classnames"
+import AuthContext from "@src/utility/context/AuthContext";
 
-const Test = () => {
+const TestProgram = () => {
     const { school_id } = useContext(SchoolContext)
+	const { user } = useContext(AuthContext)
 
 	const { t } = useTranslation();
 
@@ -46,20 +47,18 @@ const Test = () => {
 	const [selectedLesson, setSelectedLesson] = useState('')
 	const [selectedTime, setSelectedTime] = useState('progressing')
 	const [selectedTeacher, setSelectedTeacher] = useState('')
+    const [teachers, setTeachers] = useState([]);
+
+	const [lessonOption, setLessonOption] = useState([])
+	const [editData, setEditRowData] = useState()
+	const [examId, setExamModalId] = useState()
+	const [showData, setShowRowData] = useState({})
+	const [isEdit, setIsEdit] = useState(false)
 
 	const [selected_year, setSelectedYear] = useState('')
     const [selected_season, setSelectedSeason] = useState('')
 	const [yearOption, setYear] = useState([])
 	const [seasonOption, setSeasonOption] = useState([]);
-
-    const [teachers, setTeachers] = useState([]);
-
-	const [lessonOption, setLessonOption] = useState([])
-	const [difficultyLevelsOption, setDifficultyLevelsOption] = useState([])
-	const [editData, setEditRowData] = useState({})
-	const [examId, setExamModalId] = useState()
-	const [showData, setShowRowData] = useState({})
-	const [isEdit, setIsEdit] = useState(false)
 
 	const { isLoading, fetchData } = useLoader({});
 	const { fetchData: getLessonFetchData } = useLoader({});
@@ -77,7 +76,7 @@ const Test = () => {
 	const seasonApi = useApi().settings.season
 
 	async function getDatas() {
-		const { success, data } = await fetchData(challengeAPI.get(currentPage, rowsPerPage, selectedLesson, selectedTime, selectedTeacher, searchValue, true, selected_year, selected_season, 3));
+		const { success, data } = await fetchData(challengeAPI.get(currentPage, rowsPerPage, selectedLesson, selectedTime, selectedTeacher, searchValue, false, selected_year, selected_season, 5));
 
 		if (success) {
 			setDatas(data?.results);
@@ -92,19 +91,11 @@ const Test = () => {
             setTeachers(data)
         }
     }
-
 	async function getLesson() {
 		const { success, data } = await getLessonFetchData(teacherLessonApi.getOne(''))
+
 		if (success) {
 			setLessonOption(data)
-		}
-	}
-
-	async function getDifficultyLevels() {
-		const { success, data } = await getLessonFetchData(challengeAPI.getDifficultyLevels())
-
-		if (success) {
-			setDifficultyLevelsOption(data)
 		}
 	}
 
@@ -145,18 +136,22 @@ const Test = () => {
 	// Нэмэх функц
 	const handleModal = () => {
 		setModal(!modal);
-		setEditRowData({})
+		if (modal) {
+			setEditRowData()
+		}
 		setIsEdit(false)
 	};
 
-	const handleEditModal = () => {
-		setEditModal(!edit_modal);
+	const handleEditModal = (row) => {
+		setEditRowData(row)
+		setModal(!modal);
+		// setIsEdit(false)
 	};
 
-	// const handleExamModal = (id) => {
-	// 	setExamModalId(id)
-	// 	setExamModal(!examModal);
-	// };
+	const handleExamModal = (id) => {
+		setExamModalId(id)
+		setExamModal(!examModal);
+	};
 
 	// Хуудас солих үед ажиллах хэсэг
 	const handlePagination = (page) => {
@@ -167,11 +162,11 @@ const Test = () => {
 		setRowsPerPage(parseInt(e.target.value));
 	}
 
-	// const handleSend = async (id) => {
-	// 	const { success, data } = await fetchData(challengeAPI.send(id));
-	// 	if (success) {
-	// 	}
-	// }
+	const handleSend = async (id) => {
+		const { success, data } = await fetchData(challengeAPI.send(id));
+		if (success) {
+		}
+	}
 
 	useEffect(
 		() => {
@@ -188,7 +183,6 @@ const Test = () => {
 		() => {
 			getLesson()
 			getTeachers()
-			getDifficultyLevels()
 		},
 		[]
 	)
@@ -212,18 +206,22 @@ const Test = () => {
 		<Fragment>
 			<Card>
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
-					<CardTitle tag="h4" className="mt-50">{t("Шалгалтын жагсаалт")}</CardTitle>
-					<div className="d-flex flex-wrap mt-md-0 mt-1">
-						<Button
-							color="primary"
-							onClick={() => handleModal()}
-						>
-							<Plus size={15} />
-							<span className="align-middle ms-50">
-								{t("Нэмэх")}
-							</span>
-						</Button>
-					</div>
+					<CardTitle tag="h4" className="mt-50">{t("Төгсөлтийн шалгалтын жагсаалт")}</CardTitle>
+					{
+						user?.permissions?.includes('lms-graduate-exam-create')
+						&&
+						<div className="d-flex flex-wrap mt-md-0 mt-1">
+							<Button
+								color="primary"
+								onClick={() => handleModal()}
+							>
+								<Plus size={15} />
+								<span className="align-middle ms-50">
+									{t("Нэмэх")}
+								</span>
+							</Button>
+						</div>
+					}
 				</CardHeader>
 				<Row className="m-1">
 					<Col md={3} sm={10}>
@@ -270,29 +268,8 @@ const Test = () => {
 							isLoading={isLoading}
 						/>
 					</Col>
-                    <Col md={3} sm={10}>
-						<Label className="form-label" for="lesson">
-							{t('Хичээл')}
-						</Label>
-						<Select
-							id="lesson"
-							name="lesson"
-							isClearable
-							classNamePrefix='select'
-							className='react-select'
-							placeholder={`-- Сонгоно уу --`}
-							options={lessonOption || []}
-							noOptionsMessage={() => 'Хоосон байна'}
-							onChange={(val) => {
-								setSelectedLesson(val?.id || '')
-							}}
-							styles={ReactSelectStyles}
-							getOptionValue={(option) => option.id}
-							getOptionLabel={(option) => option.full_name}
-						/>
-					</Col>
-				    <Col md={3} sm={10}>
-						<Label>{t('Багш')}</Label>
+					<Col md={3} sm={10}>
+						<Label>Багш</Label>
 						<Select
 							classNamePrefix='select'
 							isClearable
@@ -310,6 +287,27 @@ const Test = () => {
 							getOptionLabel={(option) => option.full_name}
 						/>
 					</Col>
+					{/* <Col md={3} sm={10} className="m-1">
+						<Label className="form-label" for="lesson">
+							{t('Хичээл')}
+						</Label>
+						<Select
+							id="lesson"
+							name="lesson"
+							isClearable
+							classNamePrefix='select'
+							className='react-select'
+							placeholder={`-- Сонгоно уу --`}
+							options={lessonOption || []}
+							noOptionsMessage={() => 'Хоосон байна'}
+							onChange={(val) => {
+								setSelectedLesson(val?.id || '')
+							}}
+							styles={ReactSelectStyles}
+							getOptionValue={(option) => option.id}
+							getOptionLabel={(option) => option.name}
+						/>
+					</Col> */}
 					<Col md={3} sm={10}>
 						<Label className="form-label" for="time">
 							{t('Хугацаагаар')}
@@ -404,6 +402,10 @@ const Test = () => {
 							total_count,
 							handleEdit,
 							handleDelete,
+							handleShow,
+							handleSend,
+							handleEditModal,
+							handleExamModal
 						)}
 						paginationPerPage={rowsPerPage}
 						paginationDefaultPage={currentPage}
@@ -424,18 +426,11 @@ const Test = () => {
 							open={modal}
 							handleModal={handleModal}
 							refreshDatas={getDatas}
-						/>
-                )}
-				{
-					edit_modal && (
-						<EditModal
-							open={edit_modal}
-							handleModal={handleEditModal}
-							refreshDatas={getDatas}
+							select_datas={lessonOption}
 							editData={editData}
 						/>
-                )}
-				{/* {
+					)}
+				{
 					showModal &&
 					<Show
 						open={showModal}
@@ -448,10 +443,25 @@ const Test = () => {
 					<Exam
 						testId={examId}
 						handleModal={handleExamModal} />
-				} */}
+				}
+			</Card>
+			<Card className={'mt-2'}>
+				<CardHeader><div className="d-flex"><HelpCircle size={20} /><h5 className="ms-25 fw-bolder">Тусламж хэсэг</h5></div></CardHeader>
+				<CardBody>
+					<Alert color='primary' className={'p-1 тме1'}>
+						Онлайн шалгалт үүсгэх заавар мэдээлэл хүргэж байна.
+					</Alert>
+					<iframe
+						width="100%"
+						height="500"
+						title='Шалгалт'
+						src={'https://www.youtube.com/embed/mvF55C892uY'}
+						sandbox='allow-same-origin allow-forms allow-popups allow-scripts allow-presentation'
+					/>
+				</CardBody>
 			</Card>
 		</Fragment>
 	);
 };
 
-export default Test;
+export default TestProgram;

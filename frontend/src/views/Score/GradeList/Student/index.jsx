@@ -20,6 +20,7 @@ const Student  = ({ setMainData, printIsAllTimeType, chosenGroupStudent, setChos
         group: '',
         lesson_year: '',
         lesson_season: '',
+        lesson: ''
     }
 
     //Api
@@ -27,6 +28,7 @@ const Student  = ({ setMainData, printIsAllTimeType, chosenGroupStudent, setChos
     const getStudentApi = useApi().print.score
     const scoreApi = useApi().score.register
     const groupApi = useApi().student.group
+    const lessonApi = useApi().study.lessonStandart
 
     //useState
     const [select_value, setSelectValue] = useState(values)
@@ -40,6 +42,8 @@ const Student  = ({ setMainData, printIsAllTimeType, chosenGroupStudent, setChos
     const [currentPage, setCurrentPage] = useState(1);
     const [total_count, setTotalCount] = useState(1)
     const [datas, setDatas] = useState([]);
+    const [lessonOption, setLesson] = useState([])
+
     const { school_id } = useContext(SchoolContext)
 
     //Loader
@@ -63,20 +67,28 @@ const Student  = ({ setMainData, printIsAllTimeType, chosenGroupStudent, setChos
     }
 
     //Хайх товч дарсан үед ажиллах функц
-     async function handleSearch() {
+    async function handleSearch() {
         getStudentLists()
+    }
+
+    // Хичээлийн жагсаалт
+    async function getLesson() {
+        const { success, data } = await fetchData(lessonApi.getList())
+        if(success) {
+            setLesson(data)
+        }
     }
 
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('')
 
-    /*Жагсаалт дата авах функц */
+    /* Жагсаалт дата авах функц */
     async function getStudentLists() {
         const group = select_value?.group
         const lesson_year = select_value?.lesson_year
         const lesson_season = select_value?.lesson_season
 
-        const { success, data } = await allFetch(getStudentApi.getStudentList(rowsPerPage, currentPage, sortField, searchValue,group, lesson_year, lesson_season, start_value, end_value, chosenGroupStudent))
+        const { success, data } = await allFetch(getStudentApi.getStudentList(rowsPerPage, currentPage, sortField, searchValue,group, lesson_year, lesson_season, start_value, end_value, select_value?.lesson))
         if (success) {
             setDatas(data?.results)
             setTotalCount(data?.count)
@@ -110,6 +122,7 @@ const Student  = ({ setMainData, printIsAllTimeType, chosenGroupStudent, setChos
             getseasonName()
             setYear(generateLessonYear(5))
             getGroup()
+            getLesson()
         },
         []
     )
@@ -168,7 +181,7 @@ const Student  = ({ setMainData, printIsAllTimeType, chosenGroupStudent, setChos
                 <CardHeader className='lex-md-row flex-column align-md-items-center align-items-start border-bottom pt-0'>
                 </CardHeader>
                 <Row className="mx-0 mt-1 mb-1" sm={12}>
-                    <Col md={3}>
+                    <Col md={2}>
                         <Label className="form-label me-1" for="building">
                             {t('Хичээлийн жил')}
                         </Label>
@@ -205,7 +218,7 @@ const Student  = ({ setMainData, printIsAllTimeType, chosenGroupStudent, setChos
                             getOptionLabel={(option) => option.name}
                         />
                     </Col>
-                    <Col md={3}>
+                    <Col md={2}>
                         <Label className="form-label" for="lesson_season">
                             {t('Улирал')}
                         </Label>
@@ -243,7 +256,7 @@ const Student  = ({ setMainData, printIsAllTimeType, chosenGroupStudent, setChos
                             }}
                         />
                     </Col>
-                    <Col md={3}>
+                    <Col md={2}>
                         <Label className="form-label" for="group">
                             {t('Анги')}
                         </Label>
@@ -271,6 +284,34 @@ const Student  = ({ setMainData, printIsAllTimeType, chosenGroupStudent, setChos
                             styles={ReactSelectStyles}
                             getOptionValue={(option) => option.id}
                             getOptionLabel={(option) => option.name}
+                        />
+                    </Col>
+                    <Col md={2}>
+                        <Label className="form-label" for="lesson">
+                            {t('Хичээл')}
+                        </Label>
+                        <Select
+                            name="lesson"
+                            id="lesson"
+                            classNamePrefix='select'
+                            isClearable
+                            className={classnames('react-select')}
+                            isLoading={isLoading}
+                            placeholder={t('-- Сонгоно уу --')}
+                            options={lessonOption || []}
+                            value={lessonOption.find((c) => c.id === select_value.lesson)}
+                            noOptionsMessage={() => t('Хоосон байна.')}
+                            onChange={(val) => {
+                                setSelectValue(current => {
+                                    return {
+                                        ...current,
+                                        lesson: val?.id || '',
+                                    }
+                                });
+                            }}
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.id}
+                            getOptionLabel={(option) => option.code + ' ' + option?.name}
                         />
                     </Col>
                     <Col md={3} sm={6} xs={12}>

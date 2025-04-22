@@ -344,7 +344,7 @@ const Class = ({ setMainData, setChosenGroup, setFileName, yearAndSeason, printV
                             }}
                             styles={ReactSelectStyles}
                             getOptionValue={(option) => option.id}
-                            getOptionLabel={(option) => option.name}
+                            getOptionLabel={(option) => option.code + ' ' + option?.name}
                         />
                     </Col>
                     <Col md={3} className="datatable-search-text  d-flex align-items-end mt-2">
