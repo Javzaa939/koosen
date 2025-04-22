@@ -2,7 +2,7 @@ import math
 from datetime import datetime
 from dateutil import parser
 from django.db import transaction
-from django.db.models import F, Subquery, OuterRef, FloatField, Q, CharField
+from django.db.models import F, Subquery, OuterRef, FloatField, Q, CharField, Value
 from django.db.models.functions import Coalesce, Concat
 from collections import defaultdict
 
