@@ -25,7 +25,7 @@ export default function ExamFilter({ setSelected, setSelectedYear, setSelectedSe
     const { isLoading, fetchData } = useLoader({})
 
 	async function getOptions() {
-		const { success, data } = await fetchData(challengeApi.get(1, 10000000, '', '', '', '', true, selected_year, selected_season))
+		const { success, data } = await fetchData(challengeApi.get(1, 10000000, '', '', '', '', true, selected_year, selected_season, 3))
 
 		if (success) {
 			setOptions(data?.results)
