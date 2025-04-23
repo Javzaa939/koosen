@@ -27,7 +27,10 @@ from main.utils.file import remove_folder, split_root_path
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from main.utils.function.pagination import CustomPagination
-from main.utils.function.utils import str2bool, has_permission, get_lesson_choice_student, remove_key_from_dict, get_fullName, get_student_score_register, calculate_birthday, null_to_none, bytes_image_encode, get_active_year_season,start_time, json_load, dict_fetchall, unit_static_datas, undefined_to_none
+from main.utils.function.utils import (
+    str2bool, has_permission, get_lesson_choice_student, remove_key_from_dict, get_fullName, get_student_score_register, calculate_birthday, null_to_none,
+    bytes_image_encode, get_active_year_season,start_time, json_load, dict_fetchall, unit_static_datas, undefined_to_none, add_student_eng_name
+)
 # from main.khur.XypClient import citizen_regnum, highschool_regnum
 from main.utils.file import save_file, remove_folder
 from lms.models import Learning, Payment, ProfessionalDegree, Student, StudentAdmissionScore, StudentEducation, StudentLeave, StudentLogin, TimeTable
@@ -4528,3 +4531,108 @@ class ExamToGroupGroupLessonAPIView(
 
         return request.send_data(list(datas))
 
+
+@permission_classes([IsAuthenticated])
+class GraduationLessonConvertAPIView(
+    generics.GenericAPIView
+):
+    """ Төгсөх ангийн хичээлийг хөрвүүлэх """
+    def get(self, request):
+
+        data_url = 'https://kimo.mngl.net/pub/convert'
+        headers = {
+            'Content-Type':'application/json'
+        }
+        update_lesson = []
+
+        group = request.query_params.get('group')
+        group_obj = Group.objects.get(pk=group)
+        if group_obj:
+            lessons = LearningPlan.objects.filter(profession=group_obj.profession, lesson__name_uig__isnull=True).values('lesson__name', 'lesson')
+            if lessons:
+                for lesson in list(lessons):
+                    name = lesson.get('lesson__name')
+
+                    lesson_obj = LessonStandart.objects.get(id=lesson.get('lesson'))
+                    post_data = {
+                        'direction': 'to-mng',
+                        'text': name
+                    }
+
+                    response = requests.post(data_url, headers=headers, json=post_data)
+
+                    if response.status_code == 200:
+                        data = response.json()
+                        lesson_uig_name = data['result']
+
+                        if '1' in data['result']:
+                            lesson_uig_name = data['result'].replace("1", "I")
+
+                        if '2' in data['result']:
+                            lesson_uig_name = data['result'].replace("2", "II")
+
+                        if '3' in data['result']:
+                            lesson_uig_name = data['result'].replace("3", "III")
+
+                        if '4' in data['result']:
+                            lesson_uig_name = data['result'].replace("4", "IV")
+
+                        lesson_obj.name_uig = lesson_uig_name
+
+                    update_lesson.append(lesson_obj)
+
+            # Тухайн ангийн хүүхдүүдийн овог нэр
+            student_names = Student.objects.filter(group=group_obj, first_name_uig__isnull=True, last_name_uig__isnull=True)
+            updated_names = []
+            for student in list(student_names):
+                first_name = student.first_name
+                last_name = student.last_name
+
+                post_data_name = {
+                    'direction': 'to-mng',
+                    'text': first_name
+                }
+
+                post_data_last = {
+                    'direction': 'to-mng',
+                    'text': last_name
+                }
+
+                response_name = requests.post(data_url, headers=headers, json=post_data_name)
+                response_last = requests.post(data_url, headers=headers, json=post_data_last)
+
+                if response_name.status_code == 200:
+                    data_name = response_name.json()
+                    uig_name = data_name['result']
+
+                    student.first_name_uig = uig_name
+
+                if response_last.status_code == 200:
+                    data_last = response_last.json()
+                    uig_last = data_last['result']
+
+                    student.last_name_uig = uig_last
+
+                updated_names.append(student)
+
+            if len(update_lesson) > 0:
+                LessonStandart.objects.bulk_update(update_lesson, ['name_uig'])
+
+            if len(updated_names) > 0:
+                Student.objects.bulk_update(updated_names, ['first_name_uig', 'last_name_uig'])
+
+            return request.send_info('INF_001')
+        else:
+            return request.send_error('ERR_002', "Тухайн анги нь төгсөх анги мөн эсэх шалгана уу")
+
+
+@permission_classes([IsAuthenticated])
+class GraduationEnglishConvertAPIView(
+    generics.GenericAPIView
+):
+    """ Төгсөх ангийн хичээлийг хөрвүүлэх """
+    def get(self, request):
+        group = request.query_params.get('group')
+        count = add_student_eng_name(group)
+
+        return request.send_info('INF_002')

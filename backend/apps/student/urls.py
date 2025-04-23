@@ -135,4 +135,7 @@ urlpatterns = [
     # дата оруулах
     path('postData/', StudentPostDataAPIView().as_view()),
 
+    # Уйгаржин хөрвүүлэх
+    path('graduation/uigarjin/convert/', GraduationLessonConvertAPIView.as_view()),
+    path('graduation/english/convert/', GraduationEnglishConvertAPIView.as_view()),
 ]

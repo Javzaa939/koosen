@@ -1092,14 +1092,14 @@ def cyrillic_name_to_latin(first_name, last_name):
     return latin_first_name, latin_last_name
 
 
-def add_student_eng_name():
+def add_student_eng_name(group):
     """ Суралцагчдийн англи нэрийг хадгалана """
 
     # Ашиглах модел
     Student = apps.get_model('lms', 'Student')
 
     # Бүх суралцагчдаа орж авна
-    students = Student.objects.exclude(first_name_eng__isnull=False, last_name_eng__isnull=False)
+    students = Student.objects.filter(group=group).exclude(first_name_eng__isnull=False, last_name_eng__isnull=False)
 
     # Нийт bulk_create хийх өөрчлөлтүүдийг хадгалах list
     updated_students = []
@@ -1113,9 +1113,9 @@ def add_student_eng_name():
         updated_students.append(student)
 
     # Бүх өөрчлөлтүүдээ ганц query-гээр бааздаа хадгална
-    with transaction.atomic():
-        Student.objects.bulk_update(updated_students, ['first_name_eng', 'last_name_eng'])
+    Student.objects.bulk_update(updated_students, ['first_name_eng', 'last_name_eng'])
 
+    return len(updated_students)
 
 def send_message_skytel(phone_numbers, message):
     """ phone_numbers: Илгээх утасны дугаарууд

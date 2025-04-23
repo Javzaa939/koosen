@@ -2,7 +2,7 @@
 import { Fragment, useState, useEffect, useContext} from 'react'
 
 import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, ListGroupItem, Spinner, Dropdown, DropdownToggle, DropdownItem, DropdownMenu } from 'reactstrap'
-import { ChevronDown, Search, Plus, Menu, Edit, Trash2, FileText, Download, Printer } from 'react-feather'
+import { ChevronDown, Search, Plus, Menu, Edit, Trash2, FileText, Download, Shuffle } from 'react-feather'
 import DataTable from 'react-data-table-component'
 import { useTranslation } from 'react-i18next'
 import { useForm, Controller } from "react-hook-form";
@@ -150,6 +150,22 @@ const Graduation = () => {
         if(success)
         {
             setGroupOption(data)
+        }
+    }
+
+    /** Төгсөх ангийн ХИЧЭЭЛИЙН НЭР уйгаржинаар хөрвүүлэх */
+    async function handleLessonConvert() {
+        const { success } = await fetchData(graduateApi.lessonUigConvert(select_value?.group))
+        if (success) {
+            getDatas()
+        }
+    }
+
+    /** Төгсөх ангийн  НЭР англиар хөрвүүлэх */
+    async function handleEnglishConvert() {
+        const { success } = await fetchData(graduateApi.engConvert(select_value?.group))
+        if (success) {
+            getDatas()
         }
     }
 
@@ -477,14 +493,22 @@ const Graduation = () => {
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
                     <CardTitle tag="h4">{t('Төгсөлтийн ажил')}</CardTitle>
                     <div className='d-flex flex-wrap mt-md-0 mt-1 gap-1 align-items-center'>
-                        {/* <Button
+                        <Button
                             color='primary'
-                            disabled={selectedRows.length === 0}
-                            onClick={() => {multiplePrintHandler()}}
+                            disabled={select_value.group ? false : true}
+                            onClick={() => {handleEnglishConvert()}}
                         >
-                            <Printer size={15}/>
-                            <span className='align-middle ms-50'>Хэвлэлт</span>
-                        </Button> */}
+                            <Shuffle size={15}/>
+                            <span className='align-middle ms-50'>Англи хөрвүүлэх</span>
+                        </Button>
+                        <Button
+                            color='primary'
+                            disabled={select_value.group ? false : true}
+                            onClick={() => {handleLessonConvert()}}
+                        >
+                            <Shuffle size={15}/>
+                            <span className='align-middle ms-50'>Уйгаржин хөрвүүлэх</span>
+                        </Button>
                         <Button
                             color='primary'
                             disabled={select_value.group ? false : true}
@@ -494,7 +518,7 @@ const Graduation = () => {
                             <Download size={15}/>
                             <span className='align-middle ms-50'>QR татах</span>
                         </Button>
-                        
+
                         <Dropdown isOpen={dropdownOpen} toggle={togglev2}>
                             <DropdownToggle color='primary' className='m-50'>
                                 <span className='align-middle ms-50'>Загвар</span>

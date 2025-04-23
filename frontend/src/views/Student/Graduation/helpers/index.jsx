@@ -157,6 +157,13 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			wrap: true,
         },
 		{
+			name: t("Дамжаа"),
+			selector: (row) => row?.student?.group?.name,
+            sortable: true,
+            center: true,
+			wrap: true,
+        },
+		{
 			header: 'back_diplom_num',
 			name: t("Бакалаврын дипломын дугаар"),
 			selector: (row, back_diplom_num) =>

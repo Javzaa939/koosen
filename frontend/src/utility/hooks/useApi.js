@@ -824,6 +824,10 @@ function useApi(isDisplay=false) {
 
 				/** Дипломын QR татах */
 				qr: (group) => instance.get(`/student/graduation/qr/?group=${group}`),
+
+				/** Уйгаржин-р хичээлийн нэр хөрвүүлэх */
+				lessonUigConvert: (group) => instance.get(`/student/graduation/uigarjin/convert/?group=${group}`),
+				engConvert: (group) => instance.get(`/student/graduation/english/convert/?group=${group}`),
 			},
 
 			/** Боловсролын зээлийн сан */
