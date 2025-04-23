@@ -1498,9 +1498,9 @@ class ChallengeAPIView(
         if lesson_season:
             self.queryset = self.queryset.filter(lesson_season=lesson_season)
 
-        # if school:
-        #     school_ids = self.queryset.filter(student__school=school).values_list('id', flat=True)
-        #     self.queryset = self.queryset.filter(id__in=school_ids)
+        if school:
+            school_ids = self.queryset.filter(student__school=school).values_list('id', flat=True)
+            self.queryset = self.queryset.filter(id__in=school_ids)
 
         if teacher_id:
             self.queryset = self.queryset.filter(created_by=teacher_id)
@@ -7391,6 +7391,10 @@ class GraduateTitleApiView(
     serializer_class = dynamic_serializer(QuestionMainTitle, "__all__", 1)
 
     def get(self, request):
+        user = request.user
+        teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
+        if not user.is_superuser:
+            self.queryset = self.queryset.filter(created_by=teacher)
         datas = self.queryset.values('id', 'name')
         return request.send_data(list(datas))
 
@@ -7412,8 +7416,8 @@ class GraduateTitleApiView(
         ""
         datas = request.data
         instance = self.queryset.filter(id=pk).first()
-        user_id = request.user
-        teacher = get_object_or_404(Teachers, user_id=user_id, action_status=Teachers.APPROVED)
+        user = request.user
+        teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
         datas['created_by'] = teacher.id
 
         ser = dynamic_serializer(QuestionMainTitle, "__all__", 1)
@@ -7447,6 +7451,12 @@ class GraduateSubTitleApiView(
         if main:
             self.queryset = self.queryset.filter(main=main)
         question_sub = ChallengeQuestions.objects.filter(graduate_title=OuterRef('id')).values('graduate_title').annotate(count=Count('id')).values('count')
+
+        user = request.user
+        teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
+        if not user.is_superuser:
+            self.queryset = self.queryset.filter(created_by=teacher)
+
         datas = self.queryset.annotate(main_name=F('main__name'), question_count=Subquery(question_sub)).values('id', 'name', 'main_name', 'question_count')
         return request.send_data(list(datas))
 
