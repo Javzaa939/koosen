@@ -65,17 +65,6 @@ info = {
         "message": "Цахим шуудан амжилттай илгээгдлээ",
     },
 
-    "INF_011": {
-        "code": 11,
-        "name": "INF_011",
-        "message": "Workspace амжилттай үүслээ.",
-    },
-
-    "INF_012": {
-        "code": 12,
-        "name": "INF_012",
-        "message": "Workspace үүссэн байна!",
-    },
     "INF_013": {
         "code": 13,
         "name": "INF_013",
@@ -140,6 +129,12 @@ info = {
         "code": 26,
         "name": "INF_026",
         "message": "Баталгаажуулсан дүнг амжилттай устгалаа",
+        "status_code": 201
+    },
+    "INF_027": {
+        "code": 27,
+        "name": "INF_027",
+        "message": "Амжилттай илгээгдлээ",
         "status_code": 201
     },
 }

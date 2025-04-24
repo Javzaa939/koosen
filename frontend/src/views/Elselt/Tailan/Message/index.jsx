@@ -7,9 +7,9 @@ import { getPagination, ReactSelectStyles } from '@utils'
 
 // ** React Imports
 
-import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner, UncontrolledTooltip, CardBody } from 'reactstrap'
+import { Row, Col, Card, Input, Label, Button,  CardHeader, UncontrolledTooltip, CardBody, Modal, ModalHeader, ModalBody, InputGroup, InputGroupText, Badge } from 'reactstrap'
 
-import { ChevronDown, Search } from 'react-feather'
+import { ChevronDown, PlusCircle, Search } from 'react-feather'
 
 import classnames from "classnames";
 
@@ -129,8 +129,15 @@ function Message() {
 
     const [state, setState] = useState('')
     const [gpa_state, setGpaState] = useState('')
-
     const [gender, setGender] = useState('')
+    const [description, setDescription] = useState('')
+    const [phoneNumbers, setPhoneNumbers] = useState([
+        {
+            'phone_number': ''
+        }
+    ])
+
+    const [addModal, setAddModal] = useState(false)
 
 	// const elseltApi = useApi().elselt.admissionuserdata
     const admissionYearApi = useApi().elselt
@@ -230,10 +237,56 @@ function Message() {
         getDatas()
     }
 
+    const handleAddModal = () => {
+        setAddModal(!addModal)
+    }
+
+
+    const addNumber = () => {
+        setPhoneNumbers(
+            (prev) => [...prev, {'phone_number': ''}]
+        )
+    }
+
+    const handleChange = (value, idx) => {
+        setPhoneNumbers((prev) => {
+            const updated = [...prev];
+            updated[idx] = { ...updated[idx], phone_number: value };
+            return updated;
+        });
+    }
+
+    async function handleSubmit() {
+        var cdata = {
+            'description': description,
+            'phone_numbers': phoneNumbers
+        }
+        const { success } = await fetchData(elseltApi.send(cdata))
+        if (success) {
+            getDatas()
+            handleAddModal()
+            setPhoneNumbers([
+                {
+                    'phone_number': ''
+                }
+            ])
+            setDescription('')
+        }
+    }
+
     return (
         <Card>
             <MessageModal emailModal={emailModal} emailModalHandler={emailModalHandler} selectedEmail={selectedEmail}/>
-            <CardHeader>Мессеж тайлан</CardHeader>
+            <CardHeader>
+                <div>
+                    Мессеж тайлан
+                </div>
+                <div>
+                    <Button size='sm' color='primary' onClick={() => handleAddModal()}>
+                        Илгээх
+                    </Button>
+                </div>
+            </CardHeader>
             <CardBody>
                 <div>
                     <Row className='justify-content-start mx-0 mt-1'>
@@ -504,6 +557,61 @@ function Message() {
                     </div>
                 </div>
             </CardBody>
+            {
+                addModal
+                &&
+                <Modal
+                    isOpen={addModal}
+                    toggle={handleAddModal}
+                    className="modal-dialog-centered modal-sm"
+                >
+                    <ModalHeader>
+                        Тусгай дугаараас Мессеж илгээх
+                    </ModalHeader>
+                    <ModalBody>
+                        <div>
+                            <Label className='d-flex justify-content-between'>
+                                Утасны дугаар
+                                <Badge color='light-primary' id='addButton' onClick={() => addNumber()}>
+                                    <PlusCircle size={18}/>
+                                </Badge>
+                                <UncontrolledTooltip target={'addButton'}>Дугаар нэмэх</UncontrolledTooltip>
+                            </Label>
+                            {
+                                phoneNumbers?.map((data, idx) =>
+                                    <Input
+                                        type='number'
+                                        className='mt-1'
+                                        placeholder='Утасны дугаар'
+                                        id={`phone${data?.id}`}
+                                        bsSize='sm'
+                                        onChange={(e) => handleChange(e?.target.value, idx)}
+                                    />
+                                )
+                            }
+                        </div>
+                        <div className='mt-1'>
+                            <Label>Илгээх мессеж</Label>
+                            <Input
+                                type='textarea'
+                                placeholder='Илгээх мессеж'
+                                id={`message`}
+                                bsSize='sm'
+                                onChange={(e) => setDescription(e?.target.value)}
+                            />
+                        </div>
+                        <div className='d-flex justify-content-between mt-1'>
+                            <Button size='sm' color='primary' onClick={() => handleSubmit()}>
+                                Илгээх
+                            </Button>
+                            <Button size='sm' color='secondary' onClick={() => handleAddModal()}>
+                                Буцах
+                            </Button>
+                        </div>
+                    </ModalBody>
+
+                </Modal>
+            }
         </Card>
     )
 }

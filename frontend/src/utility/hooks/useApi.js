@@ -1912,6 +1912,7 @@ function useApi(isDisplay=false) {
 				message: {
 					get: (limit, page, sort, search, lesson_year_id, profession_id, unit1_id, gender, state, gpa_state, start_date, end_date) => instance.get(`/elselt/admissionuserdata/message/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&unit1_id=${unit1_id}&gender=${gender}&state=${state}&gpa_state=${gpa_state}&start_date=${start_date}&end_date=${end_date}`),
 					post: (data) => instance.post(`/elselt/admissionuserdata/message/`, data),
+					send: (data) => instance.put(`/elselt/admissionuserdata/message/`, data),
 				},
 				gpa:{
 					get: (limit, lesson_year_id, profession_id, gpa) => instance.get(`/elselt/admissionuserdata/gpa_check/?limit=${limit}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&gpa=${gpa}`)

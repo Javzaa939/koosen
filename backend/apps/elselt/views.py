@@ -2593,6 +2593,36 @@ class AdmissionUserMessageAPIView(
 
         return request.send_info('INF_001')
 
+    def put(self, request):
+        datas = request.data
+        numbers = datas.get('phone_numbers')
+
+        numbers = [data.get('phone_number') for data in numbers]
+
+        # Үүрэн холбоогоор нь ангилсан дугаарнууд
+        typed_phonenumbers = check_phone_number(numbers)
+
+        all_success_count = 0
+
+        # Нийт дугаарыг үүрэн холбоогоор нь ялгаж мессеж илгээх
+        for key, value in typed_phonenumbers.items():
+            if key == 'mobicom':
+                success_mobi, msg, success_count, not_found_numbers = send_message_mobicom(value, datas.get('description'))
+                all_success_count = all_success_count + success_count
+
+            if key == 'skytel':
+                success_sky, msg, success_count_s, not_found_numbers = send_message_skytel(value, datas.get('description'))
+                all_success_count = all_success_count + success_count_s
+
+            if key == 'unitel':
+                success_uni, msg, success_count_u, not_found_numbers = send_message_unitel(value, datas.get('description'))
+                all_success_count = all_success_count + success_count_u
+
+            if key == 'gmobile':
+                success_g, msg, success_count_g, not_found_numbers = send_message_gmobile(value, datas.get('description'))
+                all_success_count = all_success_count + success_count_g
+
+        return request.send_info('INF_027')
 
 @permission_classes([IsAuthenticated])
 class AdmissionJusticeListAPIView(

@@ -1004,7 +1004,7 @@ def score_register__score_total(teach_score, exam_score):
 
 def calculate_age(birth_date):
 
-    now_date = dt.datetime.now()
+    now_date = datetime.now()
     age = 0
     if birth_date:
         year = now_date.year - birth_date.year
@@ -1017,7 +1017,7 @@ def calculate_age(birth_date):
         if month == 0:
             year -= 1
             month += 12
-        age = dt.datetime(year, month, day)
+        age = datetime(year, month, day)
 
     return age
 
@@ -1136,6 +1136,7 @@ def send_message_skytel(phone_numbers, message):
         if rsp.status_code == 200:
             success_count += 1
 
+        print(rsp._content)
         # хүлээн авагчийн дугаар буруу
         if rsp.status_code == 103:
             not_found_numbers.append(phone_number)
