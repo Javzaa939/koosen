@@ -7399,7 +7399,7 @@ class GraduateTitleApiView(
         return request.send_data(list(datas))
 
     def post(self, request):
-        ser = dynamic_serializer(QuestionMainTitle, "__all__", 1)
+        ser = dynamic_serializer(QuestionMainTitle, "__all__")
         user_id = request.user
         teacher = get_object_or_404(Teachers, user_id=user_id, action_status=Teachers.APPROVED)
         datas = request.data
@@ -7450,6 +7450,7 @@ class GraduateSubTitleApiView(
         main = request.query_params.get('main')
         if main:
             self.queryset = self.queryset.filter(main=main)
+
         question_sub = ChallengeQuestions.objects.filter(graduate_title=OuterRef('id')).values('graduate_title').annotate(count=Count('id')).values('count')
 
         user = request.user
