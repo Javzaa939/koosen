@@ -242,13 +242,21 @@ class ElseltProfession(
     def put(self, request):
 
         datas = request.data
-        with transaction.atomic():
-            AdmissionRegisterProfession.objects.filter(
-                admission=datas.get('admission'),
-                profession=datas.get('profession')
-            ).update(state=datas.get('state'))
+        instance = AdmissionRegisterProfession.objects.filter(
+            admission=datas.get('admission'),
+            profession=datas.get('profession')
+        ).first()
 
-        return request.send_info('INF_002')
+        serializer = self.serializer_class(instance, data=datas, partial=True)
+
+        if not serializer.is_valid(raise_exception=False):
+            return request.send_error_valid(serializer.errors)
+
+        serializer.save()
+
+        return_data = serializer.data
+
+        return request.send_info('INF_002', return_data)
 
     def delete(self, request, pk=None):
         elselt = request.query_params.get('elselt')

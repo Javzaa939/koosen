@@ -4288,6 +4288,7 @@ class AdmissionRegisterProfession(models.Model):
     admission=models.ForeignKey(AdmissionRegister, on_delete=models.CASCADE, verbose_name="Элсэлт")
     profession = models.ForeignKey(ProfessionDefinition, on_delete=models.PROTECT, verbose_name="Мэргэжил")
     state = models.PositiveSmallIntegerField(choices=ADMISSION_TYPE, db_index=True, null=False, default=NOT, verbose_name="Элсэлтийн төрөл")
+    active = models.BooleanField(verbose_name='Идэвхтэй зарлагдах хөтөлбөр эсэх', default=True)
 
 
 class AdmissionIndicator(models.Model):

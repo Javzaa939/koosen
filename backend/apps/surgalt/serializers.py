@@ -270,6 +270,7 @@ class ProfessionDefinitionSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField(read_only=True)
     prof_name = serializers.SerializerMethodField(read_only=True)
     state = serializers.SerializerMethodField(read_only=True)
+    adm_register = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = ProfessionDefinition
@@ -322,6 +323,13 @@ class ProfessionDefinitionSerializer(serializers.ModelSerializer):
             admission_prof_obj = AdmissionRegisterProfession.objects.filter(profession=obj, admission=admission).first()
             state = admission_prof_obj.state
         return state
+
+    def get_adm_register(self, obj):
+        admission_prof_obj = dict()
+        admission = self.context.get('admission')
+        if admission:
+            admission_prof_obj = AdmissionRegisterProfession.objects.filter(profession=obj, admission=admission).values().first()
+        return admission_prof_obj
 
 # ------------------- Сургалтын төлөвлөгөө ---------------------
 

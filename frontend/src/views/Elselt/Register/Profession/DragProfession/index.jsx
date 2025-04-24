@@ -208,12 +208,12 @@ const DragProfession = ({ cdatas }) => {
     }
 
 
-    async function saveState(profId, state) {
+    async function saveState(profId, key, value,) {
         var datas = {
             'profession': profId,
-            'state': state,
             'admission': cdatas?.id
         }
+        datas[key] = value
         const { success } = await fetchData(elseltApi.putPropState(datas))
         if (success) {
             getProps()
@@ -306,6 +306,7 @@ const DragProfession = ({ cdatas }) => {
                                 <th>Хөтөлбөрийн нэр</th>
                                 <th>Шалгуур нэмэх</th>
                                 <th>Элсэлтийн төрөл сонгох </th>
+                                <th>Идэвхтэй зарлагдах хөтөлбөр эсэх</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -337,11 +338,24 @@ const DragProfession = ({ cdatas }) => {
                                                 options={shalguurs || []}
                                                 noOptionsMessage={() => t('Хоосон байна')}
                                                 onChange={(val) => {
-                                                    saveState(item?.id, val?.id)
+                                                    saveState(item?.id, 'state', val?.id)
                                                 }}
                                                 styles={ReactSelectStyles}
                                                 getOptionValue={(option) => option.id}
                                                 getOptionLabel={(option) => option.name}
+                                            />
+                                        </td>
+                                        <td>
+                                            <Input
+                                                checked={item?.adm_register?.active}
+                                                className='me-50 mt-25'
+                                                type='checkbox'
+                                                name={'active'}
+                                                id={'active'}
+                                                onChange={(e) => {
+                                                    let checked = e.target.checked
+                                                    saveState(item?.id, 'active', checked)
+                                                }}
                                             />
                                         </td>
                                     </tr>
