@@ -305,7 +305,7 @@ export default function PrintNationalAttachment()
                         {printDatas?.student?.last_name_uig}
                     </div>
                     <div style={{ height: '47.6%', writingMode: 'vertical-lr', display: 'flex' }}>
-                        <span className='h-50'>ᢈᠥᠲᠦᠯᠪᠦᠷᠢ ᠶ᠋ᠢᠨ ᠨᠡᠷ:</span>
+                        <span className='h-50'>ᢈᠥᠲᠦᠯᠪᠦᠷᠢ ᠶ᠋ᠢᠨ ᠨᠡᠷ᠎ᠡ:</span>
                         {printDatas?.student?.group?.profession?.name_uig}
                     </div>
                     <div style={{ height: '20%', writingMode: 'vertical-lr', display: 'flex' }}>
