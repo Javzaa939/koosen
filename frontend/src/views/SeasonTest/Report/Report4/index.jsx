@@ -140,15 +140,21 @@ export default function Report4() {
 
         if (Array.isArray(studentsQuestionsTableData)){
             let answersObj = {}
+
             individualData = studentsQuestionsTableData.map((item, index) => {
+                var totalScore = item?.answers.reduce((acc, answer) => {
+                    return answer.is_answered_right ? acc + 1 : acc;
+                }, 0)
                 item.answers.forEach((ans, i) => {
-                    answersObj['q'+(i+1).toString()] = ans.is_answered_right ? '1' : '0';
+                    const isCorrect = ans.is_answered_right ? '1' : '0';
+                    answersObj['q' + (i + 1).toString()] = isCorrect;
                 });
 
                 return {
                     'index': index + 1,
                     'full_name': item.full_name,
                     ...answersObj,
+                    'total': totalScore,
                 }
             })
         }
@@ -186,6 +192,7 @@ export default function Report4() {
                 '28',
                 '29',
                 '30',
+                'Оноо',
             ],
             datas: [
                 'index',
@@ -220,6 +227,10 @@ export default function Report4() {
                 'q28',
                 'q29',
                 'q30',
+                'total',
+            ],
+            width: [
+               5,
             ]
         }
         excelDownload(individualData, rowInfo, `Тайлан 4`)
