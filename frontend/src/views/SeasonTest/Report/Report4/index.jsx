@@ -230,7 +230,7 @@ export default function Report4() {
                 'total',
             ],
             width: [
-               5,
+               4.5,
             ]
         }
         excelDownload(individualData, rowInfo, `Тайлан 4`)
