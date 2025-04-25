@@ -135,7 +135,8 @@ export default function Report4() {
         )
     }, [selected_year, selected_season])
 
-
+    console.log('studentsQuestionsTableData', studentsQuestionsTableData)
+    console.log('studentsQuestionsTableAggregatedData', studentsQuestionsTableAggregatedData)
     function excelHandler() {
         let individualData = {};
 
@@ -143,18 +144,15 @@ export default function Report4() {
             let answersObj = {}
             const totalQuestions = 30;
             individualData = studentsQuestionsTableData.map((item, index) => {
-            // for (let i = 1; i <= totalQuestions; i++) {
-            //     answersObj[i.toString()] = item.answers[i - 1]?.is_answered_right ? 1 : 0;
-            // }
+
                 item.answers.forEach((ans, i) => {
-                    answersObj[(i+1).toString()] = ans.is_answered_right ? 1 : 0;
+                    answersObj['q'+(i+1).toString()] = ans.is_answered_right ? '1' : '0';
                 });
 
                 return {
-                    'index': index + 1,
-                    'full_name': item.full_name,
-                    // 'answers':answersObj,
                     ...answersObj,
+                    'full_name': item.full_name,
+                    'index': index + 1,
                 }
             })
         }
@@ -162,14 +160,73 @@ export default function Report4() {
             headers: [
                 '№',
                 'Оюутан',
-                ...Array.from({ length: 30 }, (_, i) => `${i + 1}`)
+                '1',
+                '2',
+                '3',
+                '4',
+                '5',
+                '6',
+                '7',
+                '8',
+                '9',
+                '10',
+                '11',
+                '12',
+                '13',
+                '14',
+                '15',
+                '16',
+                '17',
+                '18',
+                '19',
+                '20',
+                '21',
+                '22',
+                '23',
+                '24',
+                '25',
+                '26',
+                '27',
+                '28',
+                '29',
+                '30',
             ],
             datas: [
                 'index',
                 'full_name',
+                'q1',
+                'q2',
+                'q3',
+                'q4',
+                'q5',
+                'q6',
+                'q7',
+                'q8',
+                'q9',
+                'q10',
+                'q11',
+                'q12',
+                'q13',
+                'q14',
+                'q15',
+                'q16',
+                'q17',
+                'q18',
+                'q19',
+                'q20',
+                'q21',
+                'q22',
+                'q23',
+                'q24',
+                'q25',
+                'q26',
+                'q27',
+                'q28',
+                'q29',
+                'q30',
             ]
-
         }
+        console.log('individualData', individualData)
         excelDownload(individualData, rowInfo, `Тайлан 4`)
     }
 
