@@ -1499,8 +1499,7 @@ class ChallengeAPIView(
             self.queryset = self.queryset.filter(lesson_season=lesson_season)
 
         if school:
-            school_ids = self.queryset.filter(student__school=school).values_list('id', flat=True)
-            self.queryset = self.queryset.filter(id__in=school_ids)
+            self.queryset = self.queryset.filter(created_by__sub_org=school)
 
         if teacher_id:
             self.queryset = self.queryset.filter(created_by=teacher_id)
