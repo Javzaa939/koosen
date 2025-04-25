@@ -135,24 +135,20 @@ export default function Report4() {
         )
     }, [selected_year, selected_season])
 
-    console.log('studentsQuestionsTableData', studentsQuestionsTableData)
-    console.log('studentsQuestionsTableAggregatedData', studentsQuestionsTableAggregatedData)
     function excelHandler() {
         let individualData = {};
 
         if (Array.isArray(studentsQuestionsTableData)){
             let answersObj = {}
-            const totalQuestions = 30;
             individualData = studentsQuestionsTableData.map((item, index) => {
-
                 item.answers.forEach((ans, i) => {
                     answersObj['q'+(i+1).toString()] = ans.is_answered_right ? '1' : '0';
                 });
 
                 return {
-                    ...answersObj,
-                    'full_name': item.full_name,
                     'index': index + 1,
+                    'full_name': item.full_name,
+                    ...answersObj,
                 }
             })
         }
@@ -226,7 +222,6 @@ export default function Report4() {
                 'q30',
             ]
         }
-        console.log('individualData', individualData)
         excelDownload(individualData, rowInfo, `Тайлан 4`)
     }
 
