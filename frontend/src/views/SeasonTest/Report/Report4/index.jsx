@@ -1,6 +1,6 @@
 // ** React Imports
 import { useEffect, useRef, useState, useMemo } from 'react'
-import { Printer, Search } from 'react-feather'
+import { Printer, Search, DownloadCloud } from 'react-feather'
 import { useTranslation } from 'react-i18next'
 import { Button, Col, Input, Label, Row } from 'reactstrap'
 
@@ -12,6 +12,8 @@ import StudentsQuestionsTable from './StudentsQuestionsTable'
 import GroupFilter from '../helpers/GroupFilter'
 import ExamFilter from '../helpers/ExamFilter'
 import { stableStylesPrintElement } from '../helpers'
+import excelDownload from '@src/utility/excelDownload'
+
 
 export default function Report4() {
     // other hooks
@@ -56,6 +58,7 @@ export default function Report4() {
             lesson_year: selected_year,
             lesson_season: selected_season
         }))
+
 
         if (success) {
             setStudentsQuestionsTableData(data?.results)
@@ -132,6 +135,44 @@ export default function Report4() {
         )
     }, [selected_year, selected_season])
 
+
+    function excelHandler() {
+        let individualData = {};
+
+        if (Array.isArray(studentsQuestionsTableData)){
+            let answersObj = {}
+            const totalQuestions = 30;
+            individualData = studentsQuestionsTableData.map((item, index) => {
+            // for (let i = 1; i <= totalQuestions; i++) {
+            //     answersObj[i.toString()] = item.answers[i - 1]?.is_answered_right ? 1 : 0;
+            // }
+                item.answers.forEach((ans, i) => {
+                    answersObj[(i+1).toString()] = ans.is_answered_right ? 1 : 0;
+                });
+
+                return {
+                    'index': index + 1,
+                    'full_name': item.full_name,
+                    // 'answers':answersObj,
+                    ...answersObj,
+                }
+            })
+        }
+        const rowInfo = {
+            headers: [
+                '№',
+                'Оюутан',
+                ...Array.from({ length: 30 }, (_, i) => `${i + 1}`)
+            ],
+            datas: [
+                'index',
+                'full_name',
+            ]
+
+        }
+        excelDownload(individualData, rowInfo, `Тайлан 4`)
+    }
+
     return (
         <div className='px-1'>
             {isLoading && Loader}
@@ -142,7 +183,18 @@ export default function Report4() {
                         <GroupFilter setSelected={setSelectedGroup} exam_id={selected_exam} />
                     </div>
                 </Col>
-                <Col className='text-end'>
+                <Col className='text-start'>
+                    <Button
+                        className='ms-50 mt-50'
+                        color='primary'
+                        size='sm'
+                        onClick={() => excelHandler()}
+                    >
+                        <DownloadCloud size={15} />
+                        <span className='align-middle ms-50'>{t('Excel татах')}</span>
+                    </Button>
+                </Col>
+                <Col className='text-end mt-50'>
                     <Button
                         className='ms-1'
                         color='primary'
