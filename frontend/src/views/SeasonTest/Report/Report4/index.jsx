@@ -137,18 +137,26 @@ export default function Report4() {
 
     function excelHandler() {
         let individualData = {};
+        var keys = []
+        var excel_columns = []
 
         if (Array.isArray(studentsQuestionsTableData)){
             let answersObj = {}
 
             individualData = studentsQuestionsTableData.map((item, index) => {
+                let columns = []
+
                 var totalScore = item?.answers.reduce((acc, answer) => {
                     return answer.is_answered_right ? acc + 1 : acc;
                 }, 0)
-                item.answers.forEach((ans, i) => {
+                item?.answers.forEach((ans, i) => {
+                    var question_obj = studentsQuestionsTableAggregatedData?.questions?.find((data) => data?.question_id == ans?.question_id)
                     const isCorrect = ans.is_answered_right ? '1' : '0';
                     answersObj['q' + (i + 1).toString()] = isCorrect;
+                    columns.push(question_obj?.question_text)
                 });
+                keys = Object?.keys(answersObj)
+                excel_columns = columns
 
                 return {
                     'index': index + 1,
@@ -162,75 +170,18 @@ export default function Report4() {
             headers: [
                 '№',
                 'Оюутан',
-                '1',
-                '2',
-                '3',
-                '4',
-                '5',
-                '6',
-                '7',
-                '8',
-                '9',
-                '10',
-                '11',
-                '12',
-                '13',
-                '14',
-                '15',
-                '16',
-                '17',
-                '18',
-                '19',
-                '20',
-                '21',
-                '22',
-                '23',
-                '24',
-                '25',
-                '26',
-                '27',
-                '28',
-                '29',
-                '30',
-                'Оноо',
+                ...excel_columns,
+                'Оноо'
             ],
+
             datas: [
                 'index',
                 'full_name',
-                'q1',
-                'q2',
-                'q3',
-                'q4',
-                'q5',
-                'q6',
-                'q7',
-                'q8',
-                'q9',
-                'q10',
-                'q11',
-                'q12',
-                'q13',
-                'q14',
-                'q15',
-                'q16',
-                'q17',
-                'q18',
-                'q19',
-                'q20',
-                'q21',
-                'q22',
-                'q23',
-                'q24',
-                'q25',
-                'q26',
-                'q27',
-                'q28',
-                'q29',
-                'q30',
-                'total',
+                ...keys,
+                'total'
             ],
             width: [
-               4.5,
+               20,
             ]
         }
         excelDownload(individualData, rowInfo, `Тайлан 4`)

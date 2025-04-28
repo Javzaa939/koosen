@@ -6287,9 +6287,7 @@ class ChallengeReportAPIView(
 
             if exam:
                 queryset = queryset.filter(challenge=exam)
-
             else:
-
                 return None
 
         group = request.query_params.get('group')
