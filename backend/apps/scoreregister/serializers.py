@@ -282,7 +282,7 @@ class TeacherScoreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TeacherScore
-        fields = "student_code", "student_full_name", "group_name", "teach_score", "exam_score", "assessment", "teacher_name"
+        fields = "student_code", "student_full_name", "group_name", "teach_score", "exam_score", "assessment", "teacher_name", 'updated_at'
 
     def get_student_full_name(self, obj):
 

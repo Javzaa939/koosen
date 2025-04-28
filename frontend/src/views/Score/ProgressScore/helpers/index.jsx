@@ -81,6 +81,14 @@ export function getColumns(currentPage, rowsPerPage, total_count) {
 			sortable: true,
 			center: true,
 		},
+		{
+			header: 'updated_at',
+			name: `${t('Дүн оруулсан хугацаа')}`,
+			selector: (row) => row?.updated_at,
+			maxWidth: "180px",
+			sortable: true,
+			center: true,
+		},
 	]
 
 	return columns
