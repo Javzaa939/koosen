@@ -32,7 +32,6 @@ const List5 = () => {
     const teacherApi = useApi().hrms.teacher
     const lessonApi = useApi().study.lessonStandart
 
-    const [departmentOption, setDepartmentOption] = useState([])
     const [teacherOption, setTeacherOption] = useState([])
     const [lessonOption, setLessonOption] = useState([])
     const [season_option, setSeasonOption] = useState([])
@@ -61,7 +60,7 @@ const List5 = () => {
     }
 
     async function getLesson() {
-        const { success, data } = await fetchData(lessonApi.getExam())
+        const { success, data } = await fetchData(lessonApi.getExam(select_value?.lesson_year, select_value?.season))
         if (success) {
             setLessonOption(data)
         }
@@ -95,7 +94,7 @@ const List5 = () => {
         () => {
             getLesson()
         },
-        []
+        [select_value.lesson_year, select_value?.season ]
     )
 
     useEffect(

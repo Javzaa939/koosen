@@ -7212,9 +7212,16 @@ class LessonStandartExamListAPIView(
 
     queryset = LessonStandart.objects.all()
     def get(self, request):
+        lesson_year = request.query_params.get('lesson_year')
+        lesson_season = request.query_params.get('lesson_season')
+        qs = TeacherScore.objects.all()
+        if lesson_year:
+            qs = qs.filter(lesson_year=lesson_year)
 
-        lesson_year, lesson_season = get_active_year_season()
-        lesson_standarts = TeacherScore.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season).values_list('score_type__lesson_teacher__lesson', flat=True)
+        if lesson_season:
+            qs = qs.filter(lesson_season=lesson_season)
+
+        lesson_standarts = qs.values_list('score_type__lesson_teacher__lesson', flat=True)
 
         all_data = self.queryset.filter(id__in=lesson_standarts).values('id', 'code', 'name')
         return request.send_data(list(all_data))
