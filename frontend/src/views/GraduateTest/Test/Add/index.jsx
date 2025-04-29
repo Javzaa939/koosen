@@ -281,6 +281,27 @@ const Addmodal = ({ open, handleModal, refreshDatas, select_datas, editData }) =
                             {question_count}
                             {errors.question_count && <FormFeedback className='d-block'>{t(errors.question_count.message)}</FormFeedback>}
                         </Col>
+                        <Col md={6} className='mt-50'>
+                            <Label className="form-label" for="try_number">
+                                {t('Оролдлогын тоо')}
+                            </Label>
+                            <Controller
+                                defaultValue=''
+                                control={control}
+                                name="try_number"
+                                render={({ field }) => (
+                                    <Input
+                                        {...field}
+                                        id={field.name}
+                                        bsSize="sm"
+                                        placeholder={'Оролдлогын тоо'}
+                                        type="number"
+                                        invalid={errors[field.name] && true}
+                                    />
+                                )}
+                            />
+                            {errors.try_number && <FormFeedback className='d-block'>{t(errors.try_number.message)}</FormFeedback>}
+                        </Col>
                         <Col md={12} className="text-center mt-2">
                             <Button className='me-2' color="primary" type="submit">
                                 {t('Хадгалах')}

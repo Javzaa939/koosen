@@ -6167,13 +6167,12 @@ class ChallengeReportAPIView(
         lesson_season = request.query_params.get('lesson_season')
 
         if not report_type:
-
             return None
 
-        # lesson_year, lesson_season = get_active_year_season()
         queryset = None
-
-        exam_qs = ExamTimeTable.objects.filter(lesson_year=lesson_year, lesson_season_id=lesson_season)
+        exam_qs = ExamTimeTable.objects.all()
+        if lesson_year and lesson_season:
+            exam_qs = ExamTimeTable.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season)
         # if school_id:
         #     exam_ids = Exam_to_group.objects.filter(exam__lesson_year=lesson_year, exam__lesson_season=lesson_season, group__school=school_id).values_list('exam', flat=True)
         #     exam_qs = exam_qs.filter(id__in=exam_ids)
@@ -6278,10 +6277,14 @@ class ChallengeReportAPIView(
 
         else:
             queryset = ChallengeStudents.objects.order_by('-score').filter(
-                challenge__lesson_year=lesson_year,
-                challenge__lesson_season=lesson_season,
                 challenge__challenge_type=Challenge.SEMESTR_EXAM
             )
+
+            if lesson_year and lesson_season:
+                queryset = queryset.filter(
+                    challenge__lesson_year=lesson_year,
+                    challenge__lesson_season=lesson_season
+                )
 
             exam = request.query_params.get('exam')
 
@@ -6482,7 +6485,6 @@ class ChallengeReportAPIView(
         get_result = []
 
         if not queryset:
-
             return request.send_data(None)
 
         # report1. reliability
