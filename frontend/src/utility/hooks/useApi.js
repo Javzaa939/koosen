@@ -542,6 +542,8 @@ function useApi(isDisplay=false) {
 		},
 		/** hrms-ээс */
 		hrms: {
+			/** Системийн хандалт*/
+			get: (type) => instance.get(`/core/sys-info/?stype=${type}`),
 			/** Үндсэн сургууль */
 			school: {
 				get: () => instance.get(`/core/school/`),

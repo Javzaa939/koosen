@@ -1,5 +1,7 @@
 import json
 import requests
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 from rest_framework import mixins
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
@@ -97,7 +99,7 @@ from .serializers import EmployeeSerializer, UserSerializer
 from lms.models import ProfessionDefinition
 from lms.models import LessonStandart
 from lms.models import Student
-from lms.models import StudentLogin
+from lms.models import AccessHistoryLms
 from django.contrib.auth.hashers import make_password
 
 
@@ -1483,3 +1485,43 @@ class AbleWorkerAPIView(
             'new': count,
         }
         return request.send_info('INF_020', return_datas)
+
+
+
+@permission_classes([IsAuthenticated])
+class SysInfoApiView(
+    generics.GenericAPIView,
+):
+    """ Системийн хандалт"""
+
+    queryset = AccessHistoryLms.objects.all()
+
+    def get(self, request):
+        stype = request.query_params.get('stype')
+        cfilter = {}
+        today = datetime.today().date()
+        if stype == 'day':
+            cfilter['in_time__date'] = today
+        elif stype == 'week':
+            start_of_week = today - timedelta(days=today.weekday())  # Monday
+            end_of_week = start_of_week + timedelta(days=6)  # Sunday
+            cfilter['in_time__range'] = (start_of_week, end_of_week)
+
+        elif stype == 'last_month':
+            first_day_this_month = today.replace(day=1)
+            last_month_last_day = first_day_this_month - timedelta(days=1)
+            last_month_first_day = last_month_last_day.replace(day=1)
+            cfilter['in_time__range'] = (last_month_first_day, last_month_last_day)
+
+        elif stype == 'three_month':
+            three_months_ago = today - relativedelta(months=3)
+            cfilter['in_time__range'] = (three_months_ago, today)
+
+        queryset = self.queryset.filter(**cfilter)
+
+        return request.send_data({
+            'total': queryset.count(),
+            'sis': queryset.filter(system_type=AccessHistoryLms.LMS).count(),
+            'student': queryset.filter(system_type=AccessHistoryLms.STUDENT).count(),
+            'teacher': queryset.filter(system_type=AccessHistoryLms.TEACHER).count(),
+        })

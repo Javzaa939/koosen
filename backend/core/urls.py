@@ -3,6 +3,8 @@ from django.urls import path
 from .views import *
 
 urlpatterns = [
+    # Системийн хандалт
+    path('sys-info/', SysInfoApiView.as_view()),
     path('teacher/', TeacherListApiView.as_view()),
     path('teacher/<int:pk>/', TeacherListApiView.as_view()),
     path('teacher/all/', TeacherAllListApiView.as_view()),
