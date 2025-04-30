@@ -392,7 +392,7 @@ function useApi(isDisplay=false) {
 				getStudentDiplomaLessons: (selectedStudent) => instance.get(`/learning/lessonstandart/diploma/list/?student=${selectedStudent}`),
 				getType: (pk) => instance.get(`/learning/lessonstandart/type/${pk}/`),
 				getLessonsGroup: (group) => instance.get(`/learning/lessonstandart/group/${group}/`),
-				getExam: (lesson_year, lesson_season) => instance.get(`/learning/lessonstandart/list/exam/?lesson_year=${lesson_year}&lesson_season=${lesson_season}`),
+				getExam: (lesson_year=cyear_name, lesson_season=cseason_id) => instance.get(`/learning/lessonstandart/list/exam/?lesson_year=${lesson_year}&lesson_season=${lesson_season}`),
 
 				titleplan: {
 					get: (lessonID) => instance.get(`/learning/lessonstandart/titleplan/${lessonID}/`),
