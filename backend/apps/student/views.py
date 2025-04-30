@@ -3263,7 +3263,7 @@ class StudentCalculateGpaDiplomaAPIView(
             )
 
         if len(update_datas) > 0:
-            ScoreRegister.objects.bulk_update(update_datas, ['assesment'])
+            ScoreRegister.objects.bulk_update(update_datas, ['assessment'])
 
         return request.send_info("INF_013", list(lesson_ids))
 
