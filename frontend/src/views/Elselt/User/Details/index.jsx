@@ -318,7 +318,7 @@ function Details() {
                         {
                             <Col md={6} sm={12}>
                                 {
-                                    (datas?.degree_code === "E" || datas?.degree_code === "F")
+                                    (datas?.degree_code === "E" || datas?.degree_code === "F" || datas?.profession_state  === 4)
                                     &&
                                     <div className='border shadow p-1 m-1 rounded-3'>
                                         <div className='d-flex justify-content-between'>
@@ -330,45 +330,45 @@ function Details() {
                                             </div>
                                         </div>
                                         <div className='mt-2'>
-                                            <div className='p-50 d-flex align-items-center'>
-                                                <span className='text_prefixer me-50'>Эссэ бичсэн файл:</span>
-                                                {
-                                                    datas?.userinfo?.esse_pdf ?
-                                                        <span className='text-primary d-flex align-items-center' role='button' onClick={() => {window.open(`${process.env.REACT_APP_SERVER_FILE_URL}${datas?.userinfo?.esse_pdf}`)}}>
-                                                            {ftext(datas?.userinfo?.esse_pdf)} <Download className='ms-25' size={14}/>
-                                                        </span>
+											{
+												datas?.userinfo?.esse_pdf ?
+												<div className='p-50 d-flex align-items-center'>
+													<span className='text_prefixer me-50'>Эссэ бичсэн файл:</span>
+													<span className='text-primary d-flex align-items-center' role='button' onClick={() => {window.open(`${process.env.REACT_APP_SERVER_FILE_URL}${datas?.userinfo?.esse_pdf}`)}}>
+														{ftext(datas?.userinfo?.esse_pdf)} <Download className='ms-25' size={14}/>
+													</span>
+												</div>
+												:
+												<span>
+													Файл байхгүй
+												</span>
+                                                }
+											{datas?.userinfo?.other_file
+												?
+												<div className='p-50 d-flex align-items-center'>
+													<span className='text_prefixer me-50'>Судалгааны ажил файл:</span>
+													<span className='text-primary d-flex align-items-center' role='button' onClick={() => {window.open(`${process.env.REACT_APP_SERVER_FILE_URL}${datas?.userinfo?.other_file}`)}}>
+														{ftext(datas?.userinfo?.other_file)} <Download className='ms-25' size={14}/>
+													</span>
+												</div>
                                                     :
                                                     <span>
                                                         Файл байхгүй
                                                     </span>
                                                 }
-                                            </div>
-                                            <div className='p-50 d-flex align-items-center'>
-                                                <span className='text_prefixer me-50'>Судалгааны ажил файл:</span>
-                                                {
-                                                    datas?.userinfo?.other_file ?
-                                                        <span className='text-primary d-flex align-items-center' role='button' onClick={() => {window.open(`${process.env.REACT_APP_SERVER_FILE_URL}${datas?.userinfo?.other_file}`)}}>
-                                                            {ftext(datas?.userinfo?.other_file)} <Download className='ms-25' size={14}/>
-                                                        </span>
-                                                    :
-                                                    <span>
-                                                        Файл байхгүй
-                                                    </span>
-                                                }
-                                            </div>
-                                            <div className='p-50 d-flex align-items-center'>
-                                                <span className='text_prefixer me-50'>Төрийн албан хаагчийн анкет файл:</span>
                                                 {
                                                     datas?.userinfo?.anket_file ?
-                                                        <span className='text-primary d-flex align-items-center' role='button' onClick={() => {window.open(`${process.env.REACT_APP_SERVER_FILE_URL}${datas?.userinfo?.anket_file}`)}}>
-                                                            {ftext(datas?.userinfo?.anket_file)} <Download className='ms-25' size={14}/>
-                                                        </span>
+														<div className='p-50 d-flex align-items-center'>
+															<span className='text_prefixer me-50'>Төрийн албан хаагчийн анкет файл:</span>
+																<span className='text-primary d-flex align-items-center' role='button' onClick={() => {window.open(`${process.env.REACT_APP_SERVER_FILE_URL}${datas?.userinfo?.anket_file}`)}}>
+																	{ftext(datas?.userinfo?.anket_file)} <Download className='ms-25' size={14}/>
+																</span>
+														</div>
                                                     :
-                                                    <span>
-                                                        Файл байхгүй
-                                                    </span>
+														<span>
+															Файл байхгүй
+														</span>
                                                 }
-                                            </div>
                                         </div>
                                     </div>
                                 }
