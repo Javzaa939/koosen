@@ -214,7 +214,7 @@ function Details() {
                                                 {
                                                     datas?.userinfo?.diplom_pdf
                                                         ?
-                                                            <span className='text-primary d-flex align-items-center' role='button' onClick={() => {window.open(`${process.env.REACT_APP_SERVER_FILE_URL}${datas?.userinfo?.diplom_pdf}`)}}>
+                                                            <span className='text-primary d-flex align-items-center' role='button' onClick={() => {window.open(`${process.env.REACT_APP_CDN_URL}${datas?.userinfo?.diplom_pdf?.replace('/files/dxis/', '')}`)}}>
                                                                 {ftext(datas?.userinfo?.emongolia_diplom_pdf)} <Download className='ms-25' size={14}/>
                                                             </span>
                                                         :
@@ -232,7 +232,7 @@ function Details() {
                                                 <span className='text_prefixer me-50'>Бүрэн дунд боловсролын гэрчилгээний зураг:</span>
                                                 {
                                                     datas?.userinfo?.other_file ?
-                                                        <span className='text-primary d-flex align-items-center' role='button' onClick={() => {window.open(`${process.env.REACT_APP_SERVER_FILE_URL}${datas?.userinfo?.other_file}`)}}>
+                                                        <span className='text-primary d-flex align-items-center' role='button' onClick={() => {window.open(`${process.env.REACT_APP_CDN_URL}${datas?.userinfo?.other_file?.replace('/files/dxis/', '')}`)}}>
                                                             {ftext(datas?.userinfo?.other_file)} <Download className='ms-25' size={14}/>
                                                         </span>
                                                     :
@@ -334,7 +334,7 @@ function Details() {
 												datas?.userinfo?.esse_pdf ?
 												<div className='p-50 d-flex align-items-center'>
 													<span className='text_prefixer me-50'>Эссэ бичсэн файл:</span>
-													<span className='text-primary d-flex align-items-center' role='button' onClick={() => {window.open(`${process.env.REACT_APP_SERVER_FILE_URL}${datas?.userinfo?.esse_pdf}`)}}>
+													<span className='text-primary d-flex align-items-center' role='button' onClick={() => {window.open(`${process.env.REACT_APP_CDN_URL}${datas?.userinfo?.esse_pdf?.replace('/files/dxis/', '')}`)}}>
 														{ftext(datas?.userinfo?.esse_pdf)} <Download className='ms-25' size={14}/>
 													</span>
 												</div>
@@ -347,7 +347,7 @@ function Details() {
 												?
 												<div className='p-50 d-flex align-items-center'>
 													<span className='text_prefixer me-50'>Судалгааны ажил файл:</span>
-													<span className='text-primary d-flex align-items-center' role='button' onClick={() => {window.open(`${process.env.REACT_APP_SERVER_FILE_URL}${datas?.userinfo?.other_file}`)}}>
+													<span className='text-primary d-flex align-items-center' role='button' onClick={() => {window.open(`${process.env.REACT_APP_CDN_URL}${datas?.userinfo?.other_file?.replace('/files/dxis/', '')}`)}}>
 														{ftext(datas?.userinfo?.other_file)} <Download className='ms-25' size={14}/>
 													</span>
 												</div>
@@ -360,7 +360,7 @@ function Details() {
                                                     datas?.userinfo?.anket_file ?
 														<div className='p-50 d-flex align-items-center'>
 															<span className='text_prefixer me-50'>Төрийн албан хаагчийн анкет файл:</span>
-																<span className='text-primary d-flex align-items-center' role='button' onClick={() => {window.open(`${process.env.REACT_APP_SERVER_FILE_URL}${datas?.userinfo?.anket_file}`)}}>
+																<span className='text-primary d-flex align-items-center' role='button' onClick={() => {window.open(`${process.env.REACT_APP_CDN_URL}${datas?.userinfo?.anket_file?.replace('/files/dxis/', '')}`)}}>
 																	{ftext(datas?.userinfo?.anket_file)} <Download className='ms-25' size={14}/>
 																</span>
 														</div>
