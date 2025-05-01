@@ -161,10 +161,13 @@ const EditModal = ({ open, handleModal, graduate_id, refreshDatas }) => {
 
         let selectLesson_ids = radio === 'diploma' ? selectLessonIds ? selectLessonIds : [] : selectLessonIds
         let allSelectLessonIds = []
-
-        for (let selectLessonId of selectLesson_ids)
-        {
-            allSelectLessonIds.push(selectLessonId.id)
+        if (Array.isArray(selectLesson_ids)) {
+            for (let selectLessonId of selectLesson_ids)
+            {
+                allSelectLessonIds.push(selectLessonId.id)
+            }
+        } else {
+            allSelectLessonIds.push(selectLesson_ids.id)
         }
 
         cdata['lesson'] = allSelectLessonIds
