@@ -2903,7 +2903,7 @@ class TeacherScore(models.Model):
     lesson_season = models.ForeignKey(Season, on_delete=models.SET_NULL, null=True, verbose_name='Улирал')
 
     score = models.FloatField(verbose_name='Багшийн дүн')
-    score_type = models.ForeignKey(Lesson_teacher_scoretype, on_delete=models.PROTECT)
+    score_type = models.ForeignKey(Lesson_teacher_scoretype, on_delete=models.SET_NULL, null=True)
     grade_letter = models.ForeignKey(GradeLetter, on_delete=models.SET_NULL, null=True, verbose_name="Үсгэн үнэлгээ")
 
     is_approved = models.BooleanField(default=False, verbose_name="Баталгаажсан эсэх")

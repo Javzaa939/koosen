@@ -232,6 +232,12 @@ class LessonStandartAPIView(
                 old_teacher_qs = Lesson_to_teacher.objects.filter(lesson=pk)
                 if remove_ids or add_ids:
                     if len(remove_ids) > 0:
+                        teacher_qs = old_teacher_qs.filter(teacher__in=remove_ids)
+                        # Дүнгийн төрөл
+                        score_types = Lesson_teacher_scoretype.objects.filter(lesson_teacher__in=teacher_qs)
+                        if len(score_types) > 0:
+                            score_types.delete()
+
                         old_teacher_qs = old_teacher_qs.filter(teacher__in=remove_ids).delete()
 
                     # Шинээр нэмж байгаа бүрээр нь нэмэх
