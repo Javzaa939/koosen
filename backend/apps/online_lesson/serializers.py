@@ -387,7 +387,13 @@ class ELearnSerializer(serializers.ModelSerializer):
 
     # to get orignal field value, because Django automatically adds MEDIA and other url parts at the start of path in filefields so this another field is needed
     def get_image_path(self, obj):
-        result = obj.image.name if obj.image else None
+        result = None
+
+        if obj.image:
+            file_name = obj.image.name
+            result = settings.CDN_FILE_URL + str(file_name)
+            result = result.replace("dxis/", "")
+
         return result
 
 
@@ -437,7 +443,13 @@ class QuezQuestionsSerializer(serializers.ModelSerializer):
 
     # to get orignal field value, because Django automatically adds MEDIA and other url parts at the start of path in filefields so this another field is needed
     def get_image_path(self, obj):
-        result = obj.image.name if obj.image else None
+        result = None
+
+        if obj.image:
+            file_name = obj.image.name
+            result = settings.CDN_FILE_URL + str(file_name)
+            result = result.replace("dxis/", "")
+
         return result
 
     def get_kind_name(self, obj):
@@ -456,5 +468,11 @@ class QuezChoicesSerializer(serializers.ModelSerializer):
 
     # to get orignal field value, because Django automatically adds MEDIA and other url parts at the start of path in filefields so this another field is needed
     def get_image_path(self, obj):
-        result = obj.image.name if obj.image else None
+        result = None
+
+        if obj.image:
+            file_name = obj.image.name
+            result = settings.CDN_FILE_URL + str(file_name)
+            result = result.replace("dxis/", "")
+
         return result
