@@ -2822,23 +2822,29 @@ class PermissionsOtherInterval(models.Model):
     """ Бусад хандах эрх"""
 
     TIMETABLE = 1
-    EXAMSCORE = 2
-    DIPLOM = 3
-    QUIZ1 = 4
-    QUIZ2 = 5
-    TEACHERSCORE = 6
-    SCOREDOWNLOAD = 7
-    STUDENT_TIMETABLE = 8
+    TEACHCORE = 2
+    EXAMSCORE = 3
+    REPEAT = 4
+    ONLINE = 5
+    YELLOW_BOOK = 6
+    ADMISSION = 7
+    EXAM_QUESTION = 8
+    EXAM = 9
+    TEACHER_TIME = 10
+    PRACTICE = 10
 
     PERMISSION_TYPE=(
         (TIMETABLE, "Хичээлийн хуваарийн эрх"),
-        (STUDENT_TIMETABLE, "Оюутны хичээл сонголтын эрх"),
-        (EXAMSCORE, "Шалгалтын онооны эрх"),
-        (DIPLOM, "Диплом хэвлэх"),
-        (QUIZ1, "Сорил1-ийн онооны эрх"),
-        (QUIZ2, "Сорил2-ийн онооны эрх"),
-        (TEACHERSCORE, "Багшийн онооны эрх"),
-        (SCOREDOWNLOAD, "Багшийн 70 оноо татах эрх")
+        (TEACHCORE, "Улирлын 70 оноо оруулах хугацаа"),
+        (EXAMSCORE, "Улирлын 30 оноо оруулах хугацаа"),
+        (REPEAT, "Давтан шалгалт оноо оруулах хугацаа"),
+        (ONLINE, "Цахим хичээл байршуулах хугацаа"),
+        (YELLOW_BOOK, "Их сургуулийн нэгдсэн төлөвлөлт /шар ном/-д мэдээлэл байршуулах хугацаа"),
+        (ADMISSION, "Шинэ элсэгчдийг элсэлтийн системээс сургалтын системруу татах хугацаа"),
+        (EXAM_QUESTION, "Шалгалтын даалгавар оруулах хугацаа"),
+        (EXAM, "Шалгалтын хуваарь үүсгэх хугацаа"),
+        (TEACHER_TIME, "Багш багц цагт тооцох мэдээлэл оруулах хугацаа"),
+        (PRACTICE, "Дадлагын оноо байршуулах хугацаа")
     )
 
     lesson_year = models.CharField(max_length=20, null=True, verbose_name='Хичээлийн жил')
@@ -2852,8 +2858,6 @@ class PermissionsOtherInterval(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    class Meta:
-        unique_together = ('lesson_year', 'lesson_season', 'permission_type')
 
 class SignaturePeoples(models.Model):
     """ Гарын үсэг зурах хүмүүс
