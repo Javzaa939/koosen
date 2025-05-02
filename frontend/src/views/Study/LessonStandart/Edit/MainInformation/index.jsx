@@ -123,6 +123,9 @@ const MainInformation = ({ getNavigateData }) => {
                     if(key === 'category' || key === 'department') {
                         setValue(key, data[key]?.id)
                     }
+                    if(key === 'ckredit') {
+                        setValue('kredit', data[key])
+                    }
                     if (key === 'teachers') {
                         var teacher_ids = []
                         data[key]?.teachers?.map((teacher, idx) => {
