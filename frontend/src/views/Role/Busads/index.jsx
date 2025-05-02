@@ -151,7 +151,7 @@ const RoleRegister = () => {
             <Card>
                 {isLoading && Loader}
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
-                    <CardTitle tag='h4'>{t('Дүн оруулах хугацааны эрхийн жагсаалт')}</CardTitle>
+                    <CardTitle tag='h4'>{t('Системийн хугацааны жагсаалт')}</CardTitle>
                      <div className='d-flex flex-wrap mt-md-0 mt-1'>
                         <Button color='primary' onClick={() => handleAddModal()}>
                             <Plus size={15} />

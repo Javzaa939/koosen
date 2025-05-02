@@ -137,13 +137,13 @@ const AddModal = ({ isOpen, handleAddModal, refreshDatas }) => {
                     close={closeBtn}
                     tag="div"
                 >
-                    <h5 className="modal-title">{t('Бусад хандах эрх нэмэх')}</h5>
+                    <h5 className="modal-title">{t('Системийн хугацаа нэмэх')}</h5>
                 </ModalHeader>
                 <ModalBody className='flex-grow-1'>
                     <Row tag={Form} className='gy-1' onSubmit={handleSubmit(onSubmit)}>
                         <Col xl={12}>
                             <Label className='form-label' for='permission_type'>
-                                {t('Хандах эрх')}
+                                {t('Хандах эрхийн төрөл')}
                             </Label>
                             <Controller
                                 defaultValue=''

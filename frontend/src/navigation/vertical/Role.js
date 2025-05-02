@@ -8,12 +8,12 @@ export default [
         icon: <i className="far fa-universal-access"></i>,
         navLink: "/role",
         navChildren: [
-            // {
-            //     id: 'role1',
-            //     title: 'Багшийн дүнгийн эрх',
-            //     icon: <Circle size={8} />,
-            //     navLink: "role/teacher/"
-            // },
+            {
+                id: 'role1',
+                title: 'Багшийн дүнгийн эрх',
+                icon: <Circle size={8} />,
+                navLink: "role/teacher/"
+            },
             // {
             //     id: 'role2',
             //     title: 'Оюутны сонголтыг төлбөрөөс хамааралгүйгээр хийх эрх',
@@ -22,7 +22,7 @@ export default [
             // },
             {
                 id: 'role3',
-                title: 'Дүнгийн эрх',
+                title: 'Системийн хугацаа',
                 icon: <Circle size={8} />,
                 navLink: "role/busad/"
             },
