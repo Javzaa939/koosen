@@ -13,6 +13,7 @@ import Family from './Family'
 import MainInformation from './MainInformation'
 
 import { useTranslation } from 'react-i18next'
+import Medal from './Medal'
 
 
 const Detail = () => {
@@ -42,6 +43,11 @@ const Detail = () => {
             active_id: 5,
             name: t('ЭЕШ-ын оноо'),
             component: <AdmissionScore />
+        },
+        {
+            active_id: 6,
+            name: t('Бие даан хөгжих сургалт'),
+            component: <Medal />
         },
     ]
     const navigation = useNavigate()

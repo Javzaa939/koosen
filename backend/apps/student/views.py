@@ -60,7 +60,7 @@ from lms.models import LessonStandart
 from lms.models import StudentViz, ChallengeStudents
 from lms.models import SystemSettings
 from lms.models import PaymentBeginBalance
-from lms.models import Country, ProfessionAverageScore, AttachmentConfig, ProfessionDefinition
+from lms.models import Country, ProfessionAverageScore, AttachmentConfig, ProfessionDefinition, StudentMedal, MedalType
 
 from core.models import SubOrgs, AimagHot, SumDuureg, User, Salbars
 
@@ -103,7 +103,11 @@ from .serializers import StudentVizListSerializer
 from .serializers import StudentVizSerializer
 from .serializers import StudentSimpleListSerializer
 from .serializers import GraduationWorkStudentListSerializer
-from .serializers import StudentDefinitionListLiteSerializer
+from .serializers import (
+    StudentDefinitionListLiteSerializer,
+    StudentMedalSerializer,
+    MedalTypeSerializer,
+)
 
 translator = Translator()
 
@@ -2187,6 +2191,47 @@ class StudentAddressAPIView(
 
         except Exception as e:
             print(e)
+            return request.send_error("ERR_002")
+
+        return request.send_info("INF_001")
+
+
+@permission_classes([IsAuthenticated])
+class StudentMedalAPIView(
+    mixins.ListModelMixin,
+    generics.GenericAPIView,
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.RetrieveModelMixin,
+):
+    """ Медал """
+
+    queryset = StudentMedal.objects
+    serializer_class = StudentMedalSerializer
+
+    def get(self, request, student=None):
+
+        queryset = MedalType.objects
+        datas = MedalTypeSerializer(queryset, context={"student": student}, many=True).data
+
+        return request.send_data(datas)
+
+    @login_required()
+    @transaction.atomic
+    def post(self, request, student=None):
+
+        data = request.data
+        try:
+            obj, created = self.queryset.update_or_create(
+                student_id=student,
+                defaults={
+                    "medals": data.get("medals")
+                }
+            )
+
+        except Exception as e:
+            print('e', e)
             return request.send_error("ERR_002")
 
         return request.send_info("INF_001")
