@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from django.db.models import Q
 
+from main.utils.function.utils import student__full_name
 from core.models import (
     User,
     Employee,
@@ -133,3 +134,26 @@ class AccessHistoryLmsSerializerAll(serializers.ModelSerializer):
     class Meta:
         model = AccessHistoryLms
         fields = ['id', 'device_name', 'device_type', 'ip', 'in_time']
+
+
+class AccessHistoryLmsStudentSerializer(serializers.ModelSerializer):
+
+    student = serializers.SerializerMethodField()
+    device_type = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AccessHistoryLms
+        fields = '__all__'
+
+    def get_student(self, obj):
+        return {
+            'id': obj.student_idnum,
+            'name': student__full_name(obj.student_last_name,obj.student_first_name),
+            'code': obj.student_code
+        }
+
+    def get_device_type(self, obj):
+            return {
+                'id': obj.device_type,
+                'name': AccessHistoryLms.DEVICE_TYPE[obj.device_type-1][1]
+            }

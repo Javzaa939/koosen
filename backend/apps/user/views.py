@@ -1,10 +1,11 @@
-
+from rest_framework import mixins
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
+from rest_framework.filters import SearchFilter
 
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, F
 from django.contrib import auth
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
@@ -14,11 +15,13 @@ from django.utils.encoding import force_str, force_bytes
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from main.utils.function.utils import get_domain_url, get_domain_url_link
 from main.utils.function.utils import get_user_permissions, get_menu_unit, get_unit_user, make_connection
+from main.utils.function.pagination import CustomPagination
 from main.decorators import login_required
 
 from core.models import Employee, Schools, SubOrgs, Teachers, User
 
 from .serializers import (
+    AccessHistoryLmsStudentSerializer,
     UserInfoSerializer,
     AccessHistoryLmsSerializer,
     AccessHistoryLmsSerializerAll
@@ -48,6 +51,52 @@ class UserDetailAPI(
         qs = AccessHistoryLms.objects.filter(user=user)
         serializer = self.get_serializer(qs, many=True)
         return request.send_data(serializer.data)
+
+
+@permission_classes([IsAuthenticated])
+class AccessHistoryLmsStudentAPI(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+):
+    queryset = AccessHistoryLms.objects.filter(system_type=AccessHistoryLms.STUDENT)
+    serializer_class = AccessHistoryLmsStudentSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['student__student__first_name', 'student__student__code', 'student__student__last_name']
+
+
+    def get(self, request, pk=None):
+        """ Нэвтэрсэн 'student' мэдээллийг авах """
+
+        queryset = self.queryset
+
+        queryset = queryset.annotate(
+            student_first_name=F('student__student__first_name'),
+            student_last_name=F('student__student__last_name'),
+            student_idnum=F('student__student'),
+            student_code=F('student__student__code'),
+        )
+
+        if pk:
+            self.queryset = queryset
+            return_datas = self.retrieve(request, pk).data
+            return request.send_data(return_datas)
+        # region Sort хийх үед ажиллана
+        sorting = self.request.query_params.get('sorting')
+
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+            queryset = queryset.order_by(*sorting.split(','))
+        # endregion
+
+        self.queryset = queryset
+        return_datas = self.list(request).data
+        return request.send_data(return_datas)
+
 
 class UserAPILoginView(
     generics.GenericAPIView

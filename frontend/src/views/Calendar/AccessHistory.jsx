@@ -16,8 +16,11 @@ import { RxDotsVertical } from "react-icons/rx";
 import { RxCross2 } from "react-icons/rx";
 import useApi from "@src/utility/hooks/useApi";
 import useLoader from "@src/utility/hooks/useLoader";
+import { useTranslation } from "react-i18next";
+import ModalByStudent from "./components/ModalByStudent";
 
 const AccessHistory = (props) => {
+    const { t } = useTranslation()
     const [accessHistories, setAccessHistories] = useState([]);
     const [showAll, setShowAll] = useState(false);
 
@@ -51,7 +54,6 @@ const AccessHistory = (props) => {
         return (
             <ListGroupItem
                 key={props.index}
-                divider
                 style={{
                     fontSize: "11px",
                     height: "65px",
@@ -71,10 +73,19 @@ const AccessHistory = (props) => {
             </ListGroupItem>
         );
     };
+
+    // #region access history by student
+    const [showAllModalByStudent, setShowAllModalByStudent] = useState(false);
+
+    const handleSeeMoreModalByStudent = () => {
+        setShowAllModalByStudent((current) => !current)
+    };
+    // #endregion
+
     return (
         <Card>
             <CardHeader>
-                <CardTitle tag={"h5"}>Xандалтийн түүх</CardTitle>
+                <CardTitle tag={"h5"}>{t('Xандалтийн түүх')}</CardTitle>
             </CardHeader>
             <ListGroup>
                 {(showAll
@@ -90,14 +101,23 @@ const AccessHistory = (props) => {
                             className="ms-50"
                         />
                         <span className="align-middle ms-50">
-                            Дэлгэрэнгүй үзэх
+                            {t('Дэлгэрэнгүй үзэх')}
                         </span>
                     </ListItem>
                 )}
+                <ListItem onClick={handleSeeMoreModalByStudent} style={{ cursor: "pointer" }}>
+                    <RxDotsVertical
+                        size={20}
+                        className="ms-50"
+                    />
+                    <span className="align-middle ms-50">
+                        {t('Оюутнаар')}
+                    </span>
+                </ListItem>
             </ListGroup>
             <Modal
                 isOpen={showAll}
-                onRequestClose={handleClose}
+                toggle={handleClose}
                 style={{
                     height: "50vh",
                     content: {
@@ -123,6 +143,13 @@ const AccessHistory = (props) => {
                     </ListGroup>
                 </ModalBody>
             </Modal>
+            {
+                showAllModalByStudent &&
+                <ModalByStudent
+                    isOpen={showAllModalByStudent}
+                    toggle={handleSeeMoreModalByStudent}
+                />
+            }
         </Card>
     );
 };
