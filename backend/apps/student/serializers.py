@@ -3,6 +3,8 @@ from datetime import date
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
 
+import base64
+
 from django.conf import settings
 from django.db.models.fields.files import ImageFieldFile
 from django.db.models.functions import Cast, ExtractYear
@@ -46,7 +48,7 @@ from lms.models import LearningPlan
 from lms.models import StudentViz
 from lms.models import StudentCorrespondScore
 from lms.models import StudentCorrespondLessons
-from lms.models import AttachmentConfig
+from lms.models import AttachmentConfig, StudentMedal, MedalType
 
 from surgalt.serializers import ProfessionDefinitionSerializer
 
@@ -517,6 +519,32 @@ class StudentAddressSerializer(serializers.ModelSerializer):
         model = StudentAddress
         fields = '__all__'
 
+
+class StudentMedalSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = StudentMedal
+        fields = '__all__'
+
+
+class MedalTypeSerializer(serializers.ModelSerializer):
+    new_image = serializers.SerializerMethodField()
+    is_checked = serializers.SerializerMethodField()
+
+    class Meta:
+        model = MedalType
+        fields = "__all__"
+
+    def get_new_image(self, obj):
+        if obj.image:
+            return base64.b64encode(obj.image).decode('utf-8')
+        return None
+
+    def get_is_checked(self, obj):
+        student = self.context.get('student')
+        is_checked = StudentMedal.objects.filter(student=student, medals__overlap=[obj.id]).exists()
+
+        return is_checked
 
 
 class StudentAdmissionScoreListSerializer(serializers.ModelSerializer):

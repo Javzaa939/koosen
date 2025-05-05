@@ -871,6 +871,11 @@ function useApi(isDisplay=false) {
 				getSchool: () => instance.get(`/student/school/?school=${school_id}&`),
 				getPayment: (template='') => instance.get(`/student/report/payment/?school=${school_id}&template=${template}`),
 			},
+			/** Суралцагчийн медал */
+			medal: {
+				get: (student) => instance.get(`/student/medal/${student}/`),
+				post: (data, student) => instance.post(`/student/medal/${student}/`, data),
+			},
 		},
 
 		/** Цагийн хуваарь */

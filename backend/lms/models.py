@@ -696,6 +696,21 @@ class Student(models.Model):
         return ""
 
 
+class MedalType(models.Model):
+    """ Медалын төрөл """
+
+    image = models.BinaryField(verbose_name='Медалын зураг', editable=True, null=True)
+    name = models.CharField(max_length=500, db_index=True, verbose_name="Нэр")
+
+
+class StudentMedal(models.Model):
+    """ Оюутны медал """
+
+    student = models.ForeignKey(Student, on_delete=models.PROTECT, verbose_name="Оюутан")
+    medals = ArrayField(models.IntegerField(null=True), blank=True, null=True, verbose_name='Медалууд')
+    is_viewed = ArrayField(models.IntegerField(null=True), blank=True, null=True, verbose_name='Оюутны харсан медалын мэдээлэл')
+
+
 class StudentAddress(models.Model):
     """ Оюутны хаягийн мэдээлэл """
 
@@ -710,6 +725,7 @@ class StudentAddress(models.Model):
     lived_unit3 = models.ForeignKey(BagHoroo, related_name="live_unit3", on_delete=models.SET_NULL, null=True, verbose_name="Амьдарч буй баг хороо")
     lived_toot = models.CharField(max_length=50, null=True, verbose_name="Тоот")
     lived_other = models.CharField(max_length=500, null=True, verbose_name="Бусад")
+
 
 class StudentFamily(models.Model):
     """ Гэр бүлийн байдал """
@@ -830,7 +846,6 @@ class StudentMovement(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-
 class StudentLeave(models.Model):
     """ Оюутны чөлөөний бүртгэл """
 
@@ -851,6 +866,7 @@ class StudentLeave(models.Model):
 
     class Meta:
         unique_together = ('student', 'lesson_year', 'lesson_season')
+
 
 class StudentLogin(models.Model):
     """ Оюутны нэвтрэх """

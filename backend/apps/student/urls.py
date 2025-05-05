@@ -47,6 +47,10 @@ urlpatterns = [
     path('address/<int:student>/', StudentAddressAPIView.as_view()),
     path('address/<int:student>/<int:pk>/', StudentAddressAPIView.as_view()),
 
+    # Медал
+    path('medal/', StudentMedalAPIView.as_view()),
+    path('medal/<int:student>/', StudentMedalAPIView.as_view()),
+
     # Оюутны ЭЕШ-ийн оноо мэдээлэл
     path('admission/', StudentAdmissionAPIView.as_view()),
     path('admission/<int:student>/', StudentAdmissionAPIView.as_view()),
