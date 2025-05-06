@@ -104,6 +104,7 @@ export function getColumns(currentPage, rowsPerPage, total_count, t) {
 			center: true,
 			header: 'in_time',
 			sortable: true,
+			maxWidth: "190px",
 		},
 		{
 			name: `${t('Гаралт огноо')}`,
@@ -111,6 +112,7 @@ export function getColumns(currentPage, rowsPerPage, total_count, t) {
 			center: true,
 			header: 'out_time',
 			sortable: true,
+			maxWidth: "190px",
 		},
 	]
 
