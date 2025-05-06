@@ -1,21 +1,17 @@
-import { getPagination } from "@src/utility/Utils";
+import useApi from "@src/utility/hooks/useApi";
+import useLoader from "@src/utility/hooks/useLoader";
 import { useEffect, useState } from "react";
-import DataTable from "react-data-table-component";
-import { ChevronDown } from "react-feather";
+import { LogOut } from "react-feather";
 import { useTranslation } from "react-i18next";
-import { RiComputerLine } from "react-icons/ri";
+
 import {
-	Col,
-	ListGroup,
-	ListGroupItem,
+	Button,
 	Modal,
 	ModalBody,
-	ModalHeader,
-	Spinner
+	ModalHeader
 } from "reactstrap";
+
 import FullSetDataTable from "../FullSetDataTable";
-import useLoader from "@src/utility/hooks/useLoader";
-import useApi from "@src/utility/hooks/useApi";
 
 export default function ModalByStudent({
 	isOpen,
@@ -26,12 +22,13 @@ export default function ModalByStudent({
 
 	// pagination
 	const [currentPage, setCurrentPage] = useState(1)
-	const default_page = ['Бүгд', 10, 20, 50, 75, 100]
-	const [rowsPerPage, setRowsPerPage] = useState(default_page[2])
+	const defaultPage = ['Бүгд', 10, 20, 50, 75, 100]
+	const [rowsPerPage, setRowsPerPage] = useState(defaultPage[2])
 	const [totalCount, setTotalCount] = useState()
 
 	const [searchValue, setSearchValue] = useState()
 	const [sort, setSort] = useState('-id')
+	const [selectedRows, setSelectedRows] = useState([])
 	const [data, setData] = useState()
 
 	const accessHistoryStudentAPI = useApi().calendar.accessHistoryStudent
@@ -68,6 +65,14 @@ export default function ModalByStudent({
 		}
 	}, [searchValue]);
 
+	function closeSession(row) {
+		console.log('close session', row)
+	}
+
+	function closeSessionMass() {
+		selectedRows.forEach(row => closeSession(row))
+	}
+
 	return (
 		<Modal
 			isOpen={isOpen}
@@ -81,15 +86,30 @@ export default function ModalByStudent({
 				<FullSetDataTable
 					data={data}
 					isLoading={isLoading}
-					currentPage={currentPage}
-					rowsPerPage={rowsPerPage}
 					totalCount={totalCount}
+					setSort={setSort}
+					setSelectedRows={setSelectedRows}
+					defaultPage={defaultPage}
+					closeSession={closeSession}
+					currentPage={currentPage}
 					setCurrentPage={setCurrentPage}
 					searchValue={searchValue}
 					setSearchValue={setSearchValue}
-					sort={sort}
-					setSort={setSort}
+					rowsPerPage={rowsPerPage}
+					setRowsPerPage={setRowsPerPage}
 				/>
+				<div className="text-center">
+					<Button
+						size='sm'
+						className='ms-50 mb-50'
+						color='primary'
+						onClick={closeSessionMass}
+						disabled={selectedRows.length < 1}
+					>
+						<LogOut width={"15px"} />
+						<span className='align-middle ms-50'>{t('Сонгосон сессүүдийг бүгдийг хаах')}</span>
+					</Button>
+				</div>
 			</ModalBody>
 		</Modal>
 	)

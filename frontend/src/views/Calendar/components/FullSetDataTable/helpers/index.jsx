@@ -10,7 +10,7 @@ import {
 
 import DataTable from 'react-data-table-component';
 import moment from 'moment';
-import { CheckSquare, LogOut, XSquare } from 'react-feather';
+import { CheckSquare, LogOut, Search, XSquare } from 'react-feather';
 
 export function handleSort(column, sort, setSort) {
 	if (sort === 'asc') {
@@ -117,24 +117,6 @@ export function getColumns(currentPage, rowsPerPage, total_count, t) {
 	return columns
 }
 
-export function getColumnsDetail(t, closeSession) {
-	const columns = [
-		{
-			name: `${'Үйлдэл'}`,
-			selector: (row) => {
-				return <div>
-					{t('Үйлдэл')}: <a role="button" onClick={() => { closeSession(row) }} id={`closeSession${row?.id}`} className="me-1">
-						<Badge color="light-secondary" pill><LogOut width={"15px"} /></Badge>
-					</a>
-					<UncontrolledTooltip placement='top' target={`closeSession${row.id}`} >{t('Сонгосон сессийг хаах')}</UncontrolledTooltip>
-				</div>
-			},
-		},
-	]
-
-	return columns
-}
-
 export function ExpandedComponent(props) {
 	const { data, t, closeSession } = props
 
@@ -144,6 +126,24 @@ export function ExpandedComponent(props) {
 				backgroundColor: '#9CD9F3'
 			},
 		},
+	}
+
+	function getColumnsDetail(t, closeSession) {
+		const columns = [
+			{
+				name: `${'Үйлдэл'}`,
+				selector: (row) => {
+					return <div>
+						{t('Үйлдэл')}: <a role="button" onClick={() => { closeSession(row) }} id={`closeSession${row?.id}`} className="me-1">
+							<Badge color="light-secondary" pill><LogOut width={"15px"} /></Badge>
+						</a>
+						<UncontrolledTooltip placement='top' target={`closeSession${row.id}`} >{t('Сонгосон сессийг хаах')}</UncontrolledTooltip>
+					</div>
+				},
+			},
+		]
+
+		return columns
 	}
 
 	return (
@@ -175,26 +175,74 @@ export const handlePagination = (page, setCurrentPage) => {
 	setCurrentPage(page.selected + 1);
 };
 
-export const searchComponent = (searchValue, setSearchValue, t) => {
+export const searchComponent = (searchValue, setSearchValue, rowsPerPage, setRowsPerPage, defaultPage, t) => {
 	const handleFilter = e => {
 		const value = e.target.value.trimStart();
 		setSearchValue(value)
 	}
 
+	function handleSearch() {
+		setSearchValue(current => current)
+	}
+
+	function handlePerPage(e) {
+		setRowsPerPage(parseInt(e.target.value))
+	}
+
 	return (
-		<Col className="d-flex align-items-center mobile-datatable-search mt-1" md={6} sm={6}>
-			<Label className="me-1 search-filter-title pt-50" for="search-input">
-				{t('Хайлт')}
-			</Label>
-			<Input
-				className="dataTable-filter mb-50"
-				type="text"
-				bsSize="sm"
-				id="search-input"
-				value={searchValue ?? ''}
-				onChange={handleFilter}
-				placeholder={t('Хайх үг....')}
-			/>
-		</Col>
+		<>
+			<Col className='d-flex align-items-center justify-content-start' md={6} sm={12}>
+				<Col md={3} sm={4} xs={5} className='pe-1'>
+					<Input
+						type='select'
+						bsSize='sm'
+						style={{ height: "30px" }}
+						value={rowsPerPage}
+						onChange={e => handlePerPage(e)}
+					>
+						{
+							defaultPage.map((page, idx) => (
+								<option
+									key={idx}
+									value={page}
+								>
+									{page}
+								</option>
+							))}
+					</Input>
+				</Col>
+				<Col md={10} sm={3}>
+					<Label for='sort-select'>{t('Хуудсанд харуулах тоо')}</Label>
+				</Col>
+			</Col>
+			<Col className='d-flex align-items-center mobile-datatable-search mt-1' md={6} sm={12}>
+				<Label className="me-1 search-filter-title pt-50" for="search-input">
+					{t('Хайлт')}
+				</Label>
+				<Input
+					className='dataTable-filter mb-50'
+					type='text'
+					bsSize='sm'
+					id='search-input'
+					placeholder={t('Хайх үг....')}
+					value={searchValue ?? ''}
+					onChange={handleFilter}
+					onKeyDown={e => e.key === 'Enter' && handleSearch()}
+				/>
+				<Button
+					size='sm'
+					className='ms-50 mb-50'
+					color='primary'
+					onClick={handleSearch}
+				>
+					<Search size={15} />
+					<span className='align-middle ms-50'></span>
+				</Button>
+			</Col>
+		</>
 	)
+}
+
+export function onSelectedRowsChange(state, setSelectedStudents) {
+	setSelectedStudents(state?.selectedRows)
 }
