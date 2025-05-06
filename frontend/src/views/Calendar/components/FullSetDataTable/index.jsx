@@ -7,19 +7,20 @@ import { ChevronDown } from "react-feather";
 import { Spinner } from "reactstrap";
 
 export default function FullSetDataTable({
-	data,
-	isLoading,
-	totalCount,
-	setSort,
-	setSelectedRows,
-	defaultPage,
 	currentPage,
 	setCurrentPage,
 	searchValue,
 	setSearchValue,
 	rowsPerPage,
 	setRowsPerPage,
-	closeSession,
+	data,
+	isLoading,
+	totalCount,
+	setSort,
+	setSelectedRows,
+	defaultPage,
+	closeSessions,
+	toggleCleared,
 }) {
 	const { t } = useTranslation()
 
@@ -69,7 +70,7 @@ export default function FullSetDataTable({
 				expandableRowsComponent={(data) => ExpandedComponent({
 					data: data,
 					t: t,
-					closeSession: closeSession,
+					closeSessions: closeSessions,
 				})}
 				// #endregion
 
@@ -86,6 +87,7 @@ export default function FullSetDataTable({
 				// selectable rows
 				selectableRows
 				onSelectedRowsChange={(state) => onSelectedRowsChange(state, setSelectedRows)}
+				clearSelectedRows={toggleCleared}
 			// not needed in this prop group, maybe
 			// selectableRowSelected={row => is_change ? row?.is_selected : row?.selected}
 

@@ -1188,6 +1188,7 @@ function useApi(isDisplay=false) {
 			accessHistoryStudent: {
 				get: ({ limit = 'Бүгд', page = 1, sort = '', search = '' }) => instance.get(`/user/access-history/student/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
 				getOne: (pk = '') => instance.get(`/user/access-history/student/${pk}/`),
+				putCloseSessions: (idList) => instance.put(`/user/access-history/student/?mode=closeSessions`, idList),
 			},
 
 		},

@@ -1,3 +1,4 @@
+import traceback
 from rest_framework import mixins
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
@@ -67,6 +68,29 @@ class AccessHistoryLmsStudentAPI(
     filter_backends = [SearchFilter]
     search_fields = ['student__student__first_name', 'student__student__code', 'student__student__last_name']
 
+    # region custom methods
+    def close_sessions(self):
+        request = self.request
+        data = request.data
+
+        # to require fields
+        if not data and not data[0]:
+            raise ValidationError({ 'id': ['Хоосон байна'] })
+
+        data = data[0]
+        now_date = datetime.now()
+
+        with transaction.atomic():
+            new_data = {
+                'out_time': now_date
+            }
+
+            for data_id in data:
+                instance = self.queryset.get(id=data_id)
+                serializer = self.get_serializer(instance, data=new_data, partial=True)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+    # endregion
 
     def get(self, request, pk=None):
         """ Нэвтэрсэн 'student' мэдээллийг авах """
@@ -96,6 +120,23 @@ class AccessHistoryLmsStudentAPI(
         self.queryset = queryset
         return_datas = self.list(request).data
         return request.send_data(return_datas)
+
+    def put(self,request,pk=None):
+        result = request.send_info("INF_002")
+
+        try:
+            mode = request.query_params.get('mode')
+
+            if mode == 'closeSessions':
+                self.close_sessions()
+        except ValidationError as serializer_errors:
+            traceback.print_exc()
+            result = request.send_error_valid(serializer_errors.detail)
+        except Exception:
+            traceback.print_exc()
+            result = request.send_error("ERR_002")
+
+        return result
 
 
 class UserAPILoginView(

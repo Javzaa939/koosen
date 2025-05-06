@@ -118,7 +118,7 @@ export function getColumns(currentPage, rowsPerPage, total_count, t) {
 }
 
 export function ExpandedComponent(props) {
-	const { data, t, closeSession } = props
+	const { data, t, closeSessions } = props
 
 	const tableCustomStyles = {
 		headCells: {
@@ -128,16 +128,16 @@ export function ExpandedComponent(props) {
 		},
 	}
 
-	function getColumnsDetail(t, closeSession) {
+	function getColumnsDetail() {
 		const columns = [
 			{
 				name: `${'Үйлдэл'}`,
 				selector: (row) => {
 					return <div>
-						{t('Үйлдэл')}: <a role="button" onClick={() => { closeSession(row) }} id={`closeSession${row?.id}`} className="me-1">
+						{t('Үйлдэл')}: <a role="button" onClick={() => { closeSessions(row) }} id={`closeSessions${row?.id}`} className="me-1">
 							<Badge color="light-secondary" pill><LogOut width={"15px"} /></Badge>
 						</a>
-						<UncontrolledTooltip placement='top' target={`closeSession${row.id}`} >{t('Сонгосон сессийг хаах')}</UncontrolledTooltip>
+						<UncontrolledTooltip placement='top' target={`closeSessions${row.id}`} >{t('Сонгосон сессийг хаах')}</UncontrolledTooltip>
 					</div>
 				},
 			},
@@ -161,7 +161,7 @@ export function ExpandedComponent(props) {
 					)}
 					// highlightOnHover={true}
 					data={[data.data]}
-					columns={getColumnsDetail(t, closeSession)}
+					columns={getColumnsDetail()}
 					customStyles={tableCustomStyles}
 					fixedHeader
 					fixedHeaderScrollHeight='62vh'
@@ -246,3 +246,8 @@ export const searchComponent = (searchValue, setSearchValue, rowsPerPage, setRow
 export function onSelectedRowsChange(state, setSelectedStudents) {
 	setSelectedStudents(state?.selectedRows)
 }
+
+export const clearSelected = (setToggleCleared,setSelectedRows) => {
+	setToggleCleared(current => !current)
+	setSelectedRows([])
+};

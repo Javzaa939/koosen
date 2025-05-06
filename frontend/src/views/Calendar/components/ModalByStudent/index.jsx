@@ -12,6 +12,7 @@ import {
 } from "reactstrap";
 
 import FullSetDataTable from "../FullSetDataTable";
+import { clearSelected } from "../FullSetDataTable/helpers";
 
 export default function ModalByStudent({
 	isOpen,
@@ -26,9 +27,12 @@ export default function ModalByStudent({
 	const [rowsPerPage, setRowsPerPage] = useState(defaultPage[2])
 	const [totalCount, setTotalCount] = useState()
 
+	// selected rows
+	const [selectedRows, setSelectedRows] = useState([])
+	const [toggleCleared, setToggleCleared] = useState(false);
+
 	const [searchValue, setSearchValue] = useState()
 	const [sort, setSort] = useState('-id')
-	const [selectedRows, setSelectedRows] = useState([])
 	const [data, setData] = useState()
 
 	const accessHistoryStudentAPI = useApi().calendar.accessHistoryStudent
@@ -65,12 +69,17 @@ export default function ModalByStudent({
 		}
 	}, [searchValue]);
 
-	function closeSession(row) {
-		console.log('close session', row)
-	}
+	async function closeSessions(rows) {
+		const idList = Array.isArray(rows) ? rows.map(row => row.id) : [rows.id]
 
-	function closeSessionMass() {
-		selectedRows.forEach(row => closeSession(row))
+		const { success } = await fetchData(
+			accessHistoryStudentAPI.putCloseSessions([idList])
+		);
+
+		if (success) {
+			clearSelected(setToggleCleared,setSelectedRows)
+			getData()
+		}
 	}
 
 	return (
@@ -84,26 +93,27 @@ export default function ModalByStudent({
 			</ModalHeader>
 			<ModalBody>
 				<FullSetDataTable
-					data={data}
-					isLoading={isLoading}
-					totalCount={totalCount}
-					setSort={setSort}
-					setSelectedRows={setSelectedRows}
-					defaultPage={defaultPage}
-					closeSession={closeSession}
 					currentPage={currentPage}
 					setCurrentPage={setCurrentPage}
 					searchValue={searchValue}
 					setSearchValue={setSearchValue}
 					rowsPerPage={rowsPerPage}
 					setRowsPerPage={setRowsPerPage}
+					data={data}
+					isLoading={isLoading}
+					totalCount={totalCount}
+					setSort={setSort}
+					setSelectedRows={setSelectedRows}
+					defaultPage={defaultPage}
+					closeSessions={closeSessions}
+					toggleCleared={toggleCleared}
 				/>
 				<div className="text-center">
 					<Button
 						size='sm'
 						className='ms-50 mb-50'
 						color='primary'
-						onClick={closeSessionMass}
+						onClick={() => closeSessions(selectedRows)}
 						disabled={selectedRows.length < 1}
 					>
 						<LogOut width={"15px"} />
