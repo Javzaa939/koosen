@@ -61,7 +61,7 @@ export function getColumns(checkScore, allCheck)
 		},
 		{
 			name: "70 оноо",
-			selector: (row, index) => <span>{row?.teacher_score || 0}</span>,
+			selector: (row, index) => <span>{row?.teach_score || 0}</span>,
 			center: true,
 			width: '100px'
 		},
@@ -73,7 +73,7 @@ export function getColumns(checkScore, allCheck)
 		},
 		{
 			name: "Нийт оноо",
-			selector: (row, index) => <span>{(row?.teacher_score || 0) + (row?.exam_score || 0)}</span>,
+			selector: (row, index) => <span>{(row?.teach_score || 0) + (row?.exam_score || 0)}</span>,
 			center: true,
 			width: '118px'
 		},
