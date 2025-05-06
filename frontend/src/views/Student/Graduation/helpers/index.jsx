@@ -269,6 +269,18 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			sortable: true,
             center: true,
 		},
+		{
+			header: 'leader',
+			name: t("Мэдээлэл танилцсан эсэх"),
+			selector: (row) => {
+				return (
+					<Badge color={row?.is_check ? 'success': 'danger'}>{row?.is_check ? 'Тийм': 'Үгүй'}</Badge>
+				)
+			},
+            sortable: false,
+            center: true,
+			minWidth: "100px",
+		},
 	]
 
 	if(Object.keys(user).length > 0) {

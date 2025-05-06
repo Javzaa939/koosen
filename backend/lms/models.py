@@ -815,6 +815,8 @@ class GraduationWork(models.Model):
     back_diplom_num = models.CharField(max_length=50, null=True, verbose_name='Бакалаврын дипломын дугаар')
     registration_num = models.CharField(max_length=50, null=True, verbose_name='Бүртгэлийн дугаар')
     shalgalt_onoo = models.CharField(max_length=50, null=True, verbose_name='Шалгалтын оноо')
+    is_check = models.BooleanField(default=False, verbose_name='Дипломын мэдээлэлтэй танилцсан эсэх')
+
     created_user = models.ForeignKey(User, related_name='grad_cr_user', on_delete=models.SET_NULL, null=True, verbose_name="Бүртгэсэн хэрэглэгч")
     updated_user = models.ForeignKey(User, related_name='grad_up_user', on_delete=models.SET_NULL, null=True, verbose_name="Зассан хэрэглэгч")
 
