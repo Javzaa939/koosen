@@ -1,10 +1,12 @@
-
+import traceback
+from rest_framework import mixins
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
+from rest_framework.filters import SearchFilter
 
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, F
 from django.contrib import auth
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
@@ -14,11 +16,13 @@ from django.utils.encoding import force_str, force_bytes
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from main.utils.function.utils import get_domain_url, get_domain_url_link
 from main.utils.function.utils import get_user_permissions, get_menu_unit, get_unit_user, make_connection
+from main.utils.function.pagination import CustomPagination
 from main.decorators import login_required
 
 from core.models import Employee, Schools, SubOrgs, Teachers, User
 
 from .serializers import (
+    AccessHistoryLmsStudentSerializer,
     UserInfoSerializer,
     AccessHistoryLmsSerializer,
     AccessHistoryLmsSerializerAll
@@ -48,6 +52,110 @@ class UserDetailAPI(
         qs = AccessHistoryLms.objects.filter(user=user)
         serializer = self.get_serializer(qs, many=True)
         return request.send_data(serializer.data)
+
+
+@permission_classes([IsAuthenticated])
+class AccessHistoryLmsStudentAPI(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+):
+    queryset = AccessHistoryLms.objects.filter(system_type=AccessHistoryLms.STUDENT)
+    serializer_class = AccessHistoryLmsStudentSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['student__student__first_name', 'student__student__code', 'student__student__last_name']
+
+    # region custom methods
+    def close_sessions(self):
+        request = self.request
+        data = request.data
+
+        # to require fields
+        if not data and not data[0]:
+            raise ValidationError({ 'id': ['Хоосон байна'] })
+
+        data = data[0]
+        now_date = datetime.now()
+
+        with transaction.atomic():
+            new_data = {
+                'out_time': now_date
+            }
+
+            for data_id in data:
+                instance = self.queryset.get(id=data_id)
+                serializer = self.get_serializer(instance, data=new_data, partial=True)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+
+    def apply_front_end_filters(self,queryset):
+        request = self.request
+
+        is_out_time = request.query_params.get('outTime')
+
+        if is_out_time:
+            queryset = queryset.filter(out_time__isnull=is_out_time!='true')
+
+        device_type = request.query_params.get('deviceType')
+
+        if device_type:
+            queryset = queryset.filter(device_type=device_type)
+
+        return queryset
+    # endregion
+
+    def get(self, request, pk=None):
+        """ Нэвтэрсэн 'student' мэдээллийг авах """
+
+        queryset = self.queryset
+
+        queryset = queryset.annotate(
+            student_first_name=F('student__student__first_name'),
+            student_last_name=F('student__student__last_name'),
+            student_idnum=F('student__student'),
+            student_code=F('student__student__code'),
+        )
+
+        if pk:
+            self.queryset = queryset
+            return_datas = self.retrieve(request, pk).data
+            return request.send_data(return_datas)
+
+        queryset = self.apply_front_end_filters(queryset)
+
+        # region Sort хийх үед ажиллана
+        sorting = request.query_params.get('sorting')
+
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+            queryset = queryset.order_by(*sorting.split(','))
+        # endregion
+
+        self.queryset = queryset
+        return_datas = self.list(request).data
+        return request.send_data(return_datas)
+
+    def put(self,request,pk=None):
+        result = request.send_info("INF_002")
+
+        try:
+            mode = request.query_params.get('mode')
+
+            if mode == 'closeSessions':
+                self.close_sessions()
+        except ValidationError as serializer_errors:
+            traceback.print_exc()
+            result = request.send_error_valid(serializer_errors.detail)
+        except Exception:
+            traceback.print_exc()
+            result = request.send_error("ERR_002")
+
+        return result
+
 
 class UserAPILoginView(
     generics.GenericAPIView

@@ -1,4 +1,3 @@
-import json
 import os
 import traceback
 from rest_framework import generics, mixins
@@ -11,7 +10,6 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 
-from main.utils.function.serializer import dynamic_serializer
 from main.utils.function.pagination import CustomPagination
 from django.shortcuts import get_object_or_404
 from django.conf import settings
