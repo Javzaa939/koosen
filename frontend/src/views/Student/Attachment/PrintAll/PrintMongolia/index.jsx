@@ -239,7 +239,7 @@ export default function PrintAttachmentMongolia()
                 >
                     <div className='d-flex flex-column text-center fw-bolder'>
                         <p className='text-uppercase' style={{ marginBottom: '0px' }} >{themeConfig.school.name}</p>
-                        <p className='text-uppercase' style={{ marginBottom: '0px' }} >{printDatas?.student?.department?.school}</p>
+                        <p className='text-uppercase' style={{ marginBottom: '0px' }} >{printDatas?.student?.group?.department?.school}</p>
                         <p className='m-0' style={{ fontSize: '12px', fontWeight: '500' }} >{printDatas?.student?.graduation_work?.diplom_num} дугаартай <span className='text-lowercase'>{printDatas?.student?.group?.degree?.degree_name && `${printDatas?.student?.group?.degree?.degree_name}ын`}</span> дипломын хавсралт</p>
                         <p className='' style={{ fontSize: 12, fontWeight: 500 }}>Бүртгэлийн дугаар: {printDatas?.student?.graduation_work?.registration_num}</p>
                     </div>
