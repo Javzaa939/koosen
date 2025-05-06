@@ -6,13 +6,21 @@ import { useTranslation } from "react-i18next";
 
 import {
 	Button,
+	Col,
+	Label,
 	Modal,
 	ModalBody,
-	ModalHeader
+	ModalHeader,
+	Row
 } from "reactstrap";
 
 import FullSetDataTable from "../FullSetDataTable";
 import { clearSelected } from "../FullSetDataTable/helpers";
+import SimpleSelectFilter from "../SimpleSelectFilter";
+
+const MOBILE = 1
+const TABLET = 2
+const PC = 3
 
 export default function ModalByStudent({
 	isOpen,
@@ -34,6 +42,7 @@ export default function ModalByStudent({
 	const [searchValue, setSearchValue] = useState()
 	const [sort, setSort] = useState('-id')
 	const [data, setData] = useState()
+	const [filters, setFilters] = useState()
 
 	const accessHistoryStudentAPI = useApi().calendar.accessHistoryStudent
 
@@ -43,7 +52,9 @@ export default function ModalByStudent({
 				limit: rowsPerPage,
 				page: currentPage,
 				search: searchValue,
-				sort: sort
+				sort: sort,
+				outTime: filters?.outTime,
+				deviceType: filters?.deviceType,
 			})
 		);
 
@@ -55,7 +66,7 @@ export default function ModalByStudent({
 
 	useEffect(() => {
 		getData()
-	}, [currentPage, rowsPerPage, sort])
+	}, [currentPage, rowsPerPage, sort, filters])
 
 	useEffect(() => {
 		if (searchValue?.length == 0) {
@@ -77,7 +88,7 @@ export default function ModalByStudent({
 		);
 
 		if (success) {
-			clearSelected(setToggleCleared,setSelectedRows)
+			clearSelected(setToggleCleared, setSelectedRows)
 			getData()
 		}
 	}
@@ -92,34 +103,73 @@ export default function ModalByStudent({
 				<span className="text-primary">{t('Хандалтын түүхүүд')}</span>
 			</ModalHeader>
 			<ModalBody>
-				<FullSetDataTable
-					currentPage={currentPage}
-					setCurrentPage={setCurrentPage}
-					searchValue={searchValue}
-					setSearchValue={setSearchValue}
-					rowsPerPage={rowsPerPage}
-					setRowsPerPage={setRowsPerPage}
-					data={data}
-					isLoading={isLoading}
-					totalCount={totalCount}
-					setSort={setSort}
-					setSelectedRows={setSelectedRows}
-					defaultPage={defaultPage}
-					closeSessions={closeSessions}
-					toggleCleared={toggleCleared}
-				/>
-				<div className="text-center">
-					<Button
-						size='sm'
-						className='ms-50 mb-50'
-						color='primary'
-						onClick={() => closeSessions(selectedRows)}
-						disabled={selectedRows.length < 1}
-					>
-						<LogOut width={"15px"} />
-						<span className='align-middle ms-50'>{t('Сонгосон сессүүдийг бүгдийг хаах')}</span>
-					</Button>
-				</div>
+				<Row className="mb-1">
+					<Col md={3} className="d-flex flex-column justify-content-between">
+						<Label for='out_time'>{t('Гаралт огноо')}</Label>
+						<SimpleSelectFilter
+							fieldName={'out_time'}
+							isStaticOptions={true}
+							getApi={() => [
+								{ value: true, label: 'Бөглөгдсөн' },
+								{ value: false, label: 'Хоосон' },
+							]}
+							getOptionLabel={(option) => option.label}
+							getOptionValue={(option) => option.value}
+							optionValueFieldName={'value'}
+							setParentSelectedOption={(newValue) => setFilters(current => ({ ...current, outTime: newValue }))}
+						/>
+					</Col>
+					<Col md={3}>
+						<Label for='device_type'>{t('Нэвтэрсэн төхөөрөмжийн төрөл')}</Label>
+						<SimpleSelectFilter
+							fieldName={'device_type'}
+							isStaticOptions={true}
+							getApi={() => [
+								{ value: MOBILE, label: "Утас" },
+								{ value: TABLET, label: "Таблет" },
+								{ value: PC, label: "Компютер" },
+							]}
+							getOptionLabel={(option) => option.label}
+							getOptionValue={(option) => option.value}
+							optionValueFieldName={'value'}
+							setParentSelectedOption={(newValue) => setFilters(current => ({ ...current, deviceType: newValue }))}
+						/>
+					</Col>
+				</Row>
+				<Row>
+					<Col>
+						<FullSetDataTable
+							currentPage={currentPage}
+							setCurrentPage={setCurrentPage}
+							searchValue={searchValue}
+							setSearchValue={setSearchValue}
+							rowsPerPage={rowsPerPage}
+							setRowsPerPage={setRowsPerPage}
+							data={data}
+							isLoading={isLoading}
+							totalCount={totalCount}
+							setSort={setSort}
+							setSelectedRows={setSelectedRows}
+							defaultPage={defaultPage}
+							closeSessions={closeSessions}
+							toggleCleared={toggleCleared}
+						/>
+					</Col>
+				</Row>
+				<Row className="text-center">
+					<Col>
+						<Button
+							size='sm'
+							className='ms-50 mb-50'
+							color='primary'
+							onClick={() => closeSessions(selectedRows)}
+							disabled={selectedRows.length < 1}
+						>
+							<LogOut width={"15px"} />
+							<span className='align-middle ms-50'>{t('Сонгосон сессүүдийг бүгдийг хаах')}</span>
+						</Button>
+					</Col>
+				</Row>
 			</ModalBody>
 		</Modal>
 	)

@@ -199,6 +199,7 @@ export const searchComponent = (searchValue, setSearchValue, rowsPerPage, setRow
 						style={{ height: "30px" }}
 						value={rowsPerPage}
 						onChange={e => handlePerPage(e)}
+						id='rowsPerPage'
 					>
 						{
 							defaultPage.map((page, idx) => (
@@ -212,7 +213,7 @@ export const searchComponent = (searchValue, setSearchValue, rowsPerPage, setRow
 					</Input>
 				</Col>
 				<Col md={10} sm={3}>
-					<Label for='sort-select'>{t('Хуудсанд харуулах тоо')}</Label>
+					<Label for='rowsPerPage'>{t('Хуудсанд харуулах тоо')}</Label>
 				</Col>
 			</Col>
 			<Col className='d-flex align-items-center mobile-datatable-search mt-1' md={6} sm={12}>

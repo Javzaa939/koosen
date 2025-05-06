@@ -25,8 +25,6 @@ export default function FullSetDataTable({
 	const { t } = useTranslation()
 
 	return (
-		// TODO:
-		//  - how to reset sort to default
 		<div className='react-dataTable react-dataTable-selectable-rows mx-1'>
 			{/* sometimes needed */}
 			{/* <div className='react-dataTable react-dataTable-selectable-rows' id='datatableLeftOneRightOne'> */}

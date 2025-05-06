@@ -1186,7 +1186,14 @@ function useApi(isDisplay=false) {
 			getAccessHistory: () => instance.get(`/user/access-history/`),
 
 			accessHistoryStudent: {
-				get: ({ limit = 'Бүгд', page = 1, sort = '', search = '' }) => instance.get(`/user/access-history/student/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
+				get: ({
+					limit = 'Бүгд',
+					page = 1,
+					sort = '',
+					search = '',
+					outTime='',
+					deviceType='',
+				}) => instance.get(`/user/access-history/student/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&outTime=${outTime}&deviceType=${deviceType}`),
 				getOne: (pk = '') => instance.get(`/user/access-history/student/${pk}/`),
 				putCloseSessions: (idList) => instance.put(`/user/access-history/student/?mode=closeSessions`, idList),
 			},

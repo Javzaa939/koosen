@@ -90,6 +90,21 @@ class AccessHistoryLmsStudentAPI(
                 serializer = self.get_serializer(instance, data=new_data, partial=True)
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
+
+    def apply_front_end_filters(self,queryset):
+        request = self.request
+
+        is_out_time = request.query_params.get('outTime')
+
+        if is_out_time:
+            queryset = queryset.filter(out_time__isnull=is_out_time!='true')
+
+        device_type = request.query_params.get('deviceType')
+
+        if device_type:
+            queryset = queryset.filter(device_type=device_type)
+
+        return queryset
     # endregion
 
     def get(self, request, pk=None):
@@ -108,8 +123,11 @@ class AccessHistoryLmsStudentAPI(
             self.queryset = queryset
             return_datas = self.retrieve(request, pk).data
             return request.send_data(return_datas)
+
+        queryset = self.apply_front_end_filters(queryset)
+
         # region Sort хийх үед ажиллана
-        sorting = self.request.query_params.get('sorting')
+        sorting = request.query_params.get('sorting')
 
         if sorting:
             if not isinstance(sorting, str):
