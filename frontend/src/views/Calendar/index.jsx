@@ -27,6 +27,7 @@ import Calendar from './Calendar'
 import SidebarLeft from './SidebarLeft'
 import AddEventSidebar from './Add'
 import SwiperFade from './SwiperFade';
+import AccessHistory from './AccessHistory'
 
 import '@styles/react/apps/app-calendar.scss'
 
@@ -324,13 +325,20 @@ const CalendarComponent = () => {
                         />
                     </Col>
 
-                    <Col lg = '3' sm ='9' className='m-2'>
-                        <Card className='text-center'>
+                    <Col lg="3" sm="9" className="m-2">
+                        <Card className="text-center">
                             <CardBody>
-                                <CardTitle tag = 'h3'>Сүүлд нэмэгдсэн мэдээ, мэдээлэл</CardTitle>
-                                {datas1.length > 0 ? <SwiperFade datas={datas1} /> : <h5>Мэдээлэл байхгүй байна!</h5>}
+                                <CardTitle tag="h3">
+                                    Сүүлд нэмэгдсэн мэдээ, мэдээлэл
+                                </CardTitle>
+                                {datas1.length > 0 ? (
+                                    <SwiperFade datas={datas1} />
+                                ) : (
+                                    <h5>Мэдээлэл байхгүй байна!</h5>
+                                )}
                             </CardBody>
                         </Card>
+                        <AccessHistory />
                     </Col>
 
                     <div
