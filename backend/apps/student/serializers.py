@@ -1315,7 +1315,7 @@ class StudentDefinitionListLiteSerializer(serializers.ModelSerializer):
         data = dict()
 
         if obj.status.code == 5:
-            graduation_data = GraduationWork.objects.get(student=obj)
+            graduation_data = GraduationWork.objects.filter(student=obj).first()
 
             data["diplom_num"] = graduation_data.diplom_num if graduation_data.diplom_num else ""
             data["graduation_year"] = graduation_data.graduation_date if graduation_data.graduation_date else ""

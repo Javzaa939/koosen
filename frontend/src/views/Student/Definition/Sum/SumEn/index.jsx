@@ -202,7 +202,7 @@ export default function Sum()
                                             <span className="text-uppercase">{transliterateCyrillicToLatin(datas?.student?.first_name)} {transliterateCyrillicToLatin(datas?.student?.last_name)}</span> /{engVseg(datas?.student?.register_num[0])}{engVseg(datas?.student?.register_num[1])}{datas?.student?.register_num.slice(-8)}/ is studying in the program
                                             <br/>
                                             <span>
-                                                with an average grade of {Math.round(parseFloat(datas?.score?.gpa || 0) * 10) / 10}.
+                                                with an average grade of {datas?.score?.gpa}.
                                             </span>
                                         </span>
                                     :
@@ -211,7 +211,7 @@ export default function Sum()
                                                 {datas?.student?.first_name}
                                             </span> <span className="text-uppercase fw-bolder">{datas?.student?.last_name} /{datas?.student?.register_num}/</span>  is studying in the {datas?.student?.group?.profession?.name_eng} program
                                             <br/>
-                                            with an average grade of {Math.round(parseFloat(datas?.score?.score_obj?.gpa || 0) * 10) / 10}
+                                            with an average grade of {datas?.score?.gpa}
                                             <span>
                                                 {
                                                     datas?.season_name ? ` in the ${datas?.season_name_eng }` : ''

@@ -114,7 +114,7 @@ export default function Sum()
                                         <span>
                                             <span className="text-uppercase fw-bolder">{datas?.student?.last_name} </span><span/> овогтой <span className="text-uppercase fw-bolder">{datas?.student?.first_name} /{datas?.student?.register_num}/</span> нь {datas?.student?.profession_name} хөтөлбөрт
                                             <br/>
-                                            <span>{Math.round(parseFloat(datas?.score?.gpa || 0) * 10) / 10}</span> голч дүнтэй суралцдаг нь үнэн болно.
+                                            <span>{datas?.score?.gpa}</span> голч дүнтэй суралцдаг нь үнэн болно.
                                         </span>
                                     :
                                         <span>
@@ -122,7 +122,7 @@ export default function Sum()
                                                 {datas?.student?.last_name}
                                             </span> овогтой <span className="text-uppercase fw-bolder">{datas?.student?.first_name} /{datas?.student?.register_num}/</span> нь {datas?.student?.profession_name} хөтөлбөрт
                                             <br/>
-                                            {data?.year_value} хичээлийн {datas?.season_name ? 'жилийн' : 'жилд'} {datas?.season_name?.toLowerCase()}{datas?.season_name ? 'ын улиралд' : ''} {Math.round(parseFloat(datas?.score?.score_obj?.gpa || 0) * 10) / 10} голч дүнтэй суралцсан нь үнэн болно.
+                                            {data?.year_value} хичээлийн {datas?.season_name ? 'жилийн' : 'жилд'} {datas?.season_name?.toLowerCase()}{datas?.season_name ? 'ын улиралд' : ''} {datas?.score?.gpa} голч дүнтэй суралцсан нь үнэн болно.
                                         </span>
                                 }
                             </div>

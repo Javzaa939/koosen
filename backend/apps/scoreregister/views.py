@@ -1314,17 +1314,11 @@ class ScoreRegisterPrintAPIView(
             # дундаж олох нь
             if onoo != 0:
                 total_onoo = round(onoo / total_kr, 2)
+                total_gpa = round(total_gpa_scores / total_kr, 2)
 
             # нийт kr
             total_kr_count = total_kr_count + total_kr
             total_onoo_count = total_onoo_count + onoo
-
-            # голч олох нь
-            score = Score.objects.filter(
-                score_max__gte=total_onoo, score_min__lte=total_onoo).first()
-
-            if score:
-                total_gpa=score.gpa
 
             # жил,улирал болгоны kr and lesson жагсаалт
             year_splitted = key.split(' ')
@@ -1349,12 +1343,8 @@ class ScoreRegisterPrintAPIView(
             total_onoo_avg = round(total_onoo_count / total_kr_count, 2)
 
         estimate_count = total_kr_count - total_skr_count
-        print('estimate_count', estimate_count)
-        print('total_kr_count', total_kr_count)
-        print('total_skr_count', total_skr_count)
-        print('total_gpa_scores', total_gpa_scores)
         if total_gpa_scores != 0.0:
-            niit_gpa = round((total_gpa_scores / estimate_count), 1)
+            niit_gpa = round((total_gpa_scores / estimate_count), 2)
 
         total.append({
             "all_total":

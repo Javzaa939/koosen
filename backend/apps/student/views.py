@@ -3183,8 +3183,6 @@ class DefinitionSumAPIView(
             all_data['season_name'] = season_name
             all_data['season_name_eng'] = season_name_eng
 
-        # if score['total_kr'] == 0:
-        #     return request.send_data(all_data)
 
         all_data['score'] = score
         return request.send_data(all_data)
