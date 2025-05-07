@@ -817,56 +817,56 @@ class AdmissionUserEmailAPIView(
         user = request.user
         data = request.data
 
-        sid = transaction.savepoint()
-        try:
-            with transaction.atomic():
+        # sid = transaction.savepoint()
+        # try:
+        with transaction.atomic():
 
-                link_domain = get_domain_url_link()
-                link_domain = get_domain_url()
-                logo_url = "{domain}/static/media/dxis_logo.png".format(domain=link_domain)
+            link_domain = get_domain_url_link()
+            link_domain = get_domain_url()
+            logo_url = "{domain}/static/media/dxis_logo.png".format(domain=link_domain)
 
-                datas = {
-                    'logo_url': logo_url,
-                    'description': data['description'] if data['description'] else ""
-                }
+            datas = {
+                'logo_url': logo_url,
+                'description': data['description'] if data['description'] else ""
+            }
 
-                html_body = render_to_string('mail_state.html', datas)
+            html_body = render_to_string('mail_state.html', datas)
 
-                create_email_info = []
+            create_email_info = []
 
-                for value in data["students"]:
-                    create_email_info.append(
-                        EmailInfo(
-                            user_id = value,
-                            message = html_body,
-                            send_user_id = user.id,
-                        )
+            for value in data["students"]:
+                create_email_info.append(
+                    EmailInfo(
+                        user_id = value,
+                        message = html_body,
+                        send_user_id = user.id,
                     )
+                )
 
-                self.queryset.bulk_create(create_email_info)
+            self.queryset.bulk_create(create_email_info)
 
-                config = {
-                    "email_password": user.employee.org.email_password,
-                    "email_port": user.employee.org.email_port,
-                    "email_host": user.employee.org.email_host,
-                    "email_use_tsl": user.employee.org.email_use_tls,
-                }
+            config = {
+                "email_password": user.employee.org.email_password,
+                "email_port": user.employee.org.email_port,
+                "email_host": user.employee.org.email_host,
+                "email_use_tsl": user.employee.org.email_use_tls,
+            }
 
-                for mail in data["email_list"]:
-                    send_mail(
-                        subject = 'Элсэлт',
-                        message = 'Дотоод хэргийн их сургууль',
-                        from_email = user.employee.org.email_host_user,
-                        recipient_list = [mail],
-                        connection = make_connection(user.employee.org.email_host_user, config),
-                        html_message = html_body
-                    )
+            for mail in data["email_list"]:
+                send_mail(
+                    subject = 'Элсэлт',
+                    message = 'Дотоод хэргийн их сургууль',
+                    from_email = user.employee.org.email_host_user,
+                    recipient_list = [mail],
+                    connection = make_connection(user.employee.org.email_host_user, config),
+                    html_message = html_body
+                )
 
 
-        except Exception as e:
-            print(e)
-            transaction.savepoint_rollback(sid)
-            return request.send_error("ERR_002", e.__str__)
+        # except Exception as e:
+        #     print(e)
+        #     transaction.savepoint_rollback(sid)
+        #     return request.send_error("ERR_002", e.__str__)
 
         return request.send_info('INF_001')
 
