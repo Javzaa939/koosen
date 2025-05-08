@@ -120,24 +120,28 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 						<Badge color="light-secondary" pill><Edit  width={"15px"} /></Badge>
 					</a>
 					<UncontrolledTooltip placement='top' target={`complaintListDatatableEdit${row.id}`} >Засах</UncontrolledTooltip>
-					{isLoading && Loader}
-					<a
-						role="button"
-						onClick={() => showWarning({
-							header: {
-								title: t(`Оюутны нууц үг`),
-							},
-							question: t(`Оюутны нууц үг сэргээх үү?`),
-							onClick: () => changePassModal(row.id)
-						})}
-						id={`complaintListDatatableEditPass${row?.id}`}
-						className="me-1"
-					>
-						<Badge color="light-info" pill><Lock  width={"15px"} /></Badge>
-					</a>
-					<UncontrolledTooltip placement='top' target={`complaintListDatatableEditPass${row.id}`} >Нууц үг сэргээх</UncontrolledTooltip>
 					{
-						(user.permissions.includes('lms-student-register-delete')  && school_id) &&
+						(user.permissions.includes('lms-student-register-update')) &&
+						<>
+						<a
+							role="button"
+							onClick={() => showWarning({
+								header: {
+									title: t(`Оюутны нууц үг`),
+								},
+								question: t(`Оюутны нууц үг сэргээх үү?`),
+								onClick: () => changePassModal(row.id)
+							})}
+							id={`complaintListDatatableEditPass${row?.id}`}
+							className="me-1"
+						>
+							<Badge color="light-info" pill><Lock  width={"15px"} /></Badge>
+						</a>
+						<UncontrolledTooltip placement='top' target={`complaintListDatatableEditPass${row.id}`} >Нууц үг сэргээх</UncontrolledTooltip>
+						</>
+					}
+					{
+						(user.permissions.includes('lms-student-register-delete')) &&
 						<>
 						<a role="button"
 							onClick={() => showWarning({
@@ -158,7 +162,6 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 					{
 						Object.keys(user).length > 0 && user?.is_superuser &&
 						<>
-							{isLoading && Loader}
 							<a
 								role="button"
 								onClick={() => showWarning({

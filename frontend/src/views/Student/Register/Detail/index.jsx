@@ -26,31 +26,31 @@ const Detail = () => {
             active_id: 1,
             name: t('Мэдээлэл'),
             component: <MainInformation />,
-            disabled: user?.permissions?.includes('lms-student-register-update') ? false : true
+            disabled: (user?.permissions?.includes('lms-student-register-update') ? false : true)
         },
         {
             active_id: 2,
             name: t('Гэр бүл'),
             component: <Family />,
-            disabled: user?.permissions?.includes('lms-student-register-update') ? false : true
+            disabled: (user?.permissions?.includes('lms-student-register-update') ? false : true)
         },
         {
             active_id: 3,
             name: t('Боловсрол'),
             component: <Education />,
-            disabled: user?.permissions?.includes('lms-student-register-update') ? false : true
+            disabled: (user?.permissions?.includes('lms-student-register-update') ? false : true)
         },
         {
             active_id: 4,
             name: t('Хаяг'),
             component: <Address />,
-            disabled: user?.permissions?.includes('lms-student-register-update') ? false : true
+            disabled: (user?.permissions?.includes('lms-student-register-update') ? false : true)
         },
         {
             active_id: 5,
             name: t('ЭЕШ-ын оноо'),
             component: <AdmissionScore />,
-            disabled: user?.permissions?.includes('lms-student-register-update') ? false : true
+            disabled: (user?.permissions?.includes('lms-student-register-update') ? false : true)
         },
         {
             active_id: 6,
@@ -92,6 +92,7 @@ const Detail = () => {
                                         onClick={() => {
                                             toggle(menu.active_id)
                                         }}
+                                        disabled={menu?.disabled}
                                     >
                                         {menu.name}
                                     </NavLink>
