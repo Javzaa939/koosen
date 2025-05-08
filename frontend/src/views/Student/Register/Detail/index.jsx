@@ -1,4 +1,4 @@
-import React, { useState, Fragment, useEffect } from 'react'
+import React, { useState, Fragment, useEffect, useContext } from 'react'
 
 import { useNavigate } from 'react-router-dom'
 
@@ -11,6 +11,7 @@ import AdmissionScore from './AdmissionScore'
 import Education from './Education'
 import Family from './Family'
 import MainInformation from './MainInformation'
+import AuthContext from "@context/AuthContext"
 
 import { useTranslation } from 'react-i18next'
 import Medal from './Medal'
@@ -18,36 +19,45 @@ import Medal from './Medal'
 
 const Detail = () => {
     const { t } = useTranslation()
+    const { user } = useContext(AuthContext)
+
     const nav_menus = [
         {
             active_id: 1,
             name: t('Мэдээлэл'),
-            component: <MainInformation />
+            component: <MainInformation />,
+            disabled: user?.permissions?.includes('lms-student-register-update') ? false : true
         },
         {
             active_id: 2,
             name: t('Гэр бүл'),
-            component: <Family />
+            component: <Family />,
+            disabled: user?.permissions?.includes('lms-student-register-update') ? false : true
         },
         {
             active_id: 3,
             name: t('Боловсрол'),
-            component: <Education />
+            component: <Education />,
+            disabled: user?.permissions?.includes('lms-student-register-update') ? false : true
         },
         {
             active_id: 4,
             name: t('Хаяг'),
-            component: <Address />
+            component: <Address />,
+            disabled: user?.permissions?.includes('lms-student-register-update') ? false : true
         },
         {
             active_id: 5,
             name: t('ЭЕШ-ын оноо'),
-            component: <AdmissionScore />
+            component: <AdmissionScore />,
+            disabled: user?.permissions?.includes('lms-student-register-update') ? false : true
         },
         {
             active_id: 6,
             name: t('Бие даан хөгжих сургалт'),
-            component: <Medal />
+            component: <Medal />,
+            disabled: user?.permissions?.includes('lms-student-medal-update') ? false : true
+
         },
     ]
     const navigation = useNavigate()
