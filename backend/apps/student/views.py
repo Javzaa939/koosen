@@ -2633,36 +2633,59 @@ class GraduationWorkAPIView(
     def post(self, request):
         " Төгсөлтийн ажил шинээр үүсгэх "
 
+        data_url = 'https://kimo.mngl.net/pub/convert'
+        headers = {
+            'Content-Type':'application/json'
+        }
+
+        # transaction savepoint зарлах нь хэрэв алдаа гарвад roll back хийнэ
+        sid = transaction.savepoint()
+
         data = request.data
         lesson_ids = data['lesson']
-        if 'lesson' in data:
-            del data['lesson']
-
+        del data['lesson']
         student = data.get("student")
 
-        graduate_info = self.queryset.filter(student=student)
+        graduate_info = self.queryset.filter(student=student).first()
         if graduate_info:
             return request.send_error('ERR_002', 'Оюутан бүртгэгдсэн байна')
 
-        try:
-            serializer = self.serializer_class(data=data, many=False)
-            if not serializer.is_valid():
-                return request.send_error_valid(serializer.errors)
+        mn_topic = data.get('diplom_topic')
+        serializer = self.serializer_class(data=data, many=False)
 
-            created_qs = self.create(request).data
-            if lesson_ids:
-                created_qs = self.queryset.get(id=created_qs.get("id"))
-                created_qs.lesson.add(*lesson_ids)
+        if not serializer.is_valid():
+            transaction.savepoint_rollback(sid)
+            return request.send_error_valid(serializer.errors)
 
-        except Exception as e:
-            print(e)
-            return request.send_error("ERR_002")
+        created_qs = self.create(request).data
+        created_qs = self.queryset.get(id=created_qs.get("id"))
+        created_qs.lesson.add(*lesson_ids)
+
+        # Төгсөлтийн ажлын сэдэв хөрвүүлэх
+        if mn_topic:
+            post_data = {
+                'direction': 'to-mng',
+                'text': mn_topic
+            }
+
+            response = requests.post(data_url, headers=headers, json=post_data)
+            if response.status_code == 200:
+                data = response.json()
+                topic_uig_name = data['result']
+                graduate_info.diplom_topic_uig = topic_uig_name
+                graduate_info.save()
+
 
         return request.send_info("INF_001")
 
     @has_permission(must_permissions=['lms-student-graduate-update'])
     def put(self, request, pk=None):
         "Төгсөлтийн ажил засах"
+
+        data_url = 'https://kimo.mngl.net/pub/convert'
+        headers = {
+            'Content-Type':'application/json'
+        }
 
         data = request.data
         lesson_ids = data['lesson']
@@ -2678,20 +2701,30 @@ class GraduationWorkAPIView(
         if student_qs:
             return request.send_error('ERR_002', 'Оюутан бүртгэгдсэн байна')
 
-        try:
-            serializer = self.get_serializer(instance, data=data)
-            if not serializer.is_valid(raise_exception=False):
-                return request.send_error_valid(serializer.errors)
+        mn_topic = data.get('diplom_topic')
+        serializer = self.get_serializer(instance, data=data)
 
-            updated_qs = self.update(request).data
-            updated_qs = self.queryset.get(id=updated_qs.get("id"))
-            # updated_qs.lesson.all().remove()
-            updated_qs.lesson.clear()
-            updated_qs.lesson.add(*lesson_ids)
+        if not serializer.is_valid(raise_exception=False):
+            return request.send_error_valid(serializer.errors)
 
-        except Exception as e:
-            print(e)
-            return request.send_error("ERR_002")
+        updated_qs = self.update(request).data
+        updated_qs = self.queryset.get(id=updated_qs.get("id"))
+        updated_qs.lesson.clear()
+        updated_qs.lesson.add(*lesson_ids)
+
+        # Төгсөлтийн ажлын сэдэв хөрвүүлэх
+        if mn_topic:
+            post_data = {
+                'direction': 'to-mng',
+                'text': mn_topic
+            }
+
+            response = requests.post(data_url, headers=headers, json=post_data)
+            if response.status_code == 200:
+                data = response.json()
+                topic_uig_name = data['result']
+                instance.diplom_topic_uig = topic_uig_name
+                instance.save()
 
         return request.send_info("INF_002")
 
