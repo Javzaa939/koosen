@@ -2702,15 +2702,14 @@ class GraduationWorkAPIView(
             return request.send_error('ERR_002', 'Оюутан бүртгэгдсэн байна')
 
         mn_topic = data.get('diplom_topic')
-        serializer = self.get_serializer(instance, data=data)
+        serializer = self.get_serializer(instance, data=data, partial=True)
 
         if not serializer.is_valid(raise_exception=False):
             return request.send_error_valid(serializer.errors)
 
-        updated_qs = self.update(request).data
-        updated_qs = self.queryset.get(id=updated_qs.get("id"))
-        updated_qs.lesson.clear()
-        updated_qs.lesson.add(*lesson_ids)
+        serializer.save()
+        instance.lesson.clear()
+        instance.lesson.add(*lesson_ids)
 
         # Төгсөлтийн ажлын сэдэв хөрвүүлэх
         if mn_topic:
