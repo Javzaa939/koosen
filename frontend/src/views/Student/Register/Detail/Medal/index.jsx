@@ -31,7 +31,7 @@ const Medal = () => {
 
     useEffect(() => {
         /** Эрх шалгана */
-        if(Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-update')) {
+        if(Object.keys(user).length > 0 && user.permissions.includes('lms-student-medal-update')) {
             setDisabled(false)
         }
     },[user])
