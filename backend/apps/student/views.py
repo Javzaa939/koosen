@@ -4624,10 +4624,11 @@ class GraduationLessonConvertAPIView(
         group = request.query_params.get('group')
         group_obj = Group.objects.get(pk=group)
         if group_obj:
-            lessons = LearningPlan.objects.filter(profession=group_obj.profession, lesson__name_uig__isnull=True).values('lesson__name', 'lesson')
+            lessons = LearningPlan.objects.filter(profession=group_obj.profession).values('lesson__name', 'lesson')
             if lessons:
                 for lesson in list(lessons):
                     name = lesson.get('lesson__name')
+                    print(name, 'names')
 
                     lesson_obj = LessonStandart.objects.get(id=lesson.get('lesson'))
                     post_data = {
@@ -4640,6 +4641,7 @@ class GraduationLessonConvertAPIView(
                     if response.status_code == 200:
                         data = response.json()
                         lesson_uig_name = data['result']
+                        print(lesson_uig_name, 'lesson_uig_name')
 
                         if '1' in data['result']:
                             lesson_uig_name = data['result'].replace("1", "I")
