@@ -290,7 +290,7 @@ export default function PrintNationalAttachment()
             >
 
                 <div className='d-flex flex-column text-center' style={{ writingMode: 'vertical-lr', fontSize: '16px', marginRight: '3px', marginBottom: '75px' }} >
-                    <span style={{ marginLeft: '13px' }}>{printDatas?.student?.school_name_uig}</span>
+                    <span style={{ marginLeft: '13px' }}>{printDatas?.student?.school_name_uig ? printDatas?.student?.school_name_uig : printDatas?.student?.group?.department?.school_uig}</span>
                     <span style={{ fontSize: '11px', marginLeft: '10px' }}>
                         {tooBichih(printDatas?.student?.graduation_work?.diplom_num)} ᠳ᠋ᠤᠭᠠᠷ ᠲᠠᠢ {printDatas?.student?.group?.degree?.degree_uig_name} ᠤ᠋ᠨ ᠳ᠋ᠢᠫᠯᠣᠮ ᠤ᠋ᠨ ᠬᠠᠪᠰᠤᠷᠤᠯᠲᠠ
                     </span>
