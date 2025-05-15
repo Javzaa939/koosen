@@ -6047,8 +6047,9 @@ class ChallengeStudentsScoreAPIView(
             answers_choices = []
 
             # to optimize database usage by avoiding sql queries in loop. to do it collect all ids first and make single sql query later
-            for value in answers.values():
-                answers_choices.append(value)
+            if answers:
+                for value in answers.values():
+                    answers_choices.append(value)
 
             # to detect attempt. attempt counted only if any choice was given (i am not sure is it correct detect way or not)
             if answers_choices:
