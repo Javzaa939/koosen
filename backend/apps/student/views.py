@@ -2712,7 +2712,7 @@ class GraduationWorkAPIView(
         instance.lesson.add(*lesson_ids)
 
         # Төгсөлтийн ажлын сэдэв хөрвүүлэх
-        if mn_topic:
+        if mn_topic and not instance.diplom_topic_uig:
             post_data = {
                 'direction': 'to-mng',
                 'text': mn_topic
