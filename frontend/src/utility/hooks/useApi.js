@@ -680,7 +680,7 @@ function useApi(isDisplay=false) {
 				return instance.get(`/student/info/list/?state=${state}&lesson=${lesson_id}&teacher=${teacher_id}&class_id=${classId}&school=${school_id}`)
 			},
 			getSimpleList: () => instance.get(`/student/info/simplelist/`),
-			getGraduate: (depId, degree, group) => instance.get(`/student/info/graduate/?department=${depId}&degree=${degree}&group=${group}&school=${school_id}`),
+			getGraduate: ({ limit='Бүгд', page=1, sort='', search='', depId='', degree='', group='' }) => instance.get(`/student/info/graduate/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&department=${depId}&degree=${degree}&group=${group}&school=${school_id}`),
 			postGraduate: (data) => instance.post(`/student/graduation/group/`, data),
 			postCommand: (data) => instance.post(`/student/command/`, data),
 			putRegNumAndDiplom: (data, pk) => instance.put(`/student/regisanddiplom/${pk}/`, data),

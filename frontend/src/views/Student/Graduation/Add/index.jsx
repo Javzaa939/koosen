@@ -103,12 +103,16 @@ const Createmodal = ({ open, handleModal, refreshDatas, select_value }) => {
 
         const [studentRsp]= await allFetchData(
             Promise.all([
-                studentApi.getGraduate(depId, degree, group),
+                studentApi.getGraduate({
+                    depId: depId,
+                    degree: degree,
+                    group: group
+                }),
             ])
         )
         if (studentRsp?.success)
         {
-            setStudentOption(studentRsp?.data)
+            setStudentOption(studentRsp?.data?.results)
         }
     }
 
