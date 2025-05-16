@@ -92,6 +92,12 @@ export default [
                 navLink: "admission-challenge/question/",
             },
             {
+                id: "elselt6_3",
+                title: "Элсэлтийн шалгалт",
+                icon: <Circle size={8} />,
+                navLink: "admission-challenge/test/",
+            },
+            {
                 id: 'elselt7',
                 title: 'Тэнцсэн элсэгчид',
                 icon: <Circle size={8} />,
