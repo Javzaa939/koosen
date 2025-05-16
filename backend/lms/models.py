@@ -3582,6 +3582,7 @@ class Challenge(models.Model):
     SEMESTR_EXAM = 3
     SELF_TEST = 4
     GRADUATE = 5
+    ADMISSION = 6
 
     CHALLENGE_TYPE = (
         (SORIL1, 'Явцын шалгалт'),
@@ -3589,6 +3590,7 @@ class Challenge(models.Model):
         (SEMESTR_EXAM, 'Улирлын шалгалт'),
         (SELF_TEST, 'Өөрийгөө сорих тест'),
         (GRADUATE, 'Төгсөлтийн шалгалт'),
+        (ADMISSION, 'Элсэлтийн шалгалт'),
     )
 
     #  Хамрах хүрээ нь
