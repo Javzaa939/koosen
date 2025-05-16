@@ -261,7 +261,7 @@ const QuestionsList = ({ filterId, season=false, teacher_id, is_graduate=false, 
 						open={modal}
 						handleModal={handleModal}
 						getDatas={getDatas}
-						title={filterId}
+						title={filterId === 0 ? '' : filterId}
 						season={season}
 						is_graduate={is_graduate}
 						is_elselt={is_elselt}
