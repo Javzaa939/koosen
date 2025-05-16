@@ -226,7 +226,7 @@ function AddStudent() {
                                 Буцах
                             </Button>
                             <CardTitle tag='h4' className="mt-0 mx-0">
-                                {t('Шалгалт өгөх суралцагчийг нэмэх')}
+                                {t('Шалгуулагчийг нэмэх')}
                             </CardTitle>
                         </CardHeader>
                         <Row className="m-0">
