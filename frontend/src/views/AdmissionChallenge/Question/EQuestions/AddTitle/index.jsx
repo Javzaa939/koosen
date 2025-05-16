@@ -31,6 +31,7 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle, e
 
     const [questionList, setQuestionList] = useState([])
     const [lessonOption, setLessonOption] = useState([])
+    const [isMapRendering, setIsMapRendering] = useState(false)
     const { control, handleSubmit, formState: { errors }, setValue } = useForm(validate(validateSchema))
 
     const questionAPI = useApi().challenge.question
@@ -74,6 +75,9 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle, e
     }
 
     async function getAllQuestoin() {
+        // to show loader while mapping is processing. because it can be longer then fetchData loading
+        setIsMapRendering(true)
+
         const { success, data } = await fetchData(questionAPI.getTestList())
         if (success) {
             setQuestionList(data)
@@ -97,6 +101,16 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle, e
         },
         []
     )
+
+    // to show loader while mapping is processing
+    useEffect(() => {
+        if (questionList.length) {
+            requestAnimationFrame(() => {
+                setIsMapRendering(false)
+            });
+        }
+    }, [questionList]);
+
     return (
         <>
             <Modal
@@ -215,6 +229,7 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle, e
                                         <Label className="form-label" for="questions">
                                             {t('Багцлах боломжтой асуултууд')}
                                         </Label>
+                                        {isMapRendering && Loader}
                                         <ul className='border border-2 rounded p-25' style={{ listStyle: "none" }}>
                                             {
                                                 questionList.map((question, index) => {
