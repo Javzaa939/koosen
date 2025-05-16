@@ -24,7 +24,7 @@ import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 
 import Addmodal from "./Add";
-import Show from "../Show";
+import Show from "./Show";
 import Exam from "./Exam"
 import classNames from "classnames"
 
