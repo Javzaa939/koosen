@@ -39,6 +39,7 @@ import {
 import { validate, convertDefaultValue } from "@utils"
 
 import { validateSchema } from '../validateSchema';
+import ScrollSelectFilterById from '../helpers/ScrollSelectFilterById';
 
 
 const Createmodal = ({ open, handleModal, refreshDatas, select_value }) => {
@@ -103,12 +104,16 @@ const Createmodal = ({ open, handleModal, refreshDatas, select_value }) => {
 
         const [studentRsp]= await allFetchData(
             Promise.all([
-                studentApi.getGraduate(depId, degree, group),
+                studentApi.getGraduate({
+                    depId: depId,
+                    degree: degree,
+                    group: group
+                }),
             ])
         )
         if (studentRsp?.success)
         {
-            setStudentOption(studentRsp?.data)
+            setStudentOption(studentRsp?.data?.results)
         }
     }
 
@@ -207,27 +212,32 @@ const Createmodal = ({ open, handleModal, refreshDatas, select_value }) => {
                                 control={control}
                                 defaultValue=''
                                 name="student"
-                                render={({ field: { value, onChange} }) => {
+                                render={({ field: { value, onChange, ref, ...rest} }) => {
                                     return (
-                                        <Select
-                                            name="student"
-                                            id="student"
-                                            classNamePrefix='select'
-                                            isClearable
-                                            className={classnames('react-select', { 'is-invalid': errors.student })}
-                                            isLoading={getAllLoading}
-                                            placeholder={t(`-- Сонгоно уу --`)}
-                                            options={studentOption || []}
-                                            value={studentOption.find((c) => c.id === value)}
-                                            noOptionsMessage={() => t('Хоосон байна')}
+                                        <ScrollSelectFilterById
+                                            {...rest}
+                                            fieldName={rest.name}
+                                            getApi={(pageLocal, searchTextLocal, recordsLimitPerPageLocal) =>
+                                                studentApi.getGraduate({
+                                                    limit: recordsLimitPerPageLocal,
+                                                    page: pageLocal,
+                                                    search: searchTextLocal,
+                                                    depId: select_value.department,
+                                                    degree: select_value.degree,
+                                                    group: select_value.group
+                                                })
+                                            }
+                                            getOptionLabel={(option) => option.code + ' ' + option.last_name + ' ' + option.first_name}
+                                            getOptionValue={(option) => option.id}
                                             onChange={(val) => {
                                                 onChange(val?.id || '')
-                                                if(val?.id) setSelectStudent(val?.id)
+                                                if (val?.id) setSelectStudent(val?.id)
                                                 setValue('lesson', '')
                                             }}
-                                            styles={ReactSelectStyles}
-                                            getOptionValue={(option) => option.id}
-                                            getOptionLabel={(option) => option.code + ' ' + option.last_name + ' ' +  option.first_name}
+                                            className={classnames('react-select', { 'is-invalid': errors.student })}
+                                            recordsLimitPerPage={15}
+                                            optionValueFieldName={'id'}
+                                            value={value}
                                         />
                                     )
                                 }}
