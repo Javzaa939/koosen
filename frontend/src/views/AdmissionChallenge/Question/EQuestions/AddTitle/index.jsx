@@ -61,26 +61,27 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle, e
         }
     }
 
-    const getLessons = async () => {
-        try {
-            const { success, data } = await fetchData(lessonApi.getList())
-            if (success) {
-                setLessonOption(data)
-            }
-        }
-        catch (error) {
-            console.error("Error fetching lessons:", error);
-        }
+    // const getLessons = async () => {
+    //     try {
+    //         const { success, data } = await fetchData(lessonApi.getList())
+    //         if (success) {
+    //             setLessonOption(data)
+    //         }
+    //     }
+    //     catch (error) {
+    //         console.error("Error fetching lessons:", error);
+    //     }
 
-    }
+    // }
 
     async function getAllQuestoin() {
         // to show loader while mapping is processing. because it can be longer then fetchData loading
         setIsMapRendering(true)
 
-        const { success, data } = await fetchData(questionAPI.getTestList())
+        const { success, data } = await fetchData(questionAPI.getTestList(true))
         if (success) {
             setQuestionList(data)
+            setIsMapRendering(false)
         }
     }
 
@@ -95,23 +96,24 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle, e
             setOpen({ type: false, editId: null })
         }
     }
-    useEffect(
-        () => {
-            if (examType !== 'admission') {
-                getLessons()
-            }
-        },
-        []
-    )
+
+    // useEffect(
+    //     () => {
+    //         if (examType !== 'admission') {
+    //             getLessons()
+    //         }
+    //     },
+    //     []
+    // )
 
     // to show loader while mapping is processing
-    useEffect(() => {
-        if (questionList.length) {
-            requestAnimationFrame(() => {
-                setIsMapRendering(false)
-            });
-        }
-    }, [questionList]);
+    // useEffect(() => {
+    //     if (questionList.length) {
+    //         requestAnimationFrame(() => {
+    //             setIsMapRendering(false)
+    //         });
+    //     }
+    // }, [questionList]);
 
     return (
         <>
@@ -133,44 +135,9 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle, e
                 </ModalHeader>
                 <ModalBody className="w-100 h-100 ">
                     <Row className='g-1' tag={Form} onSubmit={handleSubmit(onSubmit)}>
-                        {
-                            examType !== 'admission'
-                            &&
-                            <Col md={12}>
-                                <Label className="form-label" for="lesson">
-                                    {t('Хичээл')}
-                                </Label>
-                                <Controller
-                                    defaultValue=''
-                                    control={control}
-                                    id="lesson"
-                                    name="lesson"
-                                    render={({ field: { value, onChange } }) => (
-                                        <Select
-                                            name="lesson"
-                                            id="lesson"
-                                            classNamePrefix='select'
-                                            isClearable
-                                            className={classnames('react-select', { 'is-invalid': errors.lesson })}
-                                            placeholder={t(`-- Сонгоно уу --`)}
-                                            options={lessonOption || []}
-                                            value={lessonOption.find((c) => c.id === value)}
-                                            noOptionsMessage={() => t('Хоосон байна')}
-                                            onChange={(val) => {
-                                                onChange(val?.id || '')
-                                            }}
-                                            styles={ReactSelectStyles}
-                                            getOptionValue={(option) => option.id}
-                                            getOptionLabel={(option) => option.code + ' ' + option.name}
-                                        />
-                                    )}
-                                />
-                                {errors.lesson && <FormFeedback className='d-block'>{t(errors.lesson.message)}</FormFeedback>}
-                            </Col>
-                        }
                         <Col md={12}>
                             <Label className="form-label" for="name">
-                                {t('Хичээлийн сэдэв')}
+                                {t('Сэдэв')}
                             </Label>
                             <Controller
                                 defaultValue=''

@@ -5453,6 +5453,15 @@ class TestQuestionsListAPIView(
 
     def get(self, request):
         questions_qs = ChallengeQuestions.objects.all()
+        is_admission = request.query_params.get('is_admission')
+        if is_admission == 'true':
+            questions_qs = questions_qs.filter(is_admission=True)
+
+        created_by = request.user
+        if not created_by.is_superuser:
+            teacher = Teachers.objects.filter(user=created_by).first()
+            questions_qs = questions_qs.filter(created_by=teacher)
+
         ser = dynamic_serializer(ChallengeQuestions, "__all__", 1)
         data = ser(questions_qs, many=True).data
         return request.send_data(data)

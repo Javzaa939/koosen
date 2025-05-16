@@ -104,7 +104,7 @@ const EQuestions = ({ teacher_id, title_id, is_season, is_graduate=false }) => {
                                                     >
                                                         <div className="cursor-pointer" onClick={() => setActiveTitle(title.id)}>
                                                             <span>
-                                                                {title.name + ' (' + title.lesson__code + ' ' + title.lesson__name + ')'}
+                                                                {title.name}
                                                             </span>
                                                             {
                                                                 activeTitle == title.id ?
