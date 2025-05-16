@@ -15,7 +15,7 @@ from rest_framework.decorators import permission_classes
 from main.utils.function.pagination import CustomPagination
 from main.utils.function.utils import override_get_queryset, save_data_with_signals
 
-from main.utils.function.utils import has_permission, get_domain_url, _filter_queries, get_teacher_queryset, pearson_corel
+from main.utils.function.utils import has_permission, get_domain_url, _filter_queries, get_teacher_queryset, pearson_corel, str2bool
 from main.utils.file import save_file
 from main.utils.file import remove_folder
 
@@ -5045,22 +5045,31 @@ class QuestionsTitleAPIView(
     def get(self, request, pk=None):
 
         title_id = request.query_params.get('titleId')
-        title_id = int(title_id)
+        if title_id:
+            title_id = int(title_id)
+
         stype = request.query_params.get('stype')
         level = request.query_params.get('level')
         is_graduate = request.query_params.get('is_graduate')
+        is_elselt = request.query_params.get('is_elselt')
 
         # # 0  Бүх асуулт
         if title_id == 0:
             challenge_qs = ChallengeQuestions.objects.all()
         # -1  Сэдэвгүй асуултууд
         elif title_id == -1:
-            challenge_qs = ChallengeQuestions.objects.filter(Q(title__isnull=True))
+            if is_elselt == 'true':
+                challenge_qs = ChallengeQuestions.objects.filter(is_admission=True)
+            else:
+                challenge_qs = ChallengeQuestions.objects.filter(Q(title__isnull=True))
         else:
             if is_graduate == 'true':
                 challenge_qs = ChallengeQuestions.objects.filter(graduate_title=title_id)
             else:
-                challenge_qs = ChallengeQuestions.objects.filter(title=title_id)
+                if is_elselt == 'true':
+                    challenge_qs = ChallengeQuestions.objects.filter(title__is_admission=True)
+                else:
+                    challenge_qs = ChallengeQuestions.objects.filter(title=title_id)
 
         if stype:
             challenge_qs = challenge_qs.filter(kind=stype)
@@ -5316,12 +5325,12 @@ class TestQuestionsAPIView(
 
 
     def post(self, request):
-        # .dict()
         questions = request.POST.getlist('questions')
         files = request.FILES.getlist('files')
         request_data = request.data.dict()
         title = request_data.get('title')
         graduate_title = request_data.get('main_title')
+        is_admission = request_data.get('is_admission')
 
         user = request.user
         teacher = Teachers.objects.filter(user_id=user).first()
@@ -5340,6 +5349,8 @@ class TestQuestionsAPIView(
                     question['yes_or_no'] = None
                     question['max_choice_count'] = 0
                     question['rating_max_count'] = score
+                    if is_admission == 'true':
+                        question['is_admission'] = True
 
                     for image in files:
                         if hasattr(image, "name") and question['image'] == image.name:
@@ -5364,7 +5375,7 @@ class TestQuestionsAPIView(
                     )
 
                     # Улирлын шалгалтынг хувьд
-                    if title:
+                    if title and title != '-1':
                         question_obj.title.add(QuestionTitle.objects.get(pk=title))
 
                     if graduate_title:
@@ -5504,6 +5515,7 @@ class QuestionExcelAPIView(generics.GenericAPIView, mixins.ListModelMixin):
         excel_file = request.FILES.get('file')
         title = request.data.get('title')
         graduate_title = request.data.get('main_title')
+        is_admission = request.data.get('is_admission')
 
         if not excel_file:
             return request.send_info("INF_002")
@@ -5516,11 +5528,11 @@ class QuestionExcelAPIView(generics.GenericAPIView, mixins.ListModelMixin):
         data_dicts = [dict(zip(headers, row)) for row in data[1:]]
 
         for entry in data_dicts:
-            self.process_entry(entry, teacher, graduate_title)
+            self.process_entry(entry, teacher, graduate_title, is_admission)
 
         return request.send_info("INF_001")
 
-    def process_entry(self, entry, teacher, graduate_title):
+    def process_entry(self, entry, teacher, graduate_title, is_admission):
         question = entry.get('Асуулт')
 
         if question in {"Жишээ 1","Жишээ 2","Жишээ 3", 'Жишээ 4', 'Жишээ 5', 'Жишээ 6', 'Жишээ 7', 'Жишээ 8', 'Жишээ 9'}:
@@ -5548,7 +5560,8 @@ class QuestionExcelAPIView(generics.GenericAPIView, mixins.ListModelMixin):
             score=score,
             level=level,
             max_choice_count=max_choice_count,
-            created_by=teacher
+            created_by=teacher,
+            is_admission=str2bool(is_admission)
         )
         challenge.save()
         # Төгсөлтйин шалгалт бол

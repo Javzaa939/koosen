@@ -3527,6 +3527,8 @@ class ChallengeQuestions(models.Model):
 
     title = models.ManyToManyField(QuestionTitle, verbose_name='Асуултын ерөнхий сэдэв')
     graduate_title = models.ManyToManyField(QuestioSubTitle, verbose_name='Асуултын ерөнхий сэдэв')
+    is_admission =  models.BooleanField(default=False, verbose_name="Элсэлтийн асуулт эсэх")
+
     level = models.IntegerField(choices=DIFFICULTY_LEVELS, default=LEVEL_NORMAL,  verbose_name='Асуултын түвшин')
 
     # KIND_RATING үед
