@@ -1651,7 +1651,7 @@ function useApi(isDisplay=false) {
 				},
 				getOneTitle: (id) => instance.get(`learning/questions/title/${id}/?titleId=${id}`),
 				postExcel:(datas) => instance.post(`learning/questions/excel/` , datas),
-
+				deleteTitle: (id) => instance.delete(`learning/questions/title/${id}/`),
 
 			},
 
