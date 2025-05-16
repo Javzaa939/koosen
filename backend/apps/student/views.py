@@ -2801,6 +2801,8 @@ class GraduationWorkImportAPIView(
 
         return request.send_info('INF_002')
 
+
+@permission_classes([IsAuthenticated])
 class StudentGraduateListAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin
@@ -2809,6 +2811,10 @@ class StudentGraduateListAPIView(
 
     queryset = Student.objects.all()
     serializer_class = StudentListSerializer
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['code', 'register_num', 'first_name', 'last_name', 'status__name', 'register_num']
 
     def get_queryset(self):
         queryset = self.queryset
@@ -2828,6 +2834,13 @@ class StudentGraduateListAPIView(
 
         if group:
             queryset = queryset.filter(group_id=group)
+
+        # region to sort by one or multiple fields
+        sorting = self.request.GET.get('sorting', '')
+
+        if sorting:
+            self.queryset = self.queryset.order_by(*sorting.split(','))
+        # endregion
 
         return queryset
 
