@@ -27,7 +27,7 @@ const validateSchema = Yup.object().shape({
     questions: Yup.array().min(1, "Асуулт нэмнэ үү").required("Хоосон байна")
 });
 
-export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle }) {
+export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle, examType }) {
 
     const [questionList, setQuestionList] = useState([])
     const [lessonOption, setLessonOption] = useState([])
@@ -83,6 +83,7 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle })
     async function onSubmit(datas) {
         datas['questions'] = datas['questions']?.map(v => v.id)
         datas['other_questions'] = questionList.map(v => v.id)
+        datas['is_admission'] = examType === 'admission' ? true : false
         const { success, data } = await fetchData(open.editId ? questionAPI.putTitle(open.editId, datas) : questionAPI.postTitle(datas))
         if (success) {
             getAllTitle()
