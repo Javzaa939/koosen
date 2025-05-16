@@ -38,7 +38,7 @@ function AddStudent() {
     const { isLoading, Loader, fetchData } = useLoader({});
     const { fetchData: fetchSelectData } = useLoader({});
     const { fetchData: fetchQuestion } = useLoader({});
-    const { fetchData: fetchStudents } = useLoader({});
+    const { fetchData: fetchStudents, isLoading: isLoadingExaminee } = useLoader({});
     const { control, handleSubmit, setError, formState: { errors }, } = useForm({});
     const { challenge_id, lesson_id } = useParams();
 
@@ -63,6 +63,7 @@ function AddStudent() {
     const [student_search_value, setStudentSearchValue] = useState([]);
 
     const challengeAPI = useApi().challenge;
+	const elseltApi = useApi().elselt.admissionuserdata
     const groupApi = useApi().student.group;
 
     async function getDatas() {
@@ -89,9 +90,10 @@ function AddStudent() {
     }
 
     async function getStudents() {
-        const { success, data } = await fetchStudents(challengeAPI.getStudents(student_search_value));
+        const STATE_SEND = 1
+        const { success, data } = await fetchStudents(elseltApi.get('Бүгд',1,'',student_search_value,'','','','',STATE_SEND,'','','','','','',''));
         if (success) {
-            setStudents(data)
+            setStudents(data?.results)
         }
     }
 
@@ -255,7 +257,7 @@ function AddStudent() {
                                                                     value={students.find((c) => c.id === value)}
                                                                     noOptionsMessage={() => 'Хоосон байна'}
                                                                     onChange={(val) => {
-                                                                        onChange(val?.code)
+                                                                        onChange(val?.user.register)
                                                                     }}
                                                                     onInputChange={(e) => {
                                                                         setStudentSearchValue(e);
@@ -267,7 +269,8 @@ function AddStudent() {
                                                                     }}
                                                                     styles={ReactSelectStyles}
                                                                     getOptionValue={(option) => option.id}
-                                                                    getOptionLabel={(option) => `${option.code} ${option.full_name}`}
+                                                                    getOptionLabel={(option) => `${option.user.register} ${option.full_name}`}
+                                                                    isLoading={isLoadingExaminee}
                                                                 />
                                                             );
                                                         }}
