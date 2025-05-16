@@ -2,7 +2,6 @@ import { lazy } from "react";
 
 // admission challenge
 const AdmissionQuestion = lazy(() => import("@views/AdmissionChallenge/Question"))
-const AdmissionEQuestions = lazy(() => import("@views/AdmissionChallenge/Question/EQuestions/"))
 
 // progress challenge
 const Test = lazy(() => import("@views/Test/"))
@@ -31,10 +30,6 @@ const TestRoutes = [
     {
         path: '/admission-challenge/question/',
         element: <AdmissionQuestion />
-    },
-    {
-        path: '/admission-challenge/question/equestions/',
-        element: <AdmissionEQuestions />
     },
     // #endregion
 
