@@ -353,17 +353,39 @@ const VerticalLayout = (props) =>
 
 
                         /** ----------------------------- Шалгалт цэс ---------------------------- */
+                        // #region admission challenge
+                        /** Шалгалтын асуулт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-exam-question-read', 'admission-challenge-question')
+
+                        /** Шалгалт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-exam-read', 'admission-challenge')
+                        // #endregion
+
+                        // #region progress challenge
                         /** Шалгалтын асуулт */
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-exam-question-read', 'e-challenge')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-season-question-read', 'season-equistion')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-graduate-question-read', 'graduate-question')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-graduate-question-read', 'graduate-challenge')
+
                         /** Шалгалт */
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-exam-read', 'just-challenge')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-season-exam-read', 'season-challenge')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-graduate-exam-read', 'graduate-test')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-exam-report-read', 'examreport')
+                        // #endregion
 
+                        // #region graduate challenge
+                        /** Шалгалтын асуулт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-graduate-question-read', 'graduate-question')
+
+                        /** Шалгалт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-graduate-question-read', 'graduate-challenge')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-graduate-exam-read', 'graduate-test')
+                        // #endregion
+
+                        // #region season challenge
+                        /** Шалгалтын асуулт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-season-question-read', 'season-equistion')
+
+                        /** Шалгалт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-season-exam-read', 'season-challenge')
+                        // #endregion
 
 
                         /** ----------------------------- Онлайн хичээл цэс ---------------------------- */
@@ -416,7 +438,7 @@ const VerticalLayout = (props) =>
                         if (menus.id === 'role' && !user.permissions?.includes('lms-role-read'))  delete newMenu[idx];
 
                         /** ----------------------------- Цахим сургалт ---------------------------- */
-                        if (menus.id === 'remotelesson' && !user.permissions?.includes('lms-elearn-list-read'))  delete newMenu[idx];
+                        if (menus.id === 'remotelesson' && !user.permissions?.includes('lms-role-read'))  delete newMenu[idx];
                     }
                 })
                 setCNavigation(newMenu)
