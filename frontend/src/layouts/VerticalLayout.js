@@ -99,11 +99,13 @@ const VerticalLayout = (props) =>
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-psychological-read', 'elselt3_1')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-justice-read', 'elselt3_3')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-army-read', 'elselt6_1')
+                        /** Элсэлтийн шалгалтын асуулт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-question-read', 'elselt6_2')
+
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-approve-read', 'elselt7')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-log-read', 'elselt7_1')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-mail-read', 'elselt8')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-message-read', 'elselt9')
-
 
                         /** ----------------------------Сэтгэлзүйн сорил------------------------------- */
 
@@ -353,10 +355,6 @@ const VerticalLayout = (props) =>
 
 
                         /** ----------------------------- Шалгалт цэс ---------------------------- */
-                        // #region admission challenge
-                        /** Шалгалтын асуулт */
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-exam-question-read', 'admission-challenge-question')
-
                         /** Шалгалт */
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-exam-read', 'admission-challenge')
                         // #endregion

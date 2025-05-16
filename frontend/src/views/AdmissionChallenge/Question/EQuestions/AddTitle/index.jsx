@@ -97,7 +97,9 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle, e
     }
     useEffect(
         () => {
-          getLessons()
+            if (examType !== 'admission') {
+                getLessons()
+            }
         },
         []
     )
@@ -131,37 +133,41 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle, e
                 </ModalHeader>
                 <ModalBody className="w-100 h-100 ">
                     <Row className='g-1' tag={Form} onSubmit={handleSubmit(onSubmit)}>
-                        <Col md={12}>
-                            <Label className="form-label" for="lesson">
-                                {t('Хичээл')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                id="lesson"
-                                name="lesson"
-                                render={({ field: { value, onChange } }) => (
-                                    <Select
-                                        name="lesson"
-                                        id="lesson"
-                                        classNamePrefix='select'
-                                        isClearable
-                                        className={classnames('react-select', { 'is-invalid': errors.lesson })}
-                                        placeholder={t(`-- Сонгоно уу --`)}
-                                        options={lessonOption || []}
-                                        value={lessonOption.find((c) => c.id === value)}
-                                        noOptionsMessage={() => t('Хоосон байна')}
-                                        onChange={(val) => {
-                                            onChange(val?.id || '')
-                                        }}
-                                        styles={ReactSelectStyles}
-                                        getOptionValue={(option) => option.id}
-                                        getOptionLabel={(option) => option.code + ' ' + option.name}
-                                    />
-                                )}
-                            />
-                            {errors.lesson && <FormFeedback className='d-block'>{t(errors.lesson.message)}</FormFeedback>}
-                        </Col>
+                        {
+                            examType !== 'admission'
+                            &&
+                            <Col md={12}>
+                                <Label className="form-label" for="lesson">
+                                    {t('Хичээл')}
+                                </Label>
+                                <Controller
+                                    defaultValue=''
+                                    control={control}
+                                    id="lesson"
+                                    name="lesson"
+                                    render={({ field: { value, onChange } }) => (
+                                        <Select
+                                            name="lesson"
+                                            id="lesson"
+                                            classNamePrefix='select'
+                                            isClearable
+                                            className={classnames('react-select', { 'is-invalid': errors.lesson })}
+                                            placeholder={t(`-- Сонгоно уу --`)}
+                                            options={lessonOption || []}
+                                            value={lessonOption.find((c) => c.id === value)}
+                                            noOptionsMessage={() => t('Хоосон байна')}
+                                            onChange={(val) => {
+                                                onChange(val?.id || '')
+                                            }}
+                                            styles={ReactSelectStyles}
+                                            getOptionValue={(option) => option.id}
+                                            getOptionLabel={(option) => option.code + ' ' + option.name}
+                                        />
+                                    )}
+                                />
+                                {errors.lesson && <FormFeedback className='d-block'>{t(errors.lesson.message)}</FormFeedback>}
+                            </Col>
+                        }
                         <Col md={12}>
                             <Label className="form-label" for="name">
                                 {t('Хичээлийн сэдэв')}

@@ -86,6 +86,12 @@ export default [
                 navLink: "elselt/preparation"
             },
             {
+                id: "elselt6_2",
+                title: "Элсэлт асуултын сан",
+                icon: <Circle size={8} />,
+                navLink: "admission-challenge/question/",
+            },
+            {
                 id: 'elselt7',
                 title: 'Тэнцсэн элсэгчид',
                 icon: <Circle size={8} />,

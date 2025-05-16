@@ -34,7 +34,7 @@ import { ReactSelectStyles, get_questionype, get_leveltype, get_levelseasons } f
 import EditModal from "./EditModal";
 import FileModal from "./FileModal"
 
-const QuestionsList = ({ filterId, season=false, teacher_id, is_graduate }) => {
+const QuestionsList = ({ filterId, season=false, teacher_id, is_graduate=false, is_elselt=false }) => {
 
 	const { t } = useTranslation();
 	const { skin } = useSkin()
@@ -74,7 +74,7 @@ const QuestionsList = ({ filterId, season=false, teacher_id, is_graduate }) => {
 
 	async function getDatas() {
 		if (!filterId) return
-		const { success, data } = await fetchData(questionAPI.getByTitle(currentPage, rowsPerPage, searchValue, filterId, teacher_id, stype, level, is_graduate));
+		const { success, data } = await fetchData(questionAPI.getByTitle(currentPage, rowsPerPage, searchValue, filterId, teacher_id, stype, level, is_graduate, is_elselt));
 		if (success) {
 			setDatas(data?.results);
 			setTotalCount(data?.count);
@@ -264,6 +264,7 @@ const QuestionsList = ({ filterId, season=false, teacher_id, is_graduate }) => {
 						title={filterId}
 						season={season}
 						is_graduate={is_graduate}
+						is_elselt={is_elselt}
 					/>
 				)}
 				{editModal && (
@@ -274,6 +275,7 @@ const QuestionsList = ({ filterId, season=false, teacher_id, is_graduate }) => {
 						getDatas={getDatas}
 						season={season}
 						is_graduate={is_graduate}
+						is_elselt={is_elselt}
 					/>
 				)}
 				{fileModal && (
@@ -284,6 +286,7 @@ const QuestionsList = ({ filterId, season=false, teacher_id, is_graduate }) => {
 						title={filterId}
 						season={season}
 						is_graduate={is_graduate}
+						is_elselt={is_elselt}
 					/>
 				)}
 			</Card>
