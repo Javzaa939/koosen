@@ -1,6 +1,9 @@
-import React, { Fragment, useState, useEffect } from "react";
-
-import { Plus} from "react-feather";
+import React, { Fragment, useState, useEffect, useContext } from "react";
+import { getPagination, get_questiontimetype, ReactSelectStyles, generateLessonYear } from "@utils";
+import { useTranslation } from "react-i18next";
+import { getColumns } from "./helpers";
+import { Plus, HelpCircle, Search } from "react-feather";
+import SchoolContext from '@context/SchoolContext'
 
 import {
 	Row,
@@ -11,26 +14,22 @@ import {
 	Col,
 	Input,
 	Label,
-	Spinner,
+	CardBody,
+	Alert
 } from "reactstrap";
 
 import DataTable from "react-data-table-component";
 import Select from 'react-select'
-import { ReactSelectStyles } from "@utils"
-
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 
-import { useTranslation } from "react-i18next";
-
-import { getPagination, get_questiontimetype } from "@utils";
-
-import { getColumns } from "./helpers";
-
 import Addmodal from "./Add";
-import Show from "./Show";
+import Show from "../Show";
+import Exam from "./Exam"
+import classNames from "classnames"
 
 const TestProgram = () => {
+    const { school_id } = useContext(SchoolContext)
 
 	const { t } = useTranslation();
 
@@ -40,32 +39,42 @@ const TestProgram = () => {
 
 	const [currentPage, setCurrentPage] = useState(1);
 	const [rowsPerPage, setRowsPerPage] = useState(10);
+	const [total_count, setTotalCount] = useState(1);
+    const [searchValue, setSearchValue] = useState('');
 
-    // Өөрийгөө сорих тест хичээлээр хайх
-    const [selectedLesson, setSelectedLesson] = useState('')
-    const [selectedTime, setSelectedTime] = useState('')
-    const [lessonOption, setLessonOption] = useState([])
-	const [editData, setEditRowData] = useState({})
+	const [selectedLesson, setSelectedLesson] = useState('')
+	const [selectedTime, setSelectedTime] = useState('progressing')
+	const [selectedTeacher, setSelectedTeacher] = useState('')
+    const [teachers, setTeachers] = useState([]);
+
+	const [lessonOption, setLessonOption] = useState([])
+	const [editData, setEditRowData] = useState()
+	const [examId, setExamModalId] = useState()
 	const [showData, setShowRowData] = useState({})
 	const [isEdit, setIsEdit] = useState(false)
 
-	// Нийт датаны тоо
-	const [total_count, setTotalCount] = useState(1);
+	const [selected_year, setSelectedYear] = useState('')
+    const [selected_season, setSelectedSeason] = useState('')
+	const [yearOption, setYear] = useState([])
+	const [seasonOption, setSeasonOption] = useState([]);
 
-	// Loader
-	const { isLoading,fetchData } = useLoader({});
+	const { isLoading, fetchData } = useLoader({});
 	const { fetchData: getLessonFetchData } = useLoader({});
+    const { isLoading: teacherLoading, fetchData: teacherFetch } = useLoader({})
 
-	// Modal
+
 	const [modal, setModal] = useState(false);
+	const [edit_modal, setEditModal] = useState(false);
 	const [showModal, setShowModal] = useState(false);
+	const [examModal, setExamModal] = useState(false)
 
-	// API
 	const challengeAPI = useApi().challenge
-    const LessonApi = useApi().study.lessonStandart
+	const teacherLessonApi = useApi().study.lesson
+	const teacherListApi = useApi().hrms.teacher
+	const seasonApi = useApi().settings.season
 
 	async function getDatas() {
-		const { success, data } = await fetchData(challengeAPI.get(currentPage, rowsPerPage, selectedLesson, selectedTime));
+		const { success, data } = await fetchData(challengeAPI.get(currentPage, rowsPerPage, selectedLesson, selectedTime, selectedTeacher, searchValue, false, selected_year, selected_season));
 
 		if (success) {
 			setDatas(data?.results);
@@ -73,13 +82,20 @@ const TestProgram = () => {
 		}
 	}
 
-    async function getLesson()
+	async function getTeachers()
     {
-        const { success, data } = await getLessonFetchData(LessonApi.getList())
+        const { success, data } = await teacherFetch(teacherListApi.getSchoolFilter(school_id))
         if(success) {
-            setLessonOption(data)
+            setTeachers(data)
         }
     }
+	async function getLesson() {
+		const { success, data } = await getLessonFetchData(teacherLessonApi.getOne(''))
+
+		if (success) {
+			setLessonOption(data)
+		}
+	}
 
 	async function handleDelete(id) {
 		const { success, data } = await fetchData(challengeAPI.delete(id));
@@ -88,20 +104,26 @@ const TestProgram = () => {
 		}
 	}
 
+	async function getSeasonOption() {
+        const { success, data } = await fetchData(seasonApi.get());
+        if (success) {
+            setSeasonOption(data);
+        }
+    }
+
 	// Засах товч дарах үед ажиллах функц
-    const handleEdit = (row) => {
-        setEditRowData(row)
-        handleModal()
+	const handleEdit = (row) => {
+		setEditRowData(row)
+		handleEditModal()
 		setIsEdit(!isEdit)
-    }
+	}
 
-	// Засах товч дарах үед ажиллах функц
-    const handleShow = (row) => {
-        setShowRowData(row)
+	// Дэлгэрэнгүй товч дарах үед ажиллах функц
+	const handleShow = (row) => {
+		setShowRowData(row)
 		handleShowModal()
-    }
+	}
 
-	// Нэмэх функц
 	const handleShowModal = () => {
 		setShowModal(!showModal);
 		if (showModal) {
@@ -113,9 +135,20 @@ const TestProgram = () => {
 	const handleModal = () => {
 		setModal(!modal);
 		if (modal) {
-			setEditRowData({})
+			setEditRowData()
 		}
 		setIsEdit(false)
+	};
+
+	const handleEditModal = (row) => {
+		setEditRowData(row)
+		setModal(!modal);
+		// setIsEdit(false)
+	};
+
+	const handleExamModal = (id) => {
+		setExamModalId(id)
+		setExamModal(!examModal);
 	};
 
 	// Хуудас солих үед ажиллах хэсэг
@@ -123,34 +156,55 @@ const TestProgram = () => {
 		setCurrentPage(page.selected + 1);
 	};
 
-    function handlePerPage(e) {
-        setRowsPerPage(parseInt(e.target.value));
-    }
+	function handlePerPage(e) {
+		setRowsPerPage(parseInt(e.target.value));
+	}
 
-	const handleSend = async(id) => {
+	const handleSend = async (id) => {
 		const { success, data } = await fetchData(challengeAPI.send(id));
 		if (success) {
 		}
 	}
 
+	useEffect(
+		() => {
+			setYear(generateLessonYear(10)),
+			getSeasonOption()
+		}, []
+	)
+
 	useEffect(() => {
 		getDatas();
-	}, [currentPage, rowsPerPage, selectedLesson, selectedTime]);
+	}, [currentPage, rowsPerPage, selectedLesson, selectedTime, selectedTeacher, selected_season, selected_year]);
 
-    useEffect(
-        () =>
-        {
-            getLesson()
-			getDatas()
-        },
-        []
-    )
+	useEffect(
+		() => {
+			getLesson()
+			getTeachers()
+		},
+		[]
+	)
+
+	function handleSearch() {
+        setTimeout(() => {
+            getDatas()
+        }, 100)
+    }
+
+	useEffect(() => {
+        if(searchValue.length < 1) getDatas()
+    },[searchValue])
+
+	const handleFilter = e => {
+        const value = e.target.value.trimStart();
+		setSearchValue(value)
+	}
 
 	return (
 		<Fragment>
 			<Card>
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
-					<CardTitle tag="h4">{t("Шалгалтын жагсаалт")}</CardTitle>
+					<CardTitle tag="h4" className="mt-50">{t("Шалгалтын жагсаалт")}</CardTitle>
 					<div className="d-flex flex-wrap mt-md-0 mt-1">
 						<Button
 							color="primary"
@@ -163,8 +217,71 @@ const TestProgram = () => {
 						</Button>
 					</div>
 				</CardHeader>
-				<Row >
-					<Col md={4} sm={12} className="m-1">
+				<Row className="m-1">
+					<Col md={3} sm={10}>
+						<Label className="form-label" for={'lesson_year'}>
+							{t('Хичээлийн жил')}
+						</Label>
+						<Select
+							id={'lesson_year'}
+							name={'lesson_year'}
+							isClearable
+							classNamePrefix='select'
+							className='react-select'
+							placeholder={t(`-- Сонгоно уу --`)}
+							options={yearOption || []}
+							noOptionsMessage={() => t('Хоосон байна')}
+							onChange={(val) => {
+								setSelectedYear(val?.id || '')
+							}}
+							styles={ReactSelectStyles}
+							getOptionValue={(option) => option.id}
+							getOptionLabel={(option) => option.name}
+							isLoading={isLoading}
+						/>
+					</Col>
+					<Col md={3} sm={12}>
+						<Label className="form-label" for={'lesson_season'}>
+							{t('Хичээлийн улирал')}
+						</Label>
+						<Select
+							id={'lesson_season'}
+							name={'lesson_season'}
+							isClearable
+							classNamePrefix='select'
+							className='react-select'
+							placeholder={t(`-- Сонгоно уу --`)}
+							options={seasonOption || []}
+							noOptionsMessage={() => t('Хоосон байна')}
+							onChange={(val) => {
+								setSelectedSeason(val?.id || '')
+							}}
+							styles={ReactSelectStyles}
+							getOptionValue={(option) => option.id}
+							getOptionLabel={(option) => option.season_name}
+							isLoading={isLoading}
+						/>
+					</Col>
+					<Col md={3} sm={10}>
+						<Label>Багш</Label>
+						<Select
+							classNamePrefix='select'
+							isClearable
+							className={classNames('react-select')}
+							isLoading={teacherLoading}
+							placeholder={t('-- Сонгоно уу --')}
+							options={teachers || []}
+							value={teachers.find((c) => c.id === selectedTeacher)}
+							noOptionsMessage={() => t('Хоосон байна')}
+							onChange={(val) => {
+								setSelectedTeacher(val ? val.id : '')
+							}}
+							styles={ReactSelectStyles}
+							getOptionValue={(option) => option.id}
+							getOptionLabel={(option) => option.full_name}
+						/>
+					</Col>
+					{/* <Col md={3} sm={10} className="m-1">
 						<Label className="form-label" for="lesson">
 							{t('Хичээл')}
 						</Label>
@@ -184,8 +301,8 @@ const TestProgram = () => {
 							getOptionValue={(option) => option.id}
 							getOptionLabel={(option) => option.name}
 						/>
-					</Col>
-					<Col md={4} sm={12} className="m-1">
+					</Col> */}
+					<Col md={3} sm={10}>
 						<Label className="form-label" for="time">
 							{t('Хугацаагаар')}
 						</Label>
@@ -196,6 +313,7 @@ const TestProgram = () => {
 							classNamePrefix='select'
 							className='react-select'
 							placeholder={`-- Сонгоно уу --`}
+							value={get_questiontimetype()?.find((e) => e.id == selectedTime)}
 							options={get_questiontimetype() || []}
 							noOptionsMessage={() => 'Хоосон байна'}
 							onChange={(val) => {
@@ -234,6 +352,27 @@ const TestProgram = () => {
 							</Label>
 						</Col>
 					</Col>
+					<Col className='d-flex align-items-end mobile-datatable-search mt-50'>
+                        <Input
+                            className='dataTable-filter mb-50'
+                            type='text'
+                            bsSize='sm'
+                            id='search-input'
+                            placeholder={t("Хайх")}
+                            value={searchValue}
+                            onChange={handleFilter}
+                            onKeyPress={e => e.key === 'Enter' && handleSearch()}
+                        />
+                        <Button
+                            size='sm'
+                            className='ms-50 mb-50'
+                            color='primary'
+                            onClick={handleSearch}
+                        >
+                            <Search size={15} />
+                            <span className='align-middle ms-50'></span>
+                        </Button>
+                    </Col>
 				</Row>
 				<div className="react-dataTable react-dataTable-selectable-rows">
 					<DataTable
@@ -258,7 +397,9 @@ const TestProgram = () => {
 							handleEdit,
 							handleDelete,
 							handleShow,
-							handleSend
+							handleSend,
+							handleEditModal,
+							handleExamModal
 						)}
 						paginationPerPage={rowsPerPage}
 						paginationDefaultPage={currentPage}
@@ -273,28 +414,48 @@ const TestProgram = () => {
 						fixedHeaderScrollHeight="62vh"
 					/>
 				</div>
-				{modal && (
-					<Addmodal
-						open={modal}
-						handleModal={handleModal}
-						refreshDatas={getDatas}
-						editData={editData}
-						isEdit={isEdit}
-						setEditRowData={setEditRowData}
-					/>
-				)}
+				{
+					modal && (
+						<Addmodal
+							open={modal}
+							handleModal={handleModal}
+							refreshDatas={getDatas}
+							select_datas={lessonOption}
+							editData={editData}
+						/>
+					)}
 				{
 					showModal &&
-						<Show
-							open={showModal}
-							handleModal={handleShowModal}
-							datas={showData}
-						/>
+					<Show
+						open={showModal}
+						handleModal={handleShowModal}
+						datas={showData}
+					/>
 				}
+				{
+					examModal &&
+					<Exam
+						testId={examId}
+						handleModal={handleExamModal} />
+				}
+			</Card>
+			<Card className={'mt-2'}>
+				<CardHeader><div className="d-flex"><HelpCircle size={20} /><h5 className="ms-25 fw-bolder">Тусламж хэсэг</h5></div></CardHeader>
+				<CardBody>
+					<Alert color='primary' className={'p-1 тме1'}>
+						Онлайн шалгалт үүсгэх заавар мэдээлэл хүргэж байна.
+					</Alert>
+					<iframe
+						width="100%"
+						height="500"
+						title='Шалгалт'
+						src={'https://www.youtube.com/embed/mvF55C892uY'}
+						sandbox='allow-same-origin allow-forms allow-popups allow-scripts allow-presentation'
+					/>
+				</CardBody>
 			</Card>
 		</Fragment>
 	);
 };
 
 export default TestProgram;
-
