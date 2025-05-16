@@ -62,19 +62,6 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle })
         }
     }
 
-    // const getLessons = async () => {
-    //     try {
-    //         const { success, data } = await fetchData(lessonApi.getList())
-    //         if (success) {
-    //             setLessonOption(data)
-    //         }
-    //     }
-    //     catch (error) {
-    //         console.error("Error fetching lessons:", error);
-    //     }
-
-    // }
-
     async function getAllQuestoin() {
         // to show loader while mapping is processing. because it can be longer then fetchData loading
         setIsMapRendering(true)
