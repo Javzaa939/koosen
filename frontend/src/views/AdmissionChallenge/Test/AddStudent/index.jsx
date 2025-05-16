@@ -230,118 +230,50 @@ function AddStudent() {
                             </CardTitle>
                         </CardHeader>
                         <Row className="m-0">
-                            <Col md={7} className="mx-0 p-0">
-                                <Form onSubmit={handleSubmit(onSubmit)}>
-                                    <div className='added-cards mb-0 text-center'>
-                                        <div className={classnames('cardMaster p-1 rounded border')}>
-                                            <div className='content-header mb-2 mt-1'>
-                                                <h4 className='content-header'>Хамрах хүрээгээ сонгоно уу</h4>
-                                            </div>
-                                            <Row className='custom-options-checkable gx-1'>
-                                                {/* <Col md={6}>
-                                                    <Input type='radio' id='all' name='plans' className='custom-option-item-check' onChange={(e) => handleScope(e, 'Хичээлийн хүрээнд')} checked={scope == 'all'} />
-                                                    <Label for='all' className='custom-option-item text-center p-1'>
-                                                        <span className='fw-bolder'>Хичээлийн хүрээнд</span>
-                                                    </Label>
-                                                </Col> */}
-                                                {/* <Col md={6}>
-                                                    <Input type='radio' id='group' name='plans' className='custom-option-item-check ' onChange={(e) => handleScope(e, 'Ангийн хүрээнд')} checked={scope == 'group'} />
-                                                    <Label for='group' className='custom-option-item text-center p-1'>
-                                                        <span className='fw-bolder'>Ангийн хүрээнд</span>
-                                                    </Label>
-                                                </Col> */}
-                                            </Row>
-                                            {
-                                                scope === 'group' &&
-                                                <Row className='mt-1'>
-                                                    <Col md={12}>
-                                                        <Label className="form-label" for="select">
-                                                            {'Анги сонгох'}
-                                                        </Label>
-                                                        <Controller
-                                                            control={control}
-                                                            defaultValue=''
-                                                            name="select"
-                                                            render={({ field: { value, onChange } }) => {
-                                                                return (
-                                                                    <Select
-                                                                        name="select"
-                                                                        id="select"
-                                                                        classNamePrefix='select'
-                                                                        isClearable
-                                                                        isMulti
-                                                                        className={'react-select'}
-                                                                        isLoading={isLoading}
-                                                                        options={selectOption || []}
-                                                                        placeholder={t('-- Сонгоно уу --')}
-                                                                        noOptionsMessage={() => t('Хоосон байна.')}
-                                                                        onChange={(val) => {
-                                                                            groupSelect(val)
-                                                                        }}
-                                                                        styles={ReactSelectStyles}
-                                                                        getOptionValue={(option) => option.id}
-                                                                        getOptionLabel={(option) => option.name + '(' + option.degree__degree_code + ')'}
-                                                                    />
-                                                                )
-                                                            }}
-                                                        />
-                                                        {errors.select && <FormFeedback className='d-block'>{t(errors.select.message)}</FormFeedback>}
-                                                    </Col>
-                                                </Row>
-                                            }
-                                            <Button
-                                                className="me-0 mt-1"
-                                                color="primary"
-                                                type="submit"
-                                            >
-                                                {t("Хадгалах")}
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </Form>
-                            </Col>
-                            <Col md={5} className="p-0">
+                            <Col md={12} className="p-0">
                                 <Form onSubmit={handleSubmit(onSubmitStudent)}>
                                     <div className='added-cards mb-0'>
                                         <div className={classnames('cardMaster p-1 rounded border')}>
                                             <div className='content-header mb-2 mt-1 text-center'>
                                                 <h4 className='content-header'>Оюутныг кодоор сонгох</h4>
                                             </div>
-                                            <Col md={12} className="my-2">
-                                                <Controller
-                                                    defaultValue=''
-                                                    control={control}
-                                                    name="student"
-                                                    render={({ field: { value, onChange } }) => {
-                                                        return (
-                                                            <Select
-                                                                id="student"
-                                                                name="student"
-                                                                classNamePrefix='select'
-                                                                className='react-select'
-                                                                placeholder={`Хайх`}
-                                                                options={students || []}
-                                                                value={students.find((c) => c.id === value)}
-                                                                noOptionsMessage={() => 'Хоосон байна'}
-                                                                onChange={(val) => {
-                                                                    onChange(val?.code)
-                                                                }}
-                                                                onInputChange={(e) => {
-                                                                    setStudentSearchValue(e);
-                                                                    if (student_search_value.length > 1) {
-                                                                        handleStudentSelect();
-                                                                    } else if (student_search_value.length === 0) {
-                                                                        setStudents([]);
-                                                                    }
-                                                                }}
-                                                                styles={ReactSelectStyles}
-                                                                getOptionValue={(option) => option.id}
-                                                                getOptionLabel={(option) => `${option.code} ${option.full_name}`}
-                                                            />
-                                                        );
-                                                    }}
-                                                />
-                                            </Col>
+                                            <Row className="justify-content-center">
+                                                <Col sm={12} md={6} className="my-2">
+                                                    <Controller
+                                                        defaultValue=''
+                                                        control={control}
+                                                        name="student"
+                                                        render={({ field: { value, onChange } }) => {
+                                                            return (
+                                                                <Select
+                                                                    id="student"
+                                                                    name="student"
+                                                                    classNamePrefix='select'
+                                                                    className='react-select'
+                                                                    placeholder={`Хайх`}
+                                                                    options={students || []}
+                                                                    value={students.find((c) => c.id === value)}
+                                                                    noOptionsMessage={() => 'Хоосон байна'}
+                                                                    onChange={(val) => {
+                                                                        onChange(val?.code)
+                                                                    }}
+                                                                    onInputChange={(e) => {
+                                                                        setStudentSearchValue(e);
+                                                                        if (student_search_value.length > 1) {
+                                                                            handleStudentSelect();
+                                                                        } else if (student_search_value.length === 0) {
+                                                                            setStudents([]);
+                                                                        }
+                                                                    }}
+                                                                    styles={ReactSelectStyles}
+                                                                    getOptionValue={(option) => option.id}
+                                                                    getOptionLabel={(option) => `${option.code} ${option.full_name}`}
+                                                                />
+                                                            );
+                                                        }}
+                                                    />
+                                                </Col>
+                                            </Row>
                                             <div className="text-center">
                                                 <Button
                                                     className="me-0 mt-1 text-end"
