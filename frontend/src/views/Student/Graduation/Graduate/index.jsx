@@ -72,9 +72,11 @@ const CreateModal = ({ open, handleModal, refreshDatas, group }) => {
     const studentApi = useApi().student
 
     async function getStudentOption() {
-        const { success, data } = await fetchData(studentApi.getGraduate('', '', group))
+        const { success, data } = await fetchData(studentApi.getGraduate({
+            group: group
+        }))
         if(success) {
-            setStudentOption(data)
+            setStudentOption(data?.results)
         }
     }
 
