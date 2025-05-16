@@ -468,7 +468,17 @@ class TeacherNameSerializer(serializers.ModelSerializer):
             .annotate(question_count=Count('id'))
             .filter(question_count__gt=0).values_list('title__lesson__name', flat=True).distinct()
         )
-        return ', '.join(list(lessons))
+
+        result = []
+
+        # to avoid "TypeError: sequence item 0: expected str instance, NoneType found". And because i do not know how this lesson names should be returned, for example: may be count of None items is required
+        for ind, lesson in enumerate(lessons):
+            new_item = lesson
+
+            if lesson == None:
+                new_item = 'None'
+            result.append(new_item)
+        return ', '.join(result)
 
 
 class EmployeePostSerializer(serializers.ModelSerializer):
