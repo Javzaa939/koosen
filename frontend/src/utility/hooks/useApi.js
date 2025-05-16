@@ -1641,7 +1641,7 @@ function useApi(isDisplay=false) {
 					return instance.delete(`learning/questions/?year=${cyear_name}&season=${cseason_id}${remove_ids}`)
 				},
 				getByTitle: (page, limit, search, titleId, teacher_id, stype='', level='',  is_graduate=false) => instance.get(`learning/questions/title/${teacher_id}/?page=${page}&limit=${limit}&search=${search}&titleId=${titleId}&stype=${stype}&level=${level}&is_graduate=${is_graduate}`),
-				getTitle: (lesson='', is_season=false, teacher_id=0) => instance.get(`learning/questions/title/list/${teacher_id}/?lesson=${lesson}&season=${is_season}`),
+				getTitle: (lesson='', is_season=false, teacher_id=0, examType='') => instance.get(`learning/questions/title/list/${teacher_id}/?lesson=${lesson}&season=${is_season}&examType=${examType}`),
 				getLevel: (lesson='') => instance.get(`learning/questions/level/list/?lesson=${lesson}`),
 				postTitle: (datas) => instance.post(`learning/questions/title/`, datas),
 				postTestQuestions: (data) =>

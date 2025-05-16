@@ -23,7 +23,7 @@ import { getColumns } from './helpers';
 import { getColumnsLesson } from './helpers2';
 import EQuestions from './EQuestions'
 
-const Teacher = () => {
+const Question = () => {
 
 	var values = {
 		position_id: '',
@@ -51,7 +51,7 @@ const Teacher = () => {
 	const [position_option, setOrgPositions] = useState([]);
 	const [selected_values, setSelectValue] = useState(values);
 
-	const [teacher, setTeacher] = useState('')
+	const [teacher, setTeacher] = useState(0) // 0 means all teachers
 	const [teacher_name, setTeacherName] = useState('')
 	const [title_id, setTitleId] = useState('')
 
@@ -181,4 +181,4 @@ const Teacher = () => {
 		<EQuestions teacher_id={teacher} title_id={title_id} />
 	)
 }
-export default Teacher;
+export default Question;

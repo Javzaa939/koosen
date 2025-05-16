@@ -19,7 +19,6 @@ import QuestionsList from "./QuestionsList";
 import AddTitle from "./AddTitle";
 import useModal from "@hooks/useModal";
 const EQuestions = ({ teacher_id, title_id, is_season, is_graduate=false }) => {
-    console.log(is_graduate)
     const [datas, setDatas] = useState([]);
     const [titleModal, setTitleModal] = useState({ type: false, editId: null })
     const [activeTitle, setActiveTitle] = useState(title_id)
@@ -30,7 +29,7 @@ const EQuestions = ({ teacher_id, title_id, is_season, is_graduate=false }) => {
     const questionAPI = useApi().challenge.question
 
     async function getAllTitle() {
-        const { success, data } = await fetchData(questionAPI.getTitle('', is_season, teacher_id, is_graduate, title_id))
+        const { success, data } = await fetchData(questionAPI.getTitle('', is_season, teacher_id, 'admission'))
         if (success) {
             setDatas(data)
         }

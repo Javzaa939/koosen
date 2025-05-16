@@ -5150,6 +5150,7 @@ class QuestionsTitleListAPIView(
 
         lesson = request.query_params.get('lesson')
         season = request.query_params.get('season')
+        exam_type = request.query_params.get('examType')
 
         if lesson:
             self.queryset = self.queryset.filter(lesson=lesson)
@@ -5158,6 +5159,9 @@ class QuestionsTitleListAPIView(
             self.queryset = self.queryset.filter(is_season=False)
         else:
             self.queryset = self.queryset.filter(is_season=True)
+
+        if exam_type == 'admission':
+            self.queryset = self.queryset.filter(is_admission=True)
 
         question_sub = ChallengeQuestions.objects.filter(title=OuterRef('id')).values('title').annotate(count=Count('id')).values('count')
         data = self.queryset.annotate(question_count=Subquery(question_sub)).values("id", "name", 'lesson__name', 'lesson__code', 'lesson__id', 'question_count', 'is_open')
