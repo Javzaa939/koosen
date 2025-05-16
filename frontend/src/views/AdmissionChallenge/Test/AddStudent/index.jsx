@@ -218,7 +218,7 @@ function AddStudent() {
                         <CardHeader className="rounded border d-flex flex-row">
                             <Button
                                 tag={Link}
-                                to="/challenge/test"
+                                to="/admission-challenge/test"
                                 color="primary"
                                 className="btn-sm-block"
                             >

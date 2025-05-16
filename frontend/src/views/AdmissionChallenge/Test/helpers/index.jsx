@@ -111,7 +111,7 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
                                 onClick={() => { handleShow(row) }}
                                 id={`complaintListDatatableShow${row?.id}`}
                                 className='me-1'
-                                href={`/challenge/test/addstudent/${row?.id}/${row?.lesson?.id}`}
+                                href={`/admission-challenge/test/addstudent/${row?.id}/${row?.lesson?.id}`}
                             >
                                 <Badge color="light-info"><Book width={"10px"} /></Badge>
                             </a>
@@ -182,7 +182,7 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
                                 onClick={() => { handleShow(row) }}
                                 id={`complaintResultDetail${row?.id}`}
                                 className='me-1'
-                                href={`/challenge/detail/${row?.id}/`}
+                                href={`/admission-challenge/detail/${row?.id}/`}
                             >
                                       <Badge color="secondary"><Paperclip width={"10px"} /></Badge>
                             </a>
