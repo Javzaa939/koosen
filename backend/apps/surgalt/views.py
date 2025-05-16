@@ -5055,7 +5055,10 @@ class QuestionsTitleAPIView(
 
         # # 0  Бүх асуулт
         if title_id == 0:
-            challenge_qs = ChallengeQuestions.objects.all()
+            if is_elselt == 'true':
+                challenge_qs = ChallengeQuestions.objects.filter(is_admission=True)
+            else:
+                challenge_qs = ChallengeQuestions.objects.all()
         # -1  Сэдэвгүй асуултууд
         elif title_id == -1:
             if is_elselt == 'true':

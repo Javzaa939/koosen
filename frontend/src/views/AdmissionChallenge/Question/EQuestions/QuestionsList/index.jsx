@@ -73,7 +73,7 @@ const QuestionsList = ({ filterId, season=false, teacher_id, is_graduate=false, 
 
 
 	async function getDatas() {
-		if (!filterId) return
+		if (!filterId && filterId !== 0) return
 		const { success, data } = await fetchData(questionAPI.getByTitle(currentPage, rowsPerPage, searchValue, filterId, teacher_id, stype, level, is_graduate, is_elselt));
 		if (success) {
 			setDatas(data?.results);
