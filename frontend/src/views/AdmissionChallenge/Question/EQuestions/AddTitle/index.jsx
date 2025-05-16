@@ -108,7 +108,7 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle, e
 
     // to show loader while mapping is processing
     useEffect(() => {
-        if (questionList.length) {
+        if (Array.isArray(questionList)) {
             requestAnimationFrame(() => {
                 setIsMapRendering(false)
             });
