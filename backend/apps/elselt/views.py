@@ -1,5 +1,6 @@
 import hashlib
 import datetime as dt
+import traceback
 import requests
 import os
 import pandas as pd
@@ -616,17 +617,21 @@ class AdmissionUserInfoAPIView(
         return queryset
 
     def get(self, request, pk=None):
-        user = request.user.id
-        employee_sub_org_id = Employee.objects.filter(user=user).values_list('sub_org', flat=True).first()
+        try:
+            user = request.user.id
+            employee_sub_org_id = Employee.objects.filter(user=user).values_list('sub_org', flat=True).first()
 
-        if employee_sub_org_id == 21:
-            self.queryset = self.queryset.filter(profession__profession__school=employee_sub_org_id)
+            if employee_sub_org_id == 21:
+                self.queryset = self.queryset.filter(profession__profession__school=employee_sub_org_id)
 
-        if pk:
-            all_data = self.retrieve(request, pk).data
-            return request.send_data(all_data)
+            if pk:
+                all_data = self.retrieve(request, pk).data
+                return request.send_data(all_data)
 
-        all_data = self.list(request).data
+            all_data = self.list(request).data
+        except Exception:
+            traceback.print_exc()
+            return request.send_error('ERR_002')
         return request.send_data(all_data)
 
     @transaction.atomic()
