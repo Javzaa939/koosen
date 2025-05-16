@@ -23,7 +23,7 @@ import useLoader from '@hooks/useLoader';
 import Flatpickr from 'react-flatpickr';
 import '@styles/react/libs/flatpickr/flatpickr.scss';
 
-const Addmodal = ({ open, handleModal, refreshDatas, select_datas, editData }) => {
+const Addmodal = ({ open, handleModal, refreshDatas, select_datas, editData, examType }) => {
 
     const { control, handleSubmit, setError, setValue, formState: { errors, title, lesson, duration, description,question_count} } = useForm(validate(validateSchema))
 	const { fetchData } = useLoader({ isFullScreen: true });
@@ -52,6 +52,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, select_datas, editData }) =
 
         cdata['start_date'] = new Date(startPicker)
         cdata['end_date'] = new Date(endPicker)
+        cdata['challenge_type'] = examType
         cdata = convertDefaultValue(cdata)
 
         if (editData !== undefined) {

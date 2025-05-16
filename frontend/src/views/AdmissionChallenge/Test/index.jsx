@@ -28,6 +28,8 @@ import Show from "./Show";
 import Exam from "./Exam"
 import classNames from "classnames"
 
+const CHALLENGE_TYPE_ADMISSION = 6
+
 const TestProgram = () => {
     const { school_id } = useContext(SchoolContext)
 
@@ -74,7 +76,7 @@ const TestProgram = () => {
 	const seasonApi = useApi().settings.season
 
 	async function getDatas() {
-		const { success, data } = await fetchData(challengeAPI.get(currentPage, rowsPerPage, selectedLesson, selectedTime, selectedTeacher, searchValue, false, selected_year, selected_season));
+		const { success, data } = await fetchData(challengeAPI.get(currentPage, rowsPerPage, selectedLesson, selectedTime, selectedTeacher, searchValue, false, selected_year, selected_season, CHALLENGE_TYPE_ADMISSION));
 
 		if (success) {
 			setDatas(data?.results);
@@ -422,6 +424,7 @@ const TestProgram = () => {
 							refreshDatas={getDatas}
 							select_datas={lessonOption}
 							editData={editData}
+							examType={CHALLENGE_TYPE_ADMISSION}
 						/>
 					)}
 				{
