@@ -3464,6 +3464,7 @@ class QuestionTitle(models.Model):
     name = models.CharField(max_length=255, null=True, verbose_name='Сэдвийн нэр')
     is_season = models.BooleanField(default=False, verbose_name='Улирлын шалгалтын сэдэв эсэх')
     is_graduate = models.BooleanField(default=False, verbose_name='Төгсөлтийн шалгалтын сэдэв эсэх')
+    is_admission = models.BooleanField(default=False, verbose_name='Элсэлтийн шалгалтын сэдэв эсэх')
     is_open = models.BooleanField(default=False, verbose_name='Нээлттэй сэдэв эсэх')
     created_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(Teachers, on_delete=models.CASCADE, related_name="+", null=True)
