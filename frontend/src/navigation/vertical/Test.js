@@ -42,6 +42,12 @@ export default [
 						icon: <Circle size={8} />,
 						navLink: "admission-challenge/question/",
 					},
+					{
+						id: "admission-challenge-test",
+						title: "Онлайн шалгалт",
+						icon: <Circle size={8} />,
+						navLink: "admission-challenge/test/",
+					},
 				]
 			},
 			{
