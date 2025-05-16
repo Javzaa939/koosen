@@ -5454,6 +5454,10 @@ class TestQuestionsListAPIView(
     def get(self, request):
         questions_qs = ChallengeQuestions.objects.all()
         ser = dynamic_serializer(ChallengeQuestions, "__all__", 1)
+        challenge_type = request.query_params.get('challengeType')
+
+        if challenge_type == f'{Challenge.ADMISSION}':
+            questions_qs = questions_qs.filter(is_admission=True)
         data = ser(questions_qs, many=True).data
         return request.send_data(data)
 

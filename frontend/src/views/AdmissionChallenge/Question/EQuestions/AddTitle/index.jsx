@@ -27,6 +27,8 @@ const validateSchema = Yup.object().shape({
     questions: Yup.array().min(1, "Асуулт нэмнэ үү").required("Хоосон байна")
 });
 
+const CHALLENGE_TYPE_ADMISSION = 6
+
 export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle, examType }) {
 
     const [questionList, setQuestionList] = useState([])
@@ -78,7 +80,7 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle, e
         // to show loader while mapping is processing. because it can be longer then fetchData loading
         setIsMapRendering(true)
 
-        const { success, data } = await fetchData(questionAPI.getTestList())
+        const { success, data } = await fetchData(questionAPI.getTestList(CHALLENGE_TYPE_ADMISSION))
         if (success) {
             setQuestionList(data)
         }

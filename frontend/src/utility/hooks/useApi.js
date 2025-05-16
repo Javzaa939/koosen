@@ -1646,8 +1646,8 @@ function useApi(isDisplay=false) {
 				postTitle: (datas) => instance.post(`learning/questions/title/`, datas),
 				postTestQuestions: (data) =>
 					instance.post(`learning/questions/test/?year=${cyear_name}&season=${cseason_id}`, data),
-				getTestList: () => {
-					return instance.get(`learning/questions/test/list/`)
+				getTestList: (challengeType) => {
+					return instance.get(`learning/questions/test/list/?challengeType=${challengeType}`)
 				},
 				getOneTitle: (id) => instance.get(`learning/questions/title/${id}/?titleId=${id}`),
 				postExcel:(datas) => instance.post(`learning/questions/excel/` , datas),
