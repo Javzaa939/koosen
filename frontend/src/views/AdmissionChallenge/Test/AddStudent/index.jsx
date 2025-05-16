@@ -36,21 +36,15 @@ function AddStudent() {
     const { t } = useTranslation();
 
     const { isLoading, Loader, fetchData } = useLoader({});
-    const { fetchData: fetchSelectData } = useLoader({});
     const { fetchData: fetchQuestion } = useLoader({});
     const { fetchData: fetchStudents, isLoading: isLoadingExaminee } = useLoader({});
     const { control, handleSubmit, setError, formState: { errors }, } = useForm({});
     const { challenge_id, lesson_id } = useParams();
 
-    const [scope, setScope] = useState('group');
-
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(100);
     const [total_count, setTotalCount] = useState(1);
     const [searchValue, setSearchValue] = useState('');
-
-    const [selectedGroups, setSelectedGroups] = useState([]);
-    const [selectOption, setSelectOption] = useState([]);
 
     const [datas, setDatas] = useState([]);
     const [students, setStudents] = useState([]);
@@ -64,30 +58,14 @@ function AddStudent() {
 
     const challengeAPI = useApi().challenge;
 	const elseltApi = useApi().elselt.admissionuserdata
-    const groupApi = useApi().student.group;
 
     async function getDatas() {
-
-        const { success, data } = await fetchData(challengeAPI.getAddStudent(currentPage, rowsPerPage, searchValue, challenge_id));
+        const { success, data } = await fetchData(challengeAPI.admission.getAddStudent(currentPage, rowsPerPage, searchValue, challenge_id));
         if (success) {
             setDatas(data?.results);
             setTotalCount(data?.count);
         }
     };
-
-    async function getSelects() {
-        const { success, data } = await fetchSelectData(challengeAPI.getSelect(scope, lesson_id))
-        if (success) {
-            setSelectOption(data)
-        }
-    }
-
-    async function getGroups() {
-        const { success, data } = await fetchSelectData(groupApi.getAllList())
-        if (success) {
-            setSelectOption(data)
-        }
-    }
 
     async function getStudents() {
         const STATE_SEND = 1
@@ -107,7 +85,7 @@ function AddStudent() {
     }
 
     async function handleDelete(id) {
-        const { success, data } = await fetchData(challengeAPI.deleteStudent(id, challenge_id));
+        const { success, data } = await fetchData(challengeAPI.admission.deleteStudent(id, challenge_id));
         if (success) {
             getDatas();
         }
@@ -128,14 +106,6 @@ function AddStudent() {
         getQuestionTableData()
     }, [])
 
-    useEffect(
-        () => {
-            getGroups()
-
-        },
-        []
-    )
-
     function handleFilter(e) {
         const value = e.target.value.trimStart();
         setSearchValue(value)
@@ -149,15 +119,6 @@ function AddStudent() {
         getStudents()
     }
 
-    function groupSelect(data) {
-        setSelectedGroups(data);
-    }
-
-    const handleScope = (e, name) => {
-        var id = e.target.id
-        setScope(id)
-    };
-
     const handlePagination = (page) => {
         setCurrentPage(page.selected + 1);
     };
@@ -166,27 +127,10 @@ function AddStudent() {
         setModal(!modal);
     };
 
-    async function onSubmit(cdata) {
-        cdata['groups'] = selectedGroups
-        cdata['scope'] = scope
-        cdata['lesson'] = lesson_id
-        cdata = convertDefaultValue(cdata)
-        const { success, error } = await fetchData(challengeAPI.putTestKind(cdata, challenge_id))
-        if (success) {
-            getDatas()
-        }
-        else {
-            /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error) {
-                setError(error[key].field, { type: 'custom', message: error[key].msg });
-            }
-        }
-    }
-
     async function onSubmitStudent(cdata) {
         cdata["challenge"] = challenge_id
         cdata = convertDefaultValue(cdata)
-        const { success, error } = await fetchData(challengeAPI.putTest(cdata))
+        const { success, error } = await fetchData(challengeAPI.admission.putTest(cdata))
         if (success) {
             getDatas()
         }
@@ -225,7 +169,7 @@ function AddStudent() {
                                 color="primary"
                                 className="btn-sm-block"
                             >
-                                Буцах
+                                {t('Буцах')}
                             </Button>
                             <CardTitle tag='h4' className="mt-0 mx-0">
                                 {t('Шалгуулагчийг нэмэх')}
@@ -237,7 +181,7 @@ function AddStudent() {
                                     <div className='added-cards mb-0'>
                                         <div className={classnames('cardMaster p-1 rounded border')}>
                                             <div className='content-header mb-2 mt-1 text-center'>
-                                                <h4 className='content-header'>{t('Шалгуулагчийг кодоор сонгох')}</h4>
+                                                <h4 className='content-header'>{t('Шалгуулагчийг кодоор/регистрийн дугаараар сонгох')}</h4>
                                             </div>
                                             <Row className="justify-content-center">
                                                 <Col md={12} lg={6} className="my-2">

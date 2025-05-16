@@ -84,7 +84,7 @@ from core.models import (
 from lms.models import get_image_path
 from lms.models import get_choice_image_path
 
-from elselt.serializer import MentalUserSerializer
+from elselt.serializer import ElseltApproveSerializer, MentalUserSerializer
 
 from .serializers import ChallengeGroupsSerializer, ChallengeProfessionsSerializer, ChallengeReport2StudentsDetailSerializer, ChallengeReport2StudentsSerializer, LessonStandartSerializer, ChallengeQuestionsAnswersSerializer, ChallengeReport4Serializer
 from .serializers import LessonTitlePlanSerializer
@@ -5869,6 +5869,74 @@ class ChallengeLevelCountAPIView(
             challenges.save()
 
         return request.send_info("INF_003")
+
+
+@permission_classes([IsAuthenticated])
+class ChallengeAddAdmissionUserAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin
+):
+    queryset = AdmissionUserProfession.objects.all()
+    serializer_class = ElseltApproveSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['user__first_name', 'user__register', 'user__email', 'user__code', 'user__last_name', 'user__mobile']
+
+    def get(self, request):
+        challenge = request.query_params.get('challenge')
+        challenge_student_all = Challenge.objects.get(id=challenge).admission_user.all().values_list('id', flat=True)
+        self.queryset = self.queryset.filter(id__in=list(challenge_student_all))
+        datas = self.list(request).data
+        return request.send_data(datas)
+
+    def put(self, request):
+        data = request.data
+        challenge_id = data.get("challenge")
+        student_code = data.get("student")
+
+        if student_code is None:
+            return request.send_error("ERR_003", 'Элсэгчийн код хоосон байна!')
+
+        try:
+            student = AdmissionUserProfession.objects.filter(user__register=student_code).first()
+
+            if student:
+                challenge = Challenge.objects.filter(id=challenge_id).first()
+
+                if challenge:
+                    check = challenge.admission_user.filter(id=student.id)
+
+                    if check:
+                        return request.send_error("ERR_003",f'"{student_code}" кодтой элсэгч шалгалтанд үүссэн байна.')
+
+                    challenge.admission_user.add(student)
+                    challenge.save()
+                    return request.send_info("INF_002")
+                else:
+                    return request.send_error("ERR_002")
+            else:
+                return request.send_error("ERR_003",f'"{student_code}" кодтой элсэгч олдсонгүй!')
+        except Exception as e:
+            print(e)
+            return request.send_error("ERR_002")
+
+    def delete(self, request, pk, student):
+        try:
+            challenge = Challenge.objects.get(id=pk)
+            student = AdmissionUserProfession.objects.get(pk=student)
+            challenge.admission_user.remove(student)
+            challenge.save()
+
+            return request.send_info("INF_003")
+
+        except Exception as e:
+            print(e)
+            return request.send_error("ERR_002")
 
 
 @permission_classes([IsAuthenticated])
