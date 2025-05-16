@@ -18,6 +18,7 @@ import { validate } from "@utils";
 import * as Yup from "yup";
 import useLoader from '@hooks/useLoader';
 import useApi from '@hooks/useApi';
+import { CHALLENGE_TYPE, CHALLENGE_TYPE_ADMISSION } from '@src/views/AdmissionChallenge/helpers';
 
 const validateSchema = Yup.object().shape({
     // name: Yup.string().trim().required("Хоосон байна"),
@@ -36,7 +37,7 @@ const validateSchema = Yup.object().shape({
 });
 
 export default function AddQuestion(props) {
-    const { open, handleModal, getDatas, title, is_graduate, is_elselt } = props
+    const { open, handleModal, getDatas, title, is_graduate } = props
 
     const { t } = useTranslation()
 
@@ -85,7 +86,7 @@ export default function AddQuestion(props) {
             } else {
                 formData.append("title", title)
             }
-            formData.append("is_admission", true)
+            formData.append("is_admission", CHALLENGE_TYPE === CHALLENGE_TYPE_ADMISSION)
         })
 
         const { success, data } = await fetchData(questionApi.postTestQuestions(formData))

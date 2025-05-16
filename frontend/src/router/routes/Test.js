@@ -41,7 +41,7 @@ const TestRoutes = [
         element: <AdmissionTest/>
     },
     {
-        path: '/admission-challenge/test/addstudent/:challenge_id/:lesson_id',
+        path: '/admission-challenge/test/addstudent/:challenge_id',
         element: <AdmissionAddStudent/>
     },
     {

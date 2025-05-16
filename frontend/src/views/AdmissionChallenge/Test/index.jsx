@@ -27,8 +27,7 @@ import Addmodal from "./Add";
 import Show from "./Show";
 import Exam from "./Exam"
 import classNames from "classnames"
-
-const CHALLENGE_TYPE_ADMISSION = 6
+import { CHALLENGE_TYPE_ADMISSION } from "../helpers";
 
 const TestProgram = () => {
     const { school_id } = useContext(SchoolContext)

@@ -5,6 +5,7 @@ import { Eye, Edit, X, Book, Paperclip, Trash, Trash2, PlusCircle, PlusSquare, P
 import useModal from "@hooks/useModal"
 import { formatDate } from '@utils'
 import { Badge, UncontrolledTooltip } from 'reactstrap';
+import { EXAM_ROOT_PAGE } from '../../helpers';
 
 export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, handleDelete, handleShow, handleSend, handleEditModal, handleExamModal) {
 
@@ -111,7 +112,7 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
                                 onClick={() => { handleShow(row) }}
                                 id={`complaintListDatatableShow${row?.id}`}
                                 className='me-1'
-                                href={`/admission-challenge/test/addstudent/${row?.id}/${row?.lesson?.id}`}
+                                href={`/${EXAM_ROOT_PAGE}/test/addstudent/${row?.id}`}
                             >
                                 <Badge color="light-info"><Book width={"10px"} /></Badge>
                             </a>
@@ -182,7 +183,7 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
                                 onClick={() => { handleShow(row) }}
                                 id={`complaintResultDetail${row?.id}`}
                                 className='me-1'
-                                href={`/admission-challenge/detail/${row?.id}/`}
+                                href={`/${EXAM_ROOT_PAGE}/detail/${row?.id}/`}
                             >
                                       <Badge color="secondary"><Paperclip width={"10px"} /></Badge>
                             </a>

@@ -27,6 +27,7 @@ import classnames from "classnames";
 import DataTable from "react-data-table-component";
 
 import AddQuestion from "../AddQuestion";
+import { EXAM_ROOT_PAGE } from "../../helpers";
 
 
 function AddStudent() {
@@ -218,7 +219,7 @@ function AddStudent() {
                         <CardHeader className="rounded border d-flex flex-row">
                             <Button
                                 tag={Link}
-                                to="/admission-challenge/test"
+                                to={`/${EXAM_ROOT_PAGE}/test`}
                                 color="primary"
                                 className="btn-sm-block"
                             >

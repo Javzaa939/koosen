@@ -21,15 +21,14 @@ import useApi from '@hooks/useApi';
 
 import Select from 'react-select'
 import classnames from 'classnames'
+import { CHALLENGE_TYPE, CHALLENGE_TYPE_ADMISSION } from '@src/views/AdmissionChallenge/helpers';
 
 const validateSchema = Yup.object().shape({
     name: Yup.string().trim().required("Хоосон байна"),
     questions: Yup.array().min(1, "Асуулт нэмнэ үү").required("Хоосон байна")
 });
 
-const CHALLENGE_TYPE_ADMISSION = 6
-
-export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle, examType }) {
+export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle }) {
 
     const [questionList, setQuestionList] = useState([])
     const [lessonOption, setLessonOption] = useState([])
@@ -90,7 +89,7 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle, e
     async function onSubmit(datas) {
         datas['questions'] = datas['questions']?.map(v => v.id)
         datas['other_questions'] = questionList.map(v => v.id)
-        datas['is_admission'] = examType === 'admission' ? true : false
+        datas['is_admission'] = CHALLENGE_TYPE === CHALLENGE_TYPE_ADMISSION
         const { success, data } = await fetchData(open.editId ? questionAPI.putTitle(open.editId, datas) : questionAPI.postTitle(datas))
         if (success) {
             getAllTitle()
@@ -98,15 +97,6 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle, e
             setOpen({ type: false, editId: null })
         }
     }
-
-    // useEffect(
-    //     () => {
-    //         if (examType !== 'admission') {
-    //             getLessons()
-    //         }
-    //     },
-    //     []
-    // )
 
     // to show loader while mapping is processing
     useEffect(() => {

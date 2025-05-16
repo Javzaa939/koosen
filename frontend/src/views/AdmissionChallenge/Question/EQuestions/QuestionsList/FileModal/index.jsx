@@ -16,8 +16,9 @@ import {
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
+import { CHALLENGE_TYPE, CHALLENGE_TYPE_ADMISSION } from '@src/views/AdmissionChallenge/helpers';
 
-const FileModal = ({ isOpen, handleModal, refreshData, title, season, is_graduate, is_elselt }) => {
+const FileModal = ({ isOpen, handleModal, refreshData, title, season, is_graduate }) => {
 
     const defaultExt = ['csv', 'xlsx']
     const [isLoading, setLoader] = useState(false)
@@ -63,7 +64,7 @@ const FileModal = ({ isOpen, handleModal, refreshData, title, season, is_graduat
                 formData.append('title', title)
             }
 
-            formData.append('is_admission', is_elselt)
+            formData.append('is_admission', CHALLENGE_TYPE === CHALLENGE_TYPE_ADMISSION)
 
             const { success, error }  = await fetchData(fileApi.postExcel(formData))
             if (success) {

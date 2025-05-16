@@ -5162,7 +5162,7 @@ class QuestionsTitleListAPIView(
 
         lesson = request.query_params.get('lesson')
         season = request.query_params.get('season')
-        exam_type = request.query_params.get('examType')
+        challenge_type = request.query_params.get('challengeType')
 
         if lesson:
             self.queryset = self.queryset.filter(lesson=lesson)
@@ -5172,7 +5172,7 @@ class QuestionsTitleListAPIView(
         else:
             self.queryset = self.queryset.filter(is_season=True)
 
-        if exam_type == 'admission':
+        if challenge_type == f'{Challenge.ADMISSION}':
             self.queryset = self.queryset.filter(is_admission=True)
 
         question_sub = ChallengeQuestions.objects.filter(title=OuterRef('id')).values('title').annotate(count=Count('id')).values('count')
@@ -5753,9 +5753,11 @@ class ChallengeSedevCountAPIView(
                         level=level,
                     )
                 else:
+                    if challenge.challenge_type not in [Challenge.SORIL1,Challenge.ADMISSION]:
+                        level = challenge.level
                     challenge_questions = ChallengeQuestions.objects.filter(
                         title=lesson_title,
-                        level=challenge.level,
+                        level=level,
                         title__lesson=challenge.lesson,
                         title__is_season=(challenge.challenge_type == Challenge.SEMESTR_EXAM)
                     )
@@ -5792,8 +5794,13 @@ class ChallengeSedevCountAPIView(
         challenges = Challenge.objects.filter(questions=question).first()
         if challenges:
             challenges.questions.remove(question)
-            question.title.clear()
-            question.save()
+
+            """
+            NOTE why remove from title? this only for removing challenge connection or not?
+            it will remove this question from all titles if it is uncommented, is it okey?
+            """
+            # question.title.clear()
+            # question.save()
             challenges.save()
 
         return request.send_info("INF_003")

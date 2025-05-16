@@ -25,6 +25,7 @@ import useLoader from "@hooks/useLoader";
 import DetailModal from './Detail';
 import ResultModal from "./Modal";
 import UpdateChallengeStudentsScoreButton from "./components/UpdateChallengeStudentsScoreButton";
+import { EXAM_ROOT_PAGE } from "../../helpers";
 
 export function excelDownLoad(datas, STATE_LIST) {
 	const mainData = datas.map((data, idx) => {
@@ -245,7 +246,7 @@ function DetailShow(){
 					</CardTitle>
 					<Button
 						tag={Link}
-						to={detailOneDatas?.challenge_type_name === 'Улирлын шалгалт' ? "/challenge-season" : "/admission-challenge/test"}
+						to={detailOneDatas?.challenge_type_name === 'Улирлын шалгалт' ? "/challenge-season" : `/${EXAM_ROOT_PAGE}/test`}
 						color="primary"
 						className="btn-sm-block"
 					>
