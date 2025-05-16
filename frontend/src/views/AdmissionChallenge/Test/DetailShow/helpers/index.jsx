@@ -22,7 +22,7 @@ export function getColumns (currentPage, rowsPerPage, datas, helpers_data, handl
 			center: true,
         },
         {
-            name: `${'Оюутны код'}`,
+            name: `${'Шалгуулагчийн код'}`,
             selector: (row) => row?.code,
             minWidth: "100px",
             wrap:true,

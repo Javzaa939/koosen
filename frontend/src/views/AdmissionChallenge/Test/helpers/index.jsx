@@ -58,7 +58,7 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
             center: true,
         },
         {
-            name: <span className='text-center' style={{ marginTop: '3px', marginBottom: '3px' }}>Шалгалт өгсөн оюутны тоо</span>,
+            name: <span className='text-center' style={{ marginTop: '3px', marginBottom: '3px' }}>Шалгалт өгсөн шалгуулагчийн тоо</span>,
             selector: (row) => row?.is_student,
             minWidth: "10%",
             center: true,
@@ -155,7 +155,7 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
                                     header: {
                                         title: `Шалгалт устгах`,
                                     },
-                                    question: `Та энэ асуултыг шалгалтыг устгахдаа итгэлтэй байна уу? Шалгалтын өгсөн оюутнуудын хариулт хамт устахыг анхаарна уу`,
+                                    question: `Та энэ асуултыг шалгалтыг устгахдаа итгэлтэй байна уу? Шалгалтын өгсөн шалгуулагчдын хариулт хамт устахыг анхаарна уу`,
                                     onClick: () => handleDelete(row.id),
                                     btnText: 'Устгах',
                                 })}

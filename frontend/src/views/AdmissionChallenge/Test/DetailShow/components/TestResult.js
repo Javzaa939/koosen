@@ -127,10 +127,10 @@ const TestResult = ({ selectedQuestionDatas, generalDatas }) => {
 					<table className='w-100'>
 						<tbody>
 							<tr>
-								<td className='pe-1'>Оюутны нэр: <b className='fw-bold'>{generalDatas?.student_name}</b></td>
+								<td className='pe-1'>Шалгуулагчийн нэр: <b className='fw-bold'>{generalDatas?.student_name}</b></td>
 							</tr>
 							<tr>
-								<td className='pe-1'>Оюутны код: <b className='fw-bold'>{generalDatas?.student_code}</b></td>
+								<td className='pe-1'>Шалгуулагчийн код: <b className='fw-bold'>{generalDatas?.student_code}</b></td>
 							</tr>
 							<tr>
 								<td className='pe-1'>Авсан оноо: <b className='fw-bold'>{generalDatas?.score}</b></td>

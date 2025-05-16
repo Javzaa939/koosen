@@ -235,10 +235,10 @@ function AddStudent() {
                                     <div className='added-cards mb-0'>
                                         <div className={classnames('cardMaster p-1 rounded border')}>
                                             <div className='content-header mb-2 mt-1 text-center'>
-                                                <h4 className='content-header'>Оюутныг кодоор сонгох</h4>
+                                                <h4 className='content-header'>{t('Шалгуулагчийг кодоор сонгох')}</h4>
                                             </div>
                                             <Row className="justify-content-center">
-                                                <Col sm={12} md={6} className="my-2">
+                                                <Col md={12} lg={6} className="my-2">
                                                     <Controller
                                                         defaultValue=''
                                                         control={control}
@@ -351,7 +351,7 @@ function AddStudent() {
             </Row>
             <Card md={12}>
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
-                    <CardTitle tag="h4">{t("Шалгалт өгөх оюутнуудын жагсаалт")}</CardTitle>
+                    <CardTitle tag="h4">{t("Шалгалт өгөх шалгуулагчдын жагсаалт")}</CardTitle>
                 </CardHeader>
                 <Col className='mt-2 my-1 mx-1 d-flex align-items-center mobile-datatable-search'>
                     <Input

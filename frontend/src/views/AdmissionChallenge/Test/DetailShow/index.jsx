@@ -32,7 +32,7 @@ export function excelDownLoad(datas, STATE_LIST) {
 		return(
 			{
 				'№': idx + 1,
-				'Оюутны код': data?.code || '',
+				'Шалгуулагчийн код': data?.code || '',
 				'Овог': data?.last_name,
 				'Нэр': data?.first_name || '',
 				'Нийт оноо': data?.challenge[0]?.take_score || '',
@@ -51,7 +51,7 @@ export function excelDownLoad(datas, STATE_LIST) {
 	utils.book_append_sheet(workbook, worksheet, "Шалгалтын үр дүн")
 	const staticCells = [
 			'№',
-			'Оюутны код',
+			'Шалгуулагчийн код',
 			'Овог',
 			'Нэр',
 			'Нийт оноо',
@@ -242,7 +242,7 @@ function DetailShow(){
 						</Button>
 					</div>
                     <CardTitle tag="h4" className="mx-2">
-						{t("Шалгалт өгсөн оюутнуудын дэлгэрэнгүй мэдээлэл")}
+						{t("Шалгалт өгсөн шалгуулагчдын дэлгэрэнгүй мэдээлэл")}
 					</CardTitle>
 					<Button
 						tag={Link}
@@ -292,7 +292,7 @@ function DetailShow(){
 				<Row className="mx-0">
 					<Alert color="primary" className="p-1">
 						Хэрвээ шалгалтын оноо шинэчлэсэн тохиолдолд
-						Шалгалтын хуваарь цэсний ДҮН ТАТАХ товч дээр дарж дүнг шинэчлэснээр оюутны ШАЛГАЛТЫН ОНОО шинэчлэгдэхийг анхаарна уу!!!
+						Шалгалтын хуваарь цэсний ДҮН ТАТАХ товч дээр дарж дүнг шинэчлэснээр шалгуулагчийн ШАЛГАЛТЫН ОНОО шинэчлэгдэхийг анхаарна уу!!!
 					</Alert>
 				</Row>
                 <Row className="justify-content-between aling-items-center mx-0 mt-1 mb-1" sm={9}>

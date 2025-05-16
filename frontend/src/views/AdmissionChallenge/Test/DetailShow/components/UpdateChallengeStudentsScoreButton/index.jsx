@@ -86,10 +86,10 @@ export default function UpdateChallengeStudentsScoreButton({ selected_exam }) {
 										<thead>
 											<tr>
 												<th rowSpan={2}>№</th>
-												<th rowSpan={2}>{t('Оюутны код')}</th>
+												<th rowSpan={2}>{t('Шалгуулагчийн код')}</th>
 												<th colSpan={2}>{t('Өмнөх оноо')}</th>
 												<th colSpan={2}>{t('Шинэчлэгдсэн оноо')}</th>
-												{/* <th colSpan={2}>{t('Оюутны оролдлогын тоо дүүрсэн эсэх')}</th>  Шаардлагатай үед ашиглана */}
+												{/* <th colSpan={2}>{t('Шалгуулагчийн оролдлогын тоо дүүрсэн эсэх')}</th>  Шаардлагатай үед ашиглана */}
 											</tr>
 											<tr>
 												<th>{t('Авсан')}</th>
