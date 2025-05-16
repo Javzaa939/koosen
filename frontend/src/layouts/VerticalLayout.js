@@ -353,13 +353,9 @@ const VerticalLayout = (props) =>
 
 
                         /** ----------------------------- Шалгалт цэс ---------------------------- */
-                        // #region admission challenge
-                        /** Шалгалтын асуулт */
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-exam-question-read', 'admission-challenge-question')
-
-                        /** Шалгалт */
+                        // admission challenge
+                        // NOTE: all sub menus automatically included to permission so only parent menu ID is used
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-exam-read', 'admission-challenge')
-                        // #endregion
 
                         // #region progress challenge
                         /** Шалгалтын асуулт */
