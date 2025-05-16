@@ -31,6 +31,19 @@ export default [
 					},
 				]
 			},
+			// {
+			// 	id: "admission-challenge",
+			// 	title: "Элсэлтийн шалгалт",
+			// 	icon: <Circle size={8} />,
+			// 	children: [
+			// 		{
+			// 			id: "admission-challenge-question",
+			// 			title: "Асуултын сан",
+			// 			icon: <Circle size={8} />,
+			// 			navLink: "admission-challenge/question/",
+			// 		},
+			// 	]
+			// },
 			{
 				id: "just-challenge",
 				title: "Явцын шалгалт",

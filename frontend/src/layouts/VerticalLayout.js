@@ -99,11 +99,13 @@ const VerticalLayout = (props) =>
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-psychological-read', 'elselt3_1')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-justice-read', 'elselt3_3')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-army-read', 'elselt6_1')
+                        /** Элсэлтийн шалгалтын асуулт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-question-read', 'elselt6_2')
+
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-approve-read', 'elselt7')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-log-read', 'elselt7_1')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-mail-read', 'elselt8')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-message-read', 'elselt9')
-
 
                         /** ----------------------------Сэтгэлзүйн сорил------------------------------- */
 
@@ -353,17 +355,35 @@ const VerticalLayout = (props) =>
 
 
                         /** ----------------------------- Шалгалт цэс ---------------------------- */
+                        // admission challenge
+                        // NOTE: all sub menus automatically included to permission so only parent menu ID is used
+                        // childrenDatas = checkPerm(childrenDatas, menus, 'lms-exam-read', 'admission-challenge')
+
+                        // #region progress challenge
                         /** Шалгалтын асуулт */
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-exam-question-read', 'e-challenge')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-season-question-read', 'season-equistion')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-graduate-question-read', 'graduate-question')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-graduate-question-read', 'graduate-challenge')
+
                         /** Шалгалт */
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-exam-read', 'just-challenge')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-season-exam-read', 'season-challenge')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-graduate-exam-read', 'graduate-test')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-exam-report-read', 'examreport')
+                        // #endregion
 
+                        // #region graduate challenge
+                        /** Шалгалтын асуулт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-graduate-question-read', 'graduate-question')
+
+                        /** Шалгалт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-graduate-question-read', 'graduate-challenge')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-graduate-exam-read', 'graduate-test')
+                        // #endregion
+
+                        // #region season challenge
+                        /** Шалгалтын асуулт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-season-question-read', 'season-equistion')
+
+                        /** Шалгалт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-season-exam-read', 'season-challenge')
+                        // #endregion
 
 
                         /** ----------------------------- Онлайн хичээл цэс ---------------------------- */
@@ -416,7 +436,7 @@ const VerticalLayout = (props) =>
                         if (menus.id === 'role' && !user.permissions?.includes('lms-role-read'))  delete newMenu[idx];
 
                         /** ----------------------------- Цахим сургалт ---------------------------- */
-                        if (menus.id === 'remotelesson' && !user.permissions?.includes('lms-elearn-list-read'))  delete newMenu[idx];
+                        if (menus.id === 'remotelesson' && !user.permissions?.includes('lms-role-read'))  delete newMenu[idx];
                     }
                 })
                 setCNavigation(newMenu)

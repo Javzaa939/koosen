@@ -3464,6 +3464,7 @@ class QuestionTitle(models.Model):
     name = models.CharField(max_length=255, null=True, verbose_name='Сэдвийн нэр')
     is_season = models.BooleanField(default=False, verbose_name='Улирлын шалгалтын сэдэв эсэх')
     is_graduate = models.BooleanField(default=False, verbose_name='Төгсөлтийн шалгалтын сэдэв эсэх')
+    is_admission = models.BooleanField(default=False, verbose_name='Элсэлтийн шалгалтын сэдэв эсэх')
     is_open = models.BooleanField(default=False, verbose_name='Нээлттэй сэдэв эсэх')
     created_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(Teachers, on_delete=models.CASCADE, related_name="+", null=True)
@@ -3526,6 +3527,8 @@ class ChallengeQuestions(models.Model):
 
     title = models.ManyToManyField(QuestionTitle, verbose_name='Асуултын ерөнхий сэдэв')
     graduate_title = models.ManyToManyField(QuestioSubTitle, verbose_name='Асуултын ерөнхий сэдэв')
+    is_admission =  models.BooleanField(default=False, verbose_name="Элсэлтийн асуулт эсэх")
+
     level = models.IntegerField(choices=DIFFICULTY_LEVELS, default=LEVEL_NORMAL,  verbose_name='Асуултын түвшин')
 
     # KIND_RATING үед
@@ -3581,6 +3584,7 @@ class Challenge(models.Model):
     SEMESTR_EXAM = 3
     SELF_TEST = 4
     GRADUATE = 5
+    ADMISSION = 6
 
     CHALLENGE_TYPE = (
         (SORIL1, 'Явцын шалгалт'),
@@ -3588,6 +3592,7 @@ class Challenge(models.Model):
         (SEMESTR_EXAM, 'Улирлын шалгалт'),
         (SELF_TEST, 'Өөрийгөө сорих тест'),
         (GRADUATE, 'Төгсөлтийн шалгалт'),
+        (ADMISSION, 'Элсэлтийн шалгалт'),
     )
 
     #  Хамрах хүрээ нь

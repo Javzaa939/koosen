@@ -1,25 +1,57 @@
 import { lazy } from "react";
 
+// admission challenge
+const AdmissionQuestion = lazy(() => import("@views/AdmissionChallenge/Question"))
+const AdmissionTest = lazy(() => import("@views/AdmissionChallenge/Test"))
+
+// progress challenge
 const Test = lazy(() => import("@views/Test/"))
 const ShowDetail = lazy(() => import("@views/Test/DetailShow"))
-
 const EQuestions = lazy(() => import("@views/Test/EQuestions/"))
 const Challenge = lazy(() => import("@views/Test/Test/"))
-const SeasonTest = lazy(() => import("@views/SeasonTest/Test/"))
-const SeasonTestQuestion = lazy(() => import("@views/SeasonTest/Question/"))
-const GraduateQuestion = lazy(() => import("@views/GraduateTest/Question/"))
-const GraduateTest = lazy(() => import("@views/GraduateTest/Test/"))
-
 const AddStudent = lazy(() => import("@views/Test/Test/AddStudent/"))
-const AddStudentSeason = lazy(() => import("@views/SeasonTest/Test/AddStudent/"))
-const AddStudentGraduate = lazy(() => import("@views/GraduateTest/Test/AddStudent/"))
-
-const TestReport = lazy(() => import("@views/SeasonTest/Report/"))
-
 const ExamSchedule = lazy(() => import("@views/Test/ExamSchedule"))
 const Teacher = lazy(() => import("@views/Test/Teachers"))
 
+// season challenge
+const SeasonTest = lazy(() => import("@views/SeasonTest/Test/"))
+const SeasonTestQuestion = lazy(() => import("@views/SeasonTest/Question/"))
+const AddStudentSeason = lazy(() => import("@views/SeasonTest/Test/AddStudent/"))
+const TestReport = lazy(() => import("@views/SeasonTest/Report/"))
+
+// graduate challenge
+const GraduateQuestion = lazy(() => import("@views/GraduateTest/Question/"))
+const GraduateTest = lazy(() => import("@views/GraduateTest/Test/"))
+const AddStudentGraduate = lazy(() => import("@views/GraduateTest/Test/AddStudent/"))
+
+
 const TestRoutes = [
+    // #region admission challenge
+    // "Asuultyn san" page
+    {
+        path: '/admission-challenge/question/',
+        element: <AdmissionQuestion />
+    },
+
+    // "Online shalgalt" page
+    {
+        path: '/admission-challenge/test/',
+        element: <AdmissionTest/>
+    },
+    // #endregion
+
+    // #region progress challenge
+    // "Asuultyn san" page
+    {
+        path: '/challenge/teacher/',
+        element: <Teacher />
+    },
+    {
+        path: '/challenge/equestion/',
+        element: <EQuestions />
+    },
+
+    // "Online shalgalt" page
     {
         path: '/challenge/challenge/',
         element: <Test />
@@ -29,17 +61,20 @@ const TestRoutes = [
         element: <ShowDetail />
     },
     {
-        path: '/challenge/equestion/',
-        element: <EQuestions />
-    },
-    {
-        path: '/challenge/teacher/',
-        element: <Teacher />
+        path: '/challenge/test/addstudent/:challenge_id/:lesson_id',
+        element: <AddStudent/>
     },
     {
         path: '/challenge/test/',
         element: <Challenge/>
     },
+    {
+        path: 'challenge/exam_schedule/',
+        element: <ExamSchedule/>
+    },
+    // #endregion
+
+    // #region season challenge
     {
         path: '/challenge-question/',
         element: <SeasonTestQuestion/>
@@ -53,17 +88,12 @@ const TestRoutes = [
         element: <TestReport/>
     },
     {
-        path: '/challenge/test/addstudent/:challenge_id/:lesson_id',
-        element: <AddStudent/>
-    },
-    {
         path: '/challenge-season/addstudent/:challenge_id/:lesson_id',
         element: <AddStudentSeason/>
     },
-    {
-        path: 'challenge/exam_schedule/',
-        element: <ExamSchedule/>
-    },
+    // #endregion
+
+    // #region graduate challenge
     {
         path: '/graduate-question/',
         element: <GraduateQuestion/>
@@ -76,6 +106,7 @@ const TestRoutes = [
         path: '/challenge/graduate-test/addstudent/:challenge_id/',
         element: <AddStudentGraduate/>
     },
+    // #endregion
 ]
 
 export default TestRoutes;
