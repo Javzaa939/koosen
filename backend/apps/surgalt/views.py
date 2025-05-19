@@ -5062,7 +5062,7 @@ class QuestionsTitleAPIView(
         # -1  Сэдэвгүй асуултууд
         elif title_id == -1:
             if is_elselt == 'true':
-                challenge_qs = ChallengeQuestions.objects.filter(is_admission=True)
+                challenge_qs = ChallengeQuestions.objects.filter(title__isnull=True,is_admission=True)
             else:
                 challenge_qs = ChallengeQuestions.objects.filter(Q(title__isnull=True))
         else:
@@ -5070,7 +5070,7 @@ class QuestionsTitleAPIView(
                 challenge_qs = ChallengeQuestions.objects.filter(graduate_title=title_id)
             else:
                 if is_elselt == 'true':
-                    challenge_qs = ChallengeQuestions.objects.filter(title__is_admission=True)
+                    challenge_qs = ChallengeQuestions.objects.filter(title=title_id,title__is_admission=True)
                 else:
                     challenge_qs = ChallengeQuestions.objects.filter(title=title_id)
 
