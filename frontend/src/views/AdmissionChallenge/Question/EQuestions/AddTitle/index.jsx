@@ -29,46 +29,42 @@ const validateSchema = Yup.object().shape({
 });
 
 export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle }) {
+    const title = open.editTitle
+    const editId = title.id
 
     const [questionList, setQuestionList] = useState([])
-    const [lessonOption, setLessonOption] = useState([])
     const [isMapRendering, setIsMapRendering] = useState(false)
     const { control, handleSubmit, formState: { errors }, setValue } = useForm(validate(validateSchema))
 
     const questionAPI = useApi().challenge.question
-    const lessonApi = useApi().study.lessonStandart
     const { fetchData, Loader, isLoading } = useLoader({})
 
     const { t } = useTranslation()
 
-    useEffect(
-        () => {
-            if (open.editId) {
-                getOneTitle()
-            } else {
-                getAllQuestoin()
-            }
-        },
-        []
-    )
+    useEffect(() => {
+        if (editId) getOneTitle()
+        else getAllQuestoin()
+    }, [])
 
     async function getOneTitle() {
-        const { success, data } = await fetchData(questionAPI.getOneTitle(open.editId))
+        const { success, data: apiResult } = await fetchData(questionAPI.getOneTitle(editId))
         if (success) {
-            setValue("questions", data.questions)
-            setValue("name", data.title.name)
-            setValue("lesson", data.title.lesson)
-            setQuestionList(data.other_questions)
+            const questions = apiResult?.results
+            setValue("questions", questions)
+            setValue("name", title?.name)
+            const questionsIds = questions.map(item=>item.id)
+            getAllQuestoin(questionsIds)
         }
     }
 
-    async function getAllQuestoin() {
+    async function getAllQuestoin(excludingQuestionIds) {
         // to show loader while mapping is processing. because it can be longer then fetchData loading
         setIsMapRendering(true)
 
-        const { success, data } = await fetchData(questionAPI.getTestList(true))
+        const { success, data } = await fetchData(questionAPI.getTestList(CHALLENGE_TYPE === CHALLENGE_TYPE_ADMISSION))
         if (success) {
-            setQuestionList(data)
+            if (Array.isArray(excludingQuestionIds)) setQuestionList(data.filter(v => !excludingQuestionIds.includes(v.id)))
+            else setQuestionList(data)
             setIsMapRendering(false)
         }
     }
@@ -77,11 +73,11 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle })
         datas['questions'] = datas['questions']?.map(v => v.id)
         datas['other_questions'] = questionList.map(v => v.id)
         datas['is_admission'] = CHALLENGE_TYPE === CHALLENGE_TYPE_ADMISSION
-        const { success, data } = await fetchData(open.editId ? questionAPI.putTitle(open.editId, datas) : questionAPI.postTitle(datas))
+        const { success, data } = await fetchData(editId ? questionAPI.putTitle(editId, datas) : questionAPI.postTitle(datas))
         if (success) {
             getAllTitle()
             setActiveTitle(0)
-            setOpen({ type: false, editId: null })
+            setOpen({ type: false, editTitle: null })
         }
     }
 
@@ -98,7 +94,7 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle })
         <>
             <Modal
                 isOpen={open.type}
-                toggle={() => { setOpen({ type: false, editId: null }) }}
+                toggle={() => { setOpen({ type: false, editTitle: null }) }}
                 className='sidebar-xl'
                 modalClassName='modal-slide-in custom-80'
                 contentClassName='p-0'
@@ -109,7 +105,7 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle })
                     style={{ position: "relative" }}
                 >
                     <div>
-                        <h4 className='mb-0'>Багц асуулт {open.editId ? "засах" : "нэмэх"}</h4>
+                        <h4 className='mb-0'>Багц асуулт {editId ? "засах" : "нэмэх"}</h4>
                     </div>
                 </ModalHeader>
                 <ModalBody className="w-100 h-100 ">
@@ -184,7 +180,7 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle })
                                         {isMapRendering && Loader}
                                         <ul className='border border-2 rounded p-25' style={{ listStyle: "none" }}>
                                             {
-                                                questionList.map((question, index) => {
+                                                questionList?.map((question, index) => {
                                                     return (
                                                         <li className='py-25 px-25 d-flex justify-content-between align-items-center' key={index}>
                                                             <div>
@@ -211,7 +207,7 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle })
 
                         <Col md={12}>
                             <Button type='submit' className='me-1' color='primary' size='sm'>Хадгалах</Button>
-                            <Button color='primary' outline size='sm' onClick={() => { setOpen({ type: false, editId: null }) }}>Буцах</Button>
+                            <Button color='primary' outline size='sm' onClick={() => { setOpen({ type: false, editTitle: null }) }}>Буцах</Button>
                         </Col>
                     </Row>
 

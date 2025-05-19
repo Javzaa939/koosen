@@ -22,7 +22,7 @@ import { CHALLENGE_TYPE_ADMISSION } from "../../helpers";
 
 const EQuestions = ({ teacher_id, title_id, is_season }) => {
     const [datas, setDatas] = useState([]);
-    const [titleModal, setTitleModal] = useState({ type: false, editId: null })
+    const [titleModal, setTitleModal] = useState({ type: false, editTitle: null })
     const [activeTitle, setActiveTitle] = useState(title_id)
 
     const { t } = useTranslation();
@@ -71,7 +71,7 @@ const EQuestions = ({ teacher_id, title_id, is_season }) => {
                                                 t('Асуултууд багцлагдсан сэдвүүд')
                                             }
                                         </CardTitle>
-                                        <Button className="px-50 py-25" color="primary" outline onClick={() => { setTitleModal({ type: true, editId: null }) }} size="sm">
+                                        <Button className="px-50 py-25" color="primary" outline onClick={() => { setTitleModal({ type: true, editTitle: null }) }} size="sm">
                                             <PlusCircle size={16} />
                                         </Button>
                                     </Col>
@@ -113,7 +113,7 @@ const EQuestions = ({ teacher_id, title_id, is_season }) => {
                                                             }
                                                         </div>
                                                         <div className="">
-                                                            <Edit className="text-info cursor-pointer me-50" size={13} onClick={() => { setTitleModal({ type: true, editId: title.id }) }} />
+                                                            <Edit className="text-info cursor-pointer me-50" size={13} onClick={() => { setTitleModal({ type: true, editTitle: title }) }} />
                                                             <Trash className="text-danger cursor-pointer" size={14} onClick={() => {
                                                                 showWarning({
                                                                     header: {

@@ -1644,6 +1644,7 @@ function useApi(isDisplay=false) {
 				getTitle: (lesson='', is_season=false, teacher_id=0, challengeType='') => instance.get(`learning/questions/title/list/${teacher_id}/?lesson=${lesson}&season=${is_season}&challengeType=${challengeType}`),
 				getLevel: (lesson='') => instance.get(`learning/questions/level/list/?lesson=${lesson}`),
 				postTitle: (datas) => instance.post(`learning/questions/title/`, datas),
+				putTitle: (id, datas) => instance.put(`learning/questions/title/${id}/`, datas),
 				postTestQuestions: (data) =>
 					instance.post(`learning/questions/test/?year=${cyear_name}&season=${cseason_id}`, data),
 				getTestList: (is_admission=false) => {
