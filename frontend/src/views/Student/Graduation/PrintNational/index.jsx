@@ -121,7 +121,7 @@ export default function PrintNational()
     // <span style={{ fontFamily: 'CMSUB', fontSize: '25px' }}>{data?.student?.group?.join_year?.substring(0, 4)} - {data?.lesson_year?.substring(5, 9)}</span> ᠣᠨ ᠳ᠋ᠤ
 
     return (
-        <div className='vh-100 position-relative' style={{ fontFamily: 'mongolianScript', fontSize: '16px', padding: '120px 120px 95px 260px' }}>
+        <div className='vh-100 position-relative bg-white' style={{ fontFamily: 'mongolianScript', fontSize: '16px', padding: '120px 120px 95px 260px' }}>
             {isLoading && Loader}
 
             <div className='d-flex justify-content-between h-100 ms-3' >
