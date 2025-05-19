@@ -5558,9 +5558,9 @@ class QuestionExcelAPIView(generics.GenericAPIView, mixins.ListModelMixin):
         kind = self.KIND_MAP.get(kind_str)
         level = self.LEVEL_MAP.get(level_str)
         if graduate_title:
-            level = self.LEVEL_MAP.get(level_str)
+            level = self.LEVEL_MAP.get(level_str.capitalize)
         else:
-            level = self.LEVEL_MAP_SEASON.get(level_str)
+            level = self.LEVEL_MAP_SEASON.get(level_str.capitalize())
 
         # max_choice зөв хариулт хэд байгаагаас
         max_choice_count = len(correct_answer_index.split()) if kind == 2 else 1
