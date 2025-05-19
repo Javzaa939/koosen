@@ -19,8 +19,8 @@ import * as Yup from "yup";
 import useLoader from '@hooks/useLoader';
 import useApi from '@hooks/useApi';
 
-import Select from 'react-select'
-import classnames from 'classnames'
+// import Select from 'react-select'
+// import classnames from 'classnames'
 import { CHALLENGE_TYPE, CHALLENGE_TYPE_ADMISSION } from '@src/views/AdmissionChallenge/helpers';
 
 const validateSchema = Yup.object().shape({
@@ -30,7 +30,7 @@ const validateSchema = Yup.object().shape({
 
 export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle }) {
     const title = open.editTitle
-    const editId = title.id
+    const editId = open.editTitle ? title.id : ''
 
     const [questionList, setQuestionList] = useState([])
     const [isMapRendering, setIsMapRendering] = useState(false)
