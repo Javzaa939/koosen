@@ -5,6 +5,7 @@ import { Eye, Edit, X, Book, Paperclip, Trash, Trash2, PlusCircle, PlusSquare, P
 import useModal from "@hooks/useModal"
 import { formatDate } from '@utils'
 import { Badge, UncontrolledTooltip } from 'reactstrap';
+import { EXAM_ROOT_PAGE } from '../../helpers';
 
 export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, handleDelete, handleShow, handleSend, handleEditModal, handleExamModal) {
 
@@ -31,20 +32,6 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
             center: true,
         },
         {
-            name: `${'Хичээл'}`,
-            selector: (row) => row?.lesson?.name,
-            minWidth: "15%",
-            wrap: true,
-            center: true,
-        },
-        {
-            name: `${'Багш'}`,
-            selector: (row) => row?.teacher_name,
-            minWidth: "15%",
-            wrap: true,
-            center: true,
-        },
-        {
             name: `${'Эхлэх хугацаа'}`,
             selector: (row) => formatDate(row?.start_date, 'YYYY-MM-DD HH:mm'),
             minWidth: "15%",
@@ -57,21 +44,18 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
             center: true,
         },
         {
-            name: <span className='text-center' style={{ marginTop: '3px', marginBottom: '3px' }}>Шалгалт өгсөн оюутны тоо</span>,
+            name: <span className='text-center' style={{ marginTop: '3px', marginBottom: '3px' }}>Шалгалт өгсөн шалгуулагчийн тоо</span>,
             selector: (row) => row?.is_student,
             minWidth: "10%",
             center: true,
         },
-        // {
-        //     name: `${'Илгээсэн төлөв'}`,
-        //     selector: (row) => {
-        // 		if (row?.send_type) {
-        // 			return request_flag_color(row?.send_type)
-        // 		} else ''
-        // 	},
-        //     minWidth: "100px",
-        // },
-        // Устгах үед шалгалтын эхлэх хугацаа эхлээд дуусах хугацаа болоогүй үед устгах боломжгүй
+        {
+            name: `${'Үүсгэсэн хэрэглэгч'}`,
+            selector: (row) => row?.teacher_name,
+            minWidth: "15%",
+            wrap: true,
+            center: true,
+        },
         {
             name: "Үйлдэл",
             center: true,
@@ -111,7 +95,7 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
                                 onClick={() => { handleShow(row) }}
                                 id={`complaintListDatatableShow${row?.id}`}
                                 className='me-1'
-                                href={`/challenge/test/addstudent/${row?.id}/${row?.lesson?.id}`}
+                                href={`/${EXAM_ROOT_PAGE}/test/addstudent/${row?.id}`}
                             >
                                 <Badge color="light-info"><Book width={"10px"} /></Badge>
                             </a>
@@ -154,7 +138,7 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
                                     header: {
                                         title: `Шалгалт устгах`,
                                     },
-                                    question: `Та энэ асуултыг шалгалтыг устгахдаа итгэлтэй байна уу? Шалгалтын өгсөн оюутнуудын хариулт хамт устахыг анхаарна уу`,
+                                    question: `Та энэ асуултыг шалгалтыг устгахдаа итгэлтэй байна уу? Шалгалтын өгсөн шалгуулагчдын хариулт хамт устахыг анхаарна уу`,
                                     onClick: () => handleDelete(row.id),
                                     btnText: 'Устгах',
                                 })}
@@ -182,7 +166,7 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
                                 onClick={() => { handleShow(row) }}
                                 id={`complaintResultDetail${row?.id}`}
                                 className='me-1'
-                                href={`/challenge/detail/${row?.id}/`}
+                                href={`/${EXAM_ROOT_PAGE}/detail/${row?.id}/`}
                             >
                                       <Badge color="secondary"><Paperclip width={"10px"} /></Badge>
                             </a>

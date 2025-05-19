@@ -3,6 +3,8 @@ import { lazy } from "react";
 // admission challenge
 const AdmissionQuestion = lazy(() => import("@views/AdmissionChallenge/Question"))
 const AdmissionTest = lazy(() => import("@views/AdmissionChallenge/Test"))
+const AdmissionAddStudent = lazy(() => import("@views/AdmissionChallenge/Test/AddStudent/"))
+const AdmissionShowDetail = lazy(() => import("@views/AdmissionChallenge/Test/DetailShow"))
 
 // progress challenge
 const Test = lazy(() => import("@views/Test/"))
@@ -37,6 +39,14 @@ const TestRoutes = [
     {
         path: '/admission-challenge/test/',
         element: <AdmissionTest/>
+    },
+    {
+        path: '/admission-challenge/test/addstudent/:challenge_id',
+        element: <AdmissionAddStudent/>
+    },
+    {
+        path: '/admission-challenge/detail/:detid',
+        element: <AdmissionShowDetail />
     },
     // #endregion
 

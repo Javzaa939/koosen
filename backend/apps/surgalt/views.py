@@ -84,7 +84,7 @@ from core.models import (
 from lms.models import get_image_path
 from lms.models import get_choice_image_path
 
-from elselt.serializer import MentalUserSerializer
+from elselt.serializer import ElseltApproveSerializer, MentalUserSerializer
 
 from .serializers import ChallengeGroupsSerializer, ChallengeProfessionsSerializer, ChallengeReport2StudentsDetailSerializer, ChallengeReport2StudentsSerializer, LessonStandartSerializer, ChallengeQuestionsAnswersSerializer, ChallengeReport4Serializer
 from .serializers import LessonTitlePlanSerializer
@@ -5055,7 +5055,10 @@ class QuestionsTitleAPIView(
 
         # # 0  Бүх асуулт
         if title_id == 0:
-            challenge_qs = ChallengeQuestions.objects.all()
+            if is_elselt == 'true':
+                challenge_qs = ChallengeQuestions.objects.filter(is_admission=True)
+            else:
+                challenge_qs = ChallengeQuestions.objects.all()
         # -1  Сэдэвгүй асуултууд
         elif title_id == -1:
             if is_elselt == 'true':
@@ -5159,7 +5162,7 @@ class QuestionsTitleListAPIView(
 
         lesson = request.query_params.get('lesson')
         season = request.query_params.get('season')
-        exam_type = request.query_params.get('examType')
+        challenge_type = request.query_params.get('challengeType')
 
         if lesson:
             self.queryset = self.queryset.filter(lesson=lesson)
@@ -5169,7 +5172,7 @@ class QuestionsTitleListAPIView(
         else:
             self.queryset = self.queryset.filter(is_season=True)
 
-        if exam_type == 'admission':
+        if challenge_type == f'{Challenge.ADMISSION}':
             self.queryset = self.queryset.filter(is_admission=True)
 
         question_sub = ChallengeQuestions.objects.filter(title=OuterRef('id')).values('title').annotate(count=Count('id')).values('count')
@@ -5750,9 +5753,11 @@ class ChallengeSedevCountAPIView(
                         level=level,
                     )
                 else:
+                    if challenge.challenge_type not in [Challenge.SORIL1,Challenge.ADMISSION]:
+                        level = challenge.level
                     challenge_questions = ChallengeQuestions.objects.filter(
                         title=lesson_title,
-                        level=challenge.level,
+                        level=level,
                         title__lesson=challenge.lesson,
                         title__is_season=(challenge.challenge_type == Challenge.SEMESTR_EXAM)
                     )
@@ -5789,8 +5794,13 @@ class ChallengeSedevCountAPIView(
         challenges = Challenge.objects.filter(questions=question).first()
         if challenges:
             challenges.questions.remove(question)
-            question.title.clear()
-            question.save()
+
+            """
+            NOTE why remove from title? this only for removing challenge connection or not?
+            it will remove this question from all titles if it is uncommented, is it okey?
+            """
+            # question.title.clear()
+            # question.save()
             challenges.save()
 
         return request.send_info("INF_003")
@@ -5859,6 +5869,114 @@ class ChallengeLevelCountAPIView(
             challenges.save()
 
         return request.send_info("INF_003")
+
+
+@permission_classes([IsAuthenticated])
+class ChallengeAddAdmissionUserAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin
+):
+    queryset = AdmissionUserProfession.objects.all()
+    serializer_class = ElseltApproveSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['user__first_name', 'user__register', 'user__email', 'user__code', 'user__last_name', 'user__mobile']
+
+    def get(self, request):
+        challenge = request.query_params.get('challenge')
+        challenge_student_all = Challenge.objects.get(id=challenge).admission_user.all().values_list('id', flat=True)
+        self.queryset = self.queryset.filter(id__in=list(challenge_student_all))
+        datas = self.list(request).data
+        return request.send_data(datas)
+
+    @has_permission(must_permissions=['lms-exam-update'])
+    def put(self, request):
+        data = request.data
+        challenge_id = data.get("challenge")
+        student_code = data.get("student")
+
+        if student_code is None:
+            return request.send_error("ERR_003", 'Элсэгчийн код хоосон байна!')
+
+        try:
+            student = AdmissionUserProfession.objects.filter(user__register=student_code).first()
+
+            if student:
+                challenge = Challenge.objects.filter(id=challenge_id).first()
+
+                if challenge:
+                    check = challenge.admission_user.filter(id=student.id)
+
+                    if check:
+                        return request.send_error("ERR_003",f'"{student_code}" кодтой элсэгч шалгалтанд үүссэн байна.')
+
+                    challenge.admission_user.add(student)
+                    challenge.save()
+                    return request.send_info("INF_002")
+                else:
+                    return request.send_error("ERR_002")
+            else:
+                return request.send_error("ERR_003",f'"{student_code}" кодтой элсэгч олдсонгүй!')
+        except Exception as e:
+            print(e)
+            return request.send_error("ERR_002")
+
+    @has_permission(must_permissions=['lms-exam-update'])
+    def delete(self, request, pk, student):
+        try:
+            challenge = Challenge.objects.get(id=pk)
+            student = AdmissionUserProfession.objects.get(pk=student)
+            challenge.admission_user.remove(student)
+            challenge.save()
+
+            return request.send_info("INF_003")
+
+        except Exception as e:
+            print(e)
+            return request.send_error("ERR_002")
+
+
+@permission_classes([IsAuthenticated])
+class AdmissionChallengeAddKindAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+):
+
+    queryset = Challenge.objects.all()
+    serializer_class = ChallengeSerializer
+
+    @has_permission(must_permissions=['lms-exam-update'])
+    def put(self, request, pk=None):
+        datas = request.data
+        select_ids = datas.get('admission')
+
+        if not select_ids:
+            return request.send_error("ERR_003", 'Элсэлтийг сонгоно уу!')
+        qs_admission_user = AdmissionUserProfession.objects.filter(
+            profession__admission__is_store=False,
+            state=AdmissionUserProfession.STATE_SEND
+        )
+
+        qs_admission_user = qs_admission_user.filter(profession__admission__in=select_ids)
+
+        try:
+            with transaction.atomic():
+                challenge = Challenge.objects.get(id=pk)
+
+                for admission_user in qs_admission_user:
+                    challenge.admission_user.add(admission_user)
+                challenge.save()
+        except Exception:
+            traceback.print_exc()
+            return request.send_error("ERR_002")
+        return request.send_info("INF_002")
 
 
 @permission_classes([IsAuthenticated])

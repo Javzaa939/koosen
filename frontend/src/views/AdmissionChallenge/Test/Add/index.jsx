@@ -23,7 +23,7 @@ import useLoader from '@hooks/useLoader';
 import Flatpickr from 'react-flatpickr';
 import '@styles/react/libs/flatpickr/flatpickr.scss';
 
-const Addmodal = ({ open, handleModal, refreshDatas, select_datas, editData }) => {
+const Addmodal = ({ open, handleModal, refreshDatas, select_datas, editData, examType }) => {
 
     const { control, handleSubmit, setError, setValue, formState: { errors, title, lesson, duration, description,question_count} } = useForm(validate(validateSchema))
 	const { fetchData } = useLoader({ isFullScreen: true });
@@ -52,6 +52,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, select_datas, editData }) =
 
         cdata['start_date'] = new Date(startPicker)
         cdata['end_date'] = new Date(endPicker)
+        cdata['challenge_type'] = examType
         cdata = convertDefaultValue(cdata)
 
         if (editData !== undefined) {
@@ -160,39 +161,6 @@ const Addmodal = ({ open, handleModal, refreshDatas, select_datas, editData }) =
                                 />
                             {description}
                             {errors.description && <FormFeedback className='d-block'>{t(errors.description.message)}</FormFeedback>}
-                        </Col>
-                        <Col md={6} className='mt-50'>
-                            <Label className="form-label" for="lesson">
-                                {t('Хичээл')}
-                            </Label>
-                            <Controller
-                                control={control}
-                                defaultValue=''
-                                name="lesson"
-                                render={({ field: { value, onChange} }) => {
-                                    return (
-                                        <Select
-                                            id="lesson"
-                                            name="lesson"
-                                            isClearable
-                                            classNamePrefix='select'
-                                            className='react-select'
-                                            placeholder={t(`-- Сонгоно уу --`)}
-                                            value={select_datas.find((c) => c.id === value)}
-                                            options={select_datas || []}
-                                            noOptionsMessage={() => 'Хоосон байна'}
-                                            onChange={(val) => {
-                                                onChange(val?.id || '')
-                                            }}
-                                            styles={ReactSelectStyles}
-                                            getOptionValue={(option) => option.id}
-                                            getOptionLabel={(option) => option.code + ' ' + option.name}
-                                        />
-                                    )
-                                }}
-                            ></Controller>
-                            {lesson}
-                            {errors.lesson && <FormFeedback className='d-block'>{t(errors.lesson.message)}</FormFeedback>}
                         </Col>
                         <Col md={6} className='mt-50'>
                             <Label className="form-label" for="duration">

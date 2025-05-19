@@ -21,21 +21,21 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleDelete)
 			center: true,
         },
         {
-            name: `${'Оюутны код'}`,
-            selector: (row) => row?.code,
+            name: `${'Регистрийн дугаар'}`,
+            selector: (row) => row?.user.register,
             minWidth: "100px",
             center: true,
         },
         {
             name: `${'Овог'}`,
-            selector: (row) => row?.last_name,
+            selector: (row) => row?.user.last_name,
             minWidth: "200px",
             wrap:true,
             center: true,
         },
         {
             name: `${'Нэр'}`,
-            selector: (row) => row?.first_name,
+            selector: (row) => row?.user.first_name,
             minWidth: "200px",
             wrap:true,
             center: true,
@@ -49,9 +49,9 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleDelete)
                         className='ms-1'
                         onClick={() => showWarning({
                             header: {
-                                title: `Оюутныг шалгалтнаас хасах`,
+                                title: `Шалгуулагчийг шалгалтнаас хасах`,
                             },
-                            question: `Та энэ оюутныг тухайн шалгалтнаас хасахдаа итгэлтэй байна уу?`,
+                            question: `Та энэ шалгуулагчийг тухайн шалгалтнаас хасахдаа итгэлтэй байна уу?`,
                             onClick: () => handleDelete(row?.id),
                             btnText: 'Устгах',
                         })}

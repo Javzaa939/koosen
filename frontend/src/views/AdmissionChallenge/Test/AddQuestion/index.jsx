@@ -18,6 +18,7 @@ import {
 import Select from 'react-select';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
+import { CHALLENGE_TYPE_ADMISSION } from '../../helpers';
 
 const AddQuestion = ({ open, handleModal, lesson, refreshDatas, challenge, refreshQuestionData, status}) => {
 
@@ -35,7 +36,7 @@ const AddQuestion = ({ open, handleModal, lesson, refreshDatas, challenge, refre
     const challengesAPI = useApi().challenge
 
     async function getSelectDatas() {
-        const { success, data } = await fetchData(challengeAPI.getTitle(lesson))
+        const { success, data } = await fetchData(challengeAPI.getTitle('', false, 0, CHALLENGE_TYPE_ADMISSION))
         if (success) {
             setSelectDatas(data)
         }
