@@ -219,9 +219,11 @@ class LessonStandartAPIView(
 
         self.perform_update(serializer)
         try:
+            old_teacher_qs = Lesson_to_teacher.objects.filter(lesson=pk)
+            old_teacher_ids = Lesson_to_teacher.objects.filter(lesson=pk).values_list('teacher', flat=True)
+
             if teachers_data:
                 teacher_ids = [teacher.get('id') for teacher in teachers_data]
-                old_teacher_ids = Lesson_to_teacher.objects.filter(lesson=pk).values_list('teacher', flat=True)
 
                 # Шинээр нэмэгдсэн багш
                 add_ids = [item for item in teacher_ids if item not in old_teacher_ids]
@@ -229,7 +231,6 @@ class LessonStandartAPIView(
                 # Хуучин багшийг хасах
                 remove_ids = [item for item in old_teacher_ids if item not in teacher_ids]
 
-                old_teacher_qs = Lesson_to_teacher.objects.filter(lesson=pk)
                 if remove_ids or add_ids:
                     if len(remove_ids) > 0:
                         teacher_qs = old_teacher_qs.filter(teacher__in=remove_ids)
@@ -238,7 +239,7 @@ class LessonStandartAPIView(
                         if len(score_types) > 0:
                             score_types.delete()
 
-                        old_teacher_qs = old_teacher_qs.filter(teacher__in=remove_ids).delete()
+                        old_teacher_qs.filter(teacher__in=remove_ids).delete()
 
                     # Шинээр нэмж байгаа бүрээр нь нэмэх
                     for teacher_id in add_ids:
@@ -246,6 +247,17 @@ class LessonStandartAPIView(
                             lesson_id=pk,
                             teacher_id=teacher_id
                         )
+            else:
+                # Бүх багшаа устгах үед
+                if old_teacher_ids:
+                    teacher_qs = old_teacher_qs.filter(teacher__in=old_teacher_ids)
+                    # Дүнгийн төрөл
+                    score_types = Lesson_teacher_scoretype.objects.filter(lesson_teacher__in=teacher_qs)
+                    if len(score_types) > 0:
+                        score_types.delete()
+
+                    old_teacher_qs.filter(teacher__in=old_teacher_ids).delete()
+
         except Exception as e:
             print(e)
             return request.send_info("INF_002", 'Багшийн системд дүн оруулсан учраас устгах боломжгүй')
