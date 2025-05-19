@@ -38,7 +38,9 @@ function AddStudent() {
     const { isLoading, Loader, fetchData } = useLoader({});
     const { fetchData: fetchQuestion } = useLoader({});
     const { fetchData: fetchStudents, isLoading: isLoadingExaminee } = useLoader({});
-    const { control, handleSubmit, setError, formState: { errors }, } = useForm({});
+    const { control, handleSubmit, setError, formState: { errors }, watch, clearErrors } = useForm({});
+    const formAll = watch()
+    const selectedAdmissionIds = Array.isArray(formAll?.admission) ? formAll.admission.map(item => item.id) : []
     const { challenge_id, lesson_id } = useParams();
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -105,6 +107,38 @@ function AddStudent() {
     useEffect(() => {
         getQuestionTableData()
     }, [])
+
+	// #region Элсэлтийн жагсаалт авах
+	const [admop, setAdmop] = useState([])
+	const admissionApi = useApi().elselt
+
+	async function getAdmission() {
+		const { success, data } = await fetchData(admissionApi.getAll())
+		if (success) {
+			setAdmop(data)
+		}
+	}
+
+    async function onSubmit(cdata) {
+        cdata['admission'] = selectedAdmissionIds
+        cdata = convertDefaultValue(cdata)
+        const { success, error } = await fetchData(challengeAPI.admission.putTestKind(cdata, challenge_id))
+        if (success) {
+            getDatas()
+        }
+        else {
+            /** Алдааны мессэжийг input дээр харуулна */
+            for (let key in error) {
+                setError(error[key].field, { type: 'custom', message: error[key].msg });
+            }
+            clearErrors()
+        }
+    }
+
+    useEffect(() => {
+        getAdmission()
+    }, [])
+    // #endregion
 
     function handleFilter(e) {
         const value = e.target.value.trimStart();
@@ -176,7 +210,54 @@ function AddStudent() {
                             </CardTitle>
                         </CardHeader>
                         <Row className="m-0">
-                            <Col md={12} className="p-0">
+                            <Col md={7} className="mx-0 p-0">
+                                <Form onSubmit={handleSubmit(onSubmit)}>
+                                    <div className='added-cards mb-0 text-center'>
+                                        <div className={classnames('cardMaster p-1 rounded border')}>
+                                            <div className='content-header mb-2 mt-1'>
+                                                <h4 className='content-header'>{t('Элсэлтийг сонгоно уу')}</h4>
+                                            </div>
+                                            <Row className='mt-1'>
+                                                <Controller
+                                                    defaultValue=''
+                                                    control={control}
+                                                    name="admission"
+                                                    render={({ field }) => {
+                                                        return (
+                                                            <Col md={12} className="my-2">
+                                                                <Select
+                                                                    {...field}
+                                                                    id={field.name}
+                                                                    classNamePrefix='select'
+                                                                    isClearable
+                                                                    className={classnames('react-select')}
+                                                                    isLoading={isLoading}
+                                                                    placeholder={t('-- Сонгоно уу --')}
+                                                                    options={admop || []}
+                                                                    noOptionsMessage={() => t('Хоосон байна.')}
+                                                                    styles={ReactSelectStyles}
+                                                                    getOptionValue={(option) => option.id}
+                                                                    getOptionLabel={(option) => option.lesson_year + ' ' + option.name}
+                                                                    isMulti
+                                                                />
+                                                                {errors[field.name] && <FormFeedback className='d-block'>{t(errors[field.name].message)}</FormFeedback>}
+                                                            </Col>
+                                                        );
+                                                    }}
+                                                />
+                                            </Row>
+                                            <Button
+                                                className="me-0 mt-1"
+                                                color="primary"
+                                                type="submit"
+                                            >
+                                                {t("Хадгалах")}
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </Form>
+                            </Col>
+                            <Col md={5} className="p-0">
                                 <Form onSubmit={handleSubmit(onSubmitStudent)}>
                                     <div className='added-cards mb-0'>
                                         <div className={classnames('cardMaster p-1 rounded border')}>
@@ -184,7 +265,7 @@ function AddStudent() {
                                                 <h4 className='content-header'>{t('Шалгуулагчийг кодоор/регистрийн дугаараар сонгох')}</h4>
                                             </div>
                                             <Row className="justify-content-center">
-                                                <Col md={12} lg={6} className="my-2">
+                                                <Col md={12} className="my-2">
                                                     <Controller
                                                         defaultValue=''
                                                         control={control}

@@ -89,6 +89,7 @@ urlpatterns = [
 
     path('challenge/add/admission-user/', ChallengeAddAdmissionUserAPIView.as_view()),
 	path('challenge/add/admission-user/<int:pk>/<int:student>/', ChallengeAddAdmissionUserAPIView.as_view()),
+    path('challenge/add/admission-user/addKind/<int:pk>/', AdmissionChallengeAddKindAPIView.as_view()),
 
     path('challenge/student/', ChallengeSearchStudentAPIView.as_view()),
 

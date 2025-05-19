@@ -5894,6 +5894,7 @@ class ChallengeAddAdmissionUserAPIView(
         datas = self.list(request).data
         return request.send_data(datas)
 
+    @has_permission(must_permissions=['lms-exam-update'])
     def put(self, request):
         data = request.data
         challenge_id = data.get("challenge")
@@ -5925,6 +5926,7 @@ class ChallengeAddAdmissionUserAPIView(
             print(e)
             return request.send_error("ERR_002")
 
+    @has_permission(must_permissions=['lms-exam-update'])
     def delete(self, request, pk, student):
         try:
             challenge = Challenge.objects.get(id=pk)
@@ -5937,6 +5939,44 @@ class ChallengeAddAdmissionUserAPIView(
         except Exception as e:
             print(e)
             return request.send_error("ERR_002")
+
+
+@permission_classes([IsAuthenticated])
+class AdmissionChallengeAddKindAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+):
+
+    queryset = Challenge.objects.all()
+    serializer_class = ChallengeSerializer
+
+    @has_permission(must_permissions=['lms-exam-update'])
+    def put(self, request, pk=None):
+        datas = request.data
+        select_ids = datas.get('admission')
+
+        if not select_ids:
+            return request.send_error("ERR_003", 'Элсэлтийг сонгоно уу!')
+        qs_admission_user = AdmissionUserProfession.objects.filter(
+            profession__admission__is_store=False,
+            state=AdmissionUserProfession.STATE_SEND
+        )
+
+        qs_admission_user = qs_admission_user.filter(profession__admission__in=select_ids)
+
+        try:
+            with transaction.atomic():
+                challenge = Challenge.objects.get(id=pk)
+
+                for admission_user in qs_admission_user:
+                    challenge.admission_user.add(admission_user)
+                challenge.save()
+        except Exception:
+            traceback.print_exc()
+            return request.send_error("ERR_002")
+        return request.send_info("INF_002")
 
 
 @permission_classes([IsAuthenticated])

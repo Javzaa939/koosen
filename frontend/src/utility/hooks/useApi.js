@@ -1727,6 +1727,7 @@ function useApi(isDisplay=false) {
 				getAddStudent: (page, limit, search,challenge) => instance.get(`learning/challenge/add/admission-user/?page=${page}&limit=${limit}&search=${search}&challenge=${challenge}`),
 				putTest: (data) => instance.put(`learning/challenge/add/admission-user/`, data),
 				deleteStudent: (student, challenge) => instance.delete(`learning/challenge/add/admission-user/${challenge}/${student}/`),
+				putTestKind: (data, id) => instance.put(`learning/challenge/add/admission-user/addKind/${id}/`, data),
 			},
 		},
 
