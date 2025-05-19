@@ -32,20 +32,6 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
             center: true,
         },
         {
-            name: `${'Хичээл'}`,
-            selector: (row) => row?.lesson?.name,
-            minWidth: "15%",
-            wrap: true,
-            center: true,
-        },
-        {
-            name: `${'Багш'}`,
-            selector: (row) => row?.teacher_name,
-            minWidth: "15%",
-            wrap: true,
-            center: true,
-        },
-        {
             name: `${'Эхлэх хугацаа'}`,
             selector: (row) => formatDate(row?.start_date, 'YYYY-MM-DD HH:mm'),
             minWidth: "15%",
@@ -63,16 +49,13 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
             minWidth: "10%",
             center: true,
         },
-        // {
-        //     name: `${'Илгээсэн төлөв'}`,
-        //     selector: (row) => {
-        // 		if (row?.send_type) {
-        // 			return request_flag_color(row?.send_type)
-        // 		} else ''
-        // 	},
-        //     minWidth: "100px",
-        // },
-        // Устгах үед шалгалтын эхлэх хугацаа эхлээд дуусах хугацаа болоогүй үед устгах боломжгүй
+        {
+            name: `${'Үүсгэсэн хэрэглэгч'}`,
+            selector: (row) => row?.teacher_name,
+            minWidth: "15%",
+            wrap: true,
+            center: true,
+        },
         {
             name: "Үйлдэл",
             center: true,
