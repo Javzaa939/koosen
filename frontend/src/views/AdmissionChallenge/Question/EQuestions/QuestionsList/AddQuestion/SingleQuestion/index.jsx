@@ -19,6 +19,7 @@ import empty from "@src/assets/images/empty-image.jpg"
 import Answers from './Answers';
 import useLoader from '@src/utility/hooks/useLoader';
 import useApi from '@src/utility/hooks/useApi';
+import { get_levelseasons } from '@src/utility/Utils';
 
 export default function SingleQuestion(props) {
     const { fieldIndex, fieldName, fieldAppend, fieldRemove, } = props
@@ -66,7 +67,9 @@ export default function SingleQuestion(props) {
     }
 
 	async function getDifficultyLevels() {
-		const { success, data } = await fetchData(challengeAPI.getDifficultyLevels())
+		// const { success, data } = await fetchData(challengeAPI.getDifficultyLevels())
+        const success = true
+        const data = get_levelseasons()
 
 		if (success) {
 			setDifficultyLevelsOption(data)
@@ -215,13 +218,15 @@ export default function SingleQuestion(props) {
                                         isClearable
                                         className={classnames('react-select', { 'is-invalid': errors?.[fieldName]?.[fieldIndex]?.['level'] })}
                                         options={difficultyLevelsOption}
-                                        value={difficultyLevelsOption.find((c) => c.value === value) || ''}
+                                        value={difficultyLevelsOption.find((c) => c.id === value) || ''}
                                         placeholder={'-- Сонгоно уу --'}
                                         noOptionsMessage={() => 'Хоосон байна.'}
                                         onChange={(val) => {
-                                            onChange(val?.value || '')
+                                            onChange(val?.id || '')
                                         }}
                                         styles={ReactSelectStyles}
+                                        getOptionValue={(option) => option.id}
+                                        getOptionLabel={(option) => option.name}
                                     />
                                 )}
                             />
