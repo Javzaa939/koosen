@@ -3601,7 +3601,7 @@ class Challenge(models.Model):
     lesson_season = models.ForeignKey(Season, on_delete=models.CASCADE,  null=True)
 
     student = models.ManyToManyField(Student, blank=True, verbose_name="Оюутнууд")
-    admission_user = models.ManyToManyField(to='elselt.AdmissionUserProfession', blank=True, verbose_name="Элсэгчид")
+    elselt_user = models.ManyToManyField(to='elselt.ElseltUser', blank=True, verbose_name="Элсэгчид")
 
     kind = models.IntegerField(choices=KIND_CHOICES, null=False, default=KIND_LESSON, blank=False)
 
