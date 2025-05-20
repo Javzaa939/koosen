@@ -1578,7 +1578,7 @@ function useApi(isDisplay=false) {
 			postAnswer: (data) =>
 				instance.post(`learning/challenge/approve/`, data),
 			timetable : () => instance.get(`learning/challenge/timetable/`),
-			getQuestionList: (id) => instance.get(`learning/challenge/add/question/list/?id=${id}`),
+			getQuestionList: (limit='Бүгд', page=1, id='') => instance.get(`learning/challenge/add/question/list/?page=${page}&limit=${limit}&id=${id}`),
 
 			getAddStudent: (page, limit, search,challenge) => instance.get(`learning/challenge/add/student/?page=${page}&limit=${limit}&search=${search}&challenge=${challenge}`),
 			deleteStudent: (student, challenge) => instance.delete(`learning/challenge/add/student/${challenge}/${student}/`),
