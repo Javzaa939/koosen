@@ -5251,83 +5251,90 @@ class TestQuestionsAPIView(
         return request.send_data(all_list)
 
     def put(self, request, pk):
+        try:
+            request_data = request.data.dict()
+            type = request.query_params.get('type')
+            cdn_urls_to_rollback = []
 
-        request_data = request.data.dict()
-        type = request.query_params.get('type')
+            if type == "question":
+                question_img = request_data['image']
+                request_data = remove_key_from_dict(request_data, [ 'image'])
+                with transaction.atomic():
+                    question_obj = ChallengeQuestions.objects.filter(id=pk).first()
 
-        if type == "question":
-            question_img = request_data['image']
-            request_data = remove_key_from_dict(request_data, [ 'image'])
-            with transaction.atomic():
-                question_obj = ChallengeQuestions.objects.filter(id=pk).first()
+                    if isinstance(question_img, str) != True:
+                        question_img_path = 'challenge'
 
-                if isinstance(question_img, str) != True:
-                    question_img_path = 'challenge'
+                        file_path = create_file_to_cdn(question_img_path, question_img)
+                        cdn_urls_to_rollback.append(file_path)
 
-                    file_path = create_file_to_cdn(question_img_path, question_img)
-
-                    old_image = question_obj.image
-                    question_obj.image = file_path.get('full_path')
-                    question_obj.save()
-                    if old_image:
-                        remove_folder(str(old_image))
+                        old_image = question_obj.image
+                        question_obj.image = file_path.get('full_path')
+                        question_obj.save()
+                        if old_image:
+                            remove_folder(str(old_image))
 
 
-                if isinstance(question_img, str) == True and question_img == '':
-                    old_image = question_obj.image
-                    question_img_path = get_image_path(question_obj)
-                    # Хуучин зураг засах үедээ устгасан бол файл устгана.
-                    question_obj.image = None
-                    question_obj.save()
-                    if old_image:
-                        remove_folder(str(old_image))
+                    if isinstance(question_img, str) == True and question_img == '':
+                        old_image = question_obj.image
+                        question_img_path = get_image_path(question_obj)
+                        # Хуучин зураг засах үедээ устгасан бол файл устгана.
+                        question_obj.image = None
+                        question_obj.save()
+                        if old_image:
+                            remove_folder(str(old_image))
 
-                updated_question_rows = ChallengeQuestions.objects.filter(id=pk).update(
-                    **request_data
-                )
-                data = None
-                if updated_question_rows > 0:
-                    updated_question = ChallengeQuestions.objects.filter(id=pk).first()
-                    ser = dynamic_serializer(ChallengeQuestions, "__all__", 1)
-                    data = ser(updated_question).data
-                return request.send_info('INF_002', data)
+                    updated_question_rows = ChallengeQuestions.objects.filter(id=pk).update(
+                        **request_data
+                    )
+                    data = None
+                    if updated_question_rows > 0:
+                        updated_question = ChallengeQuestions.objects.filter(id=pk).first()
+                        ser = dynamic_serializer(ChallengeQuestions, "__all__", 1)
+                        data = ser(updated_question).data
+                    return request.send_info('INF_002', data)
 
-        else:
-            answer_img = request_data["image"]
-            answer_id = request_data.get('id')
-            request_data = remove_key_from_dict(request_data, ['image', 'id'])
-            with transaction.atomic():
-                answer_obj = QuestionChoices.objects.filter(id=answer_id).first()
-                question_obj = ChallengeQuestions.objects.filter(id=pk).first()
-                if isinstance(answer_img, str) != True:
-                    answer_img_path = 'challenge'
+            else:
+                answer_img = request_data["image"]
+                answer_id = request_data.get('id')
+                request_data = remove_key_from_dict(request_data, ['image', 'id'])
+                with transaction.atomic():
+                    answer_obj = QuestionChoices.objects.filter(id=answer_id).first()
+                    question_obj = ChallengeQuestions.objects.filter(id=pk).first()
+                    if isinstance(answer_img, str) != True:
+                        answer_img_path = 'challenge'
 
-                    file_path = create_file_to_cdn(answer_img_path, answer_img)
+                        file_path = create_file_to_cdn(answer_img_path, answer_img)
+                        cdn_urls_to_rollback.append(file_path)
 
-                    old_image = answer_obj.image
-                    answer_obj.image = file_path.get('full_path')
-                    answer_obj.save()
-                    if old_image:
-                        remove_file_from_cdn(str(old_image))
+                        old_image = answer_obj.image
+                        answer_obj.image = file_path.get('full_path')
+                        answer_obj.save()
+                        if old_image:
+                            remove_file_from_cdn(str(old_image))
 
-                # Delete image
-                if isinstance(answer_img, str) == True and answer_img == '':
-                    old_image = answer_obj.image
-                    answer_img_path = 'challenge'
-                    answer_obj.image = None
-                    answer_obj.save()
-                    if old_image:
-                        remove_file_from_cdn(str(old_image))
+                    # Delete image
+                    if isinstance(answer_img, str) == True and answer_img == '':
+                        old_image = answer_obj.image
+                        answer_img_path = 'challenge'
+                        answer_obj.image = None
+                        answer_obj.save()
+                        if old_image:
+                            remove_file_from_cdn(str(old_image))
 
-                updated_rows = QuestionChoices.objects.filter(id=answer_id).update(**request_data)
-                data = None
-                if updated_rows > 0:
-                    updated_answer = QuestionChoices.objects.filter(id=answer_id).first()
-                    ser = dynamic_serializer(QuestionChoices, "__all__")
-                    data = ser(updated_answer).data
-                    print(data)
-                return request.send_info('INF_002', data)
+                    updated_rows = QuestionChoices.objects.filter(id=answer_id).update(**request_data)
+                    data = None
+                    if updated_rows > 0:
+                        updated_answer = QuestionChoices.objects.filter(id=answer_id).first()
+                        ser = dynamic_serializer(QuestionChoices, "__all__")
+                        data = ser(updated_answer).data
+                    return request.send_info('INF_002', data)
+        except Exception:
+            traceback.print_exc()
 
+            for url in cdn_urls_to_rollback:
+                remove_file_from_cdn(url)
+            return request.send_error('ERR_002')
 
     def post(self, request):
         questions = request.POST.getlist('questions')
@@ -5339,7 +5346,7 @@ class TestQuestionsAPIView(
 
         user = request.user
         teacher = Teachers.objects.filter(user_id=user).first()
-        sid = transaction.savepoint()
+        cdn_urls_to_rollback = []
 
         try:
             with transaction.atomic():
@@ -5391,6 +5398,7 @@ class TestQuestionsAPIView(
                         question_img_path = 'challenge'
 
                         file_path = create_file_to_cdn(question_img_path, question_img)
+                        cdn_urls_to_rollback.append(file_path)
 
                         question_obj.image = file_path.get('full_path')
                         question_obj.save()
@@ -5430,6 +5438,7 @@ class TestQuestionsAPIView(
                                 choice_img_path = 'challenge'
 
                                 file_path = create_file_to_cdn(choice_img_path, choice_img)
+                                cdn_urls_to_rollback.append(file_path)
 
                                 choice_obj.image = file_path.get('full_path')
                                 choice_obj.save()
@@ -5438,12 +5447,12 @@ class TestQuestionsAPIView(
 
                     question_obj.choices.set(choice_ids)
 
-        except Exception as e:
-            print(e)
-            transaction.savepoint_rollback(sid)
+        except Exception:
+            traceback.print_exc()
 
+            for url in cdn_urls_to_rollback:
+                remove_file_from_cdn(url)
             return request.send_error('ERR_002')
-
         return request.send_info('INF_001')
 
 
@@ -5732,7 +5741,6 @@ class ChallengeSedevCountAPIView(
 
     def post(self, request):
         data = request.data
-        print(data)
         challenge_id = data.get("challenge")
         title = data.get("subject")
         level = data.get("level_of_question")
