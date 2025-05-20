@@ -6103,21 +6103,25 @@ class ChallengeQuestionsAPIView(
     queryset = ChallengeQuestions.objects.all()
     serializer_class = ChallengeQuestionListSerializer
 
-    def get(self, request):
+    pagination_class = CustomPagination
 
+    def get(self, request):
         challenge_id = request.query_params.get('id')
         challenge = Challenge.objects.filter(id=challenge_id).first()
 
         if challenge_id:
             all_data = challenge.questions.all().order_by('id')
-            serializer = self.get_serializer(all_data, many=True)
+            paginator = self.pagination_class()
+            paginated_all_data = paginator.paginate_queryset(all_data, request, view=self)
+            serializer = self.get_serializer(paginated_all_data, many=True)
 
             response_data = {
+                "question_count": paginator.page.paginator.count,
+                'next': paginator.get_next_link(),
+                'previous': paginator.get_previous_link(),
                 "questions": serializer.data,
-                "question_count": len(serializer.data),
                 "challenge_question_count": challenge.question_count
             }
-
         return request.send_data(response_data)
 
 

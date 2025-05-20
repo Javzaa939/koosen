@@ -83,7 +83,11 @@ function AddStudent() {
     }
 
     async function getQuestionTableData() {
-        const { success, data } = await fetchQuestion(challengeAPI.getQuestionList(challenge_id))
+        const { success, data } = await fetchQuestion(challengeAPI.getQuestionList(
+            rowsPerPageQuestions,
+            currentPageQuestions,
+            challenge_id
+        ))
         if (success) {
             setQuestionCount(data.question_count)
             setChallengeCount(data.challenge_question_count)
@@ -113,7 +117,7 @@ function AddStudent() {
 
     useEffect(() => {
         getQuestionTableData()
-    }, [])
+    }, [currentPageQuestions, rowsPerPageQuestions])
 
 	// #region Элсэлтийн жагсаалт авах
 	const [admop, setAdmop] = useState([])
