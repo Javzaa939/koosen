@@ -13,7 +13,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 
 from main.utils.function.pagination import CustomPagination
-from main.utils.function.utils import override_get_queryset, save_data_with_signals
+from main.utils.function.utils import create_file_to_cdn, override_get_queryset, remove_file_from_cdn, save_data_with_signals
 
 from main.utils.function.utils import has_permission, get_domain_url, _filter_queries, get_teacher_queryset, pearson_corel, str2bool
 from main.utils.file import save_file
@@ -2229,15 +2229,15 @@ class QuestionsAPIView(
 
         questions = self.queryset.filter(id__in=delete_ids)
 
-        with transaction.atomic():
-            try:
+        try:
+            with transaction.atomic():
                 for question in questions:
 
                     # Хэрвээ асуултанд зураг байвал устгана
                     question_img = question.image
 
                     if question_img:
-                        remove_folder(str(question_img))
+                        remove_file_from_cdn(str(question_img))
 
                         if question:
                             choices = question.choices.all()
@@ -2247,7 +2247,7 @@ class QuestionsAPIView(
 
                                 # Хэрвээ хариултын хэсэгт зураг байвал устгана
                                 if img:
-                                    remove_folder(str(img))
+                                    remove_file_from_cdn(str(img))
 
                                 choice.delete()
 
@@ -2256,9 +2256,9 @@ class QuestionsAPIView(
 
                     question.delete()
 
-            except Exception as e:
-                print(e)
-                return request.send_error("ERR_002")
+        except Exception as e:
+            print(e)
+            return request.send_error("ERR_002")
 
         return request.send_info("INF_003")
 
@@ -5262,12 +5262,12 @@ class TestQuestionsAPIView(
                 question_obj = ChallengeQuestions.objects.filter(id=pk).first()
 
                 if isinstance(question_img, str) != True:
-                    question_img_path = get_image_path(question_obj)
+                    question_img_path = 'challenge'
 
-                    file_path = save_file(question_img, question_img_path)[0]
+                    file_path = create_file_to_cdn(question_img_path, question_img)
 
                     old_image = question_obj.image
-                    question_obj.image = file_path
+                    question_obj.image = file_path.get('full_path')
                     question_obj.save()
                     if old_image:
                         remove_folder(str(old_image))
@@ -5300,22 +5300,24 @@ class TestQuestionsAPIView(
                 answer_obj = QuestionChoices.objects.filter(id=answer_id).first()
                 question_obj = ChallengeQuestions.objects.filter(id=pk).first()
                 if isinstance(answer_img, str) != True:
-                    answer_img_path = get_choice_image_path(answer_obj)
-                    file_path = save_file(answer_img, answer_img_path)[0]
+                    answer_img_path = 'challenge'
+
+                    file_path = create_file_to_cdn(answer_img_path, answer_img)
+
                     old_image = answer_obj.image
-                    answer_obj.image = file_path
+                    answer_obj.image = file_path.get('full_path')
                     answer_obj.save()
                     if old_image:
-                        remove_folder(str(old_image))
+                        remove_file_from_cdn(str(old_image))
 
                 # Delete image
                 if isinstance(answer_img, str) == True and answer_img == '':
                     old_image = answer_obj.image
-                    answer_img_path = get_choice_image_path(answer_obj)
+                    answer_img_path = 'challenge'
                     answer_obj.image = None
                     answer_obj.save()
                     if old_image:
-                        remove_folder(str(old_image))
+                        remove_file_from_cdn(str(old_image))
 
                 updated_rows = QuestionChoices.objects.filter(id=answer_id).update(**request_data)
                 data = None
@@ -5337,10 +5339,10 @@ class TestQuestionsAPIView(
 
         user = request.user
         teacher = Teachers.objects.filter(user_id=user).first()
+        sid = transaction.savepoint()
 
-        with transaction.atomic():
-            sid = transaction.savepoint()
-            try:
+        try:
+            with transaction.atomic():
                 # Асуултыг хадгалах хэсэг
                 for question in questions:
                     question = json.loads(question)
@@ -5386,11 +5388,11 @@ class TestQuestionsAPIView(
 
                     # Асуултанд зураг байвал хадгалах хэсэг
                     if question_img:
-                        question_img_path = get_image_path(question_obj)
+                        question_img_path = 'challenge'
 
-                        file_path = save_file(question_img, question_img_path)[0]
+                        file_path = create_file_to_cdn(question_img_path, question_img)
 
-                        question_obj.image = file_path
+                        question_obj.image = file_path.get('full_path')
                         question_obj.save()
 
                     choice_ids = list()
@@ -5425,22 +5427,22 @@ class TestQuestionsAPIView(
 
                             # Асуултанд зураг байвал хадгалах хэсэг
                             if choice_img:
-                                choice_img_path = get_choice_image_path(choice_obj)
+                                choice_img_path = 'challenge'
 
-                                file_path = save_file(choice_img, choice_img_path)[0]
+                                file_path = create_file_to_cdn(choice_img_path, choice_img)
 
-                                choice_obj.image = file_path
+                                choice_obj.image = file_path.get('full_path')
                                 choice_obj.save()
 
                             choice_ids.append(choice_obj.id)
 
                     question_obj.choices.set(choice_ids)
 
-            except Exception as e:
-                print(e)
-                transaction.savepoint_rollback(sid)
+        except Exception as e:
+            print(e)
+            transaction.savepoint_rollback(sid)
 
-                return request.send_error('ERR_002')
+            return request.send_error('ERR_002')
 
         return request.send_info('INF_001')
 
