@@ -5812,20 +5812,18 @@ class ChallengeSedevCountAPIView(
         return request.send_error("ERR_003", 'Шалгалтын сэдэв сонгоно уу.')
 
     def delete(self, request, pk=None):
+        try:
+            question_ids = request.query_params.get('questions')
 
-        question = ChallengeQuestions.objects.filter(id=pk).first()
-        challenges = Challenge.objects.filter(questions=question).first()
-        if challenges:
-            challenges.questions.remove(question)
-
-            """
-            NOTE why remove from title? this only for removing challenge connection or not?
-            it will remove this question from all titles if it is uncommented, is it okey?
-            """
-            # question.title.clear()
-            # question.save()
-            challenges.save()
-
+            if not isinstance(question_ids,list):
+                question_ids = question_ids.split(',')
+            challenge = Challenge.objects.get(id=pk)
+            question_objs = challenge.questions.filter(id__in=question_ids)
+            challenge.questions.remove(*question_objs)
+            challenge.save()
+        except Exception:
+            traceback.print_exc()
+            return request.send_error("ERR_002")
         return request.send_info("INF_003")
 
 
