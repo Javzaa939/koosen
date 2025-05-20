@@ -5065,24 +5065,30 @@ class QuestionsTitleAPIView(
         is_graduate = request.query_params.get('is_graduate')
         is_elselt = request.query_params.get('is_elselt')
 
+        user = request.user
+        teacher = Teachers.objects.filter(user=user).first()
+
         # # 0  Бүх асуулт
         if title_id == 0:
-            if is_elselt == 'true':
+            if str2bool(is_elselt):
                 challenge_qs = ChallengeQuestions.objects.filter(is_admission=True)
             else:
                 challenge_qs = ChallengeQuestions.objects.all()
+
         # -1  Сэдэвгүй асуултууд
         elif title_id == -1:
-            if is_elselt == 'true':
-                challenge_qs = ChallengeQuestions.objects.filter(title__isnull=True,is_admission=True)
+            if str2bool(is_elselt):
+                challenge_qs = ChallengeQuestions.objects.filter(title__isnull=True, is_admission=True)
+                if not user.is_superuser:
+                    challenge_qs = challenge_qs.filter(created_by=teacher)
             else:
-                challenge_qs = ChallengeQuestions.objects.filter(Q(title__isnull=True))
+                challenge_qs = ChallengeQuestions.objects.filter(title__isnull=True)
         else:
             if is_graduate == 'true':
                 challenge_qs = ChallengeQuestions.objects.filter(graduate_title=title_id)
             else:
                 if is_elselt == 'true':
-                    challenge_qs = ChallengeQuestions.objects.filter(title=title_id,title__is_admission=True)
+                    challenge_qs = ChallengeQuestions.objects.filter(title=title_id, title__is_admission=True)
                 else:
                     challenge_qs = ChallengeQuestions.objects.filter(title=title_id)
 
@@ -5470,7 +5476,7 @@ class TestQuestionsListAPIView(
         questions_qs = ChallengeQuestions.objects.all()
         is_admission = request.query_params.get('is_admission')
         if is_admission == 'true':
-            questions_qs = questions_qs.filter(is_admission=True)
+            questions_qs = questions_qs.filter(is_admission=True, title__isnull=True)
 
         created_by = request.user
         if not created_by.is_superuser:
