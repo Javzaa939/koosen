@@ -5156,6 +5156,8 @@ class QuestionsTitleAPIView(
 
 
     def delete(self, request, pk=None):
+        challenge_questions = ChallengeQuestions.objects.filter(title=pk)
+        challenge_questions.delete()
         self.destroy(request, pk)
         return request.send_info("INF_003")
 
@@ -5558,11 +5560,11 @@ class QuestionExcelAPIView(generics.GenericAPIView, mixins.ListModelMixin):
         data_dicts = [dict(zip(headers, row)) for row in data[1:]]
 
         for entry in data_dicts:
-            self.process_entry(entry, teacher, graduate_title, is_admission)
+            self.process_entry(entry, teacher, graduate_title, is_admission, title)
 
         return request.send_info("INF_001")
 
-    def process_entry(self, entry, teacher, graduate_title, is_admission):
+    def process_entry(self, entry, teacher, graduate_title, is_admission, title):
         question = entry.get('Асуулт')
 
         if question in {"Жишээ 1","Жишээ 2","Жишээ 3", 'Жишээ 4', 'Жишээ 5', 'Жишээ 6', 'Жишээ 7', 'Жишээ 8', 'Жишээ 9'}:
@@ -5597,6 +5599,9 @@ class QuestionExcelAPIView(generics.GenericAPIView, mixins.ListModelMixin):
         # Төгсөлтйин шалгалт бол
         if graduate_title:
             challenge.graduate_title.add(QuestioSubTitle.objects.get(pk=graduate_title))
+
+        if title:
+            challenge.title.add(QuestionTitle.objects.get(pk=title))
 
         choice_keys = ['Хариулт 1', 'Хариулт 2', 'Хариулт 3', 'Хариулт 4', 'Хариулт 5', 'Хариулт 6']
         choice_ids = self.process_choices(entry, teacher, choice_keys, kind, score, correct_answer_index)

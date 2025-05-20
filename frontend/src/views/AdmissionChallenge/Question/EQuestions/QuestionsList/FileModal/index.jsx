@@ -5,6 +5,7 @@ import { AlertCircle, X } from 'react-feather'
 
 import {
     Col,
+    Row,
     Input,
     Label,
     Modal,
@@ -18,12 +19,13 @@ import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import { CHALLENGE_TYPE, CHALLENGE_TYPE_ADMISSION } from '@src/views/AdmissionChallenge/helpers';
 
-const FileModal = ({ isOpen, handleModal, refreshData, title, season, is_graduate }) => {
+const FileModal = ({ isOpen, handleModal, refreshData, title, season, is_graduate, is_title=false, titles=[] }) => {
 
     const defaultExt = ['csv', 'xlsx']
     const [isLoading, setLoader] = useState(false)
     const [file, setFile] = useState('')
     const [fileExt, setFileExt] = useState('')
+    const [selectedTitle, setSelectedTitle] = useState('')
     const [error, setFileError] = useState('')
 
     const { fetchData } = useLoader({})
@@ -58,10 +60,15 @@ const FileModal = ({ isOpen, handleModal, refreshData, title, season, is_graduat
             const formData = new FormData()
             formData.append('file', file)
             formData.append('ext', fileExt)
+            console.log(selectedTitle)
             if (is_graduate) {
                 formData.append('main_title', title)
             } else {
-                formData.append('title', title)
+                if (is_title) {
+                    formData.append('title', selectedTitle)
+                } else {
+                    formData.append('title', title)
+                }
             }
 
             formData.append('is_admission', CHALLENGE_TYPE === CHALLENGE_TYPE_ADMISSION)
@@ -81,30 +88,53 @@ const FileModal = ({ isOpen, handleModal, refreshData, title, season, is_graduat
         <Modal isOpen={isOpen} toggle={handleModal} className="modal-dialog-centered modal-sm">
             <ModalHeader toggle={handleModal}>{t('Асуултууд файлаар оруулах')}</ModalHeader>
             <ModalBody>
-                <Label>{t('Файл')}</Label>
-                <Input
-                    type='file'
-                    bsSize='sm'
-                    accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                    onChange={(e) => getFile(e, 'Get')}
-                    invalid={error ? true : false}
-                />
-                {error
-                ?
-                    <FormFeedback className='d-block'>{t(error)}</FormFeedback>
-                :
-                    <Col className="ps-0">
-                        <AlertCircle color="#28bcf7" size={15}/>
-                        <Label className="ms-1">{t('Зөвхөн .csv, .xlsx  өргөтгөлтэй файл оруулна уу.')}</Label>
-                    </Col>
+                {
+                    is_title
+                    &&
+                    <Row>
+                        <Col md={12} className='mt-50'>
+                            <Label>Сэдэв</Label>
+                            <Input type='select'
+                                value={selectedTitle}
+                                onChange={e => setSelectedTitle(e?.target?.value)}
+                            >
+                            {
+                                titles?.map((title, idx) =>
+                                    <option key={idx} value={title?.id}>{title?.name}</option>
+                                )
+                            }
+                            </Input>
+                        </Col>
+                    </Row>
                 }
+                <Row>
+                    <Col md={12} className='mt-50'>
+                        <Label>{t('Файл')}</Label>
+                        <Input
+                            type='file'
+                            bsSize='sm'
+                            accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                            onChange={(e) => getFile(e, 'Get')}
+                            invalid={error ? true : false}
+                        />
+                        {error
+                        ?
+                            <FormFeedback className='d-block'>{t(error)}</FormFeedback>
+                        :
+                            <Col className="ps-0">
+                                <AlertCircle color="#28bcf7" size={15}/>
+                                <Label className="ms-1">{t('Зөвхөн .csv, .xlsx  өргөтгөлтэй файл оруулна уу.')}</Label>
+                            </Col>
+                        }
+                    </Col>
+                </Row>
                 <hr className='mb-0'/>
                 <Col md={12} className='mt-50'>
                     {
                         file &&
                             <div style={{ fontSize: '11px'}}>
                                 <p className='mb-0'>Файл нэр: {file?.name}</p>
-                                <span>Файл хэмжээ: {file?.size}</span>
+                                <span>Файл хэмжээ: {file?.size}</span>s
                                 <X className='ms-50' role="button" color="red" size={15} onClick={(e) => getFile(e, 'Delete')}></X>
                             </div>
                     }

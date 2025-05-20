@@ -34,8 +34,9 @@ import { ReactSelectStyles, get_questionype, get_leveltype, get_levelseasons } f
 import EditModal from "./EditModal";
 import FileModal from "./FileModal"
 import { CHALLENGE_TYPE, CHALLENGE_TYPE_ADMISSION } from "@src/views/AdmissionChallenge/helpers";
+import useUpdateEffect from "@src/utility/hooks/useUpdateEffect";
 
-const QuestionsList = ({ filterId, season=false, teacher_id, is_graduate=false }) => {
+const QuestionsList = ({ filterId, season=false, teacher_id, is_graduate=false, titles }) => {
 
 	const { t } = useTranslation();
 	const { skin } = useSkin()
@@ -89,7 +90,7 @@ const QuestionsList = ({ filterId, season=false, teacher_id, is_graduate=false }
 		}
 	}
 
-	useEffect(() => {
+	useUpdateEffect(() => {
 		getDatas();
 	}, [currentPage, rowsPerPage, filterId, level, stype]);
 
@@ -100,7 +101,7 @@ const QuestionsList = ({ filterId, season=false, teacher_id, is_graduate=false }
 	};
 
 
-	useEffect(
+	useUpdateEffect(
 		() => {
 			if (searchValue.length > 2 || !searchValue) {
 				getDatas()
@@ -285,6 +286,8 @@ const QuestionsList = ({ filterId, season=false, teacher_id, is_graduate=false }
 						title={filterId}
 						season={season}
 						is_graduate={is_graduate}
+						is_title={true}
+						titles={titles}
 					/>
 				)}
 			</Card>

@@ -25,7 +25,7 @@ import { CHALLENGE_TYPE, CHALLENGE_TYPE_ADMISSION } from '@src/views/AdmissionCh
 
 const validateSchema = Yup.object().shape({
     name: Yup.string().trim().required("Хоосон байна"),
-    questions: Yup.array().min(1, "Асуулт нэмнэ үү").required("Хоосон байна")
+    // questions: Yup.array().min(1, "Асуулт нэмнэ үү").required("Хоосон байна")
 });
 
 export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle }) {
@@ -70,8 +70,10 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle })
     }
 
     async function onSubmit(datas) {
-        datas['questions'] = datas['questions']?.map(v => v.id)
-        datas['other_questions'] = questionList.map(v => v.id)
+        if (datas['questions']) {
+            datas['questions'] = datas['questions']?.map(v => v.id)
+            datas['other_questions'] = questionList.map(v => v.id)
+        }
         datas['is_admission'] = CHALLENGE_TYPE === CHALLENGE_TYPE_ADMISSION
         const { success, data } = await fetchData(editId ? questionAPI.putTitle(editId, datas) : questionAPI.postTitle(datas))
         if (success) {

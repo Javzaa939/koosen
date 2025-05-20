@@ -153,7 +153,7 @@ const EQuestions = ({ teacher_id, title_id, is_season }) => {
                 }
 
                 <Col lg={is_season ? 12 : 8} xxl={is_season ? 12 : 9}>
-                    <QuestionsList filterId={activeTitle || 0} teacher_id={teacher_id} season={is_season} />
+                    <QuestionsList filterId={activeTitle || 0} teacher_id={teacher_id} season={is_season} titles={datas}/>
                 </Col>
 
             </Row>
