@@ -5562,9 +5562,9 @@ class QuestionExcelAPIView(generics.GenericAPIView, mixins.ListModelMixin):
         if question in {"Жишээ 1","Жишээ 2","Жишээ 3", 'Жишээ 4', 'Жишээ 5', 'Жишээ 6', 'Жишээ 7', 'Жишээ 8', 'Жишээ 9'}:
             return
 
-        level_str = entry.get('Асуултын түвшин')
+        level_str = entry.get('Асуултын түвшин').strip()
         score = entry.get('Асуултын оноо')
-        kind_str = entry.get('Асуултын төрөл')
+        kind_str = entry.get('Асуултын төрөл').strip()
         correct_answer_index = entry.get('Зөв хариулт')
 
         kind = self.KIND_MAP.get(kind_str)
