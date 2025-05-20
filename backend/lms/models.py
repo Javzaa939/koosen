@@ -3677,6 +3677,27 @@ class ChallengeStudents(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
+class ChallengeElseltUser(models.Model):
+    """ Шалгалтад оролцогчид """
+
+    challenge = models.ForeignKey(Challenge, on_delete=models.PROTECT)
+    elselt_user = models.ForeignKey(to='elselt.ElseltUser', on_delete=models.CASCADE)
+
+    tried = models.BooleanField(default=False, verbose_name='Элсэгчийн оролдлогын тоо дүүрсэн эсэх')
+
+    start_time = models.DateTimeField(verbose_name='Шалгалт эхэлсэн хугацаа')
+    end_time = models.DateTimeField(verbose_name='Шалгалт дуусгасан хугацаа', null=True)
+
+    answer = models.TextField(null=True, verbose_name='Хариулт')
+
+    score = models.FloatField(null=True, verbose_name='Элсэгчийн авсан оноо')
+    take_score = models.FloatField(null=True, verbose_name='Элсэгчийн авах оноо')
+    old_score = models.FloatField(null=True, verbose_name='Хуучин элсэгчийн авсан оноо')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
 class ChallengeSedevCount(models.Model):
 
     lesson_title = models.ForeignKey(Lesson_title_plan, on_delete=models.CASCADE, verbose_name='Хичээлийн гарчиг')
