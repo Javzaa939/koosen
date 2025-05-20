@@ -22,6 +22,7 @@ def copy_admission_users(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('elselt', '0020_setting_admissionuserprofession_admission_date_and_more'),
         ('lms', '0329_remove_studentordersport_teacher_payment_and_more'),
     ]
 
