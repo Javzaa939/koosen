@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useForm, Controller } from "react-hook-form";
 import { getPagination, convertDefaultValue, ReactSelectStyles } from "@utils";
-import { Plus, Search } from "react-feather";
+import { Plus, Search, Trash2 } from "react-feather";
 import { getQuestionColumns } from "./QuestionHelpers";
 import { getColumns } from "./helpers";
 
@@ -28,6 +28,7 @@ import DataTable from "react-data-table-component";
 
 import AddQuestion from "../AddQuestion";
 import { EXAM_ROOT_PAGE } from "../../helpers";
+import FullSetDataTable from "../../helpers/FullSetDataTable";
 
 
 function AddStudent() {
@@ -98,7 +99,9 @@ function AddStudent() {
     };
 
     async function handleDeleteQuestion(id) {
-        const { success, data } = await fetchData(challengeAPI.deleteQuestion(id));
+        if (Array.isArray(id)) id = id.map(item => item.id)
+        const { success, data } = await fetchData(challengeAPI.deleteQuestion(challenge_id, id));
+
         if (success) {
             getQuestionTableData();
         }
@@ -161,10 +164,6 @@ function AddStudent() {
         setCurrentPage(page.selected + 1);
     };
 
-    const handlePaginationQuestions = (page) => {
-        setCurrentPageQuestions(page.selected + 1);
-    };
-
     const handleModal = () => {
         setModal(!modal);
     };
@@ -198,6 +197,10 @@ function AddStudent() {
             status.push(question_datas[idx]?.status)
         }
     }
+
+	// selected rows
+	const [selectedRows, setSelectedRows] = useState([])
+	const [toggleCleared, setToggleCleared] = useState(false);
 
     return (
         <Fragment>
@@ -337,6 +340,17 @@ function AddStudent() {
                             </div>
                             <div className="d-flex flex-wrap mt-md-0 mt-1">
                                 <Button
+                                    size='sm'
+                                    color='primary'
+                                    onClick={() => handleDeleteQuestion(selectedRows)}
+                                    disabled={selectedRows.length < 1}
+                                    className="me-50"
+                                >
+                                    <Trash2 width={"15px"} />
+                                    <span className='align-middle ms-50'>{t('Сонгосныг устгах')}</span>
+                                </Button>
+                                <Button
+                                    size='sm'
                                     color="primary"
                                     onClick={() => handleModal()}
                                 >
@@ -347,41 +361,27 @@ function AddStudent() {
                                 </Button>
                             </div>
                         </CardHeader>
-                        <div className="react-dataTable react-dataTable-selectable-rows mx-50 rounded border my-50">
-                            <DataTable
-                                noHeader
-                                pagination
-                                className="react-dataTable"
-                                progressPending={isLoading}
-                                progressComponent={
-                                    <div className="my-2">
-                                        <h5>{t("Түр хүлээнэ үү...")}</h5>
-                                    </div>
-                                }
-                                noDataComponent={
-                                    <div className="mb-2" style={{ marginTop: '27px' }}>
-                                        <h5>{t("Асуулт байхгүй байна")}</h5>
-                                    </div>
-                                }
-                                columns={getQuestionColumns(
-                                    currentPageQuestions,
-                                    rowsPerPageQuestions,
-                                    question_count,
-                                    handleDeleteQuestion,
-                                )}
-                                paginationPerPage={rowsPerPageQuestions}
-                                paginationDefaultPage={currentPageQuestions}
-                                data={question_datas}
-                                paginationComponent={getPagination(
-                                    handlePaginationQuestions,
-                                    currentPageQuestions,
-                                    rowsPerPageQuestions,
-                                    question_count,
-                                )}
-                                fixedHeader
-                                fixedHeaderScrollHeight="62vh"
-                            />
-                        </div>
+                        <FullSetDataTable
+                            currentPage={currentPageQuestions}
+                            setCurrentPage={setCurrentPageQuestions}
+                            rowsPerPage={rowsPerPageQuestions}
+                            data={question_datas}
+                            isLoading={isLoading}
+                            totalCount={question_count}
+                            noDataComponent={
+                                <div className="mb-2" style={{ marginTop: '27px' }}>
+                                    <h5>{t("Асуулт байхгүй байна")}</h5>
+                                </div>
+                            }
+                            columns={getQuestionColumns(
+                                currentPageQuestions,
+                                rowsPerPageQuestions,
+                                question_count,
+                                handleDeleteQuestion,
+                            )}
+							setSelectedRows={setSelectedRows}
+							toggleCleared={toggleCleared}
+                        />
                     </Card>
                 </Col>
             </Row>

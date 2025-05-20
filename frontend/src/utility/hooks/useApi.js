@@ -1587,7 +1587,7 @@ function useApi(isDisplay=false) {
 			postLevelCount: (data) => instance.post(`learning/challenge/add/level/count/`, data),
 			deleteLevelCount: (pk) => instance.delete(`learning/challenge/add/level/count/${pk}/`),
 
-			deleteQuestion: (pk) => instance.delete(`learning/challenge/add/sedev/count/${pk}/`),
+			deleteQuestion: (pk, questions) => instance.delete(`learning/challenge/add/sedev/count/${pk}/?questions=${questions}`),
 
 			getQuestionAll: (id) => instance.get(`learning/challenge/questions/${id}/`),
 			getStudents: (search) => instance.get(`learning/challenge/student/?search=${search}`),
