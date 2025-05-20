@@ -50,7 +50,11 @@ function AddStudent() {
 
     const [datas, setDatas] = useState([]);
     const [students, setStudents] = useState([]);
+
     const [question_datas, setQuestionData] = useState([]);
+    const [currentPageQuestions, setCurrentPageQuestions] = useState(1);
+    const [rowsPerPageQuestions, setRowsPerPageQuestions] = useState(8);
+
     const [question_count, setQuestionCount] = useState('')
     const [challenge_count, setChallengeCount] = useState('')
 
@@ -155,6 +159,10 @@ function AddStudent() {
 
     const handlePagination = (page) => {
         setCurrentPage(page.selected + 1);
+    };
+
+    const handlePaginationQuestions = (page) => {
+        setCurrentPageQuestions(page.selected + 1);
     };
 
     const handleModal = () => {
@@ -356,19 +364,19 @@ function AddStudent() {
                                     </div>
                                 }
                                 columns={getQuestionColumns(
-                                    currentPage,
-                                    rowsPerPage,
-                                    total_count,
+                                    currentPageQuestions,
+                                    rowsPerPageQuestions,
+                                    question_count,
                                     handleDeleteQuestion,
                                 )}
-                                paginationPerPage={rowsPerPage}
-                                paginationDefaultPage={currentPage}
+                                paginationPerPage={rowsPerPageQuestions}
+                                paginationDefaultPage={currentPageQuestions}
                                 data={question_datas}
                                 paginationComponent={getPagination(
-                                    handlePagination,
-                                    currentPage,
-                                    rowsPerPage,
-                                    total_count,
+                                    handlePaginationQuestions,
+                                    currentPageQuestions,
+                                    rowsPerPageQuestions,
+                                    question_count,
                                 )}
                                 fixedHeader
                                 fixedHeaderScrollHeight="62vh"
