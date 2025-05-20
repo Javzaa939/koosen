@@ -22,20 +22,20 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleDelete)
         },
         {
             name: `${'Регистрийн дугаар'}`,
-            selector: (row) => row?.user.register,
+            selector: (row) => row?.register,
             minWidth: "100px",
             center: true,
         },
         {
             name: `${'Овог'}`,
-            selector: (row) => row?.user.last_name,
+            selector: (row) => row?.last_name,
             minWidth: "200px",
             wrap:true,
             center: true,
         },
         {
             name: `${'Нэр'}`,
-            selector: (row) => row?.user.first_name,
+            selector: (row) => row?.first_name,
             minWidth: "200px",
             wrap:true,
             center: true,

@@ -5897,17 +5897,17 @@ class ChallengeAddAdmissionUserAPIView(
     mixins.UpdateModelMixin,
     mixins.DestroyModelMixin
 ):
-    queryset = AdmissionUserProfession.objects.all()
-    serializer_class = ElseltApproveSerializer
+    queryset = ElseltUser.objects.all()
+    serializer_class = ElsegchSerializer
 
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['user__first_name', 'user__register', 'user__email', 'user__code', 'user__last_name', 'user__mobile']
+    search_fields = ['first_name', 'register', 'email', 'code', 'last_name', 'mobile']
 
     def get(self, request):
         challenge = request.query_params.get('challenge')
-        challenge_student_all = Challenge.objects.get(id=challenge).admission_user.all().values_list('id', flat=True)
+        challenge_student_all = Challenge.objects.get(id=challenge).elselt_user.all().values_list('id', flat=True)
         self.queryset = self.queryset.filter(id__in=list(challenge_student_all))
         datas = self.list(request).data
         return request.send_data(datas)
@@ -5922,18 +5922,18 @@ class ChallengeAddAdmissionUserAPIView(
             return request.send_error("ERR_003", 'Элсэгчийн код хоосон байна!')
 
         try:
-            student = AdmissionUserProfession.objects.filter(user__register=student_code).first()
+            student = ElseltUser.objects.filter(register=student_code).first()
 
             if student:
                 challenge = Challenge.objects.filter(id=challenge_id).first()
 
                 if challenge:
-                    check = challenge.admission_user.filter(id=student.id)
+                    check = challenge.elselt_user.filter(id=student.id)
 
                     if check:
                         return request.send_error("ERR_003",f'"{student_code}" кодтой элсэгч шалгалтанд үүссэн байна.')
 
-                    challenge.admission_user.add(student)
+                    challenge.elselt_user.add(student)
                     challenge.save()
                     return request.send_info("INF_002")
                 else:
@@ -5948,8 +5948,8 @@ class ChallengeAddAdmissionUserAPIView(
     def delete(self, request, pk, student):
         try:
             challenge = Challenge.objects.get(id=pk)
-            student = AdmissionUserProfession.objects.get(pk=student)
-            challenge.admission_user.remove(student)
+            student = ElseltUser.objects.get(pk=student)
+            challenge.elselt_user.remove(student)
             challenge.save()
 
             return request.send_info("INF_003")
@@ -5977,19 +5977,19 @@ class AdmissionChallengeAddKindAPIView(
 
         if not select_ids:
             return request.send_error("ERR_003", 'Элсэлтийг сонгоно уу!')
-        qs_admission_user = AdmissionUserProfession.objects.filter(
-            profession__admission__is_store=False,
-            state=AdmissionUserProfession.STATE_SEND
+        qs_admission_user = ElseltUser.objects.filter(
+            admissionuserprofession__profession__admission__is_store=False,
+            admissionuserprofession__state=AdmissionUserProfession.STATE_SEND
         )
 
-        qs_admission_user = qs_admission_user.filter(profession__admission__in=select_ids)
+        qs_admission_user = qs_admission_user.filter(admissionuserprofession__profession__admission__in=select_ids)
 
         try:
             with transaction.atomic():
                 challenge = Challenge.objects.get(id=pk)
 
                 for admission_user in qs_admission_user:
-                    challenge.admission_user.add(admission_user)
+                    challenge.elselt_user.add(admission_user)
                 challenge.save()
         except Exception:
             traceback.print_exc()

@@ -3601,7 +3601,7 @@ class Challenge(models.Model):
     lesson_season = models.ForeignKey(Season, on_delete=models.CASCADE,  null=True)
 
     student = models.ManyToManyField(Student, blank=True, verbose_name="Оюутнууд")
-    admission_user = models.ManyToManyField(to='elselt.AdmissionUserProfession', blank=True, verbose_name="Элсэгчид")
+    elselt_user = models.ManyToManyField(to='elselt.ElseltUser', blank=True, verbose_name="Элсэгчид")
 
     kind = models.IntegerField(choices=KIND_CHOICES, null=False, default=KIND_LESSON, blank=False)
 
@@ -3672,6 +3672,27 @@ class ChallengeStudents(models.Model):
     score = models.FloatField(null=True, verbose_name='Оюутны авсан оноо')
     take_score = models.FloatField(null=True, verbose_name='Оюутны авах оноо')
     old_score = models.FloatField(null=True, verbose_name='Хуучин оюутны авсан оноо')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class ChallengeElseltUser(models.Model):
+    """ Шалгалтад оролцогчид """
+
+    challenge = models.ForeignKey(Challenge, on_delete=models.PROTECT)
+    elselt_user = models.ForeignKey(to='elselt.ElseltUser', on_delete=models.CASCADE)
+
+    tried = models.BooleanField(default=False, verbose_name='Элсэгчийн оролдлогын тоо дүүрсэн эсэх')
+
+    start_time = models.DateTimeField(verbose_name='Шалгалт эхэлсэн хугацаа')
+    end_time = models.DateTimeField(verbose_name='Шалгалт дуусгасан хугацаа', null=True)
+
+    answer = models.TextField(null=True, verbose_name='Хариулт')
+
+    score = models.FloatField(null=True, verbose_name='Элсэгчийн авсан оноо')
+    take_score = models.FloatField(null=True, verbose_name='Элсэгчийн авах оноо')
+    old_score = models.FloatField(null=True, verbose_name='Хуучин элсэгчийн авсан оноо')
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
