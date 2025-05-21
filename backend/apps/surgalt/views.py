@@ -5,6 +5,7 @@ import ast
 import traceback
 from openpyxl import load_workbook
 from core.fns import WithChoices
+from datetime import datetime
 from rest_framework import mixins
 from rest_framework import generics
 from rest_framework.views import APIView
@@ -5920,12 +5921,13 @@ class ChallengeAddAdmissionUserAPIView(
         data = request.data
         challenge_id = data.get("challenge")
         student_code = data.get("student")
-
+        this_year = datetime.now().year
         if student_code is None:
             return request.send_error("ERR_003", 'Элсэгчийн код хоосон байна!')
 
         try:
-            student = ElseltUser.objects.filter(register=student_code).first()
+            student = ElseltUser.objects.filter(register=student_code, created__year=this_year).first()
+            print(student)
 
             if student:
                 challenge = Challenge.objects.filter(id=challenge_id).first()
