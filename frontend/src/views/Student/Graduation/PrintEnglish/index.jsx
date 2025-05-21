@@ -132,7 +132,7 @@ export default function PrintEnglish()
             <div className='text-center' style={{ width: '100%', lineHeight: '30px', fontSize: '19px', marginBottom: "100px" }} >
                 <div className='m-auto' >
                     {
-                        data?.student?.group?.degree?.degree_code === 'D'
+                        (data?.student?.group?.degree?.degree_code === 'D' || data?.student?.group?.degree?.degree_code === 'C')
                         ?
                             <span className='text-center'>This is to certify that <span className='fw-bolder text-uppercase'>{data?.student?.first_name_eng}</span> <span className='fw-bolder'>{data?.student?.last_name_eng}</span> citizen of {data?.student?.citizenship?.name_eng},
                                 <br />
@@ -155,7 +155,7 @@ export default function PrintEnglish()
                             <br />
                             <span className='fw-bolder'>The Degree of <span className='text-uppercase'>{data?.student?.group?.degree?.degree_eng_name} IN {data?.student?.group?.profession?.dep_name_eng}</span></span> in the recognition of the
                             <br />
-                            completion of the prescribed curriculum of {data?.student?.group?.profession?.name_eng} ({data?.student?.group?.profession?.code}).
+                            completion of the prescribed joint curriculum of {data?.student?.group?.profession?.name_eng} ({data?.student?.group?.profession?.code}).
                         </span>
                     }
                 </div>
