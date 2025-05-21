@@ -5975,24 +5975,38 @@ class AdmissionChallengeAddKindAPIView(
 
     @has_permission(must_permissions=['lms-exam-update'])
     def put(self, request, pk=None):
-        datas = request.data
-        select_ids = datas.get('admission')
-
-        if not select_ids:
-            return request.send_error("ERR_003", 'Элсэлтийг сонгоно уу!')
-        qs_admission_user = ElseltUser.objects.filter(
-            admissionuserprofession__profession__admission__is_store=False,
-            admissionuserprofession__state=AdmissionUserProfession.STATE_SEND
-        )
-
-        qs_admission_user = qs_admission_user.filter(admissionuserprofession__profession__admission__in=select_ids)
-
         try:
+            datas = request.data
+            select_name = datas.get('select_name')
+            qs_admission_user = None
+
+            if select_name == 'admission':
+                select_admission_ids = datas.get('admission')
+
+                if not select_admission_ids:
+                    return request.send_error("ERR_003", 'Элсэлтийг сонгоно уу!')
+                qs_admission_user = ElseltUser.objects.filter(
+                    admissionuserprofession__profession__admission__is_store=False,
+                    admissionuserprofession__state=AdmissionUserProfession.STATE_SEND
+                )
+
+                qs_admission_user = qs_admission_user.filter(admissionuserprofession__profession__admission__in=select_admission_ids)
+            elif select_name == 'profession':
+                select_profession_ids = datas.get('profession')
+
+                if not select_profession_ids:
+                    return request.send_error("ERR_003", 'Хөтөлбөрийг сонгоно уу!')
+                qs_admission_user = ElseltUser.objects.filter(
+                    admissionuserprofession__state=AdmissionUserProfession.STATE_SEND
+                )
+
+                qs_admission_user = qs_admission_user.filter(admissionuserprofession__profession__profession__in=select_profession_ids)
+            else:
+                return request.send_error("ERR_002")
+
             with transaction.atomic():
                 challenge = Challenge.objects.get(id=pk)
-
-                for admission_user in qs_admission_user:
-                    challenge.elselt_user.add(admission_user)
+                challenge.elselt_user.add(*qs_admission_user)
                 challenge.save()
         except Exception:
             traceback.print_exc()

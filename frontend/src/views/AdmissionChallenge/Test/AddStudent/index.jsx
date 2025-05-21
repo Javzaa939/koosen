@@ -42,6 +42,7 @@ function AddStudent() {
     const { control, handleSubmit, setError, formState: { errors }, watch, clearErrors } = useForm({});
     const formAll = watch()
     const selectedAdmissionIds = Array.isArray(formAll?.admission) ? formAll.admission.map(item => item.id) : []
+    const selectedProfessionIds = Array.isArray(formAll?.profession) ? formAll.profession.map(item => item.prof_id) : []
     const { challenge_id, lesson_id } = useParams();
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -130,8 +131,10 @@ function AddStudent() {
 		}
 	}
 
-    async function onSubmit(cdata) {
-        cdata['admission'] = selectedAdmissionIds
+    async function onSubmit(cdata,select_name) {
+        if (select_name === 'admission') cdata[select_name] = selectedAdmissionIds
+        else if (select_name === 'profession') cdata[select_name] = selectedProfessionIds
+        cdata['select_name'] = select_name
         cdata = convertDefaultValue(cdata)
         const { success, error } = await fetchData(challengeAPI.admission.putTestKind(cdata, challenge_id))
         if (success) {
@@ -206,6 +209,23 @@ function AddStudent() {
 	const [selectedRows, setSelectedRows] = useState([])
 	const [toggleCleared, setToggleCleared] = useState(false);
 
+    // #region for admission profession select input
+    const [profOption, setProfession] = useState([])
+    const professionApi = useApi().elselt.profession
+
+    // Хөтөлбөрийн жагсаалт авах
+    async function getProfession() {
+        const { success, data } = await fetchData(professionApi.getList())
+        if (success) {
+            setProfession(data)
+        }
+    }
+
+    useEffect(() => {
+        getProfession()
+    }, [])
+
+    // #endregion
     return (
         <Fragment>
             <Row className="mt-2">
@@ -225,12 +245,12 @@ function AddStudent() {
                             </CardTitle>
                         </CardHeader>
                         <Row className="m-0">
-                            <Col md={7} className="mx-0 p-0">
-                                <Form onSubmit={handleSubmit(onSubmit)}>
+                            <Col md={4} className="mx-0 p-0">
+                                <Form onSubmit={handleSubmit((cdata) => onSubmit(cdata, 'admission'))}>
                                     <div className='added-cards mb-0 text-center'>
                                         <div className={classnames('cardMaster p-1 rounded border')}>
                                             <div className='content-header mb-2 mt-1'>
-                                                <h4 className='content-header'>{t('Элсэлтийг сонгоно уу')}</h4>
+                                                <h4 className='content-header'>{t('Элсэлт')}</h4>
                                             </div>
                                             <Row className='mt-1'>
                                                 <Controller
@@ -272,7 +292,54 @@ function AddStudent() {
                                     </div>
                                 </Form>
                             </Col>
-                            <Col md={5} className="p-0">
+                            <Col md={4} className="mx-0 p-0">
+                                <Form onSubmit={handleSubmit((cdata) => onSubmit(cdata, 'profession'))}>
+                                    <div className='added-cards mb-0 text-center'>
+                                        <div className={classnames('cardMaster p-1 rounded border')}>
+                                            <div className='content-header mb-2 mt-1'>
+                                                <h4 className='content-header'>{t('Хөтөлбөр')}</h4>
+                                            </div>
+                                            <Row className='mt-1'>
+                                                <Controller
+                                                    defaultValue=''
+                                                    control={control}
+                                                    name="profession"
+                                                    render={({ field }) => {
+                                                        return (
+                                                            <Col md={12} className="my-2">
+                                                                <Select
+                                                                    {...field}
+                                                                    id={field.name}
+                                                                    classNamePrefix='select'
+                                                                    isClearable
+                                                                    className={classnames('react-select')}
+                                                                    isLoading={isLoading}
+                                                                    placeholder={t('-- Сонгоно уу --')}
+                                                                    options={profOption || []}
+                                                                    noOptionsMessage={() => t('Хоосон байна.')}
+                                                                    styles={ReactSelectStyles}
+                                                                    getOptionValue={(option) => option.prof_id}
+                                                                    getOptionLabel={(option) => option.name}
+                                                                    isMulti
+                                                                />
+                                                                {errors[field.name] && <FormFeedback className='d-block'>{t(errors[field.name].message)}</FormFeedback>}
+                                                            </Col>
+                                                        );
+                                                    }}
+                                                />
+                                            </Row>
+                                            <Button
+                                                className="me-0 mt-1"
+                                                color="primary"
+                                                type="submit"
+                                            >
+                                                {t("Хадгалах")}
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </Form>
+                            </Col>
+                            <Col md={4} className="p-0">
                                 <Form onSubmit={handleSubmit(onSubmitStudent)}>
                                     <div className='added-cards mb-0'>
                                         <div className={classnames('cardMaster p-1 rounded border')}>
