@@ -1814,10 +1814,47 @@ def convert_stringified_querydict_to_dict(post_data,keep_list=[],is_keep_only_no
     return result
 
 
+def ltrim(source_str,trimming_str):
+    """
+    to remove substring from start of string until it stops to exist on start of string
+    """
+
+    if not isinstance(source_str, str) or not isinstance(trimming_str, str):
+        return None
+    trimming_str_length = len(trimming_str)
+
+    while source_str.startswith(trimming_str):
+        source_str = source_str[trimming_str_length:]
+    return source_str
+
+
 def is_url(string):
-    # to check string for URL syntax
+    """
+    to check string for URL syntax
+    """
+
     try:
         result = urlparse(string)
         return all([result.scheme, result.netloc])
     except:
         return False
+
+
+def build_url(url):
+    """
+    to change url to cdn url if url is not full url.
+    For example if url is url from other public sources then url should not be changed to cdn url
+    NOTE: attention! see comment "i do not know why this is required"
+    """
+
+    if not isinstance(url, str):
+        return None
+    if not is_url(url):
+        if not settings.DEBUG:
+            # region i do not know why this is required
+            url = ltrim[url,'/']
+            url = ltrim[url,settings.CDN_MAIN_FOLDER]
+            # endregion
+        # url = settings.CDN_MAIN_DOMAIN + 'files/' + url
+        url = settings.CDN_FILE_URL + url
+    return url

@@ -92,7 +92,7 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
         dispatchQuestion({ type: 'SET_SCORE', payload: questoinData.score })
         dispatchQuestion({ type: 'SET_LEVEL', payload: questoinData.level })
         if (questoinData.image) {
-            dispatchQuestion({ type: "SET_IMAGE", payload: { preview: process.env.REACT_APP_SERVER_URL + questoinData.image } })
+            dispatchQuestion({ type: "SET_IMAGE", payload: { preview: questoinData.image } })
         }
     }
 
@@ -116,7 +116,7 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
         dispatchAnswer({ type: 'SET_CHOICES', payload: answerData.choices })
         dispatchAnswer({ type: 'SET_SCORE', payload: answerData.score })
         if (answerData.image) {
-            dispatchAnswer({ type: "SET_IMAGE", payload: { preview: process.env.REACT_APP_SERVER_URL + answerData.image } })
+            dispatchAnswer({ type: "SET_IMAGE", payload: { preview: answerData.image } })
         }
     }
 
@@ -331,7 +331,7 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
                                 <div className="d-flex ">
                                     {
                                         data.image ?
-                                            <img className="" src={process.env.REACT_APP_SERVER_URL + data.image} alt="image" style={{ maxHeight: "240px", maxWidth: "100%" }} />
+                                            <img className="" src={data.image} alt="image" style={{ maxHeight: "240px", maxWidth: "100%" }} />
                                             :
                                             "Зураг байхгүй байна."
                                     }
@@ -448,7 +448,7 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
                                                         <div className="d-flex">
                                                             {
                                                                 answer.image ?
-                                                                    <img className="w-100" src={process.env.REACT_APP_SERVER_URL + answer.image} alt="image" />
+                                                                    <img className="w-100" src={answer.image} alt="image" />
                                                                     :
                                                                     "Зураг байхгүй байна."
                                                             }

@@ -160,7 +160,7 @@ export default function ResultModal({ open, handleModal, datas }) {
                                                                         />
                                                                         {choice.image ? (
                                                                             <div className='m-1 ms-0 showChoiceDiv'>
-                                                                                <img src={choice.imageName || choice.image} alt='choice' />
+                                                                                <img src={choice.image} alt='choice' />
                                                                             </div>
                                                                         ) : (
                                                                             <Label className="form-check-label" for={`choice${qid}`}>

@@ -5079,8 +5079,7 @@ class QuestionsTitleAPIView(
         if level:
             challenge_qs = challenge_qs.filter(level=level)
 
-        ser = dynamic_serializer(ChallengeQuestions, "__all__", 1)
-        data = ser(challenge_qs, many=True)
+        data = ChallengeQuestionListSerializer(challenge_qs, many=True)
         count = challenge_qs.count()
 
         result = {
