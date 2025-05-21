@@ -6121,12 +6121,17 @@ class ChallengeQuestionsAPIView(
 
     pagination_class = CustomPagination
 
+    filter_backends = [SearchFilter]
+    search_fields = ['question']
+
     def get(self, request):
         challenge_id = request.query_params.get('id')
         challenge = Challenge.objects.filter(id=challenge_id).first()
 
         if challenge_id:
             all_data = challenge.questions.all().order_by('id')
+            for backend in list(self.filter_backends):
+                all_data = backend().filter_queryset(request, all_data, self)
             paginator = self.pagination_class()
             paginated_all_data = paginator.paginate_queryset(all_data, request, view=self)
             serializer = self.get_serializer(paginated_all_data, many=True)

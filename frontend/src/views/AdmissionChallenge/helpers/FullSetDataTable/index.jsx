@@ -71,8 +71,8 @@ export default function FullSetDataTable({
 				// #endregion
 
 				// subheader
-				// subHeader
-				// subHeaderComponent={searchComponent(searchValue, setSearchValue, rowsPerPage, setRowsPerPage, defaultPage, t)}
+				subHeader
+				subHeaderComponent={searchComponent(searchValue, setSearchValue, rowsPerPage, setRowsPerPage, defaultPage, t)}
 
 				// sorting
 				// onSort={(column, sort) => handleSort(column, sort, setSort)}
