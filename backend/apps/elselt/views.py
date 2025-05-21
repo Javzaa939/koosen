@@ -340,7 +340,8 @@ class ElseltActiveListProfession(
 
         elselt = request.query_params.get('elselt')
         if elselt and elselt != 'undefined':
-            self.queryset = self.queryset.filter(admission=elselt)
+            elselt = elselt.split(',')
+            self.queryset = self.queryset.filter(admission__in=elselt)
 
         user = request.user
         user_permissions = get_user_permissions(user)

@@ -215,7 +215,7 @@ function AddStudent() {
 
     // Хөтөлбөрийн жагсаалт авах
     async function getProfession() {
-        const { success, data } = await fetchData(professionApi.getList())
+        const { success, data } = await fetchData(professionApi.getList(selectedAdmissionIds))
         if (success) {
             setProfession(data)
         }
@@ -223,7 +223,7 @@ function AddStudent() {
 
     useEffect(() => {
         getProfession()
-    }, [])
+    }, [formAll?.admission])
 
     // #endregion
     return (
