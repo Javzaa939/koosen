@@ -3513,9 +3513,12 @@ class ChallengeQuestions(models.Model):
         (LEVEL_HARD2, 'Түвшин-5'),
         (LEVEL_HARD3, 'Түвшин-6')
     )
+    lesson_year = models.CharField(max_length=1000, null=False, blank=False, verbose_name="Хичээлийн жил", default='2024-2025')
+    lesson_season = models.ForeignKey(Season, on_delete=models.CASCADE,  null=True)
 
     kind = models.IntegerField(choices=KIND_CHOICES, null=False, blank=False, verbose_name='Асуултын төрөл')
     question = models.CharField(max_length=1000, null=False, blank=False, verbose_name="Асуулт")
+    description = models.TextField(null=True, blank=False, verbose_name="Асуултын тайлбар")
 
     is_required = models.BooleanField(default=False, verbose_name="Заавал санал өгөх эсэх")
     image = models.ImageField(upload_to=get_image_path, null=True, blank=True, verbose_name='зураг')
