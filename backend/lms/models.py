@@ -3300,6 +3300,165 @@ class UserRightCert(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+# ----------------------------------------------------------------- Судалгааны модел -------------------------------------------------------------------------
+def get_image_survey_path(instance):
+    """ Судалгааны асуултын файлын замыг зааж байна """
+
+    return os.path.join('survey', 'questions', "asuult_%s" % str(instance.id))
+
+def get_choice_survey_image_path(instance):
+    """ Судалгааны асуултын файлын замыг зааж байна """
+
+    return os.path.join('survey', 'questions', "answer_%s" % str(instance.id))
+
+
+class SurveyChoices(models.Model):
+    """ Өөрийгөө сорих шалгалтын сонголттой асуултын сонголтууд """
+
+    choices = models.CharField(verbose_name="Сонголт", max_length=250, null=False, blank=False)
+    image = models.ImageField(upload_to=get_choice_survey_image_path, null=True, blank=True, verbose_name='зураг')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class SurveyQuestionTitle(models.Model):
+    """ Судалгааны асуултын сэдэв """
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                Lower('name'),
+                name='unique_name_ci'
+            )
+        ]
+
+    name = models.CharField(max_length=255, null=True, verbose_name='Сэдвийн нэр')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class SurveyQuestions(models.Model):
+    """ Сургалтын алба судалгааны асуултууд """
+
+    KIND_ONE_CHOICE = 1
+    KIND_MULTI_CHOICE = 2
+    KIND_BOOLEAN = 3
+    KIND_RATING = 4
+    KIND_TEXT = 5
+
+    KIND_CHOICES = (
+        (KIND_ONE_CHOICE, 'Нэг сонголт'),
+        (KIND_MULTI_CHOICE, 'Олон сонголт'),
+        (KIND_BOOLEAN, 'Тийм, Үгүй сонголт'),
+        (KIND_RATING, 'Үнэлгээ'),
+        (KIND_TEXT, 'Бичвэр'),
+    )
+
+    kind = models.IntegerField(choices=KIND_CHOICES, null=False, blank=False, verbose_name='Асуултын төрөл')
+    question = models.CharField(max_length=1000, null=False, blank=False, verbose_name="Асуулт")
+    title = models.ForeignKey(SurveyQuestionTitle, on_delete=models.SET_NULL, null=True, verbose_name='Асуултын ерөнхий сэдэв')
+
+    is_required = models.BooleanField(default=False, verbose_name="Заавал санал өгөх эсэх")
+    is_rate_teacher = models.BooleanField(default=False, verbose_name='Багшийн үнэлэх асуулт эсэх')
+
+    image = models.ImageField(upload_to='survey_question', null=True, blank=True, verbose_name='зураг')
+
+    #  KIND_RATING үед
+    rating_max_count = models.IntegerField(default=0, verbose_name="Үнэлгээний дээд тоо", null=True, blank=True)
+    low_rating_word = models.CharField(max_length=100, verbose_name="Доод үнэлгээг илэрхийлэх үг")
+    high_rating_word = models.CharField(max_length=100, verbose_name="Дээд үнэлгээг илэрхийлэх үг")
+    rating_words = ArrayField(
+        models.CharField(max_length=100),
+        blank=True,
+        null=True,
+        verbose_name='Үнэлгээний илэрхийлэх үг'
+    )
+
+    # KIND_MULTI_CHOICE үед
+    max_choice_count = models.IntegerField(default=0, verbose_name="Сонголтын хязгаар", null=True, blank=True)
+
+    # KIND_ONE_CHOICE болон KIND_MULTI_CHOICE үед
+    choices = models.ManyToManyField(SurveyChoices)
+
+    created_by = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class Survey(models.Model):
+    """ Сургалтын алба судалгааны ажил """
+
+    oyutans = ArrayField(
+        models.IntegerField(null=True),
+        blank=True,
+        null=True,
+        verbose_name='Оюутнуудыг хадгална'
+    )
+
+    teachers = ArrayField(
+        models.IntegerField(null=True),
+        blank=True,
+        null=True,
+        verbose_name='Багш нарыг хадгална'
+    )
+
+    SOUL_TYPE_GENERAL = 1
+    SOUL_TYPE_TEACHERS_LESSONS = 2
+
+    SOUL_TYPE_CHOICES = (
+        (SOUL_TYPE_GENERAL, 'Ерөнхий судалгаа'),
+        (SOUL_TYPE_TEACHERS_LESSONS, '"Багш-хичээл" судалгаа'),
+    )
+
+    is_all = models.BooleanField(default=False, verbose_name='Бүгд')
+    scope_kind = models.IntegerField(choices=Notification.SCOPE_KIND_CHOICES, null=False, blank=False)
+
+    title = models.CharField(max_length=250, null=False, blank=False, verbose_name="Гарчиг")
+    description = models.TextField(null=False, blank=False, verbose_name="Тайлбар")
+
+    image = models.ImageField(upload_to='survey', null=True, blank=True, verbose_name='зураг')
+
+    questions = models.ManyToManyField(SurveyQuestions)
+
+    start_date = models.DateTimeField(null=False, blank=False, verbose_name="Эхлэх хугацаа")
+    end_date = models.DateTimeField(null=False, blank=False, verbose_name="Дуусах хугацаа")
+
+    is_required = models.BooleanField(default=False, verbose_name="Заавал бөглөх эсэх")
+    is_hide_employees = models.BooleanField(default=False, verbose_name="Бөглөсөн албан хаагчдыг нуух эсэх")
+    is_soul = models.BooleanField(default=False, verbose_name="Сэтгэл ханамжийн судалгаа эсэх")
+    soul_type = models.PositiveIntegerField(choices=SOUL_TYPE_CHOICES, null=True, blank=True, verbose_name='Сэтгэл ханамжийн судалгаа төрөл')
+
+    created_school = models.ForeignKey(SubOrgs, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Харьяалагдах алба нэгж", )
+    created_department = models.ForeignKey(Salbars, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Салбар")
+
+    deleted_by = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="deleted", null=True, blank=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    created_by = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @staticmethod
+    def get_state_filter(state_name):
+        dn = dt.now()
+        return {
+            "all": {},
+            "waiting": {
+                "start_date__gt": dn
+            },
+            "progressing": {
+                "start_date__lte": dn,
+                "end_date__gt": dn,
+            },
+            "finish": {
+                "end_date__lte": dn,
+            },
+        }.get(state_name)
+
+
+
 # -------------------------------------------------------- Өөрийгөө сорих тест ------------------------------------------------------------------------------------------
 
 def get_image_path(instance):
@@ -3602,6 +3761,7 @@ class Challenge(models.Model):
     lesson = models.ForeignKey(LessonStandart, on_delete=models.CASCADE, verbose_name="Хичээл", null=True)
     lesson_year = models.CharField(max_length=20, null=True, verbose_name="Хичээлийн жил")
     lesson_season = models.ForeignKey(Season, on_delete=models.CASCADE,  null=True)
+    survey = models.ForeignKey(Survey, on_delete=models.SET_NULL,  null=True, verbose_name='Судалгаа')
 
     student = models.ManyToManyField(Student, blank=True, verbose_name="Оюутнууд")
     elselt_user = models.ManyToManyField(to='elselt.ElseltUser', blank=True, verbose_name="Элсэгчид")
@@ -3745,162 +3905,6 @@ class NotificationState(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
-# ----------------------------------------------------------------- Судалгааны модел -------------------------------------------------------------------------
-def get_image_survey_path(instance):
-    """ Судалгааны асуултын файлын замыг зааж байна """
-
-    return os.path.join('survey', 'questions', "asuult_%s" % str(instance.id))
-
-def get_choice_survey_image_path(instance):
-    """ Судалгааны асуултын файлын замыг зааж байна """
-
-    return os.path.join('survey', 'questions', "answer_%s" % str(instance.id))
-
-
-class SurveyChoices(models.Model):
-    """ Өөрийгөө сорих шалгалтын сонголттой асуултын сонголтууд """
-
-    choices = models.CharField(verbose_name="Сонголт", max_length=250, null=False, blank=False)
-    image = models.ImageField(upload_to=get_choice_survey_image_path, null=True, blank=True, verbose_name='зураг')
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-
-class SurveyQuestionTitle(models.Model):
-    """ Судалгааны асуултын сэдэв """
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                Lower('name'),
-                name='unique_name_ci'
-            )
-        ]
-
-    name = models.CharField(max_length=255, null=True, verbose_name='Сэдвийн нэр')
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-
-class SurveyQuestions(models.Model):
-    """ Сургалтын алба судалгааны асуултууд """
-
-    KIND_ONE_CHOICE = 1
-    KIND_MULTI_CHOICE = 2
-    KIND_BOOLEAN = 3
-    KIND_RATING = 4
-    KIND_TEXT = 5
-
-    KIND_CHOICES = (
-        (KIND_ONE_CHOICE, 'Нэг сонголт'),
-        (KIND_MULTI_CHOICE, 'Олон сонголт'),
-        (KIND_BOOLEAN, 'Тийм, Үгүй сонголт'),
-        (KIND_RATING, 'Үнэлгээ'),
-        (KIND_TEXT, 'Бичвэр'),
-    )
-
-    kind = models.IntegerField(choices=KIND_CHOICES, null=False, blank=False, verbose_name='Асуултын төрөл')
-    question = models.CharField(max_length=1000, null=False, blank=False, verbose_name="Асуулт")
-    title = models.ForeignKey(SurveyQuestionTitle, on_delete=models.SET_NULL, null=True, verbose_name='Асуултын ерөнхий сэдэв')
-
-    is_required = models.BooleanField(default=False, verbose_name="Заавал санал өгөх эсэх")
-    is_rate_teacher = models.BooleanField(default=False, verbose_name='Багшийн үнэлэх асуулт эсэх')
-
-    image = models.ImageField(upload_to=get_image_path, null=True, blank=True, verbose_name='зураг')
-
-    #  KIND_RATING үед
-    rating_max_count = models.IntegerField(default=0, verbose_name="Үнэлгээний дээд тоо", null=True, blank=True)
-    low_rating_word = models.CharField(max_length=100, verbose_name="Доод үнэлгээг илэрхийлэх үг")
-    high_rating_word = models.CharField(max_length=100, verbose_name="Дээд үнэлгээг илэрхийлэх үг")
-    rating_words = ArrayField(
-        models.CharField(max_length=100),
-        blank=True,
-        null=True,
-        verbose_name='Үнэлгээний илэрхийлэх үг'
-    )
-
-    # KIND_MULTI_CHOICE үед
-    max_choice_count = models.IntegerField(default=0, verbose_name="Сонголтын хязгаар", null=True, blank=True)
-
-    # KIND_ONE_CHOICE болон KIND_MULTI_CHOICE үед
-    choices = models.ManyToManyField(SurveyChoices)
-
-    created_by = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="+")
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-
-class Survey(models.Model):
-    """ Сургалтын алба судалгааны ажил """
-
-    oyutans = ArrayField(
-        models.IntegerField(null=True),
-        blank=True,
-        null=True,
-        verbose_name='Оюутнуудыг хадгална'
-    )
-
-    teachers = ArrayField(
-        models.IntegerField(null=True),
-        blank=True,
-        null=True,
-        verbose_name='Багш нарыг хадгална'
-    )
-
-    SOUL_TYPE_GENERAL = 1
-    SOUL_TYPE_TEACHERS_LESSONS = 2
-
-    SOUL_TYPE_CHOICES = (
-        (SOUL_TYPE_GENERAL, 'Ерөнхий судалгаа'),
-        (SOUL_TYPE_TEACHERS_LESSONS, '"Багш-хичээл" судалгаа'),
-    )
-
-    is_all = models.BooleanField(default=False, verbose_name='Бүгд')
-    scope_kind = models.IntegerField(choices=Notification.SCOPE_KIND_CHOICES, null=False, blank=False)
-
-    title = models.CharField(max_length=250, null=False, blank=False, verbose_name="Гарчиг")
-    description = models.TextField(null=False, blank=False, verbose_name="Тайлбар")
-
-    image = models.ImageField(upload_to=get_choice_image_path, null=True, blank=True, verbose_name='зураг')
-
-    questions = models.ManyToManyField(SurveyQuestions)
-
-    start_date = models.DateTimeField(null=False, blank=False, verbose_name="Эхлэх хугацаа")
-    end_date = models.DateTimeField(null=False, blank=False, verbose_name="Дуусах хугацаа")
-
-    is_required = models.BooleanField(default=False, verbose_name="Заавал бөглөх эсэх")
-    is_hide_employees = models.BooleanField(default=False, verbose_name="Бөглөсөн албан хаагчдыг нуух эсэх")
-    is_soul = models.BooleanField(default=False, verbose_name="Сэтгэл ханамжийн судалгаа эсэх")
-    soul_type = models.PositiveIntegerField(choices=SOUL_TYPE_CHOICES, null=True, blank=True, verbose_name='Сэтгэл ханамжийн судалгаа төрөл')
-
-    created_school = models.ForeignKey(SubOrgs, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Харьяалагдах алба нэгж", )
-    created_department = models.ForeignKey(Salbars, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Салбар")
-
-    deleted_by = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="deleted", null=True, blank=True)
-    deleted_at = models.DateTimeField(null=True, blank=True)
-
-    created_by = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="+")
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    @staticmethod
-    def get_state_filter(state_name):
-        dn = dt.now()
-        return {
-            "all": {},
-            "waiting": {
-                "start_date__gt": dn
-            },
-            "progressing": {
-                "start_date__lte": dn,
-                "end_date__gt": dn,
-            },
-            "finish": {
-                "end_date__lte": dn,
-            },
-        }.get(state_name)
 
 
 class SoulSurvey(models.Model):
