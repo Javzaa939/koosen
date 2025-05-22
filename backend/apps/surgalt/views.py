@@ -41,7 +41,7 @@ from lms.models import (
     LearningPlan,
     ScoreRegister,
     ExamTimeTable,
-    Exam_to_group,
+    ChallengeElseltUser,
     LessonStandart,
     Lesson_title_plan,
     Lesson_to_teacher,
@@ -1723,6 +1723,11 @@ class ChallengeAPIView(
             challenge_students = ChallengeStudents.objects.filter(challenge=challenge_obj)
             if challenge_students:
                 challenge_students.delete()
+
+            # Шалгалтад хариулсан сурагчид
+            challenge_elsegch = ChallengeElseltUser.objects.filter(challenge=challenge_obj)
+            if challenge_elsegch:
+                challenge_elsegch.delete()
 
             self.destroy(request, pk)
 
