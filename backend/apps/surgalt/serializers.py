@@ -17,7 +17,7 @@ from core.fns import WithChoices
 
 from elselt.models import ElseltUser
 
-from lms.models import LessonStandart, TeacherScore
+from lms.models import ChallengeElseltUser, LessonStandart, TeacherScore
 from lms.models import Lesson_title_plan
 from lms.models import LessonCategory
 from lms.models import ProfessionalDegree
@@ -1376,3 +1376,166 @@ class ChallengeDetailTableStudentsSerializer(serializers.ModelSerializer):
             return round(percentage, 1)
 
         return "Дүн ороогүй"
+
+
+# region Admission Challenge
+class ChallengeListElseltSerializer(serializers.ModelSerializer):
+    startAt = serializers.SerializerMethodField()
+    endAt = serializers.SerializerMethodField()
+
+    lesson = LessonStandartSerializer()
+    is_student = serializers.SerializerMethodField()
+    teacher_name = serializers.CharField(source='created_by.full_name', default='')
+
+    class Meta:
+        model = Challenge
+        fields = '__all__'
+
+    def get_startAt(self, obj):
+        return fix_format_date(obj.start_date)
+
+    def get_endAt(self, obj):
+        return fix_format_date(obj.end_date)
+
+    def get_is_student(self, obj):
+        challenge = Challenge.objects.get(id=obj.id)
+        print(ChallengeElseltUser.objects.filter(challenge=challenge, answer__isnull=False).values('elselt_user').distinct().query)
+        challenge_student_ids = ChallengeElseltUser.objects.filter(challenge=challenge, answer__isnull=False).values('elselt_user').distinct().count()
+
+        return challenge_student_ids
+
+
+class ChallengeElseltUsersSerializer(serializers.ModelSerializer):
+    student_name = serializers.SerializerMethodField()
+    student_code = serializers.SerializerMethodField()
+    answer_json = serializers.SerializerMethodField()
+    still_score = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ChallengeElseltUser
+        fields = ['challenge', 'score', 'take_score', 'answer_json', "tried", "id", "student_name", "student_code", 'answer', 'still_score']
+
+    def get_still_score(self, obj):
+        """ Өгч байгаа шалгалт """
+        score = 0
+
+        try:
+            if obj.answer:
+                answer_json = obj.answer.replace("'", '"')
+                answer_json = json.loads(answer_json)
+                if answer_json:
+                    # Тестэн доторх асуултууд
+                    for question_id, choice_id in answer_json.items():
+                        #Асуултан доторх хариулт
+
+                        # NOTE: choice_id нь array ирээд алдаа гараад байсан учир энэ нөхцлийг бичив. javzaa bichsen
+                        if choice_id and isinstance(choice_id, list):
+                            for ch_id in choice_id:
+                                choice_obj = QuestionChoices.objects.filter(id=ch_id).values('score', 'challengequestions__question').first()
+
+                                # Оноо байвал зөв хариулт гэж үзнэ
+                                if choice_obj and choice_obj.get('score') > 0:
+                                    score += choice_obj.get('score')
+
+                        elif choice_id:
+                            choice_obj = QuestionChoices.objects.filter(id=choice_id).values('score','challengequestions__question').first()
+
+                            # Оноо байвал зөв хариулт гэж үзнэ
+                            if choice_obj and choice_obj.get('score') > 0:
+                                score += choice_obj.get('score')
+
+            return score
+
+        except json.JSONDecodeError:
+            return None
+
+
+    def get_student_name(self, obj):
+        data = ElseltUser.objects.filter(id=obj.elselt_user.id).values('first_name').first()
+        name = data.get('first_name')
+
+        return name
+
+    def get_student_code(self, obj):
+        data = ElseltUser.objects.filter(id=obj.elselt_user.id).values('code').first()
+        code = data.get('code')
+
+        return code
+
+    def get_answer_json(self, obj):
+        answers = []
+
+        try:
+            if obj.answer:
+                answer_json = obj.answer.replace("'", '"')
+                answer_json = json.loads(answer_json)
+                if answer_json:
+
+                # Тестэн доторх асуултууд
+                    for question_id, choice_id in answer_json.items():
+                        #Асуултан доторх хариулт
+
+                        # NOTE: choice_id нь array ирээд алдаа гараад байсан учир энэ нөхцлийг бичив. javzaa bichsen
+                        if choice_id and isinstance(choice_id, list):
+                            for ch_id in choice_id:
+                                choice_obj = QuestionChoices.objects.filter(id=ch_id).values('score', 'challengequestions__question').first()
+                                # choice дотроо is_right-г үүсгэнэ
+                                is_right = False
+
+                                # Оноо байвал зөв хариулт гэж үзнэ
+                                if choice_obj and choice_obj.get('score') > 0:
+                                    is_right = True
+
+                                answers.append({
+                                    'question_id': question_id,
+                                    'question_text': choice_obj.get('challengequestions__question') if choice_obj else '',
+                                    'is_answered_right': is_right
+                                })
+                        elif choice_id:
+                            choice_obj = QuestionChoices.objects.filter(id=choice_id).values('score','challengequestions__question').first()
+
+                            # choice дотроо is_right-г үүсгэнэ
+                            is_right = False
+
+                            # Оноо байвал зөв хариулт гэж үзнэ
+                            if choice_obj and choice_obj.get('score') > 0:
+                                is_right = True
+
+                            answers.append({
+                                'question_id': question_id,
+                                'question_text': choice_obj.get('challengequestions__question') if choice_obj else '',
+                                'is_answered_right': is_right
+                            })
+
+            return answers
+
+        except json.JSONDecodeError:
+            return None
+
+
+class ElseltUserChallengeSerializer(serializers.ModelSerializer):
+
+    challenge = serializers.SerializerMethodField()
+    test_detail = serializers.SerializerMethodField()
+    class Meta:
+        model = ElseltUser
+        fields = ["id", "register", "last_name", "first_name", "challenge", "test_detail"]
+
+    def get_challenge(self, obj):
+
+        test_id = self.context.get('test_id')
+
+        challenge_student_qs = ChallengeElseltUser.objects.filter(challenge=test_id, elselt_user=obj).order_by('id')
+        data = ChallengeElseltUsersSerializer(challenge_student_qs, many=True).data
+
+        return data
+
+    def get_test_detail(self, obj):
+
+        test_id = self.context.get('test_id')
+
+        data_qs = Challenge.objects.filter(id=test_id)
+        result = ChallengeDetailSerializer(data_qs, many=True).data
+
+        return result
+# endregion
