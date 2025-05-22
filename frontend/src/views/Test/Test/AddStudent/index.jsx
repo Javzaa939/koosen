@@ -111,7 +111,7 @@ function AddStudent() {
     };
 
     async function handleDeleteQuestion(id) {
-        const { success, data } = await fetchData(challengeAPI.deleteQuestion(id));
+        const { success, data } = await fetchData(challengeAPI.deleteQuestion(challenge_id, id));
         if (success) {
             getQuestionTableData();
         }
