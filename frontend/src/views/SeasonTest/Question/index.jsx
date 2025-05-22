@@ -18,7 +18,7 @@ import useLoader from '@hooks/useLoader'
 import SchoolContext from '@context/SchoolContext'
 import { getPagination, ReactSelectStyles } from '@utils'
 
-import EQuestions from '../../Test/EQuestions'
+import EQuestions from './EQuestions'
 import SeasonQuestions from './SeasonQuestion'
 import { getColumns } from './helpers'
 

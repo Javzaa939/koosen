@@ -175,7 +175,7 @@ export default function SeasonQuestions({teacher_id, handleDetail, is_season}) {
                                                 <Badge tag={'a'} color={'light-primary'} id={`add_${idx}`} onClick={() => handleDetail(data?.id)}>
                                                     <PlusCircle/>
                                                 </Badge>
-                                                <UncontrolledTooltip target={`add_${idx}`}>{t('Сэдэв нэмэх')}</UncontrolledTooltip>
+                                                <UncontrolledTooltip target={`add_${idx}`}>{t('Асуулт нэмэх')}</UncontrolledTooltip>
                                             </td>
                                         </tr>
                                     )

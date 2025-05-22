@@ -5555,7 +5555,7 @@ class QuestionExcelAPIView(generics.GenericAPIView, mixins.ListModelMixin):
         'Түвшин-6': 6,
     }
 
-    LEVEL_MAP_SEASON = {
+    LEVEL_MAP_KH_D_KH = {
         'Хөнгөн': 1,
         'Дунд': 2,
         'Хүнд': 3,
@@ -5568,6 +5568,7 @@ class QuestionExcelAPIView(generics.GenericAPIView, mixins.ListModelMixin):
         title = request.data.get('title')
         graduate_title = request.data.get('main_title')
         is_admission = request.data.get('is_admission')
+        is_ywts = request.data.get('is_ywts')
 
         if not excel_file:
             return request.send_info("INF_002")
@@ -5580,11 +5581,11 @@ class QuestionExcelAPIView(generics.GenericAPIView, mixins.ListModelMixin):
         data_dicts = [dict(zip(headers, row)) for row in data[1:]]
 
         for entry in data_dicts:
-            self.process_entry(entry, teacher, graduate_title, is_admission, title)
+            self.process_entry(entry, teacher, graduate_title, is_admission, title, is_ywts)
 
         return request.send_info("INF_001")
 
-    def process_entry(self, entry, teacher, graduate_title, is_admission, title):
+    def process_entry(self, entry, teacher, graduate_title, is_admission, title, is_ywts):
         question = entry.get('Асуулт')
 
         if question in {"Жишээ 1","Жишээ 2","Жишээ 3", 'Жишээ 4', 'Жишээ 5', 'Жишээ 6', 'Жишээ 7', 'Жишээ 8', 'Жишээ 9'}:
@@ -5596,11 +5597,12 @@ class QuestionExcelAPIView(generics.GenericAPIView, mixins.ListModelMixin):
         correct_answer_index = entry.get('Зөв хариулт')
 
         kind = self.KIND_MAP.get(kind_str)
-        level = self.LEVEL_MAP.get(level_str)
+        level = self.LEVEL_MAP.get(level_str.capitalize())
+
         if graduate_title:
-            level = self.LEVEL_MAP.get(level_str.capitalize)
-        else:
-            level = self.LEVEL_MAP_SEASON.get(level_str.capitalize())
+            level = self.LEVEL_MAP.get(level_str.capitalize())
+        if is_ywts == 'true':
+            level = self.LEVEL_MAP_KH_D_KH.get(level_str.capitalize())
 
         # max_choice зөв хариулт хэд байгаагаас
         max_choice_count = len(correct_answer_index.split()) if kind == 2 else 1
@@ -5613,7 +5615,7 @@ class QuestionExcelAPIView(generics.GenericAPIView, mixins.ListModelMixin):
             level=level,
             max_choice_count=max_choice_count,
             created_by=teacher,
-            is_admission=str2bool(is_admission)
+            is_admission=str2bool(is_admission) if is_admission else False
         )
         challenge.save()
         # Төгсөлтйин шалгалт бол
