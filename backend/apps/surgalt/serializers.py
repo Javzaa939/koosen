@@ -12,7 +12,7 @@ from django.conf import settings
 from datetime import datetime
 
 from apps import surgalt
-from main.utils.function.utils import remove_key_from_dict
+from main.utils.function.utils import build_url, remove_key_from_dict
 from core.fns import WithChoices
 
 from elselt.models import ElseltUser
@@ -604,6 +604,8 @@ class QuestionChoicesSerializer(serializers.ModelSerializer):
 
     checked = serializers.SerializerMethodField()
     imageName = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
+
     class Meta:
         model = QuestionChoices
         fields = '__all__'
@@ -625,6 +627,11 @@ class QuestionChoicesSerializer(serializers.ModelSerializer):
             image_name = os.path.basename(image)
 
         return image_name
+
+    def get_image(self, obj):
+        url = obj.image.name if obj.image else None
+        return build_url(url)
+
 
 class StudentSerializer(serializers.ModelSerializer):
 
@@ -648,6 +655,7 @@ class ChallengeQuestionListSerializer(serializers.ModelSerializer):
     lesson_id = serializers.CharField(default='', source='subject.lesson.id')
     imageName = serializers.SerializerMethodField()
     title = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
 
     class Meta:
         model = ChallengeQuestions
@@ -670,6 +678,10 @@ class ChallengeQuestionListSerializer(serializers.ModelSerializer):
         titles = obj.title.all()
         title_names = [title.name for title in titles]
         return title_names
+
+    def get_image(self, obj):
+        url = obj.image.name if obj.image else None
+        return build_url(url)
 
 
 class ChallengeQuestionsAnswersSerializer(serializers.ModelSerializer):
