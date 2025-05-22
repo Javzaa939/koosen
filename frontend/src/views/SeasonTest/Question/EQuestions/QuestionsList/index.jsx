@@ -33,6 +33,7 @@ import { ReactSelectStyles, get_questionype, get_leveltype, get_levelseasons } f
 
 import EditModal from "./EditModal";
 import FileModal from "./FileModal"
+import { EXAM_QUESTIONS_ROOT_PAGE } from "@src/views/SeasonTest/helpers";
 
 const QuestionsList = ({ filterId, season=false, teacher_id, is_graduate }) => {
 
@@ -134,7 +135,7 @@ const QuestionsList = ({ filterId, season=false, teacher_id, is_graduate }) => {
 			)}
 			<Card className="m-0">
 				<CardHeader className="py-1">
-					<div role="a"  onClick={() => navigate(-1) } color='primary'>
+					<div role="a"  onClick={() => navigate(`/${EXAM_QUESTIONS_ROOT_PAGE}`) } color='primary'>
 						<ChevronsLeft/>Буцах
 					</div>
 					<CardTitle tag={'h5'}>
@@ -142,7 +143,7 @@ const QuestionsList = ({ filterId, season=false, teacher_id, is_graduate }) => {
 					</CardTitle>
 					<div className="d-flex gap-2">
 						{
-							(is_graduate || !season)
+							(is_graduate || season)
 							&&
 							<>
 								<Dropdown isOpen={dropdownOpen} toggle={toggle}>
