@@ -37,7 +37,7 @@ function AddStudent() {
     const { t } = useTranslation();
 
     const { isLoading, Loader, fetchData } = useLoader({});
-    const { fetchData: fetchQuestion } = useLoader({});
+    const { fetchData: fetchQuestion, isLoading: isLoadingQuestions } = useLoader({});
     const { fetchData: fetchStudents, isLoading: isLoadingExaminee } = useLoader({});
     const { control, handleSubmit, setError, formState: { errors }, watch, clearErrors } = useForm({});
     const formAll = watch()
@@ -55,7 +55,8 @@ function AddStudent() {
 
     const [question_datas, setQuestionData] = useState([]);
     const [currentPageQuestions, setCurrentPageQuestions] = useState(1);
-    const [rowsPerPageQuestions, setRowsPerPageQuestions] = useState(8);
+	const defaultPage = ['Бүгд', 10, 20, 50, 75, 100]
+    const [rowsPerPageQuestions, setRowsPerPageQuestions] = useState(defaultPage[2]);
 
     const [question_count, setQuestionCount] = useState('')
     const [challenge_count, setChallengeCount] = useState('')
@@ -85,9 +86,10 @@ function AddStudent() {
 
     async function getQuestionTableData() {
         const { success, data } = await fetchQuestion(challengeAPI.getQuestionList(
+            challenge_id,
             rowsPerPageQuestions,
             currentPageQuestions,
-            challenge_id
+            searchValueQuestions,
         ))
         if (success) {
             setQuestionCount(data.question_count)
@@ -226,6 +228,23 @@ function AddStudent() {
     }, [formAll?.admission])
 
     // #endregion
+
+    // #region search in questions
+	const [searchValueQuestions, setSearchValueQuestions] = useState()
+
+	useEffect(() => {
+		if (searchValueQuestions?.length == 0) {
+			getQuestionTableData();
+		} else {
+			const timeoutId = setTimeout(() => {
+				getQuestionTableData();
+			}, 600);
+
+			return () => clearTimeout(timeoutId);
+		}
+	}, [searchValueQuestions]);
+    // #endregion
+
     return (
         <Fragment>
             <Row className="mt-2">
@@ -435,9 +454,8 @@ function AddStudent() {
                         <FullSetDataTable
                             currentPage={currentPageQuestions}
                             setCurrentPage={setCurrentPageQuestions}
-                            rowsPerPage={rowsPerPageQuestions}
                             data={question_datas}
-                            isLoading={isLoading}
+                            isLoading={isLoadingQuestions}
                             totalCount={question_count}
                             noDataComponent={
                                 <div className="mb-2" style={{ marginTop: '27px' }}>
@@ -452,6 +470,11 @@ function AddStudent() {
                             )}
 							setSelectedRows={setSelectedRows}
 							toggleCleared={toggleCleared}
+							searchValue={searchValueQuestions}
+							setSearchValue={setSearchValueQuestions}
+                            rowsPerPage={rowsPerPageQuestions}
+							setRowsPerPage={setRowsPerPageQuestions}
+							defaultPage={defaultPage}
                         />
                     </Card>
                 </Col>
