@@ -162,7 +162,7 @@ function DetailShow(){
     const detailApi = useApi().challenge
     async function getDatas() {
         if(detid) {
-            const { success, data } = await fetchData(detailApi.getDetail(currentPage, rowsPerPage, searchValue, detid));
+            const { success, data } = await fetchData(detailApi.admission.getDetail(currentPage, rowsPerPage, searchValue, detid));
             if(success) {
                 setDatas(data);
                 setTotalCount(data?.length);

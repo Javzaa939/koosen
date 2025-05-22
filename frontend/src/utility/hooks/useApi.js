@@ -1725,6 +1725,7 @@ function useApi(isDisplay=false) {
 				get: (test_id, dep, group) => instance.get(`learning/challenge/report/chart/?school=${school_id}&test=${test_id}&department=${dep}&group=${group}`),
 			},
 			admission: {
+				getDetail: (page, limit, search, test_id) => instance.get(`learning/admission-challenge/details/?page=${page}&limit=${limit}&search=${search}&test_id=${test_id}`),
 				getAddStudent: (page, limit, search,challenge) => instance.get(`learning/challenge/add/admission-user/?page=${page}&limit=${limit}&search=${search}&challenge=${challenge}`),
 				putTest: (data) => instance.put(`learning/challenge/add/admission-user/`, data),
 				deleteStudent: (student, challenge) => instance.delete(`learning/challenge/add/admission-user/${challenge}/${student}/`),

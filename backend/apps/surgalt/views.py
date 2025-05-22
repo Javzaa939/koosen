@@ -32,6 +32,7 @@ from elselt.models import MentalUser
 from elselt.models import AdmissionUserProfession
 
 from lms.models import (
+    ChallengeElseltUser,
     Group,
     Student,
     TimeTable,
@@ -87,7 +88,7 @@ from lms.models import get_choice_image_path
 
 from elselt.serializer import ElseltApproveSerializer, MentalUserSerializer
 
-from .serializers import ChallengeGroupsSerializer, ChallengeProfessionsSerializer, ChallengeReport2StudentsDetailSerializer, ChallengeReport2StudentsSerializer, LessonStandartSerializer, ChallengeQuestionsAnswersSerializer, ChallengeReport4Serializer
+from .serializers import ChallengeElseltUsersSerializer, ChallengeGroupsSerializer, ChallengeListElseltSerializer, ChallengeProfessionsSerializer, ChallengeReport2StudentsDetailSerializer, ChallengeReport2StudentsSerializer, ElseltUserChallengeSerializer, LessonStandartSerializer, ChallengeQuestionsAnswersSerializer, ChallengeReport4Serializer
 from .serializers import LessonTitlePlanSerializer
 from .serializers import LessonStandartListSerializer
 from .serializers import LessonStandartSerialzier
@@ -1533,6 +1534,9 @@ class ChallengeAPIView(
 
         if challenge_type:
             self.queryset = self.queryset.filter(challenge_type=challenge_type)
+
+            if challenge_type == f'{Challenge.ADMISSION}':
+                self.serializer_class = ChallengeListElseltSerializer
 
         datas = self.list(request).data
 
@@ -5908,129 +5912,6 @@ class ChallengeLevelCountAPIView(
 
 
 @permission_classes([IsAuthenticated])
-class ChallengeAddAdmissionUserAPIView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin
-):
-    queryset = ElseltUser.objects.all()
-    serializer_class = ElsegchSerializer
-
-    pagination_class = CustomPagination
-
-    filter_backends = [SearchFilter]
-    search_fields = ['first_name', 'register', 'email', 'code', 'last_name', 'mobile']
-
-    def get(self, request):
-        challenge = request.query_params.get('challenge')
-        challenge_student_all = Challenge.objects.get(id=challenge).elselt_user.all().values_list('id', flat=True)
-        self.queryset = self.queryset.filter(id__in=list(challenge_student_all))
-        datas = self.list(request).data
-        return request.send_data(datas)
-
-    @has_permission(must_permissions=['lms-exam-update'])
-    def put(self, request):
-        data = request.data
-        challenge_id = data.get("challenge")
-        student_code = data.get("student")
-        this_year = datetime.now().year
-        if student_code is None:
-            return request.send_error("ERR_003", 'Элсэгчийн код хоосон байна!')
-
-        try:
-            student = ElseltUser.objects.filter(register=student_code, created__year=this_year).first()
-            print(student)
-
-            if student:
-                challenge = Challenge.objects.filter(id=challenge_id).first()
-
-                if challenge:
-                    check = challenge.elselt_user.filter(id=student.id)
-
-                    if check:
-                        return request.send_error("ERR_003",f'"{student_code}" кодтой элсэгч шалгалтанд үүссэн байна.')
-
-                    challenge.elselt_user.add(student)
-                    challenge.save()
-                    return request.send_info("INF_002")
-                else:
-                    return request.send_error("ERR_002")
-            else:
-                return request.send_error("ERR_003",f'"{student_code}" кодтой элсэгч олдсонгүй!')
-        except Exception as e:
-            print(e)
-            return request.send_error("ERR_002")
-
-    @has_permission(must_permissions=['lms-exam-update'])
-    def delete(self, request, pk, student):
-        try:
-            challenge = Challenge.objects.get(id=pk)
-            student = ElseltUser.objects.get(pk=student)
-            challenge.elselt_user.remove(student)
-            challenge.save()
-
-            return request.send_info("INF_003")
-
-        except Exception as e:
-            print(e)
-            return request.send_error("ERR_002")
-
-
-@permission_classes([IsAuthenticated])
-class AdmissionChallengeAddKindAPIView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
-):
-
-    queryset = Challenge.objects.all()
-    serializer_class = ChallengeSerializer
-
-    @has_permission(must_permissions=['lms-exam-update'])
-    def put(self, request, pk=None):
-        try:
-            datas = request.data
-            select_name = datas.get('select_name')
-            qs_admission_user = None
-
-            if select_name == 'admission':
-                select_admission_ids = datas.get('admission')
-
-                if not select_admission_ids:
-                    return request.send_error("ERR_003", 'Элсэлтийг сонгоно уу!')
-                qs_admission_user = ElseltUser.objects.filter(
-                    admissionuserprofession__profession__admission__is_store=False,
-                    admissionuserprofession__state=AdmissionUserProfession.STATE_SEND
-                )
-
-                qs_admission_user = qs_admission_user.filter(admissionuserprofession__profession__admission__in=select_admission_ids)
-            elif select_name == 'profession':
-                select_profession_ids = datas.get('profession')
-
-                if not select_profession_ids:
-                    return request.send_error("ERR_003", 'Хөтөлбөрийг сонгоно уу!')
-                qs_admission_user = ElseltUser.objects.filter(
-                    admissionuserprofession__state=AdmissionUserProfession.STATE_SEND
-                )
-
-                qs_admission_user = qs_admission_user.filter(admissionuserprofession__profession__profession__in=select_profession_ids)
-            else:
-                return request.send_error("ERR_002")
-
-            with transaction.atomic():
-                challenge = Challenge.objects.get(id=pk)
-                challenge.elselt_user.add(*qs_admission_user)
-                challenge.save()
-        except Exception:
-            traceback.print_exc()
-            return request.send_error("ERR_002")
-        return request.send_info("INF_002")
-
-
-@permission_classes([IsAuthenticated])
 class ChallengeAddStudentAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -7730,3 +7611,156 @@ class GraduateQuestionApiView(
         data = self.queryset.annotate(question_count=Subquery(question_sub)).values("id", "name", 'question_count')
 
         return request.send_data(list(data))
+
+
+# region Admission challenge
+@permission_classes([IsAuthenticated])
+class ChallengeAddAdmissionUserAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin
+):
+    queryset = ElseltUser.objects.all()
+    serializer_class = ElsegchSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['first_name', 'register', 'email', 'code', 'last_name', 'mobile']
+
+    def get(self, request):
+        challenge = request.query_params.get('challenge')
+        challenge_student_all = Challenge.objects.get(id=challenge).elselt_user.all().values_list('id', flat=True)
+        self.queryset = self.queryset.filter(id__in=list(challenge_student_all))
+        datas = self.list(request).data
+        return request.send_data(datas)
+
+    @has_permission(must_permissions=['lms-exam-update'])
+    def put(self, request):
+        data = request.data
+        challenge_id = data.get("challenge")
+        student_code = data.get("student")
+        this_year = datetime.now().year
+        if student_code is None:
+            return request.send_error("ERR_003", 'Элсэгчийн код хоосон байна!')
+
+        try:
+            student = ElseltUser.objects.filter(register=student_code, created__year=this_year).first()
+            print(student)
+
+            if student:
+                challenge = Challenge.objects.filter(id=challenge_id).first()
+
+                if challenge:
+                    check = challenge.elselt_user.filter(id=student.id)
+
+                    if check:
+                        return request.send_error("ERR_003",f'"{student_code}" кодтой элсэгч шалгалтанд үүссэн байна.')
+
+                    challenge.elselt_user.add(student)
+                    challenge.save()
+                    return request.send_info("INF_002")
+                else:
+                    return request.send_error("ERR_002")
+            else:
+                return request.send_error("ERR_003",f'"{student_code}" кодтой элсэгч олдсонгүй!')
+        except Exception as e:
+            print(e)
+            return request.send_error("ERR_002")
+
+    @has_permission(must_permissions=['lms-exam-update'])
+    def delete(self, request, pk, student):
+        try:
+            challenge = Challenge.objects.get(id=pk)
+            student = ElseltUser.objects.get(pk=student)
+            challenge.elselt_user.remove(student)
+            challenge.save()
+
+            return request.send_info("INF_003")
+
+        except Exception as e:
+            print(e)
+            return request.send_error("ERR_002")
+
+
+@permission_classes([IsAuthenticated])
+class AdmissionChallengeAddKindAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+):
+
+    queryset = Challenge.objects.all()
+    serializer_class = ChallengeSerializer
+
+    @has_permission(must_permissions=['lms-exam-update'])
+    def put(self, request, pk=None):
+        try:
+            datas = request.data
+            select_name = datas.get('select_name')
+            qs_admission_user = None
+
+            if select_name == 'admission':
+                select_admission_ids = datas.get('admission')
+
+                if not select_admission_ids:
+                    return request.send_error("ERR_003", 'Элсэлтийг сонгоно уу!')
+                qs_admission_user = ElseltUser.objects.filter(
+                    admissionuserprofession__profession__admission__is_store=False,
+                    admissionuserprofession__state=AdmissionUserProfession.STATE_SEND
+                )
+
+                qs_admission_user = qs_admission_user.filter(admissionuserprofession__profession__admission__in=select_admission_ids)
+            elif select_name == 'profession':
+                select_profession_ids = datas.get('profession')
+
+                if not select_profession_ids:
+                    return request.send_error("ERR_003", 'Хөтөлбөрийг сонгоно уу!')
+                qs_admission_user = ElseltUser.objects.filter(
+                    admissionuserprofession__state=AdmissionUserProfession.STATE_SEND
+                )
+
+                qs_admission_user = qs_admission_user.filter(admissionuserprofession__profession__profession__in=select_profession_ids)
+            else:
+                return request.send_error("ERR_002")
+
+            with transaction.atomic():
+                challenge = Challenge.objects.get(id=pk)
+                challenge.elselt_user.add(*qs_admission_user)
+                challenge.save()
+        except Exception:
+            traceback.print_exc()
+            return request.send_error("ERR_002")
+        return request.send_info("INF_002")
+
+
+@permission_classes([IsAuthenticated])
+class AdmissionChallengeDetailApiView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+):
+    queryset = ChallengeElseltUser.objects.all().order_by('score')
+    serializer_class = ChallengeElseltUsersSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['elselt_user__register', 'elselt_user__first_name', 'elselt_user__last_name']
+
+    def get(self, request):
+        test_id = request.query_params.get('test_id')
+        student_list = self.queryset.filter(challenge=test_id).values_list('elselt_user__id', flat=True)
+        students_qs = ElseltUser.objects.filter(id__in=student_list)
+        students_qs = self.filter_queryset(students_qs)
+        student_data = ElseltUserChallengeSerializer(students_qs, many=True, context={'test_id': test_id}).data
+
+        for student in student_data:
+            challenge_student = ChallengeElseltUser.objects.filter(elselt_user__id=student['id'], challenge=test_id).first()
+            if challenge_student:
+                student['is_not_exam_failed'] = (challenge_student.score or 0) >= 18
+
+        return request.send_data(student_data)
+# endregion
