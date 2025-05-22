@@ -6130,8 +6130,8 @@ class ChallengeQuestionsAPIView(
 
         if challenge_id:
             all_data = challenge.questions.all().order_by('id')
-            for backend in list(self.filter_backends):
-                all_data = backend().filter_queryset(request, all_data, self)
+            for backend_filter in list(self.filter_backends):
+                all_data = backend_filter().filter_queryset(request, all_data, self)
             paginator = self.pagination_class()
             paginated_all_data = paginator.paginate_queryset(all_data, request, view=self)
             serializer = self.get_serializer(paginated_all_data, many=True)
