@@ -3229,6 +3229,8 @@ class ExamTimeTableListAPIView(
         " Шалгалтын хуваарь жагсаалт "
 
         is_online = self.request.query_params.get("is_online")
+        lesson_year, lesson_season = get_active_year_season()
+        self.queryset = self.queryset.filter(lesson_year=lesson_year, lesson_season=lesson_season)
 
         if is_online:
             is_online = str2bool(is_online)

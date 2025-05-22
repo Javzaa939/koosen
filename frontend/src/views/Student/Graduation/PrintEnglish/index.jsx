@@ -149,7 +149,7 @@ export default function PrintEnglish()
                             <br />
                             <span className='text-uppercase'>{data?.student?.first_name_eng}</span> <span className='text-uppercase'>{data?.student?.last_name_eng}</span>
                             <br />
-                            Upon the order number {data?.graduation_number} of the President of University of Internal Affairs,
+                            Upon the order number {data?.graduation_number} of the President of University,
                             <br/>
                             dated {monthToText(data?.graduation_date?.substring(5, 7))} {data?.graduation_date?.substring(8, 10)}, {data?.graduation_date?.substring(0, 4)}
                             <br />

@@ -85,9 +85,25 @@ export default function PrintNational()
 
     function tushaal(text)
     {
-        let slash = text?.split('/')
+        var datas = []
+        if (text?.includes(',')) {
+            var texts = text?.split(',')
+            texts?.map((c) => {
+                {
+                    let slash = c?.split('/')
+                    datas.push(slash[1])
+                }
+            })
 
-        return <span><span> ᠠ‍ /</span><span style={{ fontFamily: 'CMSUB', fontSize: '25px' }}>{slash?.length > 0 ? slash[1] : text}</span></span>
+            return <span>
+                            <span> ᠠ‍ /</span><span style={{ fontFamily: 'CMSUB', fontSize: '25px' }}>{datas[0]}</span>,
+                            <span> ᠠ‍ /</span><span style={{ fontFamily: 'CMSUB', fontSize: '25px' }}>{datas[1]}</span>
+                    </span>
+
+        } else {
+            let slash = text?.split('/')
+            return <span><span> ᠠ‍ /</span><span style={{ fontFamily: 'CMSUB', fontSize: '25px' }}>{slash?.length > 0 ? slash[1] : text}</span></span>
+        }
     }
 
     function dugeerUg(too)
