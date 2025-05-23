@@ -3809,7 +3809,7 @@ class PsychologicalTestResultExcelByScopeAPIView(
         # Сүүлд нь хэрэглэгчийнхээ мэдээллийг өгөөд
         datas['first_name'] = user.first_name
         datas['last_name'] = user.last_name
-        datas['register'] = user.register
+        datas['register'] = user.register_num
 
         return datas # Буцаана
 
@@ -3865,7 +3865,7 @@ class PsychologicalTestResultExcelByScopeAPIView(
         # Сүүлд нь хэрэглэгчийнхээ мэдээллийг өгөөд
         datas['first_name'] = user.first_name
         datas['last_name'] = user.last_name
-        datas['register'] = user.register
+        datas['register'] = user.register_num
 
         return datas # Буцаана
 
@@ -3925,7 +3925,7 @@ class PsychologicalTestResultExcelByScopeAPIView(
         # Сүүлд нь хэрэглэгчийнхээ мэдээллийг өгөөд
         datas['first_name'] = user.first_name
         datas['last_name'] = user.last_name
-        datas['register'] = user.register
+        datas['register'] = user.register_num
 
         return datas # Буцаана
 
@@ -4019,6 +4019,12 @@ class PsychologicalTestResultExcelByScopeAPIView(
                 user_data['anxiety'] = self.classify_score(total_anxiety_score, anxiety_thresholds, labels)
                 user_data['stress'] = self.classify_score(total_stress_score, stress_thresholds, labels)
 
+                all_score_questions = None
+                knowledge_score = None
+                skill_score = None
+                diplom_score = None
+                mental_score = None
+                true_false_score = None
 
                 # Асуулга-3
                 if type_question_3:
@@ -4142,7 +4148,7 @@ class PsychologicalTestResultExcelByScopeAPIView(
                 prognoz_data = self.prognoz(user_obj, type_question_4)
                 prognoz_data['mental_score'] = mental_score
                 prognoz_data['true_false_score'] = true_false_score
-                prognoz_data['overall_review'] = user_data['overall_review']
+                prognoz_data['overall_review'] = user_data.get('overall_review')
                 # END ------------------------------------------------------------------------------------------------------------------------->
 
                 # Хэрэглэгчийнхээ бүх мэдээллийг үндсэн буцаах list-үүддээ нэмнэ
