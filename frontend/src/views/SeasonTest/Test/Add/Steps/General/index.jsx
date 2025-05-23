@@ -195,7 +195,7 @@ const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEdit
                     </Col>
                     <Col md={6}>
                         <Label className="form-label" for="survey">
-                            {t('Сэтгэлзүйн сорил')}
+                            {t('Сэтгэл ханамжийн судалгаа')}
                         </Label>
                         <Controller
                             control={control}
