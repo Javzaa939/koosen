@@ -4185,18 +4185,24 @@ class IQTestResultExcelAPIView(
     """ IQ Test үр дүн тайлан excel """
 
     def get(self, request):
+        try:
+            test_id = request.query_params.get('testId')
+            test_obj = PsychologicalTest.objects.get(id=test_id)
+
+            if not test_obj:
+                return request.send_data(None)
             big_data = []
             adm = request.query_params.get('adm')
 
             # IQ test Нийт асуултын тоо авах
-            question = PsychologicalTest.objects.filter(id=3).values('questions').count()
+            question = test_obj.questions.count()
             user_ids = AdmissionUserProfession.objects.values_list('user', flat=True)
+
             if adm:
                 prof_ids = AdmissionRegisterProfession.objects.filter(admission=adm).values_list('id', flat=True)
                 user_ids = AdmissionUserProfession.objects.filter(profession__in=prof_ids).values_list('user', flat=True)
-
-            queryser_mental = MentalUser.objects.filter(user__in=user_ids)
-            mental_users = queryser_mental.filter(challenge__title__icontains='IQ тест', answer__isnull=False).select_related('user')
+            queryset_mental = MentalUser.objects.filter(user__in=user_ids)
+            mental_users = queryset_mental.filter(challenge=test_id, answer__isnull=False).select_related('user')
             elselt_users = {user.id: user for user in ElseltUser.objects.filter(id__in=mental_users.values_list('user_id', flat=True))}
 
             # Шалгалт өгсөн хүн бүр
@@ -4208,6 +4214,7 @@ class IQTestResultExcelAPIView(
                     'scores': [],
                     'total_score': 0
                 }
+
                 user_obj = elselt_users[user.user.id]
                 user_data['first_name'] = user_obj.first_name
                 user_data['last_name'] = user_obj.last_name
@@ -4224,7 +4231,6 @@ class IQTestResultExcelAPIView(
                     question_id, choice_id = pair.split(':')
                     question_ids.append(question_id.strip().strip("'"))
                     chosen_choices.append(choice_id.strip().strip("'"))
-
                 def convert_to_int(value):
                     if value == 'True':
                         return 1
@@ -4232,7 +4238,6 @@ class IQTestResultExcelAPIView(
                         return 0
                     else:
                         return int(value)
-
                 question_ids = list(map(int, question_ids))
                 chosen_choices = list(map(convert_to_int, chosen_choices))
 
@@ -4251,15 +4256,15 @@ class IQTestResultExcelAPIView(
                             # Зөв бол оноо шалгах
                             user_data['scores'].append(int(score))
                             user_data['total_score'] += score
-
                 big_data.append(user_data)
-
             return_data = {
                 'question':question,
                 'user_data':big_data
             }
-
-            return request.send_data(return_data)
+        except Exception:
+            traceback.print_exc()
+            return request.send_error('ERR_002')
+        return request.send_data(return_data)
 
 
 class IQTestResultExcelByScopeAPIView(
@@ -4303,14 +4308,12 @@ class IQTestResultExcelByScopeAPIView(
 
             if not is_scope_kind_exists:
                 return request.send_data(None)
-
             # IQ test Нийт асуултын тоо, ID авах
             test_id = request.query_params.get('testId')
             test_obj = PsychologicalTest.objects.get(id=test_id)
 
             if not test_obj:
                 return request.send_data(None)
-            test_id = test_obj.id
             mental_users = self.get_scope_users(scope_kind,test_id)
 
             if not mental_users:
