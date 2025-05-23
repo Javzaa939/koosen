@@ -57,9 +57,15 @@ function Result() {
     const excelApi = useApi().challenge.psychologicalTestResult
 
     async function resultExcelReport() {
-        const { success, data } = await fetchData(excelApi.excelResult(adm));
-        if (success) {
-            downloadExcelReport(data)
+        if (active === 2) {
+            const { success, data } = await fetchData(excelApi.excelResult(adm));
+            if (success) {
+                downloadExcelReport(data)
+            }
+        } else {
+            const { success, data } = await fetchData(excelApi.excelResultByScope(active));
+
+            if (success) downloadExcelReport(data)
         }
     }
 
