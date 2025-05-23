@@ -1720,7 +1720,9 @@ function useApi(isDisplay=false) {
 				getResult: (cdata) => instance.post(`learning/psychological_test_result_show/`,cdata),
 
 				excelResult:(adm) => instance.get(`learning/psychological_test_result_excel/?adm=${adm}`),
-				iqExcelResult:(adm)=>instance.get(`learning/iq_test_result_excel/?adm=${adm}`)
+				excelResultByScope:(scope) => instance.get(`learning/psychological_test_result_excel/by-scope/?scope=${scope}`),
+				iqExcelResult:(adm)=>instance.get(`learning/iq_test_result_excel/?adm=${adm}`),
+				iqExcelResultByScope:(scope)=>instance.get(`learning/iq_test_result_excel/by-scope/?scope=${scope}`)
 
 			},
 			report:{

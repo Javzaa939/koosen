@@ -57,16 +57,28 @@ function Result() {
     const excelApi = useApi().challenge.psychologicalTestResult
 
     async function resultExcelReport() {
-        const { success, data } = await fetchData(excelApi.excelResult(adm));
-        if (success) {
-            downloadExcelReport(data)
+        if (active === 2) {
+            const { success, data } = await fetchData(excelApi.excelResult(adm));
+            if (success) {
+                downloadExcelReport(data)
+            }
+        } else {
+            const { success, data } = await fetchData(excelApi.excelResultByScope(active));
+
+            if (success) downloadExcelReport(data)
         }
     }
 
     async function IQresultExcelReport(){
-        const {success,data} = await fetchData(excelApi.iqExcelResult(adm));
-        if(success){
-            downloadIQExcelReport(data)
+        if (active === 2) {
+            const {success,data} = await fetchData(excelApi.iqExcelResult(adm));
+            if(success){
+                downloadIQExcelReport(data)
+            }
+        } else {
+            const { success, data } = await fetchData(excelApi.iqExcelResultByScope(active));
+
+            if (success) downloadIQExcelReport(data)
         }
     }
 
@@ -98,7 +110,7 @@ function Result() {
                     <Col className="me-2 d-flex justify-content-end gap-1">
                         <Button
                             color='primary'
-                            disabled={adm ? false : true}
+                            disabled={(adm || active !== 2) ? false : true}
                             className='d-flex align-items-center px-75'
                             id='test_button'
                             onClick={() => IQresultExcelReport()}
@@ -113,7 +125,7 @@ function Result() {
                             color='primary'
                             className='d-flex align-items-center px-75'
                             id='state_button'
-                            disabled={adm ? false : true}
+                            disabled={(adm || active !== 2) ? false : true}
                             onClick={() => resultExcelReport()}
                         >
                             <RiDownloadFill className='me-25' />
