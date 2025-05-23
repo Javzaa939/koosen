@@ -3543,7 +3543,6 @@ class PsychologicalTestResultExcelAPIView(
 
             if not psychologicaltest_qs:
                 return request.send_data(None)
-
             # Нийт буцаах датануудыг store хийх variable-ууд
             datas = list()
             dass21_datas = list()
@@ -3892,7 +3891,9 @@ class PsychologicalTestResultExcelByScopeAPIView(
             53, 54, 56, 57, 59, 60, 62, 63, 65, 66, 67, 68, 69, 70, 71,
             72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86
         ]
+
         mental_false = [4, 8, 17, 24, 30, 35, 41, 46, 50, 55, 64]
+
         # Энэ асуултанд Үгүй гэж хариулсан бол оноо өгнө, нөгөө 2 нь хувьсагчийн нэрээрээ тодорхой
         true_false = [1, 6, 10, 12, 15, 19, 21, 26, 33, 38, 44, 49, 52, 58, 61]
 
@@ -3927,8 +3928,6 @@ class PsychologicalTestResultExcelByScopeAPIView(
                 elif question_number in mental_true:
                     # Тийм үед оноо өгөх асуултуудыг яг response-оор нь л value-д утгыг нь оноож өгнө
                     datas[f'score_{question_number}'] = int(response)
-
-
         # Сүүлд нь хэрэглэгчийнхээ мэдээллийг өгөөд
         datas['first_name'] = user.first_name
         datas['last_name'] = user.last_name
@@ -3943,13 +3942,11 @@ class PsychologicalTestResultExcelByScopeAPIView(
 
         if not is_scope_kind_exists:
             return request.send_data(None)
-
         test_id = request.query_params.get('testId')
         psychologicaltest_qs = PsychologicalTest.objects.filter(id=test_id)
 
         if not psychologicaltest_qs:
             return request.send_data(None)
-
         # Нийт буцаах датануудыг store хийх variable-ууд
         datas = list()
         dass21_datas = list()
@@ -4174,6 +4171,7 @@ class PsychologicalTestResultExcelByScopeAPIView(
             'motivation_datas':motivation_datas,
             'prognoz_datas':prognoz_datas
         }
+
         return request.send_data(return_datas)
 
 
