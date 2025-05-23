@@ -64,9 +64,15 @@ function Result() {
     }
 
     async function IQresultExcelReport(){
-        const {success,data} = await fetchData(excelApi.iqExcelResult(adm));
-        if(success){
-            downloadIQExcelReport(data)
+        if (active === 2) {
+            const {success,data} = await fetchData(excelApi.iqExcelResult(adm));
+            if(success){
+                downloadIQExcelReport(data)
+            }
+        } else {
+            const { success, data } = await fetchData(excelApi.iqExcelResultByScope(active));
+
+            if (success) downloadIQExcelReport(data)
         }
     }
 

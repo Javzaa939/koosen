@@ -3847,6 +3847,121 @@ class IQTestResultExcelAPIView(
 
             return request.send_data(return_data)
 
+
+class IQTestResultExcelByScopeAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+    serializer_class = PsychologicalTestQuestionsSerializer
+    """ IQ Test үр дүн тайлан excel. By scope """
+
+    @staticmethod
+    def get_scope_users(scope_kind,test_id):
+        scope_users_qs = None
+
+        if scope_kind == PsychologicalTest.SCOPE_STUDENTS:
+            scope_users_qs = Student.objects.filter(
+                status__name__icontains='Суралцаж буй',
+                mentalstudents__isnull=False,
+                mentalstudents__answer__isnull=False,
+                mentalstudents__challenge=test_id
+            )
+
+            scope_users_qs = scope_users_qs.annotate(
+                register=F('register_num'),
+                answer=F('mentalstudents__answer'),
+            )
+
+            scope_users_qs = scope_users_qs.values(
+                'first_name',
+                'last_name',
+                'register',
+                'answer'
+            )
+
+        return scope_users_qs
+
+    def get(self, request):
+            scope_kind = request.query_params.get('scope')
+            is_scope_kind_exists = any(scope_kind == choice[0] for choice in PsychologicalTest.SCOPE_CHOICES)
+
+            if not is_scope_kind_exists:
+                return request.send_data(None)
+
+            # IQ test Нийт асуултын тоо, ID авах
+            test_obj = PsychologicalTest.objects.filter(scope_kind=scope_kind,title__icontains='IQ Test').first()
+
+            if not test_obj:
+                return request.send_data(None)
+            test_id = test_obj.id
+            mental_users = self.get_scope_users(scope_kind,test_id)
+
+            if not mental_users:
+                return request.send_data(None)
+            big_data = []
+
+            # Шалгалт өгсөн хүн бүр
+            for user in mental_users:
+                user_data = {
+                    'first_name': '',
+                    'last_name': '',
+                    'register': '',
+                    'scores': [],
+                    'total_score': 0
+                }
+
+                user_data['first_name'] = user.get('first_name')
+                user_data['last_name'] = user.get('last_name')
+                user_data['register'] = user.get('register')
+                # TODO: examine from this line
+
+                # Хариулттай үед
+                answer = ast.literal_eval(user.get('answer'))
+                value = str(answer)[1:-1]
+                pairs = [pair.strip() for pair in value.split(',')]
+
+                question_ids = []
+                chosen_choices = []
+
+                for pair in pairs:
+                    question_id, choice_id = pair.split(':')
+                    question_ids.append(question_id.strip().strip("'"))
+                    chosen_choices.append(choice_id.strip().strip("'"))
+
+                def convert_to_int(value):
+                    if value == 'True':
+                        return 1
+                    elif value == 'False':
+                        return 0
+                    else:
+                        return int(value)
+                question_ids = list(map(int, question_ids))
+                chosen_choices = list(map(convert_to_int, chosen_choices))
+
+                for question_id, choice_id in zip(question_ids, chosen_choices):
+                    queryset = PsychologicalTestQuestions.objects.filter(id=question_id).first()
+
+                    if queryset:
+                        # Хариулт зөв үгүйг шалгах
+                        choice = PsychologicalQuestionChoices.objects.filter(id=choice_id).first()
+
+                        if choice:
+                            score = queryset.score if choice.is_correct else 0
+
+                            # Зөв бол оноо шалгах
+                            user_data['scores'].append(int(score))
+                            user_data['total_score'] += score
+                big_data.append(user_data)
+            question_count = test_obj.questions.count()
+
+            return_data = {
+                'question':question_count,
+                'user_data':big_data
+            }
+
+            return request.send_data(return_data)
+
+
 @permission_classes([IsAuthenticated])
 class QuestionsListAPIView(
     generics.GenericAPIView,
