@@ -5104,3 +5104,18 @@ class PsycholocalHelp(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class MentalStudent(models.Model):
+    """ Элсэгчдийн сэтгэлзүйн сорил """
+
+    user = models.ForeignKey(Student, on_delete=models.CASCADE, verbose_name='Оюутан', null=True)
+    challenge = models.ForeignKey(PsychologicalTest, on_delete=models.CASCADE, verbose_name='Сэтгэлзүйн сорил')
+    description = models.TextField(verbose_name='Тайлбар', null=True)
+    answer = models.TextField(null=True, verbose_name='Хариулт')
+    score = models.FloatField(null=True, verbose_name='Элсэгчийн нийт оноо')
+    start_time = models.DateTimeField(null=True, verbose_name='Шалгалт өгч эхэлсэн хугацаа')
+    end_time = models.DateTimeField(null=True, verbose_name='Шалгалт өгч дууссан хугацаа')
+
+    created_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now=True)
