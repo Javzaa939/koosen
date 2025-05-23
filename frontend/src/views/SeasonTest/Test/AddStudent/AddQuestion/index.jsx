@@ -25,20 +25,45 @@ const AddQuestion = ({ open, handleModal, lesson, refreshDatas, challenge, refre
     const { fetchData } = useLoader({ isFullScreen: true });
 
     const [select_data, setSelectDatas] = useState([])
+    const [yearOption, setYearOption] = useState([])
+    const [seasonOption, setSeasonOption] = useState([])
+
+    const [lessonYear, setLessonYear] = useState('')
+    const [lessonSeason, setSeason] = useState('')
 
     const challengeAPI = useApi().challenge.question
     const challengesAPI = useApi().challenge
+    const seasonApi = useApi().settings.season
 
     async function getSelectDatas() {
-        const { success, data } = await fetchData(challengeAPI.getLevel(lesson))
+        const { success, data } = await fetchData(challengeAPI.getLevel(lesson, lessonYear, lessonSeason))
         if (success) {
             setSelectDatas(data)
         }
     }
 
+    async function getYears() {
+        const { success, data } = await fetchData(challengeAPI.getYear(lesson))
+        if (success) {
+            setYearOption(data)
+        }
+    }
+
+    async function getSeason() {
+        const {success, data } = await fetchData(seasonApi.get())
+        if (success) {
+            setSeasonOption(data)
+        }
+    }
+
+    useEffect(() => {
+        getYears()
+        getSeason()
+    }, [])
+
     useEffect(() => {
         getSelectDatas()
-    }, [])
+    }, [lessonYear, lessonSeason])
 
     const numberOfQuestions = watch("number_questions");
     const percentageOfQuestions = watch("number_questions_percentage");
@@ -74,6 +99,68 @@ const AddQuestion = ({ open, handleModal, lesson, refreshDatas, challenge, refre
                 </ModalHeader>
                 <ModalBody className="flex-grow-1 mb-3">
                     <Row tag={Form} onSubmit={handleSubmit(onSubmit)}>
+                        <Col md={12}>
+                            <Label className="form-label" for="lesson_year">
+                                {t('Хичээлийн жил')}
+                            </Label>
+                            <Controller
+                                control={control}
+                                defaultValue=''
+                                name="lesson_year"
+                                render={({ field: { value, onChange } }) => (
+                                    <Select
+                                        id="lesson_year"
+                                        name="lesson_year"
+                                        isClearable
+                                        classNamePrefix='select'
+                                        className='react-select'
+                                        placeholder={`-- Сонгоно уу --`}
+                                        options={yearOption || []}
+                                        value={yearOption?.find((c) => c.id === lessonYear)}
+                                        noOptionsMessage={() => 'Хоосон байна'}
+                                        onChange={(val) =>
+                                            (
+                                                setLessonYear(val?.id || ''),
+                                                onChange(val?.id)
+                                            )
+                                        }
+                                        styles={ReactSelectStyles}
+                                        getOptionValue={(option) => option.id}
+                                        getOptionLabel={(option) => option.name}
+                                    />
+                                )}
+                            />
+                        </Col>
+                        <Col md={12}>
+                            <Label className="form-label" for="lesson_season">
+                                {t('Хичээлийн улирал')}
+                            </Label>
+                            <Controller
+                                control={control}
+                                defaultValue=''
+                                name="lesson_season"
+                                render={({ field: { value, onChange } }) => (
+                                    <Select
+                                        id="lesson_season"
+                                        name="lesson_season"
+                                        isClearable
+                                        classNamePrefix='select'
+                                        className='react-select'
+                                        placeholder={`-- Сонгоно уу --`}
+                                        options={seasonOption || []}
+                                        value={seasonOption?.find((c) => c.id === lessonYear)}
+                                        noOptionsMessage={() => 'Хоосон байна'}
+                                        onChange={(val) => (
+                                            setSeason(val?.id || ''),
+                                            onChange(val?.id)
+                                        )}
+                                        styles={ReactSelectStyles}
+                                        getOptionValue={(option) => option.id}
+                                        getOptionLabel={(option) => option.season_name}
+                                    />
+                                )}
+                            />
+                        </Col>
                         <Col md={12}>
                             <Label className="form-label" for="subject">
                                 {t('Түвшин сонгох')}

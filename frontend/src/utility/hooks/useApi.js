@@ -1642,7 +1642,9 @@ function useApi(isDisplay=false) {
 				},
 				getByTitle: (page, limit, search, titleId, teacher_id, stype='', level='',  is_graduate=false, is_elselt=false) => instance.get(`learning/questions/title/${teacher_id}/?page=${page}&limit=${limit}&search=${search}&titleId=${titleId}&stype=${stype}&level=${level}&is_graduate=${is_graduate}&is_elselt=${is_elselt}`),
 				getTitle: (lesson='', is_season=false, teacher_id=0, challengeType='') => instance.get(`learning/questions/title/list/${teacher_id}/?lesson=${lesson}&season=${is_season}&challengeType=${challengeType}`),
-				getLevel: (lesson='') => instance.get(`learning/questions/level/list/?lesson=${lesson}`),
+				getLevel: (lesson='', lesson_year='', lesson_season='') => instance.get(`learning/questions/level/list/?lesson=${lesson}&lesson_year=${lesson_year}&lesson_season=${lesson_season}`),
+				getYear: (lesson='') => instance.get(`learning/questions/year/list/?lesson=${lesson}`),
+
 				postTitle: (datas) => instance.post(`learning/questions/title/`, datas),
 				putTitle: (id, datas) => instance.put(`learning/questions/title/${id}/`, datas),
 				postTestQuestions: (data) =>
@@ -1744,7 +1746,7 @@ function useApi(isDisplay=false) {
 				// types болон selected_value дамжиж ирэх үед back-руу дамжуулна
 				get: ({ limit='Бүгд', page=1, types='', selectedValue='' }) => instance.get(`survey/surveyrange/?limit=${limit}&page=${page}&types=${types}&selected_value=${selectedValue}`),
 			},
-			get:(limit, page, selectedTime, search) => instance.get(`survey/?limit=${limit}&page=${page}&time_type=${selectedTime}&search=${search}`),
+			get:(limit, page, selectedTime='', search='') => instance.get(`survey/?limit=${limit}&page=${page}&time_type=${selectedTime}&search=${search}`),
 			getList: (search) => instance.get(`survey/list/?search=${search}`),
 			getOne: (pk) => instance.get(`survey/${pk}/`),
 			post: (cdatas) => instance.post('survey/', cdatas),

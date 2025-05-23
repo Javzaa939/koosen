@@ -104,6 +104,7 @@ urlpatterns = [
     path('questions/title/<int:pk>/', QuestionsTitleAPIView.as_view()),
     path('questions/title/list/<int:pk>/', QuestionsTitleListAPIView.as_view()),
     path('questions/level/list/', QuestionsLevelListAPIView.as_view()),
+    path('questions/year/list/', QuestionsYearListAPIView.as_view()),
     path('questions/excel/',QuestionExcelAPIView.as_view()),
 
 

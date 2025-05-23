@@ -28,12 +28,14 @@ const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEdit
 	const { fetchData } = useLoader({ isFullScreen: true });
     const [lessonOption, setLessonOption] = useState([])
     const [timeTableOption, setTimeTableOption] = useState([])
+    const [surveyOption, setSurveyOption] = useState([])
     const [isRepeat, setIsRepeat] = useState(false)
-	const [startPicker, setStartPicker] = useState(new Date())
+	// const [startPicker, setStartPicker] = useState(new Date())
 
     const teacherLessonApi = useApi().study.lesson
     const examTimeTableApi = useApi().timetable.exam
     const reApi = useApi().timetable.re_exam
+    const surveyApi = useApi().survey
 
     async function onSubmit(cdata) {
         delete cdata['exam_timetable']
@@ -62,6 +64,14 @@ const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEdit
         }
     }
 
+    async function getSurvey()
+    {
+        const { success, data } = await fetchData(surveyApi.get(10000, 1 ))
+        if(success) {
+            setSurveyOption(data?.results)
+        }
+    }
+
     async function getExamTimeTableDatas() {
         if (isRepeat) {
             const { success, data } = await fetchData(reApi.getList())
@@ -80,6 +90,7 @@ const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEdit
         () =>
         {
             getLesson()
+            getSurvey()
         },
         []
     )
@@ -176,6 +187,38 @@ const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEdit
                                         styles={ReactSelectStyles}
                                         getOptionValue={(option) => option.id}
                                         getOptionLabel={(option) => isRepeat ? option.lesson_name : option.lesson_code + ' ' + option.lesson_name}
+                                    />
+                                )
+                            }}
+                        ></Controller>
+                        {errors.exam_timetable && <FormFeedback className='d-block'>{t(errors.exam_timetable.message)}</FormFeedback>}
+                    </Col>
+                    <Col md={6}>
+                        <Label className="form-label" for="survey">
+                            {t('Сэтгэлзүйн сорил')}
+                        </Label>
+                        <Controller
+                            control={control}
+                            defaultValue=''
+                            name="survey"
+                            render={({ field: { value, onChange} }) => {
+                                return (
+                                    <Select
+                                        id="survey"
+                                        name="survey"
+                                        isClearable
+                                        classNamePrefix='select'
+                                        className='react-select'
+                                        placeholder={t(`-- Сонгоно уу --`)}
+                                        value={surveyOption?.find((c) => c.id === value)}
+                                        options={surveyOption || []}
+                                        noOptionsMessage={() => 'Хоосон байна'}
+                                        onChange={(val) => {
+                                            onChange(val?.id || '')
+                                        }}
+                                        styles={ReactSelectStyles}
+                                        getOptionValue={(option) => option.id}
+                                        getOptionLabel={(option) => option?.title}
                                     />
                                 )
                             }}

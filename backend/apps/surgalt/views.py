@@ -5221,11 +5221,20 @@ class QuestionsLevelListAPIView(
     queryset = QuestionTitle.objects.all().filter(is_season=True)
     def get(self, request):
         lesson = request.query_params.get('lesson')
+        lesson_year = request.query_params.get('lesson_year')
+        lesson_season = request.query_params.get('lesson_season')
 
         if lesson:
             self.queryset = self.queryset.filter(lesson=lesson)
 
         question_queryset = ChallengeQuestions.objects.filter(title__in=self.queryset)
+
+        if lesson_year:
+            question_queryset = question_queryset.filter(lesson_year=lesson_year)
+
+        if lesson_season:
+            question_queryset = question_queryset.filter(lesson_season=lesson_season)
+
         datas = (
             question_queryset
             .values('level')
@@ -5236,6 +5245,32 @@ class QuestionsLevelListAPIView(
 
         return request.send_data(list(datas))
 
+
+@permission_classes([IsAuthenticated])
+class QuestionsYearListAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+):
+    """ Шалгалтын хичээлийн групп хийв
+    """
+
+    queryset = QuestionTitle.objects.all().filter(is_season=True)
+    def get(self, request):
+        lesson = request.query_params.get('lesson')
+
+        if lesson:
+            self.queryset = self.queryset.filter(lesson=lesson)
+
+        question_queryset = ChallengeQuestions.objects.filter(title__in=self.queryset)
+        datas = (
+            question_queryset
+            .values('lesson_year')
+            .distinct('lesson_year')
+            .annotate(name=F("lesson_year"), id=F('lesson_year'))
+            .values('name', 'id')
+        )
+
+        return request.send_data(list(datas))
 
 class TestQuestionsAPIView(
     generics.GenericAPIView,
@@ -5780,6 +5815,10 @@ class ChallengeSedevCountAPIView(
         level = data.get("level_of_question")
         subInfo = data.get("subInfo") # Төгсөлтийн шалгалт
         number_of_questions = data.get('number_questions')
+        lesson_year = data.get('lesson_year')
+        lesson_season = data.get('lesson_season')
+
+        number_of_questions = data.get('number_questions')
         number_of_questions_percentage = data.get("number_questions_percentage")
 
         if title is not None and challenge_id is not None:
@@ -5791,6 +5830,7 @@ class ChallengeSedevCountAPIView(
             challenge = Challenge.objects.filter(id=challenge_id).first()
 
             if challenge and lesson_title:
+                # Төгсөлтийн шалгалт
                 if subInfo:
                     challenge_questions = ChallengeQuestions.objects.filter(
                         graduate_title=lesson_title,
@@ -5799,12 +5839,19 @@ class ChallengeSedevCountAPIView(
                 else:
                     if challenge.challenge_type not in [Challenge.SORIL1,Challenge.ADMISSION]:
                         level = challenge.level
+
                     challenge_questions = ChallengeQuestions.objects.filter(
                         title=lesson_title,
                         level=level,
                         title__lesson=challenge.lesson,
                         title__is_season=(challenge.challenge_type == Challenge.SEMESTR_EXAM)
                     )
+
+                if lesson_year:
+                    challenge_questions = challenge_questions.filter(lesson_year=lesson_year)
+
+                if lesson_season:
+                    challenge_questions = challenge_questions.filter(lesson_season=lesson_season)
 
                 random_questions = None
                 if number_of_questions:
