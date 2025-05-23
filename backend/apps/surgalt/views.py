@@ -3551,23 +3551,23 @@ class PsychologicalTestResultExcelAPIView(
         queryset = MentalUser.objects.filter(user__in=user_ids)
 
         # Шалгалт өгсөн элсэлгчдийн шалгалтын хариу
-        mental_users = queryset.filter(challenge__title__icontains='Сэтгэлзүйн сорил').select_related('user')
+        mental_users = queryset.filter(challenge__title__icontains='ОХУ сорил').select_related('user')
 
         # Сэтгэл гутралын асуултууд
         depression_questions = set(PsychologicalTest.objects.filter(
-            title__icontains='Сэтгэлзүйн сорил',
+            title__icontains='ОХУ сорил',
             questions__question_number__in=[3, 5, 10, 13, 16, 17, 21]
         ).values_list('questions__id', flat=True))
 
         # Түгшүүрийн асуултууд
         anxiety_questions = set(PsychologicalTest.objects.filter(
-            title__icontains='Сэтгэлзүйн сорил',
+            title__icontains='ОХУ сорил',
             questions__question_number__in=[2, 4, 7, 9, 15, 19, 20]
         ).values_list('questions__id', flat=True))
 
         # Стрессийн асуултууд
         stress_questions = set(PsychologicalTest.objects.filter(
-            title__icontains='Сэтгэлзүйн сорил',
+            title__icontains='ОХУ сорил',
             questions__question_number__in=[1, 6, 8, 11, 12, 14, 18]
         ).values_list('questions__id', flat=True))
 
@@ -3947,23 +3947,23 @@ class PsychologicalTestResultExcelByScopeAPIView(
         queryset = MentalStudent.objects.filter(user__in=user_ids)
 
         # Шалгалт өгсөн элсэлгчдийн шалгалтын хариу
-        mental_users = queryset.filter(challenge__title__icontains='Сэтгэлзүйн сорил').select_related('user')
+        mental_users = queryset.filter(challenge__title__icontains='ОХУ сорил').select_related('user')
 
         # Сэтгэл гутралын асуултууд
         depression_questions = set(PsychologicalTest.objects.filter(
-            title__icontains='Сэтгэлзүйн сорил',
+            title__icontains='ОХУ сорил',
             questions__question_number__in=[3, 5, 10, 13, 16, 17, 21]
         ).values_list('questions__id', flat=True))
 
         # Түгшүүрийн асуултууд
         anxiety_questions = set(PsychologicalTest.objects.filter(
-            title__icontains='Сэтгэлзүйн сорил',
+            title__icontains='ОХУ сорил',
             questions__question_number__in=[2, 4, 7, 9, 15, 19, 20]
         ).values_list('questions__id', flat=True))
 
         # Стрессийн асуултууд
         stress_questions = set(PsychologicalTest.objects.filter(
-            title__icontains='Сэтгэлзүйн сорил',
+            title__icontains='ОХУ сорил',
             questions__question_number__in=[1, 6, 8, 11, 12, 14, 18]
         ).values_list('questions__id', flat=True))
 
@@ -4186,7 +4186,7 @@ class IQTestResultExcelAPIView(
                 user_ids = AdmissionUserProfession.objects.filter(profession__in=prof_ids).values_list('user', flat=True)
 
             queryser_mental = MentalUser.objects.filter(user__in=user_ids)
-            mental_users = queryser_mental.filter(challenge__title__icontains='IQ Test', answer__isnull=False).select_related('user')
+            mental_users = queryser_mental.filter(challenge__title__icontains='IQ тест', answer__isnull=False).select_related('user')
             elselt_users = {user.id: user for user in ElseltUser.objects.filter(id__in=mental_users.values_list('user_id', flat=True))}
 
             # Шалгалт өгсөн хүн бүр
@@ -4294,7 +4294,7 @@ class IQTestResultExcelByScopeAPIView(
                 return request.send_data(None)
 
             # IQ test Нийт асуултын тоо, ID авах
-            test_obj = PsychologicalTest.objects.filter(scope_kind=scope_kind,title__icontains='IQ Test').first()
+            test_obj = PsychologicalTest.objects.filter(scope_kind=scope_kind,title__icontains='IQ тест').first()
 
             if not test_obj:
                 return request.send_data(None)
