@@ -1,25 +1,19 @@
-import React, { useState, Fragment, useEffect } from 'react';
-import { downloadExcelReport } from './Participants/downloadExcelReport';
-import { RiDownloadFill } from "react-icons/ri";
-import {downloadIQExcelReport} from './Participants/downloadIQExcelReport'
+import { Fragment, useEffect, useState } from 'react';
 import {
-    Col,
-    Row,
-    Nav,
     Card,
-    Button,
+    Col,
+    Nav,
     NavItem,
     NavLink,
-    TabContent,
-    UncontrolledTooltip
+    Row,
+    TabContent
 } from 'reactstrap';
 
-import useLoader from "@hooks/useLoader";
 import useApi from "@hooks/useApi";
-import Teacher from './Teacher';
-import Student from './Student';
+import useLoader from "@hooks/useLoader";
 import Elsegch from './Elsegch';
-import { IQresultExcelReport, resultExcelReport } from './helpers';
+import Student from './Student';
+import Teacher from './Teacher';
 
 function Result() {
     const [active, setActive] = useState('1')
@@ -81,34 +75,6 @@ function Result() {
                                 })
                             }
                         </Nav>
-                    </Col>
-                    <Col className="me-2 d-flex justify-content-end gap-1">
-                        <Button
-                            color='primary'
-                            disabled={(adm || active !== 2) ? false : true}
-                            className='d-flex align-items-center px-75'
-                            id='test_button'
-                            onClick={() => IQresultExcelReport(active, excelApi, adm, data)}
-                        >
-                            <RiDownloadFill className='me-25' />
-                           IQ Test
-                        </Button>
-                        <UncontrolledTooltip target='test_button'>
-                            IQ test өгсөн оролцогчдын үр дүнг татах
-                        </UncontrolledTooltip>
-                        <Button
-                            color='primary'
-                            className='d-flex align-items-center px-75'
-                            id='state_button'
-                            disabled={(adm || active !== 2) ? false : true}
-                            onClick={() => resultExcelReport(active, excelApi, adm, data)}
-                        >
-                            <RiDownloadFill className='me-25' />
-                            Оноо татах
-                        </Button>
-                        <UncontrolledTooltip target='state_button'>
-                            Сэтгэлзүйн сорил өгсөн оролцогчдын үр дүнг татах
-                        </UncontrolledTooltip>
                     </Col>
                 </Row>
                 <TabContent className='py-50' activeTab={active}>

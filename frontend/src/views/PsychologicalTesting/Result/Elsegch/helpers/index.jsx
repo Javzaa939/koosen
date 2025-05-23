@@ -93,7 +93,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, adm, active, 
             name: t("Үйлдэл"),
 			center: true,
 			selector: (row) => (
-				<div className="text-center" style={{ width: "auto" }}>
+				<div>
 					<span>
 						<a	role="button"
 							id={`requestVolunteerDetail${row.id}`}
@@ -102,7 +102,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, adm, active, 
 						>
 							<Badge color="light-info" pill><Eye  width={"15px"} /></Badge>
 						</a>
-					<UncontrolledTooltip placement='top' target={`requestVolunteerDetail${row.id}`} >Ороцогчид</UncontrolledTooltip>
+						<UncontrolledTooltip placement='top' target={`requestVolunteerDetail${row.id}`} >Ороцогчид</UncontrolledTooltip>
 					</span>
 					{
 						row.test_type === TYPE_IQ &&
@@ -135,8 +135,6 @@ export function getColumns (currentPage, rowsPerPage, total_count, adm, active, 
 				</div>
 			),
             center: true,
-			maxWidth: "150px",
-			minWidth: "100px",
         },
 	]
 
