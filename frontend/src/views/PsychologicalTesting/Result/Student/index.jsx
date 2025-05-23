@@ -27,7 +27,7 @@ import useLoader from '@hooks/useLoader';
 import useApi from '@hooks/useApi';
 
 
-function Student({ scope, adm, active }){
+function Student({ scope }){
 
     // Translation
     const {t} = useTranslation();
@@ -185,7 +185,7 @@ function Student({ scope, adm, active }){
                                 </div>
                             )}
                             onSort={handleSort}
-                            columns={getColumns(currentPage, rowsPerPage, totalCount, adm, active, excelApi, fetchData)}
+                            columns={getColumns(currentPage, rowsPerPage, totalCount, '', scope, excelApi, fetchData)}
                             sortIcon={<ChevronDown size={10} />}
                             paginationPerPage={rowsPerPage}
                             paginationDefaultPage={currentPage}
