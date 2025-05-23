@@ -3931,7 +3931,8 @@ class PsychologicalTestResultExcelByScopeAPIView(
 
     def get(self, request):
         scope_kind = request.query_params.get('scope')
-        is_scope_kind_exists = any(scope_kind == f'{choice[0]}' for choice in PsychologicalTest.SCOPE_CHOICES)
+        scope_kind = int(scope_kind)
+        is_scope_kind_exists = any(scope_kind == choice[0] for choice in PsychologicalTest.SCOPE_CHOICES)
 
         if not is_scope_kind_exists:
             return request.send_data(None)
@@ -4280,7 +4281,8 @@ class IQTestResultExcelByScopeAPIView(
 
     def get(self, request):
             scope_kind = request.query_params.get('scope')
-            is_scope_kind_exists = any(scope_kind == f'{choice[0]}' for choice in PsychologicalTest.SCOPE_CHOICES)
+            scope_kind = int(scope_kind)
+            is_scope_kind_exists = any(scope_kind == {choice[0] for choice in PsychologicalTest.SCOPE_CHOICES)
 
             if not is_scope_kind_exists:
                 return request.send_data(None)
