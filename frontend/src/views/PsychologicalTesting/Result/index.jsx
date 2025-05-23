@@ -19,6 +19,7 @@ import useApi from "@hooks/useApi";
 import Teacher from './Teacher';
 import Student from './Student';
 import Elsegch from './Elsegch';
+import { IQresultExcelReport, resultExcelReport } from './helpers';
 
 function Result() {
     const [active, setActive] = useState('1')
@@ -41,7 +42,7 @@ function Result() {
         {
             activeId: 3,
             name: 'Оюутан',
-            component: <Student scope={active} />
+            component: <Student scope={active} adm={adm} active={active} />
         }
     ]
 
@@ -55,32 +56,6 @@ function Result() {
     }, [active])
 
     const excelApi = useApi().challenge.psychologicalTestResult
-
-    async function resultExcelReport() {
-        if (active === 2) {
-            const { success, data } = await fetchData(excelApi.excelResult(adm));
-            if (success) {
-                downloadExcelReport(data)
-            }
-        } else {
-            const { success, data } = await fetchData(excelApi.excelResultByScope(active));
-
-            if (success) downloadExcelReport(data)
-        }
-    }
-
-    async function IQresultExcelReport(){
-        if (active === 2) {
-            const {success,data} = await fetchData(excelApi.iqExcelResult(adm));
-            if(success){
-                downloadIQExcelReport(data)
-            }
-        } else {
-            const { success, data } = await fetchData(excelApi.iqExcelResultByScope(active));
-
-            if (success) downloadIQExcelReport(data)
-        }
-    }
 
     return (
         <Fragment>
@@ -113,7 +88,7 @@ function Result() {
                             disabled={(adm || active !== 2) ? false : true}
                             className='d-flex align-items-center px-75'
                             id='test_button'
-                            onClick={() => IQresultExcelReport()}
+                            onClick={() => IQresultExcelReport(active, excelApi, adm, data)}
                         >
                             <RiDownloadFill className='me-25' />
                            IQ Test
@@ -126,7 +101,7 @@ function Result() {
                             className='d-flex align-items-center px-75'
                             id='state_button'
                             disabled={(adm || active !== 2) ? false : true}
-                            onClick={() => resultExcelReport()}
+                            onClick={() => resultExcelReport(active, excelApi, adm, data)}
                         >
                             <RiDownloadFill className='me-25' />
                             Оноо татах
