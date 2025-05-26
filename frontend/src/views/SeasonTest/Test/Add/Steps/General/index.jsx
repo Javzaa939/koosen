@@ -223,7 +223,7 @@ const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEdit
                                 )
                             }}
                         ></Controller>
-                        {errors.exam_timetable && <FormFeedback className='d-block'>{t(errors.exam_timetable.message)}</FormFeedback>}
+                        {errors.survey && <FormFeedback className='d-block'>{t(errors.survey.message)}</FormFeedback>}
                     </Col>
                     <Col md={12}>
                         <Label className="form-label" for="description">

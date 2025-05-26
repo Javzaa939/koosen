@@ -20,19 +20,20 @@ import {
 import Select from 'react-select';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
-import Flatpickr from 'react-flatpickr';
 import '@styles/react/libs/flatpickr/flatpickr.scss';
 
 const EditModal = ({ open, handleModal, refreshDatas, editData }) => {
     const [lessonOption, setLessonOption] = useState([])
+    const [surveyOption, setSurveyOption] = useState([])
     const { control, handleSubmit, setError, setValue, formState: { errors } } = useForm(validate(validateSchema))
 	const { fetchData } = useLoader({ isFullScreen: true });
 
-    const [endPicker, setEndPicker] = useState(new Date(editData?.end_date))
-	const [startPicker, setStartPicker] = useState(new Date(editData?.start_date))
+    // const [endPicker, setEndPicker] = useState(new Date(editData?.end_date))
+	// const [startPicker, setStartPicker] = useState(new Date(editData?.start_date))
 
     const challengeAPI = useApi().challenge
     const teacherLessonApi = useApi().study.lesson
+    const surveyApi = useApi().survey
 
     async function getLesson()
     {
@@ -61,6 +62,7 @@ const EditModal = ({ open, handleModal, refreshDatas, editData }) => {
         () =>
         {
             getLesson()
+            getSurvey()
         },
         []
     )
@@ -79,6 +81,14 @@ const EditModal = ({ open, handleModal, refreshDatas, editData }) => {
             }
         }
 	}
+
+    async function getSurvey()
+    {
+        const { success, data } = await fetchData(surveyApi.get(10000, 1 ))
+        if(success) {
+            setSurveyOption(data?.results)
+        }
+    }
 
     return (
         <Fragment>
@@ -172,6 +182,38 @@ const EditModal = ({ open, handleModal, refreshDatas, editData }) => {
                             ></Controller>
                             {errors.lesson && <FormFeedback className='d-block'>{t(errors.lesson.message)}</FormFeedback>}
                         </Col>
+                        <Col md={6}>
+                        <Label className="form-label" for="survey">
+                            {t('Сэтгэл ханамжийн судалгаа')}
+                        </Label>
+                        <Controller
+                            control={control}
+                            defaultValue=''
+                            name="survey"
+                            render={({ field: { value, onChange} }) => {
+                                return (
+                                    <Select
+                                        id="survey"
+                                        name="survey"
+                                        isClearable
+                                        classNamePrefix='select'
+                                        className='react-select'
+                                        placeholder={t(`-- Сонгоно уу --`)}
+                                        value={surveyOption?.find((c) => c.id === value)}
+                                        options={surveyOption || []}
+                                        noOptionsMessage={() => 'Хоосон байна'}
+                                        onChange={(val) => {
+                                            onChange(val?.id || '')
+                                        }}
+                                        styles={ReactSelectStyles}
+                                        getOptionValue={(option) => option.id}
+                                        getOptionLabel={(option) => option?.title}
+                                    />
+                                )
+                            }}
+                        ></Controller>
+                        {errors.survey && <FormFeedback className='d-block'>{t(errors.survey.message)}</FormFeedback>}
+                    </Col>
                         <Col md={6} className='mt-50'>
                             <Label className="form-label" for="duration">
                                 {t('Үргэлжлэх хугацаа (минутаар)')}
