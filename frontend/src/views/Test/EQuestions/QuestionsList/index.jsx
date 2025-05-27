@@ -134,7 +134,7 @@ const QuestionsList = ({ filterId, season=false, teacher_id, is_graduate }) => {
 			)}
 			<Card className="m-0">
 				<CardHeader className="py-1">
-					<div role="a"  onClick={() => navigate(-1) } color='primary'>
+					<div role="a"  onClick={() => navigate('/challenge/teacher/') } color='primary'>
 						<ChevronsLeft/>Буцах
 					</div>
 					<CardTitle tag={'h5'}>

@@ -5585,6 +5585,7 @@ class QuestionsTitleAPIView(
     serializer_class = dynamic_serializer(QuestionTitle, "__all__")
 
     def get(self, request, pk=None):
+        # pk: teacher id
 
         title_id = request.query_params.get('titleId')
         if title_id:
@@ -5595,32 +5596,37 @@ class QuestionsTitleAPIView(
         is_graduate = request.query_params.get('is_graduate')
         is_elselt = request.query_params.get('is_elselt')
 
-        user = request.user
-        teacher = Teachers.objects.filter(user=user).first()
+        # get by selected teacher because this is LMS (not teacher web)
+        teacher = pk
+
+        challenge_qs = ChallengeQuestions.objects.all()
 
         # # 0  Бүх асуулт
         if title_id == 0:
             if str2bool(is_elselt):
-                challenge_qs = ChallengeQuestions.objects.filter(is_admission=True)
+                challenge_qs = challenge_qs.filter(is_admission=True)
             else:
-                challenge_qs = ChallengeQuestions.objects.all()
+                challenge_qs = challenge_qs.filter(is_admission=False)
 
         # -1  Сэдэвгүй асуултууд
         elif title_id == -1:
             if str2bool(is_elselt):
-                challenge_qs = ChallengeQuestions.objects.filter(title__isnull=True, is_admission=True)
+                challenge_qs = challenge_qs.filter(title__isnull=True, is_admission=True)
+                user = request.user
                 if not user.is_superuser:
                     challenge_qs = challenge_qs.filter(created_by=teacher)
             else:
-                challenge_qs = ChallengeQuestions.objects.filter(title__isnull=True)
+                challenge_qs = challenge_qs.filter(title__isnull=True)
         else:
             if is_graduate == 'true':
-                challenge_qs = ChallengeQuestions.objects.filter(graduate_title=title_id)
+                challenge_qs = challenge_qs.filter(graduate_title=title_id)
             else:
+                challenge_qs = challenge_qs.filter(title__created_by=teacher)
+
                 if is_elselt == 'true':
-                    challenge_qs = ChallengeQuestions.objects.filter(title=title_id, title__is_admission=True)
+                    challenge_qs = challenge_qs.filter(title=title_id, title__is_admission=True)
                 else:
-                    challenge_qs = ChallengeQuestions.objects.filter(title=title_id)
+                    challenge_qs = challenge_qs.filter(title=title_id)
 
         if stype:
             challenge_qs = challenge_qs.filter(kind=stype)
@@ -5632,21 +5638,21 @@ class QuestionsTitleAPIView(
 
         result = {
             "count": count,
-            "results": data.data
+            "results": data.data,
+            "lesson_id": self.queryset.filter(id=title_id).values_list('lesson',flat=True).first()
         }
         return request.send_data(result)
 
 
     def post(self, request):
-        user_id = request.user
-        teacher = get_object_or_404(Teachers, user_id=user_id, action_status=Teachers.APPROVED)
         question_ids = []
         request_data = request.data
+        teacher = request_data['teacher_id']
 
         if 'questions' in request_data:
             question_ids = request_data.pop("questions")
 
-        request_data['created_by'] = teacher.id
+        request_data['created_by'] = teacher
         serializer = self.get_serializer(data=request_data)
 
         if serializer.is_valid(raise_exception=False):
@@ -5716,13 +5722,22 @@ class QuestionsTitleListAPIView(
         if lesson:
             self.queryset = self.queryset.filter(lesson=lesson)
 
-        if season == 'false':
-            self.queryset = self.queryset.filter(is_season=False)
-        else:
+        if season == 'true':
             self.queryset = self.queryset.filter(is_season=True)
+        else:
+            self.queryset = self.queryset.filter(is_season=False)
 
         if challenge_type == f'{Challenge.ADMISSION}':
             self.queryset = self.queryset.filter(is_admission=True)
+        else:
+            self.queryset = self.queryset.filter(is_admission=False)
+
+        if not challenge_type:
+            self.queryset = self.queryset.filter(
+                is_admission=False,
+                is_graduate=False,
+                is_season=False
+            )
 
         question_sub = ChallengeQuestions.objects.filter(title=OuterRef('id')).values('title').annotate(count=Count('id')).values('count')
         data = self.queryset.annotate(question_count=Subquery(question_sub)).values("id", "name", 'lesson__name', 'lesson__code', 'lesson__id', 'question_count', 'is_open')
@@ -6052,14 +6067,17 @@ class TestQuestionsListAPIView(
     def get(self, request):
         questions_qs = ChallengeQuestions.objects.all()
         is_admission = request.query_params.get('is_admission')
+
         if is_admission == 'true':
             questions_qs = questions_qs.filter(is_admission=True, title__isnull=True)
+        if is_admission != 'true':
+            questions_qs = questions_qs.filter(is_admission=False)
 
         created_by = request.user
+
         if not created_by.is_superuser:
             teacher = Teachers.objects.filter(user=created_by).first()
             questions_qs = questions_qs.filter(created_by=teacher)
-
         ser = dynamic_serializer(ChallengeQuestions, "__all__", 1)
         data = ser(questions_qs, many=True).data
         return request.send_data(data)

@@ -24,12 +24,15 @@ import classnames from 'classnames'
 
 const validateSchema = Yup.object().shape({
     name: Yup.string().trim().required("Хоосон байна"),
-    questions: Yup.array().min(1, "Асуулт нэмнэ үү").required("Хоосон байна")
+    // questions: Yup.array().min(1, "Асуулт нэмнэ үү").required("Хоосон байна")
 });
 
-export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle }) {
+export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle, teacher_id }) {
+    const title = open.editTitle
+    const editId = open.editTitle ? title.id : ''
 
-    const [questionList, setQuestionList] = useState([])
+    const [questionList, setQuestionList] = useState()
+    const [isMapRendering, setIsMapRendering] = useState(false)
     const [lessonOption, setLessonOption] = useState([])
     const { control, handleSubmit, formState: { errors }, setValue } = useForm(validate(validateSchema))
 
@@ -39,24 +42,20 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle })
 
     const { t } = useTranslation()
 
-    useEffect(
-        () => {
-            if (open.editId) {
-                getOneTitle()
-            } else {
-                getAllQuestoin()
-            }
-        },
-        []
-    )
+    useEffect(() => {
+        if (editId) getOneTitle()
+        else getAllQuestoin()
+    }, [])
 
     async function getOneTitle() {
-        const { success, data } = await fetchData(questionAPI.getOneTitle(open.editId))
+        const { success, data: apiResult } = await fetchData(questionAPI.getOneTitle(editId,teacher_id))
         if (success) {
-            setValue("questions", data.questions)
-            setValue("name", data.title.name)
-            setValue("lesson", data.title.lesson)
-            setQuestionList(data.other_questions)
+            const questions = apiResult?.results
+            setValue("questions", questions)
+            setValue("name", title?.name)
+            setValue("lesson", apiResult.lesson_id)
+            const questionsIds = questions.map(item=>item.id)
+            getAllQuestoin(questionsIds)
         }
     }
 
@@ -73,34 +72,51 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle })
 
     }
 
-    async function getAllQuestoin() {
+    async function getAllQuestoin(excludingQuestionIds) {
+        // to show loader while mapping is processing. because it can be longer then fetchData loading
+        setIsMapRendering(true)
+
         const { success, data } = await fetchData(questionAPI.getTestList())
+
         if (success) {
-            setQuestionList(data)
+            if (Array.isArray(excludingQuestionIds)) setQuestionList(data.filter(v => !excludingQuestionIds.includes(v.id)))
+            else setQuestionList(data)
         }
     }
 
     async function onSubmit(datas) {
-        datas['questions'] = datas['questions']?.map(v => v.id)
-        datas['other_questions'] = questionList.map(v => v.id)
-        const { success, data } = await fetchData(open.editId ? questionAPI.putTitle(open.editId, datas) : questionAPI.postTitle(datas))
+        if (datas['questions']) {
+            datas['questions'] = datas['questions']?.map(v => v.id)
+            datas['other_questions'] = questionList.map(v => v.id)
+            datas['teacher_id'] = teacher_id
+        }
+        const { success, data } = await fetchData(editId ? questionAPI.putTitle(editId, datas) : questionAPI.postTitle(datas))
         if (success) {
             getAllTitle()
-            setActiveTitle(0)
-            setOpen({ type: false, editId: null })
+            if (editId) setActiveTitle(editId)
+            else data.id
+            setOpen({ type: false, editTitle: null })
         }
     }
-    useEffect(
-        () => {
-          getLessons()
-        },
-        []
-    )
+
+    // to show loader while mapping is processing
+    useEffect(() => {
+        if (Array.isArray(questionList)) {
+            requestAnimationFrame(() => {
+                setIsMapRendering(false)
+            });
+        }
+    },[questionList])
+
+    useEffect(() => {
+        getLessons()
+    },[])
+
     return (
         <>
             <Modal
                 isOpen={open.type}
-                toggle={() => { setOpen({ type: false, editId: null }) }}
+                toggle={() => { setOpen({ type: false, editTitle: null }) }}
                 className='sidebar-xl'
                 modalClassName='modal-slide-in custom-80'
                 contentClassName='p-0'
@@ -111,7 +127,7 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle })
                     style={{ position: "relative" }}
                 >
                     <div>
-                        <h4 className='mb-0'>Багц асуулт {open.editId ? "засах" : "нэмэх"}</h4>
+                        <h4 className='mb-0'>Багц асуулт {editId ? "засах" : "нэмэх"}</h4>
                     </div>
                 </ModalHeader>
                 <ModalBody className="w-100 h-100 ">
@@ -125,7 +141,8 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle })
                                 control={control}
                                 id="lesson"
                                 name="lesson"
-                                render={({ field: { value, onChange } }) => (
+                                render={({ field: { value, onChange } }) => {
+                                    return(
                                     <Select
                                         name="lesson"
                                         id="lesson"
@@ -143,7 +160,7 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle })
                                         getOptionValue={(option) => option.id}
                                         getOptionLabel={(option) => option.code + ' ' + option.name}
                                     />
-                                )}
+                                )}}
                             />
                             {errors.lesson && <FormFeedback className='d-block'>{t(errors.lesson.message)}</FormFeedback>}
                         </Col>
@@ -210,13 +227,14 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle })
                                                 ''
                                         }
                                     </Col>
-                                    <Col md={6} className=''>
+                                    <Col md={6} className='position-relative'>
                                         <Label className="form-label" for="questions">
                                             {t('Багцлах боломжтой асуултууд')}
                                         </Label>
+                                        {(isMapRendering || isLoading) && Loader}
                                         <ul className='border border-2 rounded p-25' style={{ listStyle: "none" }}>
                                             {
-                                                questionList.map((question, index) => {
+                                                questionList?.map((question, index) => {
                                                     return (
                                                         <li className='py-25 px-25 d-flex justify-content-between align-items-center' key={index}>
                                                             <div>
@@ -243,7 +261,7 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle })
 
                         <Col md={12}>
                             <Button type='submit' className='me-1' color='primary' size='sm'>Хадгалах</Button>
-                            <Button color='primary' outline size='sm' onClick={() => { setOpen({ type: false, editId: null }) }}>Буцах</Button>
+                            <Button color='primary' outline size='sm' onClick={() => { setOpen({ type: false, editTitle: null }) }}>Буцах</Button>
                         </Col>
                     </Row>
 
