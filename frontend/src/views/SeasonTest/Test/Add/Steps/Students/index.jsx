@@ -43,8 +43,8 @@ export default function Students({stepper, setSubmitDatas, selectedLesson, onSub
             setChallengeStudents(studensOption)
             setExcludeChallengeStudents([])
         } else {
-            var data = studensOption?.filter((c) => c.total_score >= 42)
-            var exclude_data = studensOption?.filter((c) => c.total_score <= 42)
+            var data = studensOption?.filter((c) => c.total_score > 41)
+            var exclude_data = studensOption?.filter((c) => c.total_score < 42)
             setChallengeStudents(data)
             setExcludeChallengeStudents(exclude_data)
             setIsAdd(!isAdd)
