@@ -3535,233 +3535,239 @@ class PsychologicalTestResultExcelAPIView(
         return datas # Буцаана
 
     def get(self, request):
-        adm = request.query_params.get('adm') # Элсэлтээр хайх
+        try:
+            adm = request.query_params.get('adm') # Элсэлтээр хайх
 
-        # Нийт буцаах датануудыг store хийх variable-ууд
-        datas = list()
-        dass21_datas = list()
-        motivation_datas = list()
-        prognoz_datas = list()
+            test_id = request.query_params.get('testId')
+            psychologicaltest_qs = PsychologicalTest.objects.filter(id=test_id)
 
-        user_ids = AdmissionUserProfession.objects.all().values_list('user', flat=True)
-        if adm:
-            prod_ids = AdmissionRegisterProfession.objects.filter(admission=adm).values_list('id', flat=True)
-            user_ids = AdmissionUserProfession.objects.filter(profession__in=prod_ids).values_list('user', flat=True)
+            if not psychologicaltest_qs:
+                return request.send_data(None)
+            # Нийт буцаах датануудыг store хийх variable-ууд
+            datas = list()
+            dass21_datas = list()
+            motivation_datas = list()
+            prognoz_datas = list()
 
-        queryset = MentalUser.objects.filter(user__in=user_ids)
+            user_ids = AdmissionUserProfession.objects.all().values_list('user', flat=True)
+            if adm:
+                prod_ids = AdmissionRegisterProfession.objects.filter(admission=adm).values_list('id', flat=True)
+                user_ids = AdmissionUserProfession.objects.filter(profession__in=prod_ids).values_list('user', flat=True)
 
-        # Шалгалт өгсөн элсэлгчдийн шалгалтын хариу
-        mental_users = queryset.filter(challenge__title__icontains='ОХУ сорил').select_related('user')
+            queryset = MentalUser.objects.filter(user__in=user_ids)
 
-        # Сэтгэл гутралын асуултууд
-        depression_questions = set(PsychologicalTest.objects.filter(
-            title__icontains='ОХУ сорил',
-            questions__question_number__in=[3, 5, 10, 13, 16, 17, 21]
-        ).values_list('questions__id', flat=True))
+            # Шалгалт өгсөн элсэлгчдийн шалгалтын хариу
+            mental_users = queryset.filter(challenge=test_id).select_related('user')
 
-        # Түгшүүрийн асуултууд
-        anxiety_questions = set(PsychologicalTest.objects.filter(
-            title__icontains='ОХУ сорил',
-            questions__question_number__in=[2, 4, 7, 9, 15, 19, 20]
-        ).values_list('questions__id', flat=True))
+            # Сэтгэл гутралын асуултууд
+            depression_questions = set(psychologicaltest_qs.filter(
+                questions__question_number__in=[3, 5, 10, 13, 16, 17, 21]
+            ).values_list('questions__id', flat=True))
 
-        # Стрессийн асуултууд
-        stress_questions = set(PsychologicalTest.objects.filter(
-            title__icontains='ОХУ сорил',
-            questions__question_number__in=[1, 6, 8, 11, 12, 14, 18]
-        ).values_list('questions__id', flat=True))
+            # Түгшүүрийн асуултууд
+            anxiety_questions = set(psychologicaltest_qs.filter(
+                questions__question_number__in=[2, 4, 7, 9, 15, 19, 20]
+            ).values_list('questions__id', flat=True))
 
-        # Бүх асуултын хариултуудыг нэг dict дотор key-д нь id-г нь өгөөд value-д нь obj-ын өгөөд авна
-        # Энэ нь асуултуудаа ялгаж авхад хялбар бас хурдан
-        question_choices = PsychologicalQuestionChoices.objects.in_bulk(field_name='id')
+            # Стрессийн асуултууд
+            stress_questions = set(psychologicaltest_qs.filter(
+                questions__question_number__in=[1, 6, 8, 11, 12, 14, 18]
+            ).values_list('questions__id', flat=True))
 
-        # user-үүдээ бас өмнөхтэй ижил format-аар авсан
-        elselt_users = {user.id: user for user in ElseltUser.objects.filter(id__in=mental_users.values_list('user_id', flat=True))}
+            # Бүх асуултын хариултуудыг нэг dict дотор key-д нь id-г нь өгөөд value-д нь obj-ын өгөөд авна
+            # Энэ нь асуултуудаа ялгаж авхад хялбар бас хурдан
+            question_choices = PsychologicalQuestionChoices.objects.in_bulk(field_name='id')
 
-        # Нийт сорил өгсөн хэрэглэгчид дотроо loop гүйлгээд
-        for user in mental_users:
-            # user_data-д нэг хэрэглэгчийн сорилын онооны нийт мэдээллийг store хийнэ
-            user_data = dict()
-            # Хэрэглэгчийн тухай мэдээллүүд
-            user_obj = elselt_users[user.user.id]
-            user_data['first_name'] = user_obj.first_name
-            user_data['last_name'] = user_obj.last_name
-            user_data['register'] = user_obj.register
+            # user-үүдээ бас өмнөхтэй ижил format-аар авсан
+            elselt_users = {user.id: user for user in ElseltUser.objects.filter(id__in=mental_users.values_list('user_id', flat=True))}
 
-            # Хэрэглэгчийн хариултууд
-            if user.answer:
-                # Хэрэглэгчийн тест өгсөн асуулт болон хариултуудыг аваад
-                answer = ast.literal_eval(user.answer)
+            # Нийт сорил өгсөн хэрэглэгчид дотроо loop гүйлгээд
+            for user in mental_users:
+                # user_data-д нэг хэрэглэгчийн сорилын онооны нийт мэдээллийг store хийнэ
+                user_data = dict()
+                # Хэрэглэгчийн тухай мэдээллүүд
+                user_obj = elselt_users[user.user.id]
+                user_data['first_name'] = user_obj.first_name
+                user_data['last_name'] = user_obj.last_name
+                user_data['register'] = user_obj.register
 
-                # Тэр асуултуудыг асуулга, асуулгаар нь ялгаж өнгө
-                type_question_3 = self.find_question_type(answer, '3')
-                type_question_4 = self.find_question_type(answer, '4')
-                # dass21-ийн асуултууд function ашиглах шаардлагагүй. Хариултууд нь boolean утгатай биш л байвал тэр нь
-                # dass21-т харьялагдах асуултууд гэсэн үг
-                dass21_answers = {key: value for key, value in answer.items() if not isinstance(value, bool)}
+                # Хэрэглэгчийн хариултууд
+                if user.answer:
+                    # Хэрэглэгчийн тест өгсөн асуулт болон хариултуудыг аваад
+                    answer = ast.literal_eval(user.answer)
 
-                # Үүнээс доошоо END хүртэл excel-ийн нийт гэсэн sheet-д хамаарагдах өгөгдлийн зохицуулалтууд явна
-                # Асуулга-2 буюу DASS21 -------------------------------------------------------------------------------------------------------------------->
-                # dass21-д харьялагдах асуултууд дунд түүний key-нь дээр ялгаж авсан асуултуудын id-тай таарвал тэр асуултуудын value-гийн нийлбэрийг авна
-                total_depression_score = sum(int(question_choices[value].value) for key, value in dass21_answers.items() if int(key) in depression_questions)
-                total_anxiety_score = sum(int(question_choices[value].value) for key, value in dass21_answers.items() if int(key) in anxiety_questions)
-                total_stress_score = sum(int(question_choices[value].value) for key, value in dass21_answers.items() if int(key) in stress_questions)
+                    # Тэр асуултуудыг асуулга, асуулгаар нь ялгаж өнгө
+                    type_question_3 = self.find_question_type(answer, '3')
+                    type_question_4 = self.find_question_type(answer, '4')
+                    # dass21-ийн асуултууд function ашиглах шаардлагагүй. Хариултууд нь boolean утгатай биш л байвал тэр нь
+                    # dass21-т харьялагдах асуултууд гэсэн үг
+                    dass21_answers = {key: value for key, value in answer.items() if not isinstance(value, bool)}
 
-                # Олж авсан онооны нийлбэрүүдээ user_data-д store хийнэ
-                user_data['depression_score'] = total_depression_score
-                user_data['anxiety_score'] = total_anxiety_score
-                user_data['stress_score'] = total_stress_score
+                    # Үүнээс доошоо END хүртэл excel-ийн нийт гэсэн sheet-д хамаарагдах өгөгдлийн зохицуулалтууд явна
+                    # Асуулга-2 буюу DASS21 -------------------------------------------------------------------------------------------------------------------->
+                    # dass21-д харьялагдах асуултууд дунд түүний key-нь дээр ялгаж авсан асуултуудын id-тай таарвал тэр асуултуудын value-гийн нийлбэрийг авна
+                    total_depression_score = sum(int(question_choices[value].value) for key, value in dass21_answers.items() if int(key) in depression_questions)
+                    total_anxiety_score = sum(int(question_choices[value].value) for key, value in dass21_answers.items() if int(key) in anxiety_questions)
+                    total_stress_score = sum(int(question_choices[value].value) for key, value in dass21_answers.items() if int(key) in stress_questions)
 
-                # Тухайн оноонуудаас шалтгаалан хэрэглэгч ямар шинж тэмдэгтэй байгаад
-                depression_thresholds = [4, 6, 10, 13]
-                anxiety_thresholds = [3, 5, 7, 9]
-                stress_thresholds = [7, 9, 12, 16]
-                labels = ['Хэвийн', 'Хөнгөн', 'Дунд зэрэг', 'Хүчтэй', 'Маш хүчтэй']
+                    # Олж авсан онооны нийлбэрүүдээ user_data-д store хийнэ
+                    user_data['depression_score'] = total_depression_score
+                    user_data['anxiety_score'] = total_anxiety_score
+                    user_data['stress_score'] = total_stress_score
 
-                # classify_score function-ийг ашиглан мэдэж аваад user_data-д нэмнэ
-                user_data['depression'] = self.classify_score(total_depression_score, depression_thresholds, labels)
-                user_data['anxiety'] = self.classify_score(total_anxiety_score, anxiety_thresholds, labels)
-                user_data['stress'] = self.classify_score(total_stress_score, stress_thresholds, labels)
+                    # Тухайн оноонуудаас шалтгаалан хэрэглэгч ямар шинж тэмдэгтэй байгаад
+                    depression_thresholds = [4, 6, 10, 13]
+                    anxiety_thresholds = [3, 5, 7, 9]
+                    stress_thresholds = [7, 9, 12, 16]
+                    labels = ['Хэвийн', 'Хөнгөн', 'Дунд зэрэг', 'Хүчтэй', 'Маш хүчтэй']
+
+                    # classify_score function-ийг ашиглан мэдэж аваад user_data-д нэмнэ
+                    user_data['depression'] = self.classify_score(total_depression_score, depression_thresholds, labels)
+                    user_data['anxiety'] = self.classify_score(total_anxiety_score, anxiety_thresholds, labels)
+                    user_data['stress'] = self.classify_score(total_stress_score, stress_thresholds, labels)
 
 
-                # Асуулга-3
-                if type_question_3:
-                    # Хэрэглэгчийн хариулсан асуулга 3-ийн асуултуудын id
-                    type_question_3_keys = list(type_question_3.keys())
+                    # Асуулга-3
+                    if type_question_3:
+                        # Хэрэглэгчийн хариулсан асуулга 3-ийн асуултуудын id
+                        type_question_3_keys = list(type_question_3.keys())
 
-                    # Ийм dict-үүдийн key-тэй ижил question_number-тай асуултууд л оноо авна
-                    # Оноо нь value-ууд
-                    knowledge_score_map = {4: 3.6, 17: 3.6, 26: 2.4, 28: 1.2, 42: 1.2}
-                    skill_score_map = {9: 1, 31: 2, 33: 2, 43: 3, 48: 1, 49: 1}
-                    diplom_score_map = {24: 2.5, 35: 1.5, 38: 1.5, 44: 1, 11: 3.5}
+                        # Ийм dict-үүдийн key-тэй ижил question_number-тай асуултууд л оноо авна
+                        # Оноо нь value-ууд
+                        knowledge_score_map = {4: 3.6, 17: 3.6, 26: 2.4, 28: 1.2, 42: 1.2}
+                        skill_score_map = {9: 1, 31: 2, 33: 2, 43: 3, 48: 1, 49: 1}
+                        diplom_score_map = {24: 2.5, 35: 1.5, 38: 1.5, 44: 1, 11: 3.5}
 
-                    # Дээрх 3-н асуултуудын question_number-ийг нэгтгэнэ
-                    all_question_numbers = {**knowledge_score_map, **skill_score_map, **diplom_score_map}.keys()
-                    # Энэ харин бүх юмтай нь нэгтгэнэ
-                    all_score_questions = {**knowledge_score_map, **skill_score_map, **diplom_score_map}
+                        # Дээрх 3-н асуултуудын question_number-ийг нэгтгэнэ
+                        all_question_numbers = {**knowledge_score_map, **skill_score_map, **diplom_score_map}.keys()
+                        # Энэ харин бүх юмтай нь нэгтгэнэ
+                        all_score_questions = {**knowledge_score_map, **skill_score_map, **diplom_score_map}
 
-                    # Бааз дээр хадгалагдаж байгаа оноо бүх Асуулга-3 ийн асуултууд
-                    all_questions_type_3 = PsychologicalTestQuestions.objects.filter(
-                        question__icontains='Асуулга-3',
-                        question_number__in=all_question_numbers
-                    ).in_bulk(field_name='id')
+                        # Бааз дээр хадгалагдаж байгаа оноо бүх Асуулга-3 ийн асуултууд
+                        all_questions_type_3 = PsychologicalTestQuestions.objects.filter(
+                            question__icontains='Асуулга-3',
+                            question_number__in=all_question_numbers
+                        ).in_bulk(field_name='id')
 
-                    # Оноотой асуултуудын question_number-ууд dict дотор байвал тохирох оноонуудын нийлбэрийг олно
-                    knowledge_score = sum(
-                        knowledge_score_map[question.question_number]
-                        for key, question in all_questions_type_3.items()
-                        if str(key) in type_question_3_keys and (
-                            (question.question_number in {4, 17, 26} and type_question_3[f'{key}']) or
-                            (question.question_number in {28, 42} and not type_question_3[f'{key}'])
+                        # Оноотой асуултуудын question_number-ууд dict дотор байвал тохирох оноонуудын нийлбэрийг олно
+                        knowledge_score = sum(
+                            knowledge_score_map[question.question_number]
+                            for key, question in all_questions_type_3.items()
+                            if str(key) in type_question_3_keys and (
+                                (question.question_number in {4, 17, 26} and type_question_3[f'{key}']) or
+                                (question.question_number in {28, 42} and not type_question_3[f'{key}'])
+                            )
                         )
-                    )
-                    # skill_score-ийн оноотой байх нөхцөл нь оноотой асуултууд нь бүгд Тийм байх үед учираас
-                    # нөгөө 2 оноо шиг дугааруудыг нь заавал заах шаардлагүй
-                    skill_score = sum(
-                        skill_score_map[question.question_number]
-                        for key, question in all_questions_type_3.items()
-                        if str(key) in type_question_3_keys and question.question_number in skill_score_map and type_question_3[f'{key}']
-                    )
-                    diplom_score = sum(
-                        diplom_score_map[question.question_number]
-                        for key, question in all_questions_type_3.items()
-                        if str(key) in type_question_3_keys and (
-                            (question.question_number in {24, 35, 38, 44} and type_question_3[f'{key}']) or
-                            (question.question_number == 11 and not type_question_3[f'{key}'])
+                        # skill_score-ийн оноотой байх нөхцөл нь оноотой асуултууд нь бүгд Тийм байх үед учираас
+                        # нөгөө 2 оноо шиг дугааруудыг нь заавал заах шаардлагүй
+                        skill_score = sum(
+                            skill_score_map[question.question_number]
+                            for key, question in all_questions_type_3.items()
+                            if str(key) in type_question_3_keys and question.question_number in skill_score_map and type_question_3[f'{key}']
                         )
-                    )
-
-                    # Тэгээд user_data-д нэмээд өгнө
-                    user_data['knowledge_score'] = knowledge_score
-                    user_data['skill_score'] = skill_score
-                    user_data['diplom_score'] = diplom_score
-
-                # Асуулга-4
-                if type_question_4:
-                    # Хэрэглэгчийн хариулсан асуулга 4-ийн асуултуудын id
-                    type_question_4_keys = list(type_question_4.keys())
-
-                    # Оноо авах question_number-уудтай асуултууд
-                    # Нөхцөл нь л таарвар бүгд 1 оноотой учир dict байх шаардлагагүй
-                    true_false = [1, 6, 10, 12, 15, 19, 21, 26, 33, 38, 44, 49, 52, 58, 61]
-                    mental_true = [
-                        2, 3, 5, 7, 9, 11, 13, 14, 16, 18, 20, 22, 23, 25, 27, 28,
-                        29, 31, 32, 33, 34, 36, 37, 39, 40, 42, 43, 45, 47, 48, 51,
-                        53, 54, 56, 57, 59, 60, 62, 63, 65, 66, 67, 68, 69, 70, 71,
-                        72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86
-                    ]
-                    mental_false = [4, 8, 17, 24, 30, 35, 41, 46, 50, 55, 64]
-
-                    # Дээрх 3-н асуултуудын question_number-ийг нэгтгэнэ
-                    all_question_numbers_type_4 = mental_true + mental_false + true_false
-
-                    # Нэгтгэсэн question_number-уудаа ашиглан бааз дээр байгаа Асуулга-4-ийн бүх
-                    # obj-уудыг id-тай нь харгалзуулcан нэг dict авна
-                    all_questions_type_4 = PsychologicalTestQuestions.objects.filter(
-                        question__icontains='Асуулга-4',
-                        question_number__in=all_question_numbers_type_4
-                    ).in_bulk(field_name='id')
-
-                    # Оноотой асуултуудын question_number-ууд dict дотор байвал тохирох оноонуудын нийлбэрийг олно
-                    true_false_score = sum(
-                        1 for key, question in all_questions_type_4.items()
-                        if str(key) in type_question_4_keys and question.question_number in true_false and not type_question_4[f'{key}']
-                    )
-                    # Бүгдэнд нь сайхан 1 гэсэн оноо өгөөл sum-ийн олчино
-                    mental_score = sum(
-                        1 for key, question in all_questions_type_4.items()
-                        if str(key) in type_question_4_keys and (
-                            (question.question_number in mental_true and type_question_4[f'{key}']) or
-                            (question.question_number in mental_false and not type_question_4[f'{key}'])
+                        diplom_score = sum(
+                            diplom_score_map[question.question_number]
+                            for key, question in all_questions_type_3.items()
+                            if str(key) in type_question_3_keys and (
+                                (question.question_number in {24, 35, 38, 44} and type_question_3[f'{key}']) or
+                                (question.question_number == 11 and not type_question_3[f'{key}'])
+                            )
                         )
-                    )
 
-                    # Тэгээд user_data-д нэмээд өгнө
-                    user_data['mental_score'] = mental_score
-                    user_data['true_false_score'] = true_false_score
+                        # Тэгээд user_data-д нэмээд өгнө
+                        user_data['knowledge_score'] = knowledge_score
+                        user_data['skill_score'] = skill_score
+                        user_data['diplom_score'] = diplom_score
 
-                    # classify_score function-ийг ашиглан шинж тэмдгийг мэдэж авна
-                    overall_review_thresholds = [6, 13, 28, 16]
-                    overall_labels = ['өндөр', 'сайн', 'дунд', 'муу']
-                    user_data['overall_review'] = self.classify_score(mental_score, overall_review_thresholds, overall_labels)
-                # END ------------------------------------------------------------------------------------------------------------------------>
+                    # Асуулга-4
+                    if type_question_4:
+                        # Хэрэглэгчийн хариулсан асуулга 4-ийн асуултуудын id
+                        type_question_4_keys = list(type_question_4.keys())
 
-                # Нэг бүрчилсэн өгөгдлүүдийг function-ууд шийднэ өгнө
-                # DASS21 -------------------------------------------------------------------------------------------------------------------->
-                dass21_data = self.dass21(user_obj, dass21_answers)
-                dass21_data['depression_score'] = total_depression_score
-                dass21_data['anxiety_score'] = total_anxiety_score
-                dass21_data['stress_score'] = total_stress_score
-                dass21_data['depression'] = user_data['depression']
-                dass21_data['anxiety'] = user_data['anxiety']
-                dass21_data['stress'] = user_data['stress']
+                        # Оноо авах question_number-уудтай асуултууд
+                        # Нөхцөл нь л таарвар бүгд 1 оноотой учир dict байх шаардлагагүй
+                        true_false = [1, 6, 10, 12, 15, 19, 21, 26, 33, 38, 44, 49, 52, 58, 61]
+                        mental_true = [
+                            2, 3, 5, 7, 9, 11, 13, 14, 16, 18, 20, 22, 23, 25, 27, 28,
+                            29, 31, 32, 33, 34, 36, 37, 39, 40, 42, 43, 45, 47, 48, 51,
+                            53, 54, 56, 57, 59, 60, 62, 63, 65, 66, 67, 68, 69, 70, 71,
+                            72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86
+                        ]
+                        mental_false = [4, 8, 17, 24, 30, 35, 41, 46, 50, 55, 64]
 
-                # Сурах сэдэл
-                motivation_data = self.motivation(user_obj, type_question_3, all_score_questions)
-                motivation_data['knowledge_score'] = knowledge_score
-                motivation_data['skill_score'] = skill_score
-                motivation_data['diplom_score'] = diplom_score
+                        # Дээрх 3-н асуултуудын question_number-ийг нэгтгэнэ
+                        all_question_numbers_type_4 = mental_true + mental_false + true_false
 
-                # Прогноз
-                prognoz_data = self.prognoz(user_obj, type_question_4)
-                prognoz_data['mental_score'] = mental_score
-                prognoz_data['true_false_score'] = true_false_score
-                prognoz_data['overall_review'] = user_data['overall_review']
-                # END ------------------------------------------------------------------------------------------------------------------------->
+                        # Нэгтгэсэн question_number-уудаа ашиглан бааз дээр байгаа Асуулга-4-ийн бүх
+                        # obj-уудыг id-тай нь харгалзуулcан нэг dict авна
+                        all_questions_type_4 = PsychologicalTestQuestions.objects.filter(
+                            question__icontains='Асуулга-4',
+                            question_number__in=all_question_numbers_type_4
+                        ).in_bulk(field_name='id')
 
-                # Хэрэглэгчийнхээ бүх мэдээллийг үндсэн буцаах list-үүддээ нэмнэ
-                datas.append(user_data)
-                dass21_datas.append(dass21_data)
-                motivation_datas.append(motivation_data)
-                prognoz_datas.append(prognoz_data)
+                        # Оноотой асуултуудын question_number-ууд dict дотор байвал тохирох оноонуудын нийлбэрийг олно
+                        true_false_score = sum(
+                            1 for key, question in all_questions_type_4.items()
+                            if str(key) in type_question_4_keys and question.question_number in true_false and not type_question_4[f'{key}']
+                        )
+                        # Бүгдэнд нь сайхан 1 гэсэн оноо өгөөл sum-ийн олчино
+                        mental_score = sum(
+                            1 for key, question in all_questions_type_4.items()
+                            if str(key) in type_question_4_keys and (
+                                (question.question_number in mental_true and type_question_4[f'{key}']) or
+                                (question.question_number in mental_false and not type_question_4[f'{key}'])
+                            )
+                        )
 
-        # Иймэрдүү хэлбэртэй датаг буцаана
-        return_datas = {
-            'overall_datas':datas,
-            'dass21_datas':dass21_datas,
-            'motivation_datas':motivation_datas,
-            'prognoz_datas':prognoz_datas
-        }
+                        # Тэгээд user_data-д нэмээд өгнө
+                        user_data['mental_score'] = mental_score
+                        user_data['true_false_score'] = true_false_score
+
+                        # classify_score function-ийг ашиглан шинж тэмдгийг мэдэж авна
+                        overall_review_thresholds = [6, 13, 28, 16]
+                        overall_labels = ['өндөр', 'сайн', 'дунд', 'муу']
+                        user_data['overall_review'] = self.classify_score(mental_score, overall_review_thresholds, overall_labels)
+                    # END ------------------------------------------------------------------------------------------------------------------------>
+
+                    # Нэг бүрчилсэн өгөгдлүүдийг function-ууд шийднэ өгнө
+                    # DASS21 -------------------------------------------------------------------------------------------------------------------->
+                    dass21_data = self.dass21(user_obj, dass21_answers)
+                    dass21_data['depression_score'] = total_depression_score
+                    dass21_data['anxiety_score'] = total_anxiety_score
+                    dass21_data['stress_score'] = total_stress_score
+                    dass21_data['depression'] = user_data['depression']
+                    dass21_data['anxiety'] = user_data['anxiety']
+                    dass21_data['stress'] = user_data['stress']
+
+                    # Сурах сэдэл
+                    motivation_data = self.motivation(user_obj, type_question_3, all_score_questions)
+                    motivation_data['knowledge_score'] = knowledge_score
+                    motivation_data['skill_score'] = skill_score
+                    motivation_data['diplom_score'] = diplom_score
+
+                    # Прогноз
+                    prognoz_data = self.prognoz(user_obj, type_question_4)
+                    prognoz_data['mental_score'] = mental_score
+                    prognoz_data['true_false_score'] = true_false_score
+                    prognoz_data['overall_review'] = user_data['overall_review']
+                    # END ------------------------------------------------------------------------------------------------------------------------->
+
+                    # Хэрэглэгчийнхээ бүх мэдээллийг үндсэн буцаах list-үүддээ нэмнэ
+                    datas.append(user_data)
+                    dass21_datas.append(dass21_data)
+                    motivation_datas.append(motivation_data)
+                    prognoz_datas.append(prognoz_data)
+
+            # Иймэрдүү хэлбэртэй датаг буцаана
+            return_datas = {
+                'overall_datas':datas,
+                'dass21_datas':dass21_datas,
+                'motivation_datas':motivation_datas,
+                'prognoz_datas':prognoz_datas
+            }
+        except Exception:
+            traceback.print_exc()
+            return request.send_error('ERR_002')
         return request.send_data(return_datas)
 
 
@@ -3885,7 +3891,9 @@ class PsychologicalTestResultExcelByScopeAPIView(
             53, 54, 56, 57, 59, 60, 62, 63, 65, 66, 67, 68, 69, 70, 71,
             72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86
         ]
+
         mental_false = [4, 8, 17, 24, 30, 35, 41, 46, 50, 55, 64]
+
         # Энэ асуултанд Үгүй гэж хариулсан бол оноо өгнө, нөгөө 2 нь хувьсагчийн нэрээрээ тодорхой
         true_false = [1, 6, 10, 12, 15, 19, 21, 26, 33, 38, 44, 49, 52, 58, 61]
 
@@ -3920,8 +3928,6 @@ class PsychologicalTestResultExcelByScopeAPIView(
                 elif question_number in mental_true:
                     # Тийм үед оноо өгөх асуултуудыг яг response-оор нь л value-д утгыг нь оноож өгнө
                     datas[f'score_{question_number}'] = int(response)
-
-
         # Сүүлд нь хэрэглэгчийнхээ мэдээллийг өгөөд
         datas['first_name'] = user.first_name
         datas['last_name'] = user.last_name
@@ -3936,7 +3942,11 @@ class PsychologicalTestResultExcelByScopeAPIView(
 
         if not is_scope_kind_exists:
             return request.send_data(None)
+        test_id = request.query_params.get('testId')
+        psychologicaltest_qs = PsychologicalTest.objects.filter(id=test_id)
 
+        if not psychologicaltest_qs:
+            return request.send_data(None)
         # Нийт буцаах датануудыг store хийх variable-ууд
         datas = list()
         dass21_datas = list()
@@ -3947,23 +3957,20 @@ class PsychologicalTestResultExcelByScopeAPIView(
         queryset = MentalStudent.objects.filter(user__in=user_ids)
 
         # Шалгалт өгсөн элсэлгчдийн шалгалтын хариу
-        mental_users = queryset.filter(challenge__title__icontains='ОХУ сорил').select_related('user')
+        mental_users = queryset.filter(challenge=test_id).select_related('user')
 
         # Сэтгэл гутралын асуултууд
-        depression_questions = set(PsychologicalTest.objects.filter(
-            title__icontains='ОХУ сорил',
+        depression_questions = set(psychologicaltest_qs.filter(
             questions__question_number__in=[3, 5, 10, 13, 16, 17, 21]
         ).values_list('questions__id', flat=True))
 
         # Түгшүүрийн асуултууд
-        anxiety_questions = set(PsychologicalTest.objects.filter(
-            title__icontains='ОХУ сорил',
+        anxiety_questions = set(psychologicaltest_qs.filter(
             questions__question_number__in=[2, 4, 7, 9, 15, 19, 20]
         ).values_list('questions__id', flat=True))
 
         # Стрессийн асуултууд
-        stress_questions = set(PsychologicalTest.objects.filter(
-            title__icontains='ОХУ сорил',
+        stress_questions = set(psychologicaltest_qs.filter(
             questions__question_number__in=[1, 6, 8, 11, 12, 14, 18]
         ).values_list('questions__id', flat=True))
 
@@ -4164,6 +4171,7 @@ class PsychologicalTestResultExcelByScopeAPIView(
             'motivation_datas':motivation_datas,
             'prognoz_datas':prognoz_datas
         }
+
         return request.send_data(return_datas)
 
 
@@ -4175,18 +4183,24 @@ class IQTestResultExcelAPIView(
     """ IQ Test үр дүн тайлан excel """
 
     def get(self, request):
+        try:
+            test_id = request.query_params.get('testId')
+            test_obj = PsychologicalTest.objects.get(id=test_id)
+
+            if not test_obj:
+                return request.send_data(None)
             big_data = []
             adm = request.query_params.get('adm')
 
             # IQ test Нийт асуултын тоо авах
-            question = PsychologicalTest.objects.filter(id=3).values('questions').count()
+            question = test_obj.questions.count()
             user_ids = AdmissionUserProfession.objects.values_list('user', flat=True)
+
             if adm:
                 prof_ids = AdmissionRegisterProfession.objects.filter(admission=adm).values_list('id', flat=True)
                 user_ids = AdmissionUserProfession.objects.filter(profession__in=prof_ids).values_list('user', flat=True)
-
-            queryser_mental = MentalUser.objects.filter(user__in=user_ids)
-            mental_users = queryser_mental.filter(challenge__title__icontains='IQ тест', answer__isnull=False).select_related('user')
+            queryset_mental = MentalUser.objects.filter(user__in=user_ids)
+            mental_users = queryset_mental.filter(challenge=test_id, answer__isnull=False).select_related('user')
             elselt_users = {user.id: user for user in ElseltUser.objects.filter(id__in=mental_users.values_list('user_id', flat=True))}
 
             # Шалгалт өгсөн хүн бүр
@@ -4198,6 +4212,7 @@ class IQTestResultExcelAPIView(
                     'scores': [],
                     'total_score': 0
                 }
+
                 user_obj = elselt_users[user.user.id]
                 user_data['first_name'] = user_obj.first_name
                 user_data['last_name'] = user_obj.last_name
@@ -4214,7 +4229,6 @@ class IQTestResultExcelAPIView(
                     question_id, choice_id = pair.split(':')
                     question_ids.append(question_id.strip().strip("'"))
                     chosen_choices.append(choice_id.strip().strip("'"))
-
                 def convert_to_int(value):
                     if value == 'True':
                         return 1
@@ -4222,7 +4236,6 @@ class IQTestResultExcelAPIView(
                         return 0
                     else:
                         return int(value)
-
                 question_ids = list(map(int, question_ids))
                 chosen_choices = list(map(convert_to_int, chosen_choices))
 
@@ -4241,15 +4254,15 @@ class IQTestResultExcelAPIView(
                             # Зөв бол оноо шалгах
                             user_data['scores'].append(int(score))
                             user_data['total_score'] += score
-
                 big_data.append(user_data)
-
             return_data = {
                 'question':question,
                 'user_data':big_data
             }
-
-            return request.send_data(return_data)
+        except Exception:
+            traceback.print_exc()
+            return request.send_error('ERR_002')
+        return request.send_data(return_data)
 
 
 class IQTestResultExcelByScopeAPIView(
@@ -4286,19 +4299,19 @@ class IQTestResultExcelByScopeAPIView(
         return scope_users_qs
 
     def get(self, request):
+        try:
             scope_kind = request.query_params.get('scope')
             scope_kind = int(scope_kind)
             is_scope_kind_exists = any(scope_kind == choice[0] for choice in PsychologicalTest.SCOPE_CHOICES)
 
             if not is_scope_kind_exists:
                 return request.send_data(None)
-
             # IQ test Нийт асуултын тоо, ID авах
-            test_obj = PsychologicalTest.objects.filter(scope_kind=scope_kind,title__icontains='IQ тест').first()
+            test_id = request.query_params.get('testId')
+            test_obj = PsychologicalTest.objects.get(id=test_id)
 
             if not test_obj:
                 return request.send_data(None)
-            test_id = test_obj.id
             mental_users = self.get_scope_users(scope_kind,test_id)
 
             if not mental_users:
@@ -4318,7 +4331,6 @@ class IQTestResultExcelByScopeAPIView(
                 user_data['first_name'] = user.get('first_name')
                 user_data['last_name'] = user.get('last_name')
                 user_data['register'] = user.get('register')
-                # TODO: examine from this line
 
                 # Хариулттай үед
                 answer = ast.literal_eval(user.get('answer'))
@@ -4363,8 +4375,11 @@ class IQTestResultExcelByScopeAPIView(
                 'question':question_count,
                 'user_data':big_data
             }
+        except Exception:
+            traceback.print_exc()
+            return request.send_error('ERR_002')
 
-            return request.send_data(return_data)
+        return request.send_data(return_data)
 
 
 @permission_classes([IsAuthenticated])

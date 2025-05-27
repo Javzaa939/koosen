@@ -3549,6 +3549,14 @@ class PsychologicalTest(models.Model):
         (SCOPE_STUDENTS, 'Оюутан'),
     )
 
+    TYPE_IQ = 1
+    TYPE_PSY = 2
+
+    TYPE_CHOICES = (
+        (TYPE_IQ, 'IQ тест'),
+        (TYPE_PSY, 'Сэтгэлзүйн сорил'),
+    )
+
     participants = ArrayField(
         models.IntegerField(null=True),
         blank=True,
@@ -3557,6 +3565,7 @@ class PsychologicalTest(models.Model):
     )
 
     scope_kind = models.IntegerField(choices=SCOPE_CHOICES, null=True, blank=False)
+    test_type = models.IntegerField(choices=TYPE_CHOICES, null=True, blank=False)
     title = models.CharField(max_length=250, null=False, blank=False, verbose_name="Гарчиг")
     description = models.TextField(null=True, blank=False, verbose_name="Тайлбар")
     duration = models.PositiveIntegerField(verbose_name='Үргэлжлэх хугацаа', null=True)

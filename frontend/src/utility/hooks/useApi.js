@@ -1719,11 +1719,10 @@ function useApi(isDisplay=false) {
 				getParticipants: (limit, page, search, test_id) => instance.get(`learning/psychological_test_result_participants/?page=${page}&limit=${limit}&search=${search}&test_id=${test_id}`),
 				getResult: (cdata) => instance.post(`learning/psychological_test_result_show/`,cdata),
 
-				excelResult:(adm) => instance.get(`learning/psychological_test_result_excel/?adm=${adm}`),
-				excelResultByScope:(scope) => instance.get(`learning/psychological_test_result_excel/by-scope/?scope=${scope}`),
-				iqExcelResult:(adm)=>instance.get(`learning/iq_test_result_excel/?adm=${adm}`),
-				iqExcelResultByScope:(scope)=>instance.get(`learning/iq_test_result_excel/by-scope/?scope=${scope}`)
-
+				excelResult:(adm, id) => instance.get(`learning/psychological_test_result_excel/?adm=${adm}&testId=${id}`),
+				excelResultByScope:(scope, id) => instance.get(`learning/psychological_test_result_excel/by-scope/?scope=${scope}&testId=${id}`),
+				iqExcelResult:(adm, id)=>instance.get(`learning/iq_test_result_excel/?adm=${adm}&testId=${id}`),
+				iqExcelResultByScope:(scope, id)=>instance.get(`learning/iq_test_result_excel/by-scope/?scope=${scope}&testId=${id}`)
 			},
 			report:{
 				get: (test_id, dep, group) => instance.get(`learning/challenge/report/chart/?school=${school_id}&test=${test_id}&department=${dep}&group=${group}`),

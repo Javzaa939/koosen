@@ -27,7 +27,7 @@ import useLoader from '@hooks/useLoader';
 import useApi from '@hooks/useApi';
 
 
-function Student({scope}){
+function Student({ scope }){
 
     // Translation
     const {t} = useTranslation();
@@ -109,6 +109,8 @@ function Student({scope}){
     },[rowsPerPage, currentPage])
     //----------END----------//
 
+    const excelApi = useApi().challenge.psychologicalTestResult
+
     return(
         <Fragment>
             <Card>
@@ -183,7 +185,7 @@ function Student({scope}){
                                 </div>
                             )}
                             onSort={handleSort}
-                            columns={getColumns(currentPage, rowsPerPage, totalCount)}
+                            columns={getColumns(currentPage, rowsPerPage, totalCount, '', scope, excelApi, fetchData)}
                             sortIcon={<ChevronDown size={10} />}
                             paginationPerPage={rowsPerPage}
                             paginationDefaultPage={currentPage}
