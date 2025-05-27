@@ -1865,7 +1865,7 @@ class ScoreRegisterLessonAPIView(
                     obj['group_name'] = student.get('student__group__name')
                     obj['total_score'] = total_score
                     obj['is_fail'] = False
-                    if total_score < 42:
+                    if total_score <= 42:
                         obj['is_fail'] = True
 
                     all_students_teach_scores.append(obj)
