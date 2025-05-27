@@ -148,7 +148,7 @@ export default function PrintNational()
                     <div style={{ writingMode: 'vertical-lr', marginLeft: '40px', lineHeight: '46px' }} >
                         ᠮᠣᠩᠭᠣᠯ ᠤᠯᠤᠰ ᠤ᠋ᠨ ᠢᠷᢉᠡᠨ {data?.student?.last_name_uig} ᠣᠪᠤᠭᠲᠠᠢ {data?.student?.first_name_uig} ᠨᠢ
                         <br/>
-                        {data?.student?.group?.profession?.name_uig} {tooBichih(data?.student?.group?.profession?.code)} ᠬᠠᠮᠲᠤᠷᠠᠭᠰᠠᠨ ᢈᠥᠲᠦᠯᠪᠦᠷᠢ ᠪᠡᠷ ᠰᠤᠷᠤᠯᠴᠠᠨ ᠲᠡᢉᠦᠰᠦᢉᠰᠡᠨ ᠲᠤᠯᠠ ᠶᠡᢈᠡ ᠰᠤᠷᠭᠠᠭᠤᠯᠢ ᠶ᠋ᠢᠨ ᠵᠠᢈᠢᠷᠤᠯ ᠤ᠋ᠨ {tooBichih(data?.decision_date?.substring(0, 4))} ᠣᠨ ᠤ᠋ {tooBichih(data?.decision_date?.substring(5, 7))} {dugeerUg(data?.decision_date?.substring(5, 7) && data?.decision_date?.substring(5, 7).charAt(data?.decision_date?.substring(5, 7).length - 1))} ᠰᠠᠷ᠎ᠠ ᠶ᠋ᠢᠨ {tooBichih(data?.decision_date?.substring(8, 10))}{tooBichih('-')} ᠪ
+                        {data?.student?.group?.profession?.name_uig} {tooBichih(data?.student?.group?.profession?.code)} {data?.student?.group?.profession?.is_together ? 'ᠬᠠᠮᠲᠤᠷᠠᠭᠰᠠᠨ' : ''} ᢈᠥᠲᠦᠯᠪᠦᠷᠢ ᠪᠡᠷ ᠰᠤᠷᠤᠯᠴᠠᠨ ᠲᠡᢉᠦᠰᠦᢉᠰᠡᠨ ᠲᠤᠯᠠ ᠶᠡᢈᠡ ᠰᠤᠷᠭᠠᠭᠤᠯᠢ ᠶ᠋ᠢᠨ ᠵᠠᢈᠢᠷᠤᠯ ᠤ᠋ᠨ {tooBichih(data?.decision_date?.substring(0, 4))} ᠣᠨ ᠤ᠋ {tooBichih(data?.decision_date?.substring(5, 7))} {dugeerUg(data?.decision_date?.substring(5, 7) && data?.decision_date?.substring(5, 7).charAt(data?.decision_date?.substring(5, 7).length - 1))} ᠰᠠᠷ᠎ᠠ ᠶ᠋ᠢᠨ {tooBichih(data?.decision_date?.substring(8, 10))}{tooBichih('-')} ᠪ
                         ᠡᠳᠦᠷ ᠦ᠋ᠨ <span style={{ textWrap: 'nowrap' }}>{tushaal(data?.graduation_number)} {dugeerUg(data?.graduation_number && data?.graduation_number.charAt(data?.graduation_number.length - 1))}</span> ᠲᠤᠰᠢᠶᠠᠯ ᠢ᠋ᠶᠠᠷ {data?.student?.group?.profession?.dep_name_uig} <span className='fs-3'>{data?.student?.group?.degree?.degree_uig_name}</span> ᠤ᠋ᠨ ᠵᠡᠷᢉᠡ ᠣᠯᠭᠤᠪᠠ᠃
                     </div>
                 </div>
@@ -156,12 +156,16 @@ export default function PrintNational()
                 {
                     listArr.map((val, idx) =>
                     {
-                        return (
-                            <div className='d-flex justify-content-between' style={{ writingMode: 'vertical-lr' }} key={idx} >
-                                <span style={{ height: '60%' }}>{val?.position_name_uig}</span>
-                                <span className='signature_national' style={{ marginLeft: 'auto', textWrap: 'nowrap' }}>{val?.last_name_uig} {val?.first_name_uig}</span>
-                            </div>
-                        )
+                        if (!data?.student?.group?.profession?.is_together && idx == 1) {
+                            return
+                        } else {
+                            return (
+                                <div className='d-flex justify-content-between' style={{ writingMode: 'vertical-lr' }} key={idx} >
+                                    <span style={{ height: '60%' }}>{val?.position_name_uig}</span>
+                                    <span className='signature_national' style={{ marginLeft: 'auto', textWrap: 'nowrap' }}>{val?.last_name_uig} {val?.first_name_uig}</span>
+                                </div>
+                            )
+                        }
                     })
                 }
                 <div className='d-flex justify-content-between' style={{ writingMode: 'vertical-rl', paddingTop: '30px', paddingBottom: '30px', paddingLeft: '30px' }} >

@@ -381,6 +381,7 @@ class ProfessionDefinition(models.Model):
     duration = models.FloatField(null=True, verbose_name="Суралцах хугацаа")
     volume_kr = models.FloatField(null=True, verbose_name="Сургалтын агуулга багтаамж/багц цаг")
     introduction = models.TextField(null=True, verbose_name="Мэргэжлийн танилцуулга")
+    is_together = models.BooleanField(verbose_name='Хамтарсан хөтөлбөр эсэх', default=False)
     department = models.ForeignKey(Salbars, on_delete=models.SET_NULL, null=True, verbose_name="Хөтөлбөрийн баг")
     school = models.ForeignKey(SubOrgs, on_delete=models.SET_NULL, null=True, verbose_name="Сургууль")
     poster_image = models.ImageField(upload_to='profession/', null=True, verbose_name='Танилцуулга зураг')

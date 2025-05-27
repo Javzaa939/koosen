@@ -142,7 +142,7 @@ export default function PrintMongolia({ printOnce })
                         <div className='m-auto' style={{ width: '700px' }}>
                             {data?.student?.citizenship?.name} Улсын иргэн <span className='text-uppercase fw-bolder'>{data?.student?.last_name}</span> овогтой <span className='text-uppercase fw-bolder'>{data?.student?.first_name}</span> нь
                             <br/>
-                            {data?.student?.group?.profession?.name}, {data?.student?.group?.profession?.code} <span className='text-nowrap'>хамтарсан хөтөлбөрөөр суралцан төгссөн тул</span> <span className='text-nowrap'>Их сургуулийн захирлын {data?.graduation_date?.substring(0, 4)} оны {data?.graduation_date?.substring(5, 7)} {dugeerUg(data?.graduation_date?.substring(5, 7) && data?.graduation_date?.substring(5, 7).charAt(data?.graduation_date?.substring(5, 7).length - 1))} сарын {data?.graduation_date?.substring(8, 10)}{niiUg(data?.graduation_date?.substring(8, 10) && data?.graduation_date?.substring(8, 10).charAt(data?.graduation_date?.substring(8, 10).length - 1))} өдрийн </span>
+                            {data?.student?.group?.profession?.name}, {data?.student?.group?.profession?.code} <span className='text-nowrap'>{data?.student?.group?.profession?.is_together ? 'хамтарсан' : ''} хөтөлбөрөөр суралцан төгссөн тул</span> <span className='text-nowrap'>Их сургуулийн захирлын {data?.graduation_date?.substring(0, 4)} оны {data?.graduation_date?.substring(5, 7)} {dugeerUg(data?.graduation_date?.substring(5, 7) && data?.graduation_date?.substring(5, 7).charAt(data?.graduation_date?.substring(5, 7).length - 1))} сарын {data?.graduation_date?.substring(8, 10)}{niiUg(data?.graduation_date?.substring(8, 10) && data?.graduation_date?.substring(8, 10).charAt(data?.graduation_date?.substring(8, 10).length - 1))} өдрийн </span>
                             {
                                 data?.student?.group?.degree?.degree_code !== 'D'
                                 ?
@@ -165,16 +165,20 @@ export default function PrintMongolia({ printOnce })
                             listArr.map((val, idx) =>
                             {
                                 var splitted = val?.position_name?.split(',')
-                                return (
-                                    <div className='d-flex flex-column pt-2 pb-2' style={{ paddingRight: '20px', paddingLeft: '20px' }} key={idx} >
-                                        <div className='border-top-black' style={{width: '400px'}}>
-                                            <span className='' style={{textWrap: 'wrap'}}>{`${splitted[0]},`}</span>
-                                            <br/>
-                                            <span className='' style={{textWrap: 'wrap'}}>{splitted.slice(1).join(',')}</span>
+                                if (!data?.student?.group?.profession?.is_together && idx == 1) {
+                                    return
+                                } else {
+                                    return (
+                                        <div className='d-flex flex-column pt-2 pb-2' style={{ paddingRight: '20px', paddingLeft: '20px' }} key={idx} >
+                                            <div className='border-top-black' style={{width: '400px'}}>
+                                                <span className='' style={{textWrap: 'wrap'}}>{`${splitted[0]},`}</span>
+                                                <br/>
+                                                <span className='' style={{textWrap: 'wrap'}}>{splitted.slice(1).join(',')}</span>
+                                            </div>
+                                            <span>{val?.last_name}{val?.first_name}</span>
                                         </div>
-                                        <span>{val?.last_name}{val?.first_name}</span>
-                                    </div>
-                                )
+                                    )
+                                }
                             })
                         }
 

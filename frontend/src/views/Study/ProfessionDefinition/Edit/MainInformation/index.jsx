@@ -200,7 +200,7 @@ const MainInformation = ({ }) => {
                             />
                             {errors.profession_code && <FormFeedback className='d-block'>{t(errors.profession_code.message)}</FormFeedback>}
                         </Col>
-                        <Col lg={6} xs={12}>
+                        <Col lg={4} xs={12}>
                             <Label className="form-label" for="code">
                                 {t('Хөтөлбөрийн индекс')}
                             </Label>
@@ -224,7 +224,7 @@ const MainInformation = ({ }) => {
                             />
                             {errors.code && <FormFeedback className='d-block'>{t(errors.code.message)}</FormFeedback>}
                         </Col>
-                        <Col lg={6} xs={12}>
+                        <Col lg={4} xs={12}>
                             <Label className="form-label" for="name">
                                 {t('Хөтөлбөрийн нэр')}
                             </Label>
@@ -247,6 +247,29 @@ const MainInformation = ({ }) => {
                                 )}
                             />
                             {errors.name && <FormFeedback className='d-block'>{t(errors.name.message)}</FormFeedback>}
+                        </Col>
+                        <Col lg={4} xs={12} className=' mt-3'>
+                            <Label className="form-label" for="is_together">
+                                {t('Хамтарсан хөтөлбөр эсэх')}
+                            </Label>
+                            <Controller
+                                defaultValue=''
+                                control={control}
+                                id="is_together"
+                                name="is_together"
+                                render={({ field }) => (
+                                    <Input
+                                        id ="is_together"
+                                        {...field}
+                                        defaultChecked={field.value}
+                                        type="checkbox"
+                                        className='ms-1'
+                                        disabled={is_valid}
+                                        invalid={errors.is_together && true}
+                                    />
+                                )}
+                            />
+                            {errors.is_together && <FormFeedback className='d-block'>{t(errors.is_together.message)}</FormFeedback>}
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="name_eng">

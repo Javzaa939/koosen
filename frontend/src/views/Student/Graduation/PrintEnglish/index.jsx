@@ -155,7 +155,7 @@ export default function PrintEnglish()
                             <br />
                             <span className='fw-bolder'>The Degree of <span className='text-uppercase'>{data?.student?.group?.degree?.degree_eng_name} IN {data?.student?.group?.profession?.dep_name_eng}</span></span> in the recognition of the
                             <br />
-                            completion of the prescribed joint curriculum of {data?.student?.group?.profession?.name_eng} ({data?.student?.group?.profession?.code}).
+                            completion of the prescribed <span>{data?.student?.group?.profession?.is_together ? 'joint' : ''}</span> curriculum of {data?.student?.group?.profession?.name_eng} ({data?.student?.group?.profession?.code}).
                         </span>
                     }
                 </div>
@@ -168,12 +168,16 @@ export default function PrintEnglish()
                         {
                             listArr.map((val, idx) =>
                             {
-                                return (
-                                    <div className='d-flex flex-column pt-2 pb-2' style={{ paddingRight: '20px', paddingLeft: '20px', width: '50%' }} key={idx} >
-                                        <span className='border-top-black' style={{ paddingTop: '3px' }}>{val?.last_name_eng}{val?.first_name_eng}</span>
-                                        <span>{val?.position_name_eng}</span>
-                                    </div>
-                                )
+                                if (!data?.student?.group?.profession?.is_together && idx == 1) {
+                                    return
+                                } else {
+                                    return (
+                                        <div className='d-flex flex-column pt-2 pb-2' style={{ paddingRight: '20px', paddingLeft: '20px', width: '50%' }} key={idx} >
+                                            <span className='border-top-black' style={{ paddingTop: '3px' }}>{val?.last_name_eng}{val?.first_name_eng}</span>
+                                            <span>{val?.position_name_eng}</span>
+                                        </div>
+                                    )
+                                }
                             })
                         }
 
