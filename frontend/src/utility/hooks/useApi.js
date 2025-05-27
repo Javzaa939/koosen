@@ -1652,7 +1652,7 @@ function useApi(isDisplay=false) {
 				getTestList: (is_admission=false) => {
 					return instance.get(`learning/questions/test/list/?is_admission=${is_admission}`)
 				},
-				getOneTitle: (id) => instance.get(`learning/questions/title/${id}/?titleId=${id}`),
+				getOneTitle: (id,teacher_id=0) => instance.get(`learning/questions/title/${teacher_id}/?titleId=${id}`),
 				postExcel:(datas) => instance.post(`learning/questions/excel/` , datas),
 				deleteTitle: (id) => instance.delete(`learning/questions/title/${id}/`),
 

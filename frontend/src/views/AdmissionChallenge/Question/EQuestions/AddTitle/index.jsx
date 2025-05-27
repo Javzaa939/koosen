@@ -32,7 +32,7 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle })
     const title = open.editTitle
     const editId = open.editTitle ? title.id : ''
 
-    const [questionList, setQuestionList] = useState([])
+    const [questionList, setQuestionList] = useState()
     const [isMapRendering, setIsMapRendering] = useState(false)
     const { control, handleSubmit, formState: { errors }, setValue } = useForm(validate(validateSchema))
 
@@ -65,7 +65,6 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle })
         if (success) {
             if (Array.isArray(excludingQuestionIds)) setQuestionList(data.filter(v => !excludingQuestionIds.includes(v.id)))
             else setQuestionList(data)
-            setIsMapRendering(false)
         }
     }
 
@@ -179,7 +178,7 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle })
                                         <Label className="form-label" for="questions">
                                             {t('Багцлах боломжтой асуултууд')}
                                         </Label>
-                                        {isMapRendering && Loader}
+                                        {(isMapRendering || isLoading) && Loader}
                                         <ul className='border border-2 rounded p-25' style={{ listStyle: "none" }}>
                                             {
                                                 questionList?.map((question, index) => {

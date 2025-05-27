@@ -18,10 +18,10 @@ import useLoader from "@hooks/useLoader";
 import QuestionsList from "./QuestionsList";
 import AddTitle from "./AddTitle";
 import useModal from "@hooks/useModal";
+
 const EQuestions = ({ teacher_id, title_id, is_season, is_graduate=false }) => {
-    console.log(is_graduate)
     const [datas, setDatas] = useState([]);
-    const [titleModal, setTitleModal] = useState({ type: false, editId: null })
+    const [titleModal, setTitleModal] = useState({ type: false, editTitle: null })
     const [activeTitle, setActiveTitle] = useState(title_id)
 
     const { t } = useTranslation();
@@ -30,7 +30,7 @@ const EQuestions = ({ teacher_id, title_id, is_season, is_graduate=false }) => {
     const questionAPI = useApi().challenge.question
 
     async function getAllTitle() {
-        const { success, data } = await fetchData(questionAPI.getTitle('', is_season, teacher_id, is_graduate, title_id))
+        const { success, data } = await fetchData(questionAPI.getTitle('', is_season, teacher_id))
         if (success) {
             setDatas(data)
         }
@@ -70,7 +70,7 @@ const EQuestions = ({ teacher_id, title_id, is_season, is_graduate=false }) => {
                                                 t('Асуултууд багцлагдсан сэдвүүд')
                                             }
                                         </CardTitle>
-                                        <Button className="px-50 py-25" color="primary" outline onClick={() => { setTitleModal({ type: true, editId: null }) }} size="sm">
+                                        <Button className="px-50 py-25" color="primary" outline onClick={() => { setTitleModal({ type: true, editTitle: null }) }} size="sm">
                                             <PlusCircle size={16} />
                                         </Button>
                                     </Col>
@@ -112,7 +112,7 @@ const EQuestions = ({ teacher_id, title_id, is_season, is_graduate=false }) => {
                                                             }
                                                         </div>
                                                         <div className="">
-                                                            <Edit className="text-info cursor-pointer me-50" size={13} onClick={() => { setTitleModal({ type: true, editId: title.id }) }} />
+                                                            <Edit className="text-info cursor-pointer me-50" size={13} onClick={() => { setTitleModal({ type: true, editTitle: title }) }} />
                                                             <Trash className="text-danger cursor-pointer" size={14} onClick={() => {
                                                                 showWarning({
                                                                     header: {
@@ -178,6 +178,7 @@ const EQuestions = ({ teacher_id, title_id, is_season, is_graduate=false }) => {
                     setOpen={setTitleModal}
                     getAllTitle={getAllTitle}
                     setActiveTitle={setActiveTitle}
+                    teacher_id={teacher_id}
                 />
             )}
         </Fragment>
