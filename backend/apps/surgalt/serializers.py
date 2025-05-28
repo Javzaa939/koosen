@@ -1001,7 +1001,7 @@ class ElsegchSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ElseltUser
-        fields = ["id", "code", "register", "last_name", "first_name", "full_name"]
+        fields = ["id", "code", "register", "last_name", "first_name", "full_name", 'email']
 
     def get_full_name(self, obj):
 
@@ -1405,15 +1405,15 @@ class ChallengeListElseltSerializer(serializers.ModelSerializer):
 
 
 class ChallengeElseltUsersSerializer(serializers.ModelSerializer):
-    student_name = serializers.SerializerMethodField()
-    student_code = serializers.SerializerMethodField()
+    elselt_user = ElsegchSerializer(many=False)
+    challenge = ChallengeDetailSerializer(many=False)
     answer_json = serializers.SerializerMethodField()
     still_score = serializers.SerializerMethodField()
     profession_name = serializers.SerializerMethodField()
 
     class Meta:
         model = ChallengeElseltUser
-        fields = ['challenge', 'score', 'take_score', 'answer_json', "tried", "id", "student_name", "student_code", 'answer', 'still_score', 'profession_name']
+        fields = ['challenge', 'score', 'take_score', 'answer_json', "tried", "id", 'answer', 'still_score', 'profession_name', 'elselt_user']
 
     def get_profession_name(self, obj):
         prof_obj = AdmissionUserProfession.objects.filter(user=obj.elselt_user).first()
@@ -1453,19 +1453,6 @@ class ChallengeElseltUsersSerializer(serializers.ModelSerializer):
 
         except json.JSONDecodeError:
             return None
-
-
-    def get_student_name(self, obj):
-        data = ElseltUser.objects.filter(id=obj.elselt_user.id).values('first_name').first()
-        name = data.get('first_name')
-
-        return name
-
-    def get_student_code(self, obj):
-        data = ElseltUser.objects.filter(id=obj.elselt_user.id).values('code').first()
-        code = data.get('code')
-
-        return code
 
     def get_answer_json(self, obj):
         answers = []
@@ -1524,7 +1511,7 @@ class ElseltUserChallengeSerializer(serializers.ModelSerializer):
     test_detail = serializers.SerializerMethodField()
     class Meta:
         model = ElseltUser
-        fields = ["id", "register", "last_name", "first_name", "challenge", "test_detail"]
+        fields = ["id", "register", "last_name", "first_name", "challenge", "test_detail", 'email']
 
     def get_challenge(self, obj):
 

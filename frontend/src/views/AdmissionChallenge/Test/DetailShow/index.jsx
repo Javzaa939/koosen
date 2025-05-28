@@ -15,7 +15,6 @@ import {
 	Col,
 	Input,
 	Label,
-	Alert,
 } from "reactstrap";
 
 import DataTable from "react-data-table-component";
@@ -26,17 +25,18 @@ import DetailModal from './Detail';
 import ResultModal from "./Modal";
 import { EXAM_ROOT_PAGE } from "../../helpers";
 
-export function excelDownLoad(datas, STATE_LIST) {
+export function excelDownLoad(datas) {
 	const mainData = datas.map((data, idx) => {
 		return(
 			{
 				'№': idx + 1,
-				'Овог': data?.last_name,
-				'Нэр': data?.first_name || '',
-				'Регистр': data?.register || '',
-				'Хөтөлбөр': data?.challenge[0]?.profession_name || '',
-				'Нийт оноо': data?.challenge[0]?.take_score || '',
-				'Авсан оноо': data?.challenge[0]?.score
+				'Овог': data?.elselt_user?.last_name,
+				'Нэр': data?.elselt_user?.first_name || '',
+				'Регистр': data?.elselt_user?.register || '',
+				'И-мэйл': data?.elselt_user?.email || '',
+				'Хөтөлбөр': data?.profession_name || '',
+				'Нийт оноо': data?.take_score || '',
+				'Авсан оноо': data?.score
 			}
 		)}
 	)
@@ -54,6 +54,7 @@ export function excelDownLoad(datas, STATE_LIST) {
 			'Овог',
 			'Нэр',
 			'Регистр',
+			'И-мэйл',
 			'Хөтөлбөр',
 			'Нийт оноо',
 			'Авсан оноо',
@@ -148,8 +149,6 @@ function DetailShow(){
 	const [helpers_data, setHelpersData] = useState([]);
 	const [modal_data, setModalData] = useState([]);
 	const [resultData, setResultData] = useState([]);
-	const [showNotFailedOnly, setShowNotFailedOnly] = useState(false);
-
 
     const default_page = ['Бүгд', 10, 15, 50, 75, 100];
     const [searchValue, setSearchValue ] = useState("");
@@ -165,9 +164,8 @@ function DetailShow(){
         if(detid) {
             const { success, data } = await fetchData(detailApi.admission.getDetail(currentPage, rowsPerPage, searchValue, detid));
             if(success) {
-                setDatas(data);
-                setTotalCount(data?.length);
-				setHelpersData(data[0]?.test_detail[0])
+                setDatas(data?.results);
+                setTotalCount(data?.count);
             }
         }
     }
@@ -222,10 +220,6 @@ function DetailShow(){
         },
         [searchValue]
 	)
-
-	const filteredData = showNotFailedOnly
-		? datas.filter(item => typeof item.challenge[0]?.score === 'number' && item.challenge[0]?.score < 18)
-		: datas;
 
 	console.log(datas)
 	return (
@@ -370,7 +364,7 @@ function DetailShow(){
 						)}
 						paginationPerPage={rowsPerPage}
 						paginationDefaultPage={currentPage}
-						data={filteredData}
+						data={datas}
                         paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count, searchValue, datas)}
 						fixedHeader
 						fixedHeaderScrollHeight="62vh"

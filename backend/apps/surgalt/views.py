@@ -8354,15 +8354,8 @@ class AdmissionChallengeDetailApiView(
 
     def get(self, request):
         test_id = request.query_params.get('test_id')
-        student_list = self.queryset.filter(challenge=test_id).values_list('elselt_user__id', flat=True)
-        students_qs = ElseltUser.objects.filter(id__in=student_list)
-        students_qs = self.filter_queryset(students_qs)
-        student_data = ElseltUserChallengeSerializer(students_qs, many=True, context={'test_id': test_id}).data
-
-        for student in student_data:
-            challenge_student = ChallengeElseltUser.objects.filter(elselt_user__id=student['id'], challenge=test_id).first()
-            if challenge_student:
-                student['is_not_exam_failed'] = (challenge_student.score or 0) >= 18
+        self.queryset = self.queryset.filter(challenge=test_id)
+        student_data = self.list(request).data
 
         return request.send_data(student_data)
 # endregion
