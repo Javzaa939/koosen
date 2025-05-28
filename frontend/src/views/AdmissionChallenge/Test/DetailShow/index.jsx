@@ -24,7 +24,6 @@ import useLoader from "@hooks/useLoader";
 
 import DetailModal from './Detail';
 import ResultModal from "./Modal";
-import UpdateChallengeStudentsScoreButton from "./components/UpdateChallengeStudentsScoreButton";
 import { EXAM_ROOT_PAGE } from "../../helpers";
 
 export function excelDownLoad(datas, STATE_LIST) {
@@ -32,9 +31,10 @@ export function excelDownLoad(datas, STATE_LIST) {
 		return(
 			{
 				'№': idx + 1,
-				'Шалгуулагчийн код': data?.code || '',
 				'Овог': data?.last_name,
 				'Нэр': data?.first_name || '',
+				'Регистр': data?.register || '',
+				'Хөтөлбөр': data?.challenge[0]?.profession_name || '',
 				'Нийт оноо': data?.challenge[0]?.take_score || '',
 				'Авсан оноо': data?.challenge[0]?.score
 			}
@@ -51,9 +51,10 @@ export function excelDownLoad(datas, STATE_LIST) {
 	utils.book_append_sheet(workbook, worksheet, "Шалгалтын үр дүн")
 	const staticCells = [
 			'№',
-			'Шалгуулагчийн код',
 			'Овог',
 			'Нэр',
+			'Регистр',
+			'Хөтөлбөр',
 			'Нийт оноо',
 			'Авсан оноо',
 		];
@@ -222,16 +223,16 @@ function DetailShow(){
         [searchValue]
 	)
 
-	const filteredData = showNotFailedOnly 
+	const filteredData = showNotFailedOnly
 		? datas.filter(item => typeof item.challenge[0]?.score === 'number' && item.challenge[0]?.score < 18)
 		: datas;
 
+	console.log(datas)
 	return (
 		<Fragment>
 			<Card>
                 <CardHeader className="border-bottom d-flex flex-row-reverse">
 					<div>
-						<UpdateChallengeStudentsScoreButton selected_exam={detid} />
 						<Button
 							color="primary"
 							outline
@@ -246,7 +247,7 @@ function DetailShow(){
 					</CardTitle>
 					<Button
 						tag={Link}
-						to={detailOneDatas?.challenge_type_name === 'Улирлын шалгалт' ? "/challenge-season" : `/${EXAM_ROOT_PAGE}/test`}
+						to={`/${EXAM_ROOT_PAGE}/test`}
 						color="primary"
 						className="btn-sm-block"
 					>
@@ -289,12 +290,6 @@ function DetailShow(){
 						</Col>
 					</Col>
 				</Row>
-				<Row className="mx-0">
-					<Alert color="primary" className="p-1">
-						Хэрвээ шалгалтын оноо шинэчлэсэн тохиолдолд
-						Шалгалтын хуваарь цэсний ДҮН ТАТАХ товч дээр дарж дүнг шинэчлэснээр шалгуулагчийн ШАЛГАЛТЫН ОНОО шинэчлэгдэхийг анхаарна уу!!!
-					</Alert>
-				</Row>
                 <Row className="justify-content-between aling-items-center mx-0 mt-1 mb-1" sm={9}>
 					<Col
 						className="d-flex align-items-center justify-content-start"
@@ -326,17 +321,6 @@ function DetailShow(){
 								{t("Хуудсанд харуулах тоо")}
 							</Label>
 						</Col>
-					</Col>
-					<Col md={3} className="d-flex align-items-center">
-						<Input
-							type="checkbox" 
-							id="under18Filter"
-							checked={showNotFailedOnly}
-							onChange={(e) => setShowNotFailedOnly(e.target.checked)}
-						/>
-						<Label className="" for="under18Filter" style={{ marginLeft: '5px' , marginTop: '5px'}}>
-							{t('Шалгалтанд унасан эсэх')}
-						</Label>
 					</Col>
                     <Col className='d-flex align-items-end mobile-datatable-search '>
 						<Input

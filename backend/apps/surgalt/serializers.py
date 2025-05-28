@@ -15,7 +15,7 @@ from apps import surgalt
 from main.utils.function.utils import build_url, remove_key_from_dict
 from core.fns import WithChoices
 
-from elselt.models import ElseltUser
+from elselt.models import ElseltUser, AdmissionUserProfession
 
 from lms.models import ChallengeElseltUser, LessonStandart, TeacherScore
 from lms.models import Lesson_title_plan
@@ -1399,7 +1399,6 @@ class ChallengeListElseltSerializer(serializers.ModelSerializer):
 
     def get_is_student(self, obj):
         challenge = Challenge.objects.get(id=obj.id)
-        print(ChallengeElseltUser.objects.filter(challenge=challenge, answer__isnull=False).values('elselt_user').distinct().query)
         challenge_student_ids = ChallengeElseltUser.objects.filter(challenge=challenge, answer__isnull=False).values('elselt_user').distinct().count()
 
         return challenge_student_ids
@@ -1410,10 +1409,16 @@ class ChallengeElseltUsersSerializer(serializers.ModelSerializer):
     student_code = serializers.SerializerMethodField()
     answer_json = serializers.SerializerMethodField()
     still_score = serializers.SerializerMethodField()
+    profession_name = serializers.SerializerMethodField()
 
     class Meta:
         model = ChallengeElseltUser
-        fields = ['challenge', 'score', 'take_score', 'answer_json', "tried", "id", "student_name", "student_code", 'answer', 'still_score']
+        fields = ['challenge', 'score', 'take_score', 'answer_json', "tried", "id", "student_name", "student_code", 'answer', 'still_score', 'profession_name']
+
+    def get_profession_name(self, obj):
+        prof_obj = AdmissionUserProfession.objects.filter(user=obj.elselt_user).first()
+        return prof_obj.profession.profession.name
+
 
     def get_still_score(self, obj):
         """ Өгч байгаа шалгалт """

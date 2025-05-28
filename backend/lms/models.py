@@ -3914,9 +3914,6 @@ class SoulSurvey(models.Model):
     teacher = models.ForeignKey(Teachers, on_delete=models.PROTECT, verbose_name='Багш')
     lesson = models.ForeignKey(LessonStandart, on_delete=models.PROTECT, verbose_name='Хичээлийн стандарт', null=True)
 
-    class Meta:
-        unique_together = ('lesson_year', 'lesson_season', 'survey', 'teacher', 'lesson')
-
 
 class Pollee(models.Model):
     """ Судалгаанд оролцогчид """

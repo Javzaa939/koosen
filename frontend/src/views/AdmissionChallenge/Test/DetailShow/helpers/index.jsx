@@ -22,12 +22,6 @@ export function getColumns (currentPage, rowsPerPage, datas, helpers_data, handl
 			center: true,
         },
         {
-            name: `${'Шалгуулагчийн код'}`,
-            selector: (row) => row?.code,
-            minWidth: "100px",
-            wrap:true,
-        },
-        {
             name: `${'Овог'}`,
             selector: (row) => row?.last_name,
             minWidth: "150px",
@@ -40,8 +34,14 @@ export function getColumns (currentPage, rowsPerPage, datas, helpers_data, handl
             wrap:true,
         },
         {
-            name: `${'Анги'}`,
-            selector: (row) => row?.group?.name,
+            name: `${'Регистр'}`,
+            selector: (row) => row?.register,
+            minWidth: "150px",
+            wrap:true,
+        },
+        {
+            name: `${'Хөтөлбөр'}`,
+            selector: (row) => row?.challenge[0]?.profession_name,
             minWidth: "150px",
             wrap:true,
         },

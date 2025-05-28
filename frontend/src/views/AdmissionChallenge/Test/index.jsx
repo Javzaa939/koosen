@@ -220,89 +220,49 @@ const TestProgram = () => {
 				</CardHeader>
 				<Row className="m-1">
 					<Col md={3} sm={10}>
-						<Label className="form-label" for={'lesson_year'}>
-							{t('Хичээлийн жил')}
+						<Label className="form-label" for="time">
+							{t('Элсэлт')}
 						</Label>
 						<Select
-							id={'lesson_year'}
-							name={'lesson_year'}
-							isClearable
-							classNamePrefix='select'
-							className='react-select'
-							placeholder={t(`-- Сонгоно уу --`)}
-							options={yearOption || []}
-							noOptionsMessage={() => t('Хоосон байна')}
-							onChange={(val) => {
-								setSelectedYear(val?.id || '')
-							}}
-							styles={ReactSelectStyles}
-							getOptionValue={(option) => option.id}
-							getOptionLabel={(option) => option.name}
-							isLoading={isLoading}
-						/>
-					</Col>
-					<Col md={3} sm={12}>
-						<Label className="form-label" for={'lesson_season'}>
-							{t('Хичээлийн улирал')}
-						</Label>
-						<Select
-							id={'lesson_season'}
-							name={'lesson_season'}
-							isClearable
-							classNamePrefix='select'
-							className='react-select'
-							placeholder={t(`-- Сонгоно уу --`)}
-							options={seasonOption || []}
-							noOptionsMessage={() => t('Хоосон байна')}
-							onChange={(val) => {
-								setSelectedSeason(val?.id || '')
-							}}
-							styles={ReactSelectStyles}
-							getOptionValue={(option) => option.id}
-							getOptionLabel={(option) => option.season_name}
-							isLoading={isLoading}
-						/>
-					</Col>
-					<Col md={3} sm={10}>
-						<Label>Багш</Label>
-						<Select
-							classNamePrefix='select'
-							isClearable
-							className={classNames('react-select')}
-							isLoading={teacherLoading}
-							placeholder={t('-- Сонгоно уу --')}
-							options={teachers || []}
-							value={teachers.find((c) => c.id === selectedTeacher)}
-							noOptionsMessage={() => t('Хоосон байна')}
-							onChange={(val) => {
-								setSelectedTeacher(val ? val.id : '')
-							}}
-							styles={ReactSelectStyles}
-							getOptionValue={(option) => option.id}
-							getOptionLabel={(option) => option.full_name}
-						/>
-					</Col>
-					{/* <Col md={3} sm={10} className="m-1">
-						<Label className="form-label" for="lesson">
-							{t('Хичээл')}
-						</Label>
-						<Select
-							id="lesson"
-							name="lesson"
+							id="time"
+							name="time"
 							isClearable
 							classNamePrefix='select'
 							className='react-select'
 							placeholder={`-- Сонгоно уу --`}
-							options={lessonOption || []}
+							value={get_questiontimetype()?.find((e) => e.id == selectedTime)}
+							options={get_questiontimetype() || []}
 							noOptionsMessage={() => 'Хоосон байна'}
 							onChange={(val) => {
-								setSelectedLesson(val?.id || '')
+								setSelectedTime(val?.id || '')
 							}}
 							styles={ReactSelectStyles}
 							getOptionValue={(option) => option.id}
 							getOptionLabel={(option) => option.name}
 						/>
-					</Col> */}
+					</Col>
+					<Col md={3} sm={10}>
+						<Label className="form-label" for="time">
+							{t('Хөтөлбөр')}
+						</Label>
+						<Select
+							id="time"
+							name="time"
+							isClearable
+							classNamePrefix='select'
+							className='react-select'
+							placeholder={`-- Сонгоно уу --`}
+							value={get_questiontimetype()?.find((e) => e.id == selectedTime)}
+							options={get_questiontimetype() || []}
+							noOptionsMessage={() => 'Хоосон байна'}
+							onChange={(val) => {
+								setSelectedTime(val?.id || '')
+							}}
+							styles={ReactSelectStyles}
+							getOptionValue={(option) => option.id}
+							getOptionLabel={(option) => option.name}
+						/>
+					</Col>
 					<Col md={3} sm={10}>
 						<Label className="form-label" for="time">
 							{t('Хугацаагаар')}
