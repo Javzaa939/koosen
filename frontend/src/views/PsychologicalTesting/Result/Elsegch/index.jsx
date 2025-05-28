@@ -129,6 +129,8 @@ function Elsegch({scope, adm, setAdm}){
         [scope]
     )
 
+    const excelApi = useApi().challenge.psychologicalTestResult
+
     return(
         <Fragment>
             <Card>
@@ -228,7 +230,7 @@ function Elsegch({scope, adm, setAdm}){
                                 </div>
                             )}
                             onSort={handleSort}
-                            columns={getColumns(currentPage, rowsPerPage, totalCount)}
+                            columns={getColumns(currentPage, rowsPerPage, totalCount, adm, scope, excelApi, fetchData)}
                             sortIcon={<ChevronDown size={10} />}
                             paginationPerPage={rowsPerPage}
                             paginationDefaultPage={currentPage}
