@@ -217,7 +217,7 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
                                         bsSize="sm"
                                         placeholder={t('сургуулийн уйгаржин нэр')}
                                         type="text"
-                                        style={{ fontFamily: 'cmdashitseden', fontSize: '15px'}}
+                                        style={{ fontFamily: 'mongolianScript', fontSize: '15px'}}
                                         invalid={errors.name_uig && true}
                                     />
                                 )}
@@ -282,7 +282,7 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
                                         placeholder={t('захиралын уйгаржин нэр')}
                                         {...field}
                                         type="text"
-                                        style={{ fontFamily: 'cmdashitseden', fontSize: '15px'}}
+                                        style={{ fontFamily: 'mongolianScript', fontSize: '15px'}}
                                         invalid={errors.zahiral_name_uig && true}
                                     />
                                 )}
@@ -347,7 +347,7 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
                                         placeholder={t('цол уйгаржин нэр')}
                                         {...field}
                                         type="text"
-                                        style={{ fontFamily: 'cmdashitseden', fontSize: '15px'}}
+                                        style={{ fontFamily: 'mongolianScript', fontSize: '15px'}}
                                         invalid={errors.tsol_name_uig && true}
                                     />
                                 )}
@@ -414,7 +414,7 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
                                         placeholder={t('цол уйгаржин нэр')}
                                         {...field}
                                         type="text"
-                                        style={{ fontFamily: 'cmdashitseden', fontSize: '15px'}}
+                                        style={{ fontFamily: 'mongolianScript', fontSize: '15px'}}
                                         invalid={errors.erdem_tsol_name_uig && true}
                                     />
                                 )}

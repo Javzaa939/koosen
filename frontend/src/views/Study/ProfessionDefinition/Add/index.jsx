@@ -259,7 +259,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                         placeholder={t('Хөтөлбөрийн нэр уйгаржин')}
                                         {...field}
                                         type="text"
-                                        style={{ fontFamily: 'cmdashitseden', fontSize: '15px'}}
+                                        style={{ fontFamily: 'mongolianScript', fontSize: '15px'}}
                                         invalid={errors.name_uig && true}
                                     />
                                 )}
@@ -392,7 +392,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                         placeholder={t('Хөтөлбөрийн төрөлжсөн чиглэл уйгаржин')}
                                         {...field}
                                         type="text"
-                                        style={{ fontFamily: 'cmdashitseden', fontSize: '15px'}}
+                                        style={{ fontFamily: 'mongolianScript', fontSize: '15px'}}
                                         invalid={errors.dep_name_uig && true}
                                     />
                                 )}

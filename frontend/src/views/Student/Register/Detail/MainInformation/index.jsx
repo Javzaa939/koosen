@@ -512,7 +512,7 @@ const MainInformation = () => {
                                             readOnly={is_edit}
                                             disabled={is_edit}
                                             className="opacity-100"
-                                            style={{ fontFamily: 'CMs Urga', fontSize: '40px'}}
+                                            style={{ fontFamily: 'mongolianScript', fontSize: '40px'}}
                                             invalid={errors.last_name_uig && true}
                                             onChange={(e) =>
                                             {
@@ -590,7 +590,7 @@ const MainInformation = () => {
                                             bsSize="sm"
                                             {...field}
                                             type="text"
-                                            style={{ fontFamily: 'CMs Urga', fontSize: '40px'}}
+                                            style={{ fontFamily: 'mongolianScript', fontSize: '40px'}}
                                             readOnly={is_edit}
                                             disabled={is_edit}
                                             className="opacity-100"

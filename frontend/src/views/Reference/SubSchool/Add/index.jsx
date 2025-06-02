@@ -189,7 +189,7 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                                         bsSize="sm"
                                         placeholder={t('сургуулийн уйгаржин нэр')}
                                         type="text"
-                                        style={{ fontFamily: 'cmdashitseden', fontSize: '15px'}}
+                                        style={{ fontFamily: 'mongolianScript', fontSize: '15px'}}
                                     />
                                 )}
                             />
@@ -250,7 +250,7 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                                         placeholder={t('захиралын уйгаржин нэр')}
                                         {...field}
                                         type="text"
-                                        style={{ fontFamily: 'cmdashitseden', fontSize: '15px'}}
+                                        style={{ fontFamily: 'mongolianScript', fontSize: '15px'}}
                                     />
                                 )}
                             />
@@ -311,7 +311,7 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                                         placeholder={t('цол уйгаржин нэр')}
                                         {...field}
                                         type="text"
-                                        style={{ fontFamily: 'cmdashitseden', fontSize: '15px'}}
+                                        style={{ fontFamily: 'mongolianScript', fontSize: '15px'}}
                                     />
                                 )}
                             />
@@ -372,7 +372,7 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                                         placeholder={t('цол уйгаржин нэр')}
                                         {...field}
                                         type="text"
-                                        style={{ fontFamily: 'cmdashitseden', fontSize: '15px'}}
+                                        style={{ fontFamily: 'mongolianScript', fontSize: '15px'}}
                                     />
                                 )}
                             />

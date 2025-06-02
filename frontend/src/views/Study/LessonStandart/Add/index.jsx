@@ -244,7 +244,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                         id ="name_uig"
                                         bsSize="sm"
                                         placeholder={t('Хичээлийн нэр уйгаржин')}
-                                        style={{ fontFamily: 'cmdashitseden', fontSize: '15px'}}
+                                        style={{ fontFamily: 'mongolianScript', fontSize: '15px'}}
                                         {...field}
                                         type="text"
                                         invalid={errors.name_uig && true}
