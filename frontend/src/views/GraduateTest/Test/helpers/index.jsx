@@ -63,10 +63,10 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
             minWidth:"250px",
             maxWidth:"250px",
             selector: (row) => {
-                // var is_remove = true
-                // var is_send = false
-                // var is_edit = true
-                // var is_question = true
+                var is_remove = true
+                var is_send = false
+                var is_edit = true
+                var is_question = true
 
                 var end_date = new Date(row?.endAt)
                 var start_date = new Date(row?.startAt)
