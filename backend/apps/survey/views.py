@@ -572,7 +572,7 @@ class SurveyAPIView(
         is_all = datas.get('is_all')
 
         # Хамрах хүрээний сонгогдсон ids
-        selected_ids = request.POST.getlist('selected_id')
+        selected_ids = request.POST.getlist('selected_ids')
 
         # Бүх оюутнууд эсэх
         isAllStudent = datas.get('isAllStudent')
@@ -609,7 +609,8 @@ class SurveyAPIView(
 
         questions = request.POST.getlist('question')
 
-        datas = remove_key_from_dict(datas, ['question'])
+        if 'question' in datas:
+            datas = remove_key_from_dict(datas, ['question'])
 
         # Хэрэггүй хэсгийг хасах
         if 'selected_id' in datas:
@@ -751,9 +752,6 @@ class SurveyAPIView(
 
                     question_obj.choices.set(choice_ids)
 
-                # Судалгаа ерөнхий мэдээлэл үүсгэх хэсэг
-                datas['questions'] = question_ids
-
                 # region Сэтгэл ханамжийн судалгаа properties
                 soul_type = Survey.SOUL_TYPE_TEACHERS_LESSONS if datas.get('soul_type') == 'true' else Survey.SOUL_TYPE_GENERAL
 
@@ -765,16 +763,18 @@ class SurveyAPIView(
 
                 serializer = self.get_serializer(data=datas)
 
-                serializer.is_valid(raise_exception=False)
-
-                serializer.save()
+                if serializer.is_valid(raise_exception=False):
+                    serializer.save()
 
                 data = serializer.data
                 survey_id = data.get('id')
 
                 survey_obj = self.queryset.filter(id=survey_id).first()
 
-                survey_obj.questions.set(question_ids)
+                # Судалгаа ерөнхий мэдээлэл үүсгэх хэсэг
+                if len(question_ids) > 0:
+                    datas['questions'] = question_ids
+                    survey_obj.questions.set(question_ids)
 
                 if scope_kind == Notification.SCOPE_KIND_OYUTAN:
                     scope_ids = [int(item) for item in selected_ids if isinstance(item, str) and item.isnumeric()]
@@ -795,7 +795,7 @@ class SurveyAPIView(
                     "Судалгаа {end_date} дуусахыг анхаарна уу".format(end_date=end_date),
                     Notification.FROM_KIND_USER,
                     scope_kind,
-                    'important' if survey_obj.is_required else 'normal'
+                    'important' if survey_obj and survey_obj.is_required else 'normal'
                 )
 
                 # region to link to SoulSurvey model
@@ -1015,12 +1015,12 @@ class SurveyAPIView(
                     scope_ids = []
 
                 create_notif(request,
-                            scope_ids,
-                            "{title} судалгааны мэдээллийг хүргэж байна.".format(title=title),
-                            "Судалгаа {end_date} дуусахыг анхаарна уу".format(end_date=end_date),
-                            Notification.FROM_KIND_USER,
-                            scope_kind,
-                            'important' if survey_obj.is_required else 'normal'
+                    scope_ids,
+                    "{title} судалгааны мэдээллийг хүргэж байна.".format(title=title),
+                    "Судалгаа {end_date} дуусахыг анхаарна уу".format(end_date=end_date),
+                    Notification.FROM_KIND_USER,
+                    scope_kind,
+                    'important' if survey_obj.is_required else 'normal'
                 )
 
         except Exception as e:

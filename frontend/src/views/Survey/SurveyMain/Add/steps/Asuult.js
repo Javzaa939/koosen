@@ -13,12 +13,12 @@ import Questions from "./Questions"
 
 import useLoader from "@hooks/useLoader";
 import useApi from '@hooks/useApi';
-import QuestionsBlock from './components/QuestionsBlock';
+// import QuestionsBlock from './components/QuestionsBlock';
 import { useTranslation } from 'react-i18next';
 import QuestionTitles from './components/QuestionTitles';
 
 
-const Asuult = ({ handleModal , stepper, data, editData, isEdit, refreshDatas }) => {
+const Asuult = ({ handleModal , stepper, cdata, editData, isEdit, refreshDatas, setSubmitDatas }) => {
 
     const { t } = useTranslation()
     const default_page = [0, 5, 10, 15, 20];
@@ -127,15 +127,15 @@ const Asuult = ({ handleModal , stepper, data, editData, isEdit, refreshDatas })
         (index, choice_idx, setQuestions) => {
             setQuestions((questions) => {
                 const data = [...questions];
-    
+
                 var row_choices = questions[index].choices
-    
+
                 var crow_choices = [...row_choices]
-    
+
                 crow_choices.splice(choice_idx, 1);
-    
+
                 data[index]['choices'] = crow_choices
-    
+
                 return data;
             })
         }
@@ -303,17 +303,17 @@ const Asuult = ({ handleModal , stepper, data, editData, isEdit, refreshDatas })
             formData.append('question', JSON.stringify(questions[idx]))
         }
 
-        var selectedIds = data.selected_ids
+        var selectedIds = cdata.selected_ids
         if (selectedIds != undefined) {
-            delete data.selected_ids
-
             selectedIds.forEach(element => {
                 formData.append('selected_id', element)
             });
         }
 
-        for (let key in data) {
-            formData.append(key, data[key])
+        for (let key in cdata) {
+            if (key != 'selected_ids') {
+                formData.append(key, cdata[key])
+            }
         }
 
         const { success, error } = await postFetch(surveyAPI.post(formData))
@@ -468,7 +468,7 @@ const Asuult = ({ handleModal , stepper, data, editData, isEdit, refreshDatas })
                     questionTitles={questionTitles}
                     onHandleChangeTitle={onHandleChangeTitle}
                     setQuestionTitles={setQuestionTitles}
-                    surveyType={data.surveyType}
+                    surveyType={cdata.surveyType}
 
                     // #region this props are being used in ChoiceInput component
                     removeChoicesField={removeChoicesField}

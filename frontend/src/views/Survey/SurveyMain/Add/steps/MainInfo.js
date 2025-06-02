@@ -50,48 +50,43 @@ const MainInfo = ({ stepper, setSubmitDatas, data, editData }) => {
     }
 
 	const onSubmit = (cdatas) => {
-
-		cdatas['start_date'] = new Date(startPicker).toISOString()
-        cdatas['end_date'] = new Date(endPicker).toISOString()
 		setSubmitDatas({ ...data, ...cdatas})
         stepper.next()
 	}
 
-    const handleEndDate = (date) => {
-		var end_date = new Date(date)
+    // const handleEndDate = (date) => {
+	// 	var end_date = new Date(date)
 
-		if (!startPicker) {
-			setError('start_date', {type: 'custom ', message:'Хоосон байна'})
-		} else {
-			if (end_date < startPicker) {
-				setError('end_date', {type: 'custom ', message:'Эхлэх хугацаанаас өмнө байх боломжгүй'})
-			} else {
-				setEndPicker(end_date)
-				clearErrors('start_date')
-				clearErrors('end_date')
-			}
-		}
-	}
+	// 	if (!startPicker) {
+	// 		setError('start_date', {type: 'custom ', message:'Хоосон байна'})
+	// 	} else {
+	// 		if (end_date < startPicker) {
+	// 			setError('end_date', {type: 'custom ', message:'Эхлэх хугацаанаас өмнө байх боломжгүй'})
+	// 		} else {
+	// 			setEndPicker(end_date)
+	// 			clearErrors('start_date')
+	// 			clearErrors('end_date')
+	// 		}
+	// 	}
+	// }
 
-    useEffect(
-        () =>
-        {
-            if ( Object.keys(editData).length > 0) {
+    // useEffect(
+    //     () =>
+    //     {
+    //         if ( Object.keys(editData).length > 0) {
 
-				for(let key in editData) {
+	// 			for(let key in editData) {
+	// 				if(key === 'start_date') setStartPicker(new Date(editData[key]))
+	// 				if(key === 'end_date') setEndPicker(new Date(editData[key]))
 
-
-					if(key === 'start_date') setStartPicker(new Date(editData[key]))
-					if(key === 'end_date') setEndPicker(new Date(editData[key]))
-
-					if(editData[key] !== null )
-						setValue(key, editData[key])
-					else setValue(key, '')
-				}
-            }
-        },
-        [editData]
-    )
+	// 				if(editData[key] !== null )
+	// 					setValue(key, editData[key])
+	// 				else setValue(key, '')
+	// 			}
+    //         }
+    //     },
+    //     [editData]
+    // )
 
     useEffect(
         () =>
@@ -181,41 +176,45 @@ const MainInfo = ({ stepper, setSubmitDatas, data, editData }) => {
                         />
                         {errors.description && <FormFeedback className='d-block'>{t(errors.description.message)}</FormFeedback>}
                     </Col>
-                    <Col md={6}>
+                    <Col md={6} className='mt-50'>
                         <Label className="form-label" for="start_date">
                             {t('Эхлэх хугацаа')}
                         </Label>
-                        <Flatpickr
-                            required
-                            id='start_date'
-                            name='start_date'
-                            className={'form-control'}
-                            onChange={date => {setStartPicker(date[0]), clearErrors('start_date')}}
-                            value={startPicker}
-                            style={{height: "30px"}}
-                            options={{
-                                enableTime: true,
-                                dateFormat: 'Y-m-d H:i',
-                            }}
+                        <Controller
+                            defaultValue=''
+                            control={control}
+                            name="start_date"
+                            render={({ field }) => (
+                                <Input
+                                    {...field}
+                                    id={field.name}
+                                    bsSize="sm"
+                                    placeholder={t('Эхлэх хугацаа')}
+                                    type="datetime-local"
+                                    invalid={errors[field.name] && true}
+                                />
+                            )}
                         />
                         {errors.start_date && <FormFeedback className='d-block'>{t(errors.start_date.message)}</FormFeedback>}
                     </Col>
-                    <Col md={6}>
+                    <Col md={6} className='mt-50'>
                         <Label className="form-label" for="end_date">
                             {t('Дуусах хугацаа')}
                         </Label>
-                        <Flatpickr
-                            required
-                            id='end_date'
-                            name='end_date'
-                            className='form-control'
-                            onChange={date => handleEndDate(date[0])}
-                            value={endPicker}
-                            style={{height: "30px"}}
-                            options={{
-                                enableTime: true,
-                                dateFormat: 'Y-m-d H:i',
-                            }}
+                        <Controller
+                            defaultValue=''
+                            control={control}
+                            name="end_date"
+                            render={({ field }) => (
+                                <Input
+                                    {...field}
+                                    id={field.name}
+                                    bsSize="sm"
+                                    placeholder={t('Дуусах хугацаа')}
+                                    type="datetime-local"
+                                    invalid={errors[field.name] && true}
+                                />
+                            )}
                         />
                         {errors.end_date && <FormFeedback className='d-block'>{t(errors.end_date.message)}</FormFeedback>}
                     </Col>

@@ -134,7 +134,7 @@ const Createmodal = ({ open, handleModal, editData, isEdit, refreshDatas, toggle
                 content: <Asuult
                     stepper={stepper}
                     setSubmitDatas={setSubmitDatas}
-                    data={datas}
+                    cdata={datas}
                     editData={editData}
                     isEdit={isEdit}
                     handleModal={handleModal}
