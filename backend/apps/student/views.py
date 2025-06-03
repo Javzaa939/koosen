@@ -3578,7 +3578,7 @@ class StudentGpaDiplomaValuesAPIView(
 
                     if rows[0]['lesson_level'] == level:
                         lesson = rows[0]
-                        lesson['score'] = data_qs.score
+                        lesson['score'] = round(data_qs.score)
                         lesson['assesment'] = data_qs.assesment
                         lesson['grade_letter'] = data_qs.grade_letter.description if data_qs.grade_letter and data_qs.score < 60 else ''
 

@@ -378,9 +378,9 @@ class TeacherScoreListPrintSerializer(serializers.ModelSerializer):
     def get_teacher_score(self, obj):
         teach_qs = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson)
         if len(teach_qs) > 2:
-            teach_qs = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson, score_type__lesson_teacher=obj.score_type.lesson_teacher, score_type__score_type=Lesson_teacher_scoretype.BUSAD)
+            teach_qs = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson, score_type__lesson_teacher=obj.score_type.lesson_teacher, score__gt=0)
 
-        score = teach_qs.exclude(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total')
+        score = teach_qs.exclude(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total') or 0
 
         return score
 
