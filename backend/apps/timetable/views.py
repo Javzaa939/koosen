@@ -3298,12 +3298,11 @@ class ExamTimeTableScoreListAPIView(
                 student = challenge_student.student
                 score = challenge_student.score or 0                     # авсан оноо
                 take_score = challenge_student.take_score or 0           # авах оноо
-
                 exam_score = 0
                 if score != 0:
                     # 30 оноонд хувилсан
                     # (Авсан оноо * Хувиргах оноо) / авах оноо
-                    exam_score = (score * 30) / take_score
+                    exam_score = round((score * 30) / take_score)
 
                 teach_score = TeacherScore.objects.filter(score_type=scoretype, student=student, lesson_season=lesson_season, lesson_year=lesson_year)
 

@@ -6736,7 +6736,10 @@ class ChallengeStudentsScoreAPIView(
             # to optimize database usage by avoiding sql queries in loop. to do it collect all ids first and make single sql query later
             if answers:
                 for value in answers.values():
-                    answers_choices.append(value)
+                    if isinstance(value, list):
+                        answers_choices.append(value[0])
+                    else:
+                        answers_choices.append(value)
 
             # to detect attempt. attempt counted only if any choice was given (i am not sure is it correct detect way or not)
             if answers_choices:
@@ -6747,7 +6750,6 @@ class ChallengeStudentsScoreAPIView(
                     }
 
                     challenge_student.tried = True
-
             # to get correct answers count. any value of "QuestionChoices,score" greater than 0 counted as 1 point of score (may be summary of values of "QuestionChoices,score" field should be used instead, i am not sure)
             score = QuestionChoices.objects.filter(id__in=answers_choices, score__gt=0).count()
 

@@ -4511,6 +4511,7 @@ class GraduationWorkQrAPIView(
             for student in students:
                 diplom_num = student.get('diplom_num')
                 graduation_id = student.get('id')
+                print('diplom_num', diplom_num)
 
                 data = {
                     'cert_number': diplom_num
