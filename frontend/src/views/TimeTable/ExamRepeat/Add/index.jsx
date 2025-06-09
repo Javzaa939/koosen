@@ -752,7 +752,7 @@ const AddModal = ({ open, handleModal, refreshDatas, handleEdit, editData, editI
                                                 </CardBody>
                                             </Col>
                                             <Col md={6}>
-                                                <CardHeader className='py-0'><strong>Шалгалтанд оролцохгүй суралцагчид</strong>({studentData?.excluded_students?.length})</CardHeader>
+                                                <CardHeader className='py-0'><strong>Шалгалтанд оролцох боломжгүй суралцагчид (3-аас дээш хичээлд унасан суралцагчид)</strong>({studentData?.excluded_students?.length})</CardHeader>
                                                 <CardBody>
                                                     <Table bordered size='sm'>
                                                         <thead>
