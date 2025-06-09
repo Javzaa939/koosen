@@ -710,8 +710,7 @@ class ScoreGpaListSerializer(serializers.ModelSerializer):
 
             # Бүх голч нэмэх
             if str2bool(status):
-                if not lesson_score.grade_letter:
-                    all_gpa = all_gpa + (lesson_score.gpa * lesson_score.kredit)
+                all_gpa = all_gpa + (score_obj.gpa * lesson_score.kredit)
             else:
                 if not lesson_score.grade_letter and score_obj:
                     all_gpa = all_gpa + (score_obj.gpa * lesson_score.lesson.kredit)
@@ -719,7 +718,7 @@ class ScoreGpaListSerializer(serializers.ModelSerializer):
             # Бүх нийт кредит нэмэх
             if str2bool(status):
                 all_kredit = all_kredit + lesson_score.kredit
-                if lesson_score.grade_letter:
+                if lesson_score.grade_letter and  lesson_score.grade_letter.letter == 'S':
                     all_s_kredit = all_s_kredit + lesson_score.kredit
             else:
                 all_kredit = all_kredit + lesson_score.lesson.kredit

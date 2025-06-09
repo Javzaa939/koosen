@@ -3335,8 +3335,8 @@ class StudentCalculateGpaDiplomaAPIView(
         update_datas = []
         for unique_id in unique_ids:
             score_register_qs = ScoreRegister.objects.filter(student_id=student_id, lesson_id=unique_id).first()
+            score_qs = Score.objects.filter(score_max__gte=score_register_qs.score_total, score_min__lte=score_register_qs.score_total).first()
             if not score_register_qs.assessment:
-                score_qs = Score.objects.filter(score_max__gte=score_register_qs.score_total, score_min__lte=score_register_qs.score_total).first()
                 score_register_qs.assessment = score_qs
                 update_datas.append(score_register_qs)
 
@@ -3345,8 +3345,8 @@ class StudentCalculateGpaDiplomaAPIView(
                 lesson_id=unique_id,
                 student_id=student_id, kredit=score_register_qs.lesson.kredit,
                 score=((score_register_qs.teach_score or 0) + (score_register_qs.exam_score or 0)),
-                gpa=score_register_qs.assessment.gpa if score_register_qs.assessment else None,
-                assesment=score_register_qs.assessment.assesment if score_register_qs.assessment else score_qs.assesment,
+                gpa=score_qs.gpa if score_qs else None,
+                assesment=score_qs.assesment if score_qs else score_qs.assesment,
                 grade_letter=score_register_qs.grade_letter
             )
 
@@ -3427,9 +3427,12 @@ class StudentCalculateGpaDiplomaGroupAPIView(
 
             for unique_id in unique_ids:
                 score_register_qs = ScoreRegister.objects.filter(student_id=one_student_id, lesson_id=unique_id).first()
+                # Үсгэн үнэлгээ
                 # Дүн байхгүй бол үргэлжлүүлэх давталтыг
                 if not score_register_qs:
                     continue
+
+                score_qs = Score.objects.filter(score_max__gte=score_register_qs.score_total, score_min__lte=score_register_qs.score_total).first()
 
                 # Дипломын хичээл бодуулах хэсгийг үүсгэх
                 created_cal_qs = CalculatedGpaOfDiploma(
@@ -3437,8 +3440,8 @@ class StudentCalculateGpaDiplomaGroupAPIView(
                     student_id=one_student_id,
                     kredit=score_register_qs.lesson.kredit if score_register_qs else 0,
                     score=score_register_qs.score_total,
-                    gpa=score_register_qs.assessment.gpa if score_register_qs.assessment else None,
-                    assesment=score_register_qs.assessment.assesment if score_register_qs.assessment else None,
+                    gpa=score_qs.gpa if score_qs else None,
+                    assesment=score_qs.assesment if score_qs else None,
                     grade_letter=score_register_qs.grade_letter
                 )
 

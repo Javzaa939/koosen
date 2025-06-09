@@ -1327,6 +1327,7 @@ class GpaProfessionAPIView(
         level = self.request.query_params.get('level')
         status = self.request.query_params.get('status')
         sorting = self.request.query_params.get('sorting')
+        profession = self.request.query_params.get('profession')
 
         # Тэнхимээр хайх
         if department:
@@ -1335,6 +1336,10 @@ class GpaProfessionAPIView(
         # Түвшингээр хайх
         if level:
             queryset = queryset.filter(level=level)
+
+        # Мэргэжлээр хайх
+        if profession:
+            queryset = queryset.filter(profession=profession)
 
         # Түвшингээр хайх
         if str2bool(status):
@@ -1428,9 +1433,7 @@ class GpaProfessionAPIView(
 
                     # Бүх голч нэмэх
                     if status:
-                        print(lesson_score)
-                        if not lesson_score.grade_letter and lesson_score:
-                            all_gpa = all_gpa + (lesson_score.gpa or  0 * lesson_score.kredit or 0)
+                        all_gpa = all_gpa + (score_obj.gpa * lesson_score.kredit)
                     else:
                         if not lesson_score.grade_letter:
                             all_gpa = all_gpa + (score_obj.gpa * lesson_score.lesson.kredit)
