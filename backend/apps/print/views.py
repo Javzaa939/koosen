@@ -1428,8 +1428,9 @@ class GpaProfessionAPIView(
 
                     # Бүх голч нэмэх
                     if status:
-                        if not lesson_score.grade_letter:
-                            all_gpa = all_gpa + (lesson_score.gpa * lesson_score.kredit)
+                        print(lesson_score)
+                        if not lesson_score.grade_letter and lesson_score:
+                            all_gpa = all_gpa + (lesson_score.gpa or  0 * lesson_score.kredit or 0)
                     else:
                         if not lesson_score.grade_letter:
                             all_gpa = all_gpa + (score_obj.gpa * lesson_score.lesson.kredit)
