@@ -31,9 +31,9 @@ function StateModal({ stateModalHandler, stateModal, selectedStudents, stateop, 
         setDisplayPopover(!displayPopover)
     }
 
-    const state1 = selectedStudents.filter(data => data?.state === 1).length
-    const state2 = selectedStudents.filter(data => data?.state === 2).length
-    const state3 = selectedStudents.filter(data => data?.state === 3).length
+    // const state1 = selectedStudents.filter(data => data?.state === 1).length
+    // const state2 = selectedStudents.filter(data => data?.state === 2).length
+    // const state3 = selectedStudents.filter(data => data?.state === 3).length
 
     return (
         <Modal centered toggle={stateModalHandler} isOpen={stateModal}>

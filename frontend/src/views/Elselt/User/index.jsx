@@ -165,6 +165,7 @@ const ElseltUser = () => {
     const [gender, setGender] = useState('')
     const [stateData, setStateData] = useState({})
     const [stateOneModal, setStateOneModal] = useState(false)
+    const [isDirect, setDirect] = useState(true)
 
 	const elseltApi = useApi().elselt.admissionuserdata
     const admissionYearApi = useApi().elselt
@@ -486,7 +487,7 @@ const ElseltUser = () => {
                 stateModal={stateModal}
                 selectedStudents={selectedStudents}
                 stateop={stateop}
-                first_state={true}
+                first_state={isDirect}
             />
             <EmailModal
                 emailModalHandler={emailModalHandler}
@@ -772,11 +773,29 @@ const ElseltUser = () => {
                                 color='primary'
                                 disabled={(selectedStudents.length != 0 && user.permissions.includes('lms-elselt-admission-approve')) ? false : true}
                                 className='d-flex align-items-center px-75'
-                                id='state_button'
+                                id='first_state_button'
                                 onClick={() => stateModalHandler()}
                             >
                                 <RiEditFill className='me-25'/>
                                 Анхны төлөв солих
+                            </Button>
+                            <UncontrolledTooltip target='first_state_button'>
+                                Доорхи сонгосон элсэгчдийн анхны төлөвийг нэг дор солих
+                            </UncontrolledTooltip>
+                        </div>
+                        <div className='px-1'>
+                            <Button
+                                color='primary'
+                                disabled={(selectedStudents.length != 0 && user.permissions.includes('lms-elselt-admission-approve')) ? false : true}
+                                className='d-flex align-items-center px-75'
+                                id='state_button'
+                                onClick={() => {
+                                    stateModalHandler();
+                                    setDirect(false)
+                                }}
+                            >
+                                <RiEditFill className='me-25'/>
+                                Шууд төлөв солих
                             </Button>
                             <UncontrolledTooltip target='state_button'>
                                 Доорхи сонгосон элсэгчдийн төлөвийг нэг дор солих
