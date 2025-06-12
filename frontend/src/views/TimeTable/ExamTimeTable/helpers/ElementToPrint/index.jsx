@@ -57,8 +57,8 @@ export default function ElementToPrint({ data_to_print, elementToPrintId, select
 								<tbody>
 									<tr>
 										<td>{t('Баталсан')}:</td>
-										<td>{t('Сургалтын бодлого төлөвлөлтийн газрын дарга')}</td>
-										<td>{'Б. Мөнхзаяа'}</td>
+										<td>{t('Дэд бөгөөд сургалтын газрын захирал, доктор (Ph.D)цагдаагийн хурандаа')}</td>
+										<td>{'Ц. Азбаяр'}</td>
 										<td></td>
 										<td></td>
 									</tr>
