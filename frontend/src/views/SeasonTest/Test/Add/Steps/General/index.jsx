@@ -39,6 +39,7 @@ const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEdit
 
     async function onSubmit(cdata) {
         delete cdata['exam_timetable']
+        cdata['is_repeat'] = isRepeat
         cdata = convertDefaultValue(cdata)
 
         setSubmitDatas(cdata)
