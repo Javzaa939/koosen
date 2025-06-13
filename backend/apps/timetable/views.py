@@ -3539,8 +3539,9 @@ class ExamRepeatTimeTableScoreListAPIView(
 
             for challenge_student in challenge_students:
                 student = challenge_student.student
-                score = challenge_student.score or 0                     # авсан оноо
-                take_score = challenge_student.take_score or 0           # авах оноо
+                challenge_student_obj = ChallengeStudents.objects.filter(challenge__in=challenge_qs, student=student).order_by('-updated_at').first()
+                score = challenge_student_obj.score or 0                     # авсан оноо
+                take_score = challenge_student_obj.take_score or 0           # авах оноо
 
                 exam_score = 0
                 if score != 0:
@@ -3553,7 +3554,7 @@ class ExamRepeatTimeTableScoreListAPIView(
                 # Дүн орчихсон байвал update хийнэ
                 if teach_score:
                     teach_score.update(
-                        score=float(exam_score) if exam_score else 0,
+                        score=round(exam_score) if exam_score else 0,
                         lesson_year=lesson_year,
                         lesson_season=lesson_season
                     )
@@ -3565,7 +3566,7 @@ class ExamRepeatTimeTableScoreListAPIView(
                         lesson_season_id=lesson_season,
                         student=student,
                         score_type=scoretype,
-                        score=float(exam_score) if exam_score else 0
+                        score=round(exam_score) if exam_score else 0
                     )
 
         except Exception as e:
