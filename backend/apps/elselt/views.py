@@ -118,6 +118,7 @@ from elselt.models import (
     UserScore,
     ArmyUser,
     StateChangeLog,
+    Setting
 )
 
 @permission_classes([IsAuthenticated])
@@ -3157,6 +3158,7 @@ class UserScoreSortAPIView(generics.GenericAPIView):
     def process_single_lesson(self, lesson_names, profession, total_elsegch, gender, user_ids):
         # Элсэлтэд бүртгэгдсэн мэргэжил
         profession_obj = AdmissionRegisterProfession.objects.get(pk=profession)
+        admission_qs = AdmissionUserProfession.objects.filter(profession=profession_obj)
 
         # UserScore-д тус хичээлийн нэр дээр бүртгэлтэй оноотой хэрэглэгчдийн ElseltUser-ийн id-г олж авна
         if int(gender) == 1: # Эрэгтэй хэрэглэгчид
@@ -3186,7 +3188,7 @@ class UserScoreSortAPIView(generics.GenericAPIView):
         not_yesh_score_user_ids = list(set(user_ids) - set(yesh_score_user_ids))
 
         # ЭШ өгөөгүй хүүхдүүдийг state өөрчлөх
-        AdmissionUserProfession.objects.filter(user__in=not_yesh_score_user_ids).update(
+        AdmissionUserProfession.objects.filter(user__in=not_yesh_score_user_ids, profession=profession_obj).update(
             yesh_state=AdmissionUserProfession.STATE_REJECT,
             yesh_description='Шалгуур хичээлээр ЭШ өгөөгүй.'
         )
@@ -3225,22 +3227,23 @@ class UserScoreSortAPIView(generics.GenericAPIView):
         all_scores = unique_multi_users + single_users_scores
 
         bottom_score_obj = AdmissionBottomScore.objects.filter(
-                admission_lesson__lesson_name__in=lesson_names,
-                profession=profession_obj.profession,
-                score_type=AdmissionBottomScore.GENERAL,
-            ).first()
+            admission_lesson__lesson_name__in=lesson_names,
+            profession=profession_obj.profession,
+            score_type=AdmissionBottomScore.GENERAL,
+        ).first()
 
         # Хичээлийн өосго оноо
         bottom_score = bottom_score_obj.bottom_score
 
         # Тэгээд save_scores function-ийг ашиглан нийт датагаа хадгална
-        self.save_scores(all_scores, total_elsegch, bottom_score)
+        self.save_scores(all_scores, total_elsegch, bottom_score, admission_qs)
 
     # Нэгээс олон ЭЕШ-ийн хичээлээр оноог эрэмбэлхэд ашиглах function
     def process_multiple_lessons(self, lesson_names, profession, total_elsegch, gender, user_ids):
 
         # Элсэлтэд бүртгэгдсэн мэргэжил
         profession_obj = AdmissionRegisterProfession.objects.get(pk=profession)
+        admission_qs = AdmissionUserProfession.objects.filter(profession=profession_obj)
 
         # UserScore-д тус хичээлийн нэр дээр бүртгэлтэй оноотой хэрэглэгчдийн ElseltUser-ийн id, lesson_name болон ЭЕШ оноог олж авна
         # {'user': 806, 'lesson_name': 'Нийгэм судлал', 'scaledScore': 626} иймэрдүү датанаас бүрдсэн list ирнэ
@@ -3424,10 +3427,7 @@ class UserScoreSortAPIView(generics.GenericAPIView):
                 item['yesh_state'] = AdmissionUserProfession.STATE_APPROVE
 
                 # Хэрэглэгчийн датаг хадгалах хэсэг
-                user = item['user']
-                user = AdmissionUserProfession.objects.filter(user=user)
-
-                approve_obj = AdmissionUserProfession.objects.filter(
+                approve_obj = admission_qs.filter(
                     user=item['user']
                 ).first()
                 if approve_obj:
@@ -3445,9 +3445,6 @@ class UserScoreSortAPIView(generics.GenericAPIView):
                 item['yesh_description'] = 'Хяналтын тоонд багтсангүй.'
 
                 # ЭШ оноогоор тэнцсэн ч хяналтын тоонд багтсаагүй датаг хадгалах хэсэг
-                user = item['user']
-                user = AdmissionUserProfession.objects.filter(user=user)
-
                 reject_obj = AdmissionUserProfession.objects.filter(
                     user=item['user']
                 ).first()
@@ -3467,7 +3464,7 @@ class UserScoreSortAPIView(generics.GenericAPIView):
             item['yesh_description'] = 'ЭШ-ийн оноо босго онооны шалгуурыг хангасангүй.'
 
             # ЭШ оноогоор тэнцсэн ч хяналтын тоонд багтсаагүй датаг хадгалах хэсэг
-            reject_off_obj = AdmissionUserProfession.objects.filter(
+            reject_off_obj = admission_qs.filter(
                 user=item['user']
             ).first()
 
@@ -3486,7 +3483,7 @@ class UserScoreSortAPIView(generics.GenericAPIView):
             item['yesh_description'] = 'ЭШ-ын шалгуур хичээл дутуу учраас тэнцсэнгүй.'
 
             # ЭШ 2 хичээлээр шалгаж байхад 1 хичээлээр л ЭШ өгсөн элсэгчид датаг хадгалах хэсэг
-            reject_one_off_obj = AdmissionUserProfession.objects.filter(
+            reject_one_off_obj = admission_qs.filter(
                 user=item['user']
             ).first()
 
@@ -3498,7 +3495,7 @@ class UserScoreSortAPIView(generics.GenericAPIView):
                 reject_one_off_obj.save()
 
     # Нийт өгөгдлөө update хийх function
-    def save_scores(self, scores, total_elsegch, bottom_score):
+    def save_scores(self, scores, total_elsegch, bottom_score, admission_qs):
         """ЭШ дүн хадгалах хэсэг
             Keyword arguments:
             scores -- нийт дүн
@@ -3541,10 +3538,7 @@ class UserScoreSortAPIView(generics.GenericAPIView):
         # Bulk_update бэлдэж өгсөн тэнцсэн хэрэглэгчдэд
         for data in approved:
 
-            user = data['user']
-            user = AdmissionUserProfession.objects.filter(user=user)
-
-            approve_obj = AdmissionUserProfession.objects.filter(
+            approve_obj = admission_qs.filter(
                 user=data['user']
             ).first()
 
@@ -3557,7 +3551,7 @@ class UserScoreSortAPIView(generics.GenericAPIView):
 
         # Bulk_update бэлдэж өгсөн тэнцээгүй хэрэглэгчдэд
         for data in rejected:
-            obj = AdmissionUserProfession.objects.filter(
+            obj = admission_qs.filter(
                 user=data['user']
             ).first()
 
@@ -3660,12 +3654,12 @@ class ElseltEyeshAPIView(
     serializer_class = ElseltEyeshSerializer
 
     def refresh_token(self):
-        token_url = 'http://blockchain.eec.mn/api/v1/auth'
+        elselt_setting = Setting.objects.first()
+        token_url = elselt_setting.eec_api_url + '/auth'
 
-        # TODO elselt_setting гэдэг модел дээр хадгалаастай байгаа тэндээс уншина.
         data = {
-            "password": "a05TeVRnOUxOTUQ2",
-            "username": "info@uia.gov.mn"
+            "password": elselt_setting.eec_api_password,
+            "username": elselt_setting.eec_api_username
         }
         response = requests.post(token_url, data=data)
         response.raise_for_status()
@@ -3705,6 +3699,10 @@ class ElseltEyeshAPIView(
 
         #external_data орж ирж буй бүх хүүхдийн эеш
         data = []
+        profession = self.request.query_params.get('profession')
+        elselt = self.request.query_params.get('elselt')
+        profession_user_ids = AdmissionUserProfession.objects.filter(profession=profession, profession__admission=elselt).values_list('user', flat=True)
+        elselt_querysets = ElseltUser.objects.filter(id__in=profession_user_ids)
 
         for student in external_data:
             #Хэрэгтэй датаг авах
@@ -3712,7 +3710,7 @@ class ElseltEyeshAPIView(
 
             #Тухайн сурагч бүрийн регистр авах
             register_no = student_data.get('registerNo')
-            user_instance = ElseltUser.objects.filter(register__iexact=register_no).first()
+            user_instance = elselt_querysets.filter(register__iexact=register_no).first()
             pupil_data = student_data.get('pupil', [])
             for pupil in pupil_data:
                 exams = pupil.get('pupilExam', [])
