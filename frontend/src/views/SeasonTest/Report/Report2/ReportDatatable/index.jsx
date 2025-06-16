@@ -40,7 +40,7 @@ export default function ReportDatatable({ report }) {
     const [apiGetFuncArgs, setApiGetFuncArgs] = useState(null)
     const [rowData, setRowData] = useState({})
     const { control, watch } = useForm()
-	const defaultDateRef = useRef(moment(new Date()).format('YYYY-MM-DD'));
+	const defaultDateRef = useRef(moment(new Date()));
     const [start_date, setStartDate] = useState('')
     const [end_date, setEndDate] = useState('')
     // #endregion
@@ -232,32 +232,32 @@ export default function ReportDatatable({ report }) {
                     {
                         examMemo
                     }
-                    <Col md={3}>
-                        {
-                            ['professions', 'students'].includes(report) &&
-                            <div  className='me-1'>
-                                <ProfessionFilter setSelected={setSelectedProfession} />
-                            </div>
-                        }
-                    </Col>
-                    <Col md={3}>
-                        {
-                            ['students'].includes(report) &&
-                            <div  className='me-1'>
-                                <TeacherScoreGroupFilter setSelected={setSelectedGroup} profession={selected_profession}/>
-                            </div>
-                        }
-                    </Col>
-                    <Col md={3}>
-                        {
-                            ['groups'].includes(report) &&
-                            <div  className='me-1'>
-                                <GroupFilter setSelected={setSelectedGroup} exam_id={selected_exam} profession={selected_profession} isShowAll={report === 'students' ? 'true' : 'false'} />
-                            </div>
-                        }
-                    </Col>
                     {
-                        ['students'].includes(report) ?
+                        ['professions', 'students'].includes(report) &&
+                    <Col md={3}>
+                        <div  className='me-1'>
+                            <ProfessionFilter setSelected={setSelectedProfession} />
+                        </div>
+                    </Col>
+                    }
+                    {
+                        ['students'].includes(report) &&
+                    <Col md={3}>
+                        <div  className='me-1'>
+                            <TeacherScoreGroupFilter setSelected={setSelectedGroup} profession={selected_profession}/>
+                        </div>
+                    </Col>
+                    }
+                    {
+                        ['groups'].includes(report) &&
+                    <Col md={3}>
+                        <div  className='me-1'>
+                            <GroupFilter setSelected={setSelectedGroup} exam_id={selected_exam} profession={selected_profession} isShowAll={report === 'students' ? 'true' : 'false'} />
+                            </div>
+                     </Col>
+                        }
+                    {
+                        ['students'].includes(report) &&
                         <>
                             <Col md={3}>
                                 <Label className="form-label" for="start_date">
@@ -284,7 +284,7 @@ export default function ReportDatatable({ report }) {
                                     )}
                                 />
                             </Col>
-                            <Col md={3} >
+                            <Col md={3}>
                             <Label className="form-label" for="end_date">
                                 {t('Дуусах хугацаа')}
                             </Label>
@@ -310,10 +310,9 @@ export default function ReportDatatable({ report }) {
                             />
                         </Col>
                         </>
-                        :''
                     }
                 </Row>
-                <Row className='mt-1 d-flex'>
+                <Row className='mt-50 d-flex'>
                     <Col>
                         <Input
                             type='select'

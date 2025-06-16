@@ -1,4 +1,4 @@
-import { Label } from "reactstrap"
+import { Label} from "reactstrap"
 import Select from 'react-select'
 import { useTranslation } from "react-i18next"
 import { useEffect, useState } from "react"
