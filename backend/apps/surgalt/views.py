@@ -75,7 +75,8 @@ from lms.models import (
     Score,
     CalculatedGpaOfDiploma,
     QuestionMainTitle,
-    QuestioSubTitle
+    QuestioSubTitle,
+    Exam_to_group
 )
 
 from core.models import (
@@ -6863,22 +6864,21 @@ class ChallengeReportAPIView(
         lesson_season = request.query_params.get('lesson_season')
         start_date = request.query_params.get('start_date')
         end_date = request.query_params.get('end_date')
-        # start_date = request.query_params.get('2025-06-16')
-        # end_date = request.query_params.get('2025-06-01')
 
         if not report_type:
             return None
 
         queryset = None
         exam_qs = ExamTimeTable.objects.all()
-        if lesson_year and lesson_season and start_date and end_date:
-            print('start_date', start_date)
-            print('end_date', end_date)
-            exam_qs = ExamTimeTable.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season, begin_date__gte=start_date, end_date__lte=end_date)
+        if lesson_year and lesson_season:
+            exam_qs = ExamTimeTable.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season)
 
-            # if school_id:
-            #     exam_ids = Exam_to_group.objects.filter(exam__lesson_year=lesson_year, exam__lesson_season=lesson_season, group__school=school_id).values_list('exam', flat=True)
-            #     exam_qs = exam_qs.filter(id__in=exam_ids)
+            if start_date and end_date:
+                exam_qs = ExamTimeTable.objects.filter(begin_date__gte=start_date, end_date__lte=end_date)
+
+            if school_id:
+                exam_ids = Exam_to_group.objects.filter(exam__lesson_year=lesson_year, exam__lesson_season=lesson_season, group__school=school_id).values_list('exam', flat=True)
+                exam_qs = exam_qs.filter(id__in=exam_ids)
 
         lesson_ids = exam_qs.values_list('lesson', flat=True)
         if report_type in ['students', 'students_detail']:
@@ -6913,6 +6913,12 @@ class ChallengeReportAPIView(
                     ),
                     success_scored_lesson_count=Count(
                         Case(
+                            # Шууд нийт оноог оруулсан бол
+                            When(
+                                Q(score_type__score_type=Lesson_teacher_scoretype.BUSAD) &
+                                Q(score__gt=70),
+                                then='score_type__lesson_teacher__lesson__name'
+                            ),
                             When(
                                 Q(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO) &
                                 Q(score__gte=18),
