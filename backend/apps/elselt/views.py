@@ -3232,11 +3232,14 @@ class UserScoreSortAPIView(generics.GenericAPIView):
             score_type=AdmissionBottomScore.GENERAL,
         ).first()
 
-        # Хичээлийн өосго оноо
-        bottom_score = bottom_score_obj.bottom_score
+        if not bottom_score_obj:
+            return self.request.send_error('ERR_001', 'Шалгуур ЭШ хичээл энэ хөтөлбөр дээр оруулаагүй байна.')
+        else:
+            # Хичээлийн өосго оноо
+            bottom_score = bottom_score_obj.bottom_score
 
-        # Тэгээд save_scores function-ийг ашиглан нийт датагаа хадгална
-        self.save_scores(all_scores, total_elsegch, bottom_score, admission_qs)
+            # Тэгээд save_scores function-ийг ашиглан нийт датагаа хадгална
+            self.save_scores(all_scores, total_elsegch, bottom_score, admission_qs)
 
     # Нэгээс олон ЭЕШ-ийн хичээлээр оноог эрэмбэлхэд ашиглах function
     def process_multiple_lessons(self, lesson_names, profession, total_elsegch, gender, user_ids):
