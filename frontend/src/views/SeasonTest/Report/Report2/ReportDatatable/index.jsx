@@ -1,5 +1,5 @@
 // ** React Imports
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useRef } from 'react'
 import { Search } from 'react-feather'
 import { useTranslation } from 'react-i18next'
 import { Button, Col, Input, Label, Row } from 'reactstrap'
@@ -13,6 +13,11 @@ import './style.scss'
 import ProfessionFilter from '../../helpers/ProfessionFilter'
 import LessonsModal from '../../helpers/LessonsModal'
 import TeacherScoreGroupFilter from '../../helpers/TeacherScoreGroupFilter'
+import Flatpickr from 'react-flatpickr'
+import moment from "moment";
+import { useForm, Controller } from "react-hook-form";
+// css files
+import '@styles/react/libs/flatpickr/flatpickr.scss'
 
 export default function ReportDatatable({ report }) {
     // other hooks
@@ -34,6 +39,10 @@ export default function ReportDatatable({ report }) {
     const [studentId, setStudentId] = useState(null)
     const [apiGetFuncArgs, setApiGetFuncArgs] = useState(null)
     const [rowData, setRowData] = useState({})
+    const { control, watch } = useForm()
+	const defaultDateRef = useRef(moment(new Date()));
+    const [start_date, setStartDate] = useState('')
+    const [end_date, setEndDate] = useState('')
     // #endregion
 
     // #region primitives
@@ -45,7 +54,7 @@ export default function ReportDatatable({ report }) {
         switch (report) {
             case 'students':
                 return [
-                    {
+                     {
                         name: `${t('Ангийн нэр')}`,
                         selector: (row) => (<span>{row?.group_name}</span>),
                         center: true,
@@ -207,12 +216,12 @@ export default function ReportDatatable({ report }) {
 
     // to not rerender generic datatable if data not changed
     useEffect(()=>{
-        setApiGetFuncArgs({ report_type: report, exam: selected_exam, group: selected_group, profession: selected_profession, lesson_year: selected_year, lesson_season: selected_season })
-    },[report, selected_exam, selected_group, selected_profession, selected_season, selected_year])
+        setApiGetFuncArgs({ report_type: report, exam: selected_exam, group: selected_group, profession: selected_profession, lesson_year: selected_year, lesson_season: selected_season, start_date:start_date,  end_date:end_date })
+    },[report, selected_exam, selected_group, selected_profession, selected_season, selected_year, start_date, end_date])
 
     const examMemo = useMemo(() => {
         return (
-            <ExamFilter setSelected={setSelectedExam} setSelectedYear={setSelectedYear} setSelectedSeason={setSelectedSeason} selected_year={selected_year} selected_season={selected_season}/>
+            <ExamFilter setSelected={setSelectedExam} setSelectedYear={setSelectedYear} setSelectedSeason={setSelectedSeason} selected_year={selected_year} selected_season={selected_season} start_date={start_date}  end_date={end_date} />
         )
     }, [selected_year, selected_season])
 
@@ -223,32 +232,87 @@ export default function ReportDatatable({ report }) {
                     {
                         examMemo
                     }
+                    {
+                        ['professions', 'students'].includes(report) &&
                     <Col md={3}>
-                        {
-                            ['professions', 'students'].includes(report) &&
-                            <div  className='me-1'>
-                                <ProfessionFilter setSelected={setSelectedProfession} />
-                            </div>
-                        }
+                        <div  className='me-1'>
+                            <ProfessionFilter setSelected={setSelectedProfession} />
+                        </div>
                     </Col>
+                    }
+                    {
+                        ['students'].includes(report) &&
                     <Col md={3}>
-                        {
-                            ['students'].includes(report) &&
-                            <div  className='me-1'>
-                                <TeacherScoreGroupFilter setSelected={setSelectedGroup} profession={selected_profession} />
-                            </div>
-                        }
+                        <div  className='me-1'>
+                            <TeacherScoreGroupFilter setSelected={setSelectedGroup} profession={selected_profession}/>
+                        </div>
                     </Col>
+                    }
+                    {
+                        ['groups'].includes(report) &&
                     <Col md={3}>
-                        {
-                            ['groups'].includes(report) &&
-                            <div  className='me-1'>
-                                <GroupFilter setSelected={setSelectedGroup} exam_id={selected_exam} profession={selected_profession} isShowAll={report === 'students' ? 'true' : 'false'} />
+                        <div  className='me-1'>
+                            <GroupFilter setSelected={setSelectedGroup} exam_id={selected_exam} profession={selected_profession} isShowAll={report === 'students' ? 'true' : 'false'} />
                             </div>
+                     </Col>
                         }
-                    </Col>
+                    {
+                        ['students'].includes(report) &&
+                        <>
+                            <Col md={3}>
+                                <Label className="form-label" for="start_date">
+                                    {t('Эхлэх хугацаа')}
+                                </Label>
+                                <Controller
+                                    defaultValue={defaultDateRef.current}
+                                    name='start_date'
+                                    control={control}
+                                    render={({ field: { onChange, ...rest } }) => (
+                                        <Flatpickr
+                                            {...rest}
+                                            id={rest.name}
+                                            className='form-control'
+                                            style={{ height: "30px" }}
+                                            placeholder='Огноо'
+                                            options={{
+                                                onChange: (selectedDates, dateStr) => {
+                                                    onChange(dateStr);
+                                                    setStartDate(dateStr)
+                                                }
+                                            }}
+                                        />
+                                    )}
+                                />
+                            </Col>
+                            <Col md={3}>
+                            <Label className="form-label" for="end_date">
+                                {t('Дуусах хугацаа')}
+                            </Label>
+                            <Controller
+                                defaultValue={defaultDateRef.current}
+                                name='end_date'
+                                control={control}
+                                render={({ field: { onChange, ...rest } }) => (
+                                    <Flatpickr
+                                        {...rest}
+                                        id={rest.name}
+                                        className='form-control'
+                                        style={{ height: "30px" }}
+                                        placeholder='Огноо'
+                                        options={{
+                                            onChange: (selectedDates, dateStr) => {
+                                                onChange(dateStr);
+                                                setEndDate(dateStr)
+                                            }
+                                        }}
+                                    />
+                                )}
+                            />
+                        </Col>
+                        </>
+                    }
                 </Row>
-                <Row className='mt-1 d-flex'>
+                <Row className='mt-50 d-flex'>
                     <Col>
                         <Input
                             type='select'
