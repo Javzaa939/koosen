@@ -6872,28 +6872,35 @@ class ChallengeReportAPIView(
         exam_qs = ExamTimeTable.objects.all()
         if lesson_year and lesson_season:
             exam_qs = ExamTimeTable.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season)
+            exam_ids = exam_qs.values_list('id', flat=True)
+            group_ids  = Exam_to_group.objects.filter(exam__in=exam_ids).values_list('group', flat=True)
 
             if start_date and end_date:
-                exam_qs = ExamTimeTable.objects.filter(begin_date__gte=start_date, end_date__lte=end_date)
+                exam_ids = ExamTimeTable.objects.filter(begin_date__gte=start_date, end_date__lte=end_date).values_list('id', flat=True)
+                group_ids  = Exam_to_group.objects.filter(exam__in=exam_ids).values_list('group', flat=True)
 
             if school_id:
                 exam_ids = Exam_to_group.objects.filter(exam__lesson_year=lesson_year, exam__lesson_season=lesson_season, group__school=school_id).values_list('exam', flat=True)
-                exam_qs = exam_qs.filter(id__in=exam_ids)
+
+            exam_qs = exam_qs.filter(id__in=exam_ids)
 
         lesson_ids = exam_qs.values_list('lesson', flat=True)
+
         if report_type in ['students', 'students_detail']:
             queryset = TeacherScore.objects.filter(
                 lesson_year=lesson_year,
                 lesson_season_id=lesson_season,
                 score__gt=0,
-                score_type__lesson_teacher__lesson__in=lesson_ids
+                score_type__lesson_teacher__lesson__in=lesson_ids,
+                student__group__in=group_ids
             )
 
         if report_type == 'students':
             queryset = (
-
                 # this is "group by" part of sql query
-                queryset.values(
+                queryset
+                .filter(student__group__in=group_ids)
+                .values(
                     student_idnum=F('student_id'),
                     student_first_name=F('student__first_name'),
                     student_last_name=F('student__last_name'),
