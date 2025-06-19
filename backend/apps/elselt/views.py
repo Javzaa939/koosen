@@ -4,6 +4,7 @@ import traceback
 import requests
 import os
 import pandas as pd
+from datetime import datetime
 from collections import Counter
 
 from rest_framework import mixins
@@ -1995,6 +1996,7 @@ class ElseltHealthPhysicalCreateAPIView(
         # Манай гаргасан sha256
         data_to_verify = 'utility_solution'
         verification_hash = hashlib.sha256(data_to_verify.encode('utf-8')).hexdigest()
+        year = datetime.now().year
 
         if api_key and api_key == verification_hash:
             try:
@@ -2014,8 +2016,8 @@ class ElseltHealthPhysicalCreateAPIView(
                 sid = transaction.savepoint()
 
                 # Өмнө нь бүртгүүлсэн бол update хийнэ
-                if self.queryset.filter(user=user).exists():
-                    instance = self.queryset.filter(user=user).first()
+                if self.queryset.filter(user=user, user__created_year=year).exists():
+                    instance = self.queryset.filter(user=user, user__created_year=year).first()
                     serializer = self.serializer_class(instance=instance, data=data, partial=True)
                 else:
                     serializer = self.serializer_class(data=data)
