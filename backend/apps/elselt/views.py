@@ -865,9 +865,9 @@ class AdmissionUserEmailAPIView(
                 send_mail(
                     subject = 'Элсэлт',
                     message = 'Дотоод хэргийн их сургууль',
-                    from_email = user.employee.org.email_host_user,
+                    from_email = org.email_host_user,
                     recipient_list = [mail],
-                    connection = make_connection(user.employee.org.email_host_user, config),
+                    connection = make_connection(org.email_host_user, config),
                     html_message = html_body
                 )
 
