@@ -471,10 +471,9 @@ class UserForgotPasswordConfirmAPI(
 # from django.contrib.auth.hashers import make_password
 
 # from core.models import User
-# user = User.objects.filter(email='elselt@admin.mn').first()
-# print(user)
+# user = User.objects.filter(email='admin@sis.mn').first()
 
-# password = 'elselt@2025'
+# password = '88993174_daria'
 # hash_password = make_password(password)
 
 # print(hash_password)

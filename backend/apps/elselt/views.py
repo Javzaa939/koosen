@@ -65,7 +65,8 @@ from lms.models import (
     AdmissionBottomScore,
     StudentAdmissionScore,
     Payment,
-    ProfessionalDegree
+    ProfessionalDegree,
+    Schools
 )
 
 from core.models import Employee
@@ -852,12 +853,12 @@ class AdmissionUserEmailAPIView(
                 )
 
             self.queryset.bulk_create(create_email_info)
-
+            org = Schools.objects.first()
             config = {
-                "email_password": user.employee.org.email_password,
-                "email_port": user.employee.org.email_port,
-                "email_host": user.employee.org.email_host,
-                "email_use_tsl": user.employee.org.email_use_tls,
+                "email_password": org.email_password,
+                "email_port": org.email_port,
+                "email_host": org.email_host,
+                "email_use_tsl": org.email_use_tls,
             }
 
             for mail in data["email_list"]:
