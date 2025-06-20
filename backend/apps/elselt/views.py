@@ -2004,10 +2004,10 @@ class ElseltHealthPhysicalCreateAPIView(
                 user_register = data.get('user')
 
                 try:
-                    if not ElseltUser.objects.filter(register__iexact=user_register).exists():
+                    if not ElseltUser.objects.filter(register__iexact=user_register, created__year=year).exists():
                         return Response({'status': '404 Not Found', 'message': f'{user_register} регистрийн дугаартай тохирох хэрэглэгч олдсонгүй'}, status=status.HTTP_404_NOT_FOUND)
                     else:
-                        user = ElseltUser.objects.filter(register__iexact=user_register).first()
+                        user = ElseltUser.objects.filter(register__iexact=user_register, created__year=year).first()
                 except ElseltUser.DoesNotExist:
                     return Response({'status': '404 Not Found', 'message': f'{user_register} регистрийн дугаартай тохирох хэрэглэгч олдсонгүй'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -2016,8 +2016,8 @@ class ElseltHealthPhysicalCreateAPIView(
                 sid = transaction.savepoint()
 
                 # Өмнө нь бүртгүүлсэн бол update хийнэ
-                if self.queryset.filter(user=user, user__created__year=year).exists():
-                    instance = self.queryset.filter(user=user, user__created__year=year).first()
+                if self.queryset.filter(user=user).exists():
+                    instance = self.queryset.filter(user=user).first()
                     serializer = self.serializer_class(instance=instance, data=data, partial=True)
                 else:
                     serializer = self.serializer_class(data=data)
