@@ -2016,8 +2016,8 @@ class ElseltHealthPhysicalCreateAPIView(
                 sid = transaction.savepoint()
 
                 # Өмнө нь бүртгүүлсэн бол update хийнэ
-                if self.queryset.filter(user=user, user__created_year=year).exists():
-                    instance = self.queryset.filter(user=user, user__created_year=year).first()
+                if self.queryset.filter(user=user, user__created__year=year).exists():
+                    instance = self.queryset.filter(user=user, user__created__year=year).first()
                     serializer = self.serializer_class(instance=instance, data=data, partial=True)
                 else:
                     serializer = self.serializer_class(data=data)
