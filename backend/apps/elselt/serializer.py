@@ -566,6 +566,11 @@ class HealthUpUserInfoSerializer(serializers.ModelSerializer):
     health_up_user_data = serializers.SerializerMethodField()
     user_age = serializers.SerializerMethodField()
     user_info = serializers.SerializerMethodField()
+    aimag_name = serializers.CharField(source='user.aimag.name', default='', read_only=True)
+    soum_name = serializers.CharField(source='user.soum.name', default='', read_only=True)
+    bag_name = serializers.CharField(source='user.bag.name', default='', read_only=True)
+    toot = serializers.CharField(source='user.address_detail', default='', read_only=True)
+
 
     class Meta:
         model = HealthUser
