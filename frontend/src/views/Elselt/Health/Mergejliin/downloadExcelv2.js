@@ -6,9 +6,9 @@ export function excelDownLoadv2(datas, STATE_LIST) {
             return(
                 {
                     '№': idx + 1,
-                    'Регистрийн дугаар': data?.user_register || '',
                     'Овог':data?.user?.last_name || '',
                     'Нэр':data?.user?.first_name || '',
+                    'Регистрийн дугаар': data?.user_register || '',
                     'Утасны дугаар': data?.user?.mobile || '',
                     'Нас': data?.user_age || '',
                     'Яаралтай холбогдох': data?.user?.parent_mobile || '',
@@ -51,9 +51,9 @@ export function excelDownLoadv2(datas, STATE_LIST) {
         utils.book_append_sheet(workbook, worksheet, "Нарийн шатны үзлэгийн жагсаалт")
         const staticCells = [
                 '№',
-                'Регистрийн дугаар',
                 'Овог',
                 'Нэр',
+                'Регистрийн дугаар',
 				'Утасны дугаар',
 				'Нас',
 				'Яаралтай холбогдох',
