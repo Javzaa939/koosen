@@ -1172,14 +1172,10 @@ class EyeshOrderUserInfoSerializer(serializers.ModelSerializer):
         """ Элсэгч дагалдан шалгалт """
 
         # Тухайн мэргэжлийн ЭШ онооны босго оноо
-        profession = AdmissionBottomScore.objects.filter(profession=obj.profession.profession, score_type=AdmissionBottomScore.SUPPORT).first()
-        if profession:
-
-            # Мэргэжлийн Суурь шалгалт хичээлийн нэр
-            lesson_name = profession.admission_lesson.lesson_name
-
+        profession_names = AdmissionBottomScore.objects.filter(profession=obj.profession.profession, score_type=AdmissionBottomScore.SUPPORT).values_list('admission_lesson__lesson_name', flat=True)
+        if profession_names:
             # Тухайн хичээлээр ЭШ өгсөн бол оноонуудын хамгийн өндрийг нь авна
-            max_score = UserScore.objects.filter(user=obj.user, lesson_name__iexact=lesson_name).aggregate(max_score=Max('scaledScore'))
+            max_score = UserScore.objects.filter(user=obj.user, lesson_name__in=profession_names).aggregate(max_score=Max('scaledScore'))
             return max_score.get('max_score')
         else:
             return ''
@@ -1256,3 +1252,12 @@ class AdmissionPaymentSerializer(serializers.ModelSerializer):
                 profession_list.append(f"{profession_name}")
 
         return profession_list
+
+
+
+
+# adms = AdmissionUserProfession.objects.filter(profession=107).update(
+#     yesh_state=AdmissionUserProfession.STATE_SEND,
+#     yesh_description='',
+#     order_no=None
+# )
