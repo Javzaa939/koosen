@@ -3244,6 +3244,20 @@ class UserScoreSortAPIView(generics.GenericAPIView):
             # Тэгээд save_scores function-ийг ашиглан нийт датагаа хадгална
             self.save_scores(all_scores, total_elsegch, bottom_score, admission_qs)
 
+    def return_highest_score_lesson(self, data):
+        """ Тухайн мэргэжлийн шалгуур хичээлүүдээс Хичээл 1, 2-ийн хамгийн өндөр оноотой хичээлүүдийг авах """
+        # Group data by score_type
+        result = {}
+        for user_id, scores in data.items():
+            score_type_map = {}
+            for s in scores:
+                stype = s['score_type']
+                if stype not in score_type_map or s['scaledScore'] > score_type_map[stype]['scaledScore']:
+                    score_type_map[stype] = s
+            result[user_id] = list(score_type_map.values())
+
+        return result
+
     # Нэгээс олон ЭЕШ-ийн хичээлээр оноог эрэмбэлхэд ашиглах function
     def process_multiple_lessons(self, lesson_names, profession, total_elsegch, gender, user_ids):
 
@@ -3332,11 +3346,13 @@ class UserScoreSortAPIView(generics.GenericAPIView):
             #   {'lesson_name': 'Нийгэм судлал', 'scaledScore': 634, 'user': 4712, 'score_type': 2}
             # ]
 
-        # Дараагаар үндсэн list дотроо зөвхөн тухайн хэрэглэгч дотор 2 хичээлийн мэдээлэл group-лэгдсэн датаг нэмнэ
-        grouped_list = [group for group in grouped_data.values() if len(group) == 2]
+        # 2 хичээл1, 2 хичээл2 байх үед ХАМГИЙН ӨНДӨР оноотой хичээл 1 болон хичээл 2-ыг авах
+        restrict_grouped_data = self.return_highest_score_lesson(grouped_data)
+
+        grouped_list = [group for group in restrict_grouped_data.values() if len(group) == 2]
 
         # 2 хичээлийн нэг хичээлээр ЭШ өгөөгүй хүүхдүүд
-        grouped_one_list = [group for group in grouped_data.values() if len(group) == 1]
+        grouped_one_list = [group for group in restrict_grouped_data.values() if len(group) == 1]
 
         # 2 хичээлийн аль нэгнийхэн босго оноонд хүрээгүй тохиолдодл state солиж тэнцүүлэхгүй
         users_to_remove = []
