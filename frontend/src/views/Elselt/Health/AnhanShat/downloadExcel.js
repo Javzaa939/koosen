@@ -67,7 +67,6 @@ export function excelDownLoad(datas, STATE_LIST) {
                 'Ажиллаж байгаа байгууллагын нэр',
                 'Албан тушаал',
                 'Цол',
-
             ];
 
         utils.sheet_add_aoa(worksheet, [staticCells], { origin: "A1" });

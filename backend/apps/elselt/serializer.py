@@ -16,7 +16,8 @@ from lms.models import  (
     AimagHot,
     SumDuureg,
     ProfessionDefinition,
-    Payment
+    Payment,
+    BagHoroo
 )
 
 from elselt.models import (
@@ -449,7 +450,8 @@ class HealthUserDataSerializer(serializers.ModelSerializer):
     daatgal = serializers.SerializerMethodField()
     aimag_name = serializers.SerializerMethodField()
     user_age = serializers.SerializerMethodField()
-
+    horoo_name = serializers.SerializerMethodField()
+    sum_duureg_name = serializers.SerializerMethodField()
     class Meta:
         model = AdmissionUserProfession
         fields = '__all__'
@@ -506,13 +508,13 @@ class HealthUserDataSerializer(serializers.ModelSerializer):
             aimag = sumDuureg.name
         return aimag
 
-    # def get_sumDuureg(self,obj):
-    #     sumDuureg = SumDuureg.objects.filter(id=obj.id).first()
-    #     return sumDuureg.name if sumDuureg else ''
+    def get_sum_duureg_name(self,obj):
+        sumDuureg = SumDuureg.objects.filter(id=obj.user.id).first()
+        return sumDuureg.name if sumDuureg else ''
 
-    # def get_Horoo(self ,obj):
-    #     horoo = BagHoroo.objects.filter(id=obj.id).first()
-    #     return horoo.name if horoo else ''
+    def get_horoo_name(self ,obj):
+        horoo = BagHoroo.objects.filter(id=obj.user.id).first()
+        return horoo.name if horoo else ''
 
     def get_tsol_name(self, obj):
         tsergiinTsol =UserInfo.objects.filter(user=obj.id).first()
@@ -566,6 +568,10 @@ class HealthUpUserInfoSerializer(serializers.ModelSerializer):
     health_up_user_data = serializers.SerializerMethodField()
     user_age = serializers.SerializerMethodField()
     user_info = serializers.SerializerMethodField()
+    aimag_name = serializers.CharField(source='user.aimag.name', default='', read_only=True)
+    # soum_name = serializers.CharField(source='user.soum.name', default='', read_only=True)
+    # bag_name = serializers.CharField(source='user.bag.name', default='', read_only=True)
+
 
     class Meta:
         model = HealthUser
