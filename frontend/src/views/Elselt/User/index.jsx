@@ -51,6 +51,7 @@ const ElseltUser = () => {
     const [rowsPerPage, setRowsPerPage] = useState(20)
     const [end_date, setEndDate] = useState('')
     const [start_date, setStartDate] = useState('')
+    const [first_state, setFirstState] = useState('')  // Бүртгүүлсний дараа анхан шатандаа тэнцсэн төлөв
 
     const navigate = useNavigate()
 
@@ -210,8 +211,7 @@ const ElseltUser = () => {
 
 	/* Жагсаалтын дата авах функц */
 	async function getDatas() {
-        const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id, unit1, gender, state,
-                                                                gpa_state,age_state, justice_state, is_justice, now_state, start_date, end_date))
+        const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id, unit1, gender, state,gpa_state,age_state, justice_state, is_justice, now_state, start_date, end_date, first_state))
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
@@ -261,7 +261,7 @@ const ElseltUser = () => {
 
 			return () => clearTimeout(timeoutId);
 		}
-    }, [sortField, currentPage, rowsPerPage, searchValue, adm, profession_id, unit1, gender, state, gpa_state,age_state, justice_state, is_justice, now_state, start_date, end_date])
+    }, [sortField, currentPage, rowsPerPage, searchValue, adm, profession_id, unit1, gender, state, gpa_state,age_state, justice_state, is_justice, now_state, start_date, end_date, first_state])
 
     useEffect(() => {
         getAdmissionYear()
@@ -764,6 +764,29 @@ const ElseltUser = () => {
                                 // locale: Mongolian
                             }}
                         />
+                    </Col>
+                    <Col md={3} sm={6} xs={12} >
+                        <Label className="form-label" for="first_state">
+                            {t('Анхан шатандаа тэнцсэн төлөв')}
+                        </Label>
+                            <Select
+                                name="first_state"
+                                id="first_state"
+                                classNamePrefix='select'
+                                isClearable
+                                className={classnames('react-select')}
+                                isLoading={isLoading}
+                                placeholder={t('-- Сонгоно уу --')}
+                                options={stateop || []}
+                                value={stateop.find((c) => c.id === first_state)}
+                                noOptionsMessage={() => t('Хоосон байна.')}
+                                onChange={(val) => {
+                                    setFirstState(val?.id || '')
+                                }}
+                                styles={ReactSelectStyles}
+                                getOptionValue={(option) => option.id}
+                                getOptionLabel={(option) => option.name}
+                            />
                     </Col>
                 </Row>
                 <div className='d-flex justify-content-between my-50 mt-1'>

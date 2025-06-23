@@ -572,6 +572,7 @@ class AdmissionUserInfoAPIView(
         is_justice = self.request.query_params.get('is_justice')
         start_date = self.request.query_params.get('start_date')
         end_date = self.request.query_params.get('end_date')
+        first_state = self.request.query_params.get('first_state')
 
         # Бүртгүүлсэн огноогоор хайх хэсэг
         filters = {}
@@ -624,6 +625,10 @@ class AdmissionUserInfoAPIView(
         if gpa:
             gpa_value = float(gpa)
             queryset = queryset.filter(gpa__lte = gpa_value)
+
+        # Бүртгүүлсний дараа анхан шатандаа тэнцсэн төлөв
+        if first_state:
+            queryset = queryset.filter(first_state=first_state)
 
         # Sort хийх үед ажиллана
         if sorting:
