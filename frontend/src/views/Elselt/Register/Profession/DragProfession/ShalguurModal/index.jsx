@@ -71,7 +71,6 @@ const shalguurs = [
 
 const ShalguurModal = ({ open, handleModal, refreshDatas, admission_data }) => {
 
-
     const CloseBtn = (
         <X className="cursor-pointer" size={15} onClick={handleModal} />
     )
@@ -147,7 +146,7 @@ const ShalguurModal = ({ open, handleModal, refreshDatas, admission_data }) => {
             if (id === 3) {
                 setNasYear({
                     limit_min: '',
-                    limit_mах: ''
+                    limit_max: ''
                 })
             }
 
