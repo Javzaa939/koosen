@@ -172,47 +172,47 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
             sortable: true,
 			center: true,
 		},
-		{
-			maxWidth: "200px",
-			minWidth: "200px",
-			header: 'gpa',
-			sortable: true,
-			name: t("Голч дүн"),
-			reorder: true,
-			selector: (row) => {
-				return(
-					<>
-						<div className={`d-flex`}>
-							<Input
-								className={`text-center ${row?.userinfo?.gpa_state === 1 ? 'border-success' : 'border-danger'}`}
-								// id={`gpa-${row.id}-input`}
-								type="number"
-								step="0.1"
-								min='0'
-								max='4'
-								bsSize='sm'
-								placeholder={(`Голч дүн`)}
-								defaultValue={row?.userinfo?.gpa}
-								onBlur={focusOut}
-								onFocus={(e) => focusData.current = (e.target.value)}
-								disabled={(Object.keys(user).length > 0 && user?.is_superuser) ? false : true}
-								onKeyPress={(e) => {
-									handleSetGpaResult(e, `${row?.userinfo?.id}`, row?.gpa, 'gpa')
-								}}
-							/>
-						</div>
-					</>
-				)
-			},
-			center: true,
-		},
-		{
-			minWidth: "250px",
-			name: 'Мэдээллийн тайлбар',
-			reorder: true,
-			selector: (row) => <span title={row?.userinfo?.info_description} style={{fontSize:'10px'}}>{row?.userinfo?.info_description}</span>,
-			wrap:true
-		},
+		// {
+		// 	maxWidth: "200px",
+		// 	minWidth: "200px",
+		// 	header: 'gpa',
+		// 	sortable: true,
+		// 	name: t("Голч дүн"),
+		// 	reorder: true,
+		// 	selector: (row) => {
+		// 		return(
+		// 			<>
+		// 				<div className={`d-flex`}>
+		// 					<Input
+		// 						className={`text-center ${row?.userinfo?.gpa_state === 1 ? 'border-success' : 'border-danger'}`}
+		// 						// id={`gpa-${row.id}-input`}
+		// 						type="number"
+		// 						step="0.1"
+		// 						min='0'
+		// 						max='4'
+		// 						bsSize='sm'
+		// 						placeholder={(`Голч дүн`)}
+		// 						defaultValue={row?.userinfo?.gpa}
+		// 						onBlur={focusOut}
+		// 						onFocus={(e) => focusData.current = (e.target.value)}
+		// 						disabled={(Object.keys(user).length > 0 && user?.is_superuser) ? false : true}
+		// 						onKeyPress={(e) => {
+		// 							handleSetGpaResult(e, `${row?.userinfo?.id}`, row?.gpa, 'gpa')
+		// 						}}
+		// 					/>
+		// 				</div>
+		// 			</>
+		// 		)
+		// 	},
+		// 	center: true,
+		// },
+		// {
+		// 	minWidth: "250px",
+		// 	name: 'Мэдээллийн тайлбар',
+		// 	reorder: true,
+		// 	selector: (row) => <span title={row?.userinfo?.info_description} style={{fontSize:'10px'}}>{row?.userinfo?.info_description}</span>,
+		// 	wrap:true
+		// },
 		{
 			maxWidth: "150px",
 			minWidth: "150px",
@@ -251,37 +251,37 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			reorder: true,
 			center: true
 		},
-        {
-			maxWidth: "350px",
-			minWidth: "350px",
-			wrap: true,
-			name: t("Төгссөн сургууль"),
-			selector: (row) => <span title={row?.userinfo?.graduate_school}>{row?.userinfo?.graduate_school}</span>,
-			center: true,
-			reorder: true,
+        // {
+		// 	maxWidth: "350px",
+		// 	minWidth: "350px",
+		// 	wrap: true,
+		// 	name: t("Төгссөн сургууль"),
+		// 	selector: (row) => <span title={row?.userinfo?.graduate_school}>{row?.userinfo?.graduate_school}</span>,
+		// 	center: true,
+		// 	reorder: true,
 
-		},
-		{
-			maxWidth: "350px",
-			minWidth: "350px",
-			wrap: true,
-			name: t("Мэргэжил"),
-			selector: (row) => <span title={row?.userinfo?.graduate_profession}>{row?.userinfo?.graduate_profession}</span>,
-			center: true,
-			reorder: true,
-		},
-		{
-			name: t("Цол"),
-			selector: (row) => {
-				return (
-					<span className='text-truncate-container' title={row?.userinfo?.tsol_name}>{row?.userinfo?.tsol_name}</span>
-				)
-			},
-			wrap: true,
-			reorder: true,
-			left: true,
-			minWidth: "250px",
-		},
+		// },
+		// {
+		// 	maxWidth: "350px",
+		// 	minWidth: "350px",
+		// 	wrap: true,
+		// 	name: t("Мэргэжил"),
+		// 	selector: (row) => <span title={row?.userinfo?.graduate_profession}>{row?.userinfo?.graduate_profession}</span>,
+		// 	center: true,
+		// 	reorder: true,
+		// },
+		// {
+		// 	name: t("Цол"),
+		// 	selector: (row) => {
+		// 		return (
+		// 			<span className='text-truncate-container' title={row?.userinfo?.tsol_name}>{row?.userinfo?.tsol_name}</span>
+		// 		)
+		// 	},
+		// 	wrap: true,
+		// 	reorder: true,
+		// 	left: true,
+		// 	minWidth: "250px",
+		// },
 		{
 			minWidth: "120px",
 			name: t("Яаралтай холбогдох утас"),
