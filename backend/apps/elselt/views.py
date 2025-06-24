@@ -1335,7 +1335,8 @@ class ElseltHealthAnhanShat(
         # )
 
         # ЭШ тэнцсэн болон анхан мэдээлэлээрээ тэнцсэн
-        queryset = queryset.filter(Q(Q(yesh_state=AdmissionUserProfession.STATE_APPROVE)))
+        # queryset = queryset.filter(Q(Q(yesh_state=AdmissionUserProfession.STATE_APPROVE)))
+        queryset = queryset.filter(Q(yesh_state=AdmissionUserProfession.STATE_APPROVE) | Q(first_state=AdmissionUserProfession.STATE_APPROVE))
 
         if gender:
             if gender == 'Эрэгтэй':
