@@ -85,7 +85,7 @@ const ShalguurModal = ({ open, handleModal, refreshDatas, admission_data }) => {
 
     const [ nasYear, setNasYear ] = useState({
         'limit_min': '',
-        'limit_max': ''
+        'limit_mах': ''
     })
 
 	// Loader
@@ -146,7 +146,7 @@ const ShalguurModal = ({ open, handleModal, refreshDatas, admission_data }) => {
             if (id === 3) {
                 setNasYear({
                     limit_min: '',
-                    limit_max: ''
+                    limit_mах: ''
                 })
             }
 
@@ -290,11 +290,11 @@ const ShalguurModal = ({ open, handleModal, refreshDatas, admission_data }) => {
                                                     type='number'
                                                     bsSize='sm'
                                                     placeholder='Насны шалгуурын дээд хязгаар'
-                                                    value={nasYear.limit_max}
+                                                    value={nasYear.limit_mах}
                                                     onChange={(e) => setNasYear(current => {
                                                         return {
                                                             ...current,
-                                                            limit_max: e.target.value
+                                                            limit_mах: e.target.value
                                                         }
                                                     })}
                                                 />

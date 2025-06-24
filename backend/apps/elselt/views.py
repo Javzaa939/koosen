@@ -491,7 +491,7 @@ class ProfessionShalguur(
                             'type': return_type(shalguur_id),
                             'orderby': idx,
                             'limit_min': nasYear.get('limit_min') if nasYear.get('limit_min') else None,
-                            'limit_mах': nasYear.get('limit_max') if nasYear.get('limit_max') else None
+                            'limit_mах': nasYear.get('limit_mах') if nasYear.get('limit_mах') else None
                         }
                     )
 
