@@ -555,7 +555,7 @@ class AdmissionUserInfoAPIView(
                 queryset = queryset.filter(profession__profession__degree__degree_code__in=['C', 'D'])
 
             # Бакалавр, дэд бакалавр  элсэгчдийг харуулна.
-            if 'lms-elselt-ahlah-read' in user_permissions:
+            if 'lms-elselt-ahlah' in user_permissions:
                 self.queryset = self.queryset.filter(profession__degree__degree_code__in=['MB', 'MC'])
 
         lesson_year_id = self.request.query_params.get('lesson_year_id')
@@ -4263,7 +4263,7 @@ class AdmissionPaymentAPIView(
                 filter_profession_qs = filter_profession_qs.filter(profession__profession__degree__degree_code__in=['C', 'D'])
 
             # Бакалавр, дэд бакалавр  элсэгчдийг харуулна.
-            if 'lms-elselt-ahlah-read' in user_permissions:
+            if 'lms-elselt-ahlah' in permissions:
                 self.queryset = self.queryset.filter(profession__degree__degree_code__in=['MB', 'MC'])
 
             user_ids = filter_profession_qs.values_list('user', flat=True)
