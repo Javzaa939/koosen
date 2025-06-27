@@ -94,6 +94,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
         cdata['end_date'] =  moment(endPicker).format('YYYY-MM-DD HH:mm:ss')
         cdata['created_by'] = user?.id
         cdata['description'] = quill?.root?.innerHTML
+        cdata['test_type'] = cdata['test_type'] ? 2 : 1
 
         if (editData?.id) {
             cdata = convertDefaultValue(cdata)
@@ -141,10 +142,16 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
 
     useEffect(() => {
         if (Object.keys(editData).length > 0) {
-            const fields = ['title', 'duration', 'description'];
+            const fields = ['title', 'duration', 'description', 'test_type'];
             fields.forEach(field => {
                 if (editData[field] !== null) {
-                    setValue(field, editData[field]);
+                    if (field === 'test_type') {
+                        if (editData[field] === 2) {
+                            setValue(field, true);
+                        } else {
+                            setValue(field, false);
+                        }
+                    } else setValue(field, editData[field]);
                 }
                 if (field === 'description' && quill) {
                     quill.pasteHTML(editData[field]);
@@ -284,6 +291,29 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
                             {errors.start_date && <FormFeedback className='d-block'>{t(errors.start_date.message)}</FormFeedback>}
                         </Col>
                         <Col md={12}>
+                            <Controller
+                                defaultValue={false}
+                                control={control}
+                                id='test_type'
+                                name='test_type'
+                                render={({ field }) => {
+                                    return (
+                                        <Input
+                                            {...field}
+                                            checked={field.value}
+                                            className='me-50'
+                                            type='checkbox'
+                                            name='test_type'
+                                            id='test_type'
+                                        />
+                                    )
+                                }}
+                            />
+                            <Label className='form-label' for='test_type'>
+                                {t('Сэтгэл зүйн сорил эсэх')}
+                            </Label>
+                        </Col>
+                        <Col md={12}>
                             <Label className="form-label" for="description">
                                {t('Тайлбар')}
                             </Label>
@@ -303,7 +333,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
                                 )}
                             ></Controller>
                         </Col>
-                        <Col md={12} className="mt-2">
+                        <Col md={12} className="mt-2 text-center">
                             <Button className="me-2" color="primary" type="submit" disabled={postLoading}>
                                 {postLoading &&<Spinner size='sm' className='me-1'/>}
                                 {t('Хадгалах')}

@@ -2103,7 +2103,6 @@ class QuestionsAPIView(
                     updated_answer = QuestionChoices.objects.filter(id=answer_id).first()
                     ser = dynamic_serializer(QuestionChoices, "__all__")
                     data = ser(updated_answer).data
-                    print(data)
                 return request.send_info('INF_002', data)
 
     @has_permission(must_permissions=['lms-exam-question-create'])
