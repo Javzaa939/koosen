@@ -1015,7 +1015,7 @@ class PsychologicalTestResultSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PsychologicalTest
-        fields = ['id', 'title', 'description', 'duration', 'start_date', 'end_date', 'state']
+        fields = ['id', 'title', 'description', 'duration', 'start_date', 'end_date', 'state', 'test_type']
 
     def get_state(self, obj):
         state = 2
