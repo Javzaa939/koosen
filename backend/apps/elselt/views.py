@@ -4218,18 +4218,22 @@ class AdmissionPaymentAPIView(
     mixins.ListModelMixin,
 ):
 
-    queryset = Payment.objects.filter(status=True, dedication=Payment.ADMISSION)
+    queryset = Payment.objects.filter(Q(status=True) & (Q(dedication=Payment.SYSTEM) | Q(dedication=Payment.ADMISSION))).order_by('-payed_date')
+
     serializer_class = AdmissionPaymentSerializer
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['admission__first_name', 'admission__register', 'admission__email', 'admission__code', 'payed_date']
+    search_fields = ['admission__first_name', 'admission__register', 'admission__email', 'admission__code', 'payed_date', 'total_amount']
 
     def get(self, request):
         user = request.user
         permissions = get_user_permissions(user)
 
         filters = dict()
+        professionregister_qs= None
+        admission_qs = None
+
 
         # Элсэлт
         admission = request.query_params.get('admission')
@@ -4240,13 +4244,22 @@ class AdmissionPaymentAPIView(
         degree = request.query_params.get('degree')
 
         if admission:
-            filters['admission'] = admission
+            admission_ids = admission.split(',') if ',' in admission else [admission]
+            admission_qs = AdmissionUserProfession.objects.filter(profession__admission__in=admission_ids)
+            if admission_qs.exists():
+                user_ids = list(admission_qs.values_list('user', flat=True))
+                self.queryset = self.queryset.filter(admission__in=user_ids)
 
         if professionregister_id:
-            filters['register_id'] = professionregister_id
+            professionregister_id = professionregister_id.split(',') if ',' in professionregister_id else [professionregister_id]
+            professionregister_qs = AdmissionUserProfession.objects.filter(profession__profession__in=professionregister_id)
+            if professionregister_qs.exists():
+                user_ids = list(professionregister_qs.values_list('user', flat=True))
+                self.queryset = self.queryset.filter(admission__in=user_ids)
 
         if dedication:
-            filters['dedication'] = dedication
+
+            self.queryset = self.queryset.filter(dedication=dedication)
 
         filter_profession_qs = AdmissionUserProfession.objects.all().filter(profession__admission__is_store=False)
         if degree:
@@ -4301,7 +4314,6 @@ class AdmissionPaymentAPIView(
             )
         )
 
-        print(all_data)
         return_datas = {
             'footer': all_payment_qs,
             **all_data,

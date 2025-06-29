@@ -72,6 +72,10 @@ const Payment = () => {
             'id': 6,
             'name': 'Бүртгэлийн хураамж'
         },
+        {
+            'id': 5,
+            'name': 'Систем ашиглалтын хураамж'
+        },
     ]
     // Api
     const elseltApi = useApi().elselt
@@ -370,14 +374,14 @@ const Payment = () => {
                             isLoading={isLoading}
                             placeholder={`-- Сонгоно уу --`}
                             options={elseltProfessionOption || []}
-                            value={elseltProfessionOption.find((c) => c.id === profession_id)}
+                            value={elseltProfessionOption.find((c) => c.prof_id === profession_id)}
                             noOptionsMessage={() => 'Хоосон байна'}
                             onChange={(val) => {
-                               setProfession_id(val?.id || '')
+                               setProfession_id(val?.prof_id || '')
                             }}
                             styles={ReactSelectStyles}
                             getOptionValue={(option) => option.id}
-                            getOptionLabel={(option) => option.full_name}
+                            getOptionLabel={(option) => option.name}
                         />
                     </Col>
                     <Col sm={6} lg={3}>
