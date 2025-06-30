@@ -2776,7 +2776,7 @@ class AdmissionJusticeListAPIView(
 
 
 @permission_classes([IsAuthenticated])
-class ConversationUserSerializerAPIView(
+class ConversationUserAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
@@ -2792,9 +2792,9 @@ class ConversationUserSerializerAPIView(
 
     def get_queryset(self):
         queryset = self.queryset
-        queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
-        gender = self.request.query_params.get('gender')
+        queryset = queryset.annotate(gender=Substr('user__register', 9, 1))
 
+        gender = self.request.query_params.get('gender')
         sorting = self.request.query_params.get('sorting')
         state = self.request.query_params.get('state')
         elselt = self.request.query_params.get('elselt')
@@ -2802,11 +2802,14 @@ class ConversationUserSerializerAPIView(
         start_date=self.request.query_params.get('start_date')
         end_date=self.request.query_params.get('end_date')
 
-        # Бие бялдарт тэнцсэн элсэгчид
-        biy_byldar_ids = HealthUpUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user',flat=True)
-        queryset = queryset.filter(user__in=biy_byldar_ids)
+        latest_health = PhysqueUser.objects.filter(
+            user=OuterRef('user_id')
+        ).order_by('-created_at')
 
-        # Sort хийх үед ажиллана
+        queryset = queryset.annotate(
+            latest_health_state=Subquery(latest_health.values('state')[:1])
+        ).filter(latest_health_state=AdmissionUserProfession.STATE_APPROVE)
+
         if sorting:
             if not isinstance(sorting, str):
                 sorting = str(sorting)
