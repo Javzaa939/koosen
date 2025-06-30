@@ -596,16 +596,15 @@ class HealthUpUserInfoSerializer(serializers.ModelSerializer):
 
 
     def get_health_up_user_data(self, obj):
-
         health_user_data = None
 
-        user_data = HealthUpUser.objects.filter(user=obj.user).first()
+        user_data = HealthUpUser.objects.filter(user=obj.user).order_by('-created_at').first()
 
         if user_data:
             health_user_data = HealthUpUserSerializer(user_data).data
 
         return health_user_data
-    
+
     def get_user_age(self, obj):
         user_age = ''
         register = obj.user.register
