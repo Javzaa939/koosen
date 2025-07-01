@@ -595,7 +595,7 @@ export default function PrintAttachmentMongolia()
                             return (
                                 <div className='text-center px-1' style={{width: '400px'}} key={idx} >
                                     <div className='text-center d-inline-block text-center'>
-                                        <div className='text-center pt-50 px-2' style={{ textTransform: 'uppercase', borderTop: '1px solid black' }}>
+                                        <div className='text-center pt-50 px-2' style={{borderTop: '1px solid black' }}>
                                             <span style={{textWrap: 'wrap'}}></span>{val?.position_name} <span>{`${val?.last_name}${val?.first_name}`}</span>
                                         </div>
                                     </div>
