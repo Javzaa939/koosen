@@ -61,15 +61,15 @@ export default function PrintMongolia({ printOnce })
         switch (too)
         {
             case '0' || 0:
-                return 'дүгээр'
+                return 'дугаар'
             case '1' || 1:
-                return 'дүгээр'
+                return 'дугаар'
             case '2' || 2:
                 return 'дугаар'
             case '3' || 3:
                 return 'дугаар'
             case '4' || 4:
-                return 'дүгээр'
+                return 'дугаар'
             case '5' || 5:
                 return 'дугаар'
             case '6' || 6:
