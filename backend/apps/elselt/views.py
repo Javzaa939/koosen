@@ -158,7 +158,7 @@ class ElseltApiView(
                 self.queryset = self.queryset.filter(degrees=list(bachelor_ids))
 
             # Бакалавр, дэд бакалавр  элсэгчдийг харуулна.
-            if 'lms-elselt-ahlah-read' in user_permissions:
+            if 'lms-elselt-ahlah' in user_permissions:
                 self.queryset = self.queryset.filter(degrees=list(ahlah_ids))
 
         if join_year:
@@ -364,7 +364,7 @@ class ElseltActiveListProfession(
                 self.queryset = self.queryset.filter(profession__degree__degree_code__in=['D', 'C'])
 
             # Бакалавр, дэд бакалавр  элсэгчдийг харуулна.
-            if 'lms-elselt-ahlah-read' in user_permissions:
+            if 'lms-elselt-ahlah' in user_permissions:
                 self.queryset = self.queryset.filter(profession__degree__degree_code__in=['MB', 'MC'])
 
         all_data = self.list(request).data
@@ -926,7 +926,7 @@ class AdmissionYearAPIView(
                 self.queryset = self.queryset.filter(degrees=list(bachelor_ids))
 
             # Бакалавр, дэд бакалавр  элсэгчдийг харуулна.
-            if 'lms-elselt-ahlah-read' in user_permissions:
+            if 'lms-elselt-ahlah' in user_permissions:
                 self.queryset = self.queryset.filter(degrees=list(ahlah_ids))
 
         all_data = self.list(request).data
@@ -3966,7 +3966,7 @@ class EyeshOrderUserInfoAPIView(
                     self.queryset = self.queryset.filter(profession__profession__degree__degree_code__in=['C', 'D'])
 
                 # Бакалавр, дэд бакалавр  элсэгчдийг харуулна.
-                if 'lms-elselt-ahlah-read' in user_permissions:
+                if 'lms-elselt-ahlah' in user_permissions:
                     self.queryset = self.queryset.filter(profession__degree__degree_code__in=['MB', 'MC'])
 
             if employee_sub_org_id == 21:
