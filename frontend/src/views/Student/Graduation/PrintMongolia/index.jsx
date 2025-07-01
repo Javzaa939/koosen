@@ -75,7 +75,7 @@ export default function PrintMongolia({ printOnce })
             case '6' || 6:
                 return 'дугаар'
             case '7' || 7:
-                return 'дугаар'
+                return 'дүгаар'
             case '8' || 8:
                 return 'дугаар'
             case '9' || 9:
@@ -115,7 +115,7 @@ export default function PrintMongolia({ printOnce })
     }
 
     const PADDING_QR = 50
-
+    console.log('data?.student?.group?.degree?.degree_name', data?.graduation_number )
     return (
         <div
             className={`vh-100 position-relative d-flex flex-column justify-content-end align-items-center bg-white`}
@@ -165,6 +165,7 @@ export default function PrintMongolia({ printOnce })
                             listArr.map((val, idx) =>
                             {
                                 var splitted = val?.position_name?.split(',')
+                                console.log("splitted", splitted)
                                 if (!data?.student?.group?.profession?.is_together && idx == 1) {
                                     return
                                 } else {
