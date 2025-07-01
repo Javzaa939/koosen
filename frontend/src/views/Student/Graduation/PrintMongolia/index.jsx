@@ -75,11 +75,11 @@ export default function PrintMongolia({ printOnce })
             case '6' || 6:
                 return 'дугаар'
             case '7' || 7:
-                return 'дүгаар'
+                return 'дугаар'
             case '8' || 8:
                 return 'дугаар'
             case '9' || 9:
-                return 'дүгээр'
+                return 'дугаар'
             default:
                 break;
         }
