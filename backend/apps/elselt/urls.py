@@ -74,8 +74,8 @@ urlpatterns = [
     path('approve/', ElseltStateApprove.as_view()),
 
     # Элсэгчдийн ярилцлага
-    path('interview/',ConversationUserSerializerAPIView.as_view()),
-    path('interview/<int:pk>/', ConversationUserSerializerAPIView.as_view()),
+    path('interview/',ConversationUserAPIView.as_view()),
+    path('interview/<int:pk>/', ConversationUserAPIView.as_view()),
 
     path('eyesh/',ElseltEyeshAPIView.as_view()),
 
