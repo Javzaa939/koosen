@@ -1578,7 +1578,6 @@ class ElseltHealthProfessional(
             return request.send_data(all_data)
 
         all_data = self.list(request).data
-        print("all_", all_data)
         return request.send_data(all_data)
 
 
