@@ -1498,7 +1498,7 @@ class ElseltHealthProfessional(
     mixins.DestroyModelMixin
 ):
 
-    queryset = HealthUser.objects.all().order_by('created_at').filter(user__admissionuserprofession__profession__admission__is_store=False)
+    queryset = HealthUser.objects.all().order_by('created_at').filter(user__admissionuserprofession__profession__admission__is_store=False).distinct()
 
     serializer_class = HealthUpUserInfoSerializer
     pagination_class = CustomPagination
@@ -1578,7 +1578,7 @@ class ElseltHealthProfessional(
             return request.send_data(all_data)
 
         all_data = self.list(request).data
-
+        print("all_", all_data)
         return request.send_data(all_data)
 
 
