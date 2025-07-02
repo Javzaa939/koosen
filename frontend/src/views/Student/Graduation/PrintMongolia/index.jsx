@@ -63,13 +63,13 @@ export default function PrintMongolia({ printOnce })
             case '0' || 0:
                 return 'дугаар'
             case '1' || 1:
-                return 'дугаар'
+                return 'дүгээр'
             case '2' || 2:
                 return 'дугаар'
             case '3' || 3:
                 return 'дугаар'
             case '4' || 4:
-                return 'дугаар'
+                return 'дүгээр'
             case '5' || 5:
                 return 'дугаар'
             case '6' || 6:
@@ -79,7 +79,7 @@ export default function PrintMongolia({ printOnce })
             case '8' || 8:
                 return 'дугаар'
             case '9' || 9:
-                return 'дугаар'
+                return 'дүгээр'
             default:
                 break;
         }
@@ -115,7 +115,7 @@ export default function PrintMongolia({ printOnce })
     }
 
     const PADDING_QR = 50
-    console.log('data?.student?.group?.degree?.degree_name', data?.graduation_number )
+
     return (
         <div
             className={`vh-100 position-relative d-flex flex-column justify-content-end align-items-center bg-white`}
@@ -150,7 +150,7 @@ export default function PrintMongolia({ printOnce })
                                 :
                                 ''
                             }
-                            <span className='text-nowrap'>{data?.graduation_number} {dugeerUg(data?.graduation_number && data?.graduation_number.charAt(data?.graduation_number.length - 1))} тушаалаар</span>
+                            <span className='text-nowrap'>{data?.graduation_number} {dugeerUg(data?.graduation_number && data?.graduation_number?.charAt(data?.graduation_number?.length - 1))} тушаалаар</span>
                             <br/>
                             <span style={{ whiteSpace: 'nowrap' }}><span className='text-uppercase ' style={{ whiteSpace: 'nowrap' }}> {data?.student?.group?.profession?.dep_name} {data?.student?.group?.degree?.degree_name}</span>-ын зэрэг олгов.</span>
                         </div>
