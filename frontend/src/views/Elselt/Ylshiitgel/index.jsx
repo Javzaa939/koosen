@@ -232,6 +232,7 @@ const ElseltYlshiitgel = () => {
                     'Яаралтай холбогдох': data?.user?.parent_mobile || '',
                     'Бүртгүүлсэн огноо': moment(data?.created_at).format('YYYY-MM-DD HH:SS:MM') || '',
                     'Төлөв': data?.justice_state_name,
+                    'Систем ашиглалтын хураамж төлсөн эсэх': data?.user?.payment_state ? 'Төлсөн' : 'Төлөөгүй',
                     'Tайлбар': data?.justice_description || '',
                 }
             )
@@ -259,6 +260,7 @@ const ElseltYlshiitgel = () => {
             'Яаралтай холбогдох',
             'Бүртгүүлсэн огноо',
             'Төлөв',
+            'Систем ашиглалтын хураамж төлсөн эсэх',
             'Tайлбар',
         ];
 

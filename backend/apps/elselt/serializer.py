@@ -117,11 +117,18 @@ class UserinfoSerializer(serializers.ModelSerializer):
         model = UserInfo
         fields = "__all__"
 
+
 class ElseltUserSerializer(serializers.ModelSerializer):
+    payment_state = serializers.SerializerMethodField()
 
     class Meta:
         model = ElseltUser
         exclude = ['password', 'image']
+
+    # систем ашиглалтын төлбөр төлсөн эсэх
+    def get_payment_state(self, obj):
+        payment_check = Payment.objects.filter(admission=obj, dedication=Payment.SYSTEM, status=True).exists()
+        return payment_check
 
 
 class UserScoreSerializer(serializers.ModelSerializer):

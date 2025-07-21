@@ -128,6 +128,22 @@ export function getColumns (currentPage, rowsPerPage, total_count, user) {
 			center: true,
 		},
 		{
+			maxWidth: "200px",
+			minWidth: "200px",
+			header: 'justice_state',
+			reorder: true,
+			sortable: true,
+			name: t("Систем ашиглалтын төлбөр"),
+			selector: (row) => (
+				<Badge
+					color={`${row?.user?.payment_state ? 'primary' : 'danger'}`}
+					pill
+				>
+					{row?.user?.payment_state ? 'Төлсөн' : 'Төлөөгүй'}
+				</Badge>),
+			center: true,
+		},
+		{
 			minWidth: "150px",
 			header: 'justice_description',
 			name: t("Тайлбар"),
