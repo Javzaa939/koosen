@@ -3993,7 +3993,7 @@ class EyeshOrderUserInfoAPIView(
                 # эрх зүйн сургууль байвал
                 if school == 12:
                     # Элсэгч бүх шалгуурыг даваад тэнцсэн төлөв
-                    AdmissionUserProfession.objects.filter(user=student.user.id).update(state=AdmissionUserProfession.STATE_APPROVE)
+                    AdmissionUserProfession.objects.filter(user=student.user.id).update(state=AdmissionUserProfession.STATE_APPROVE, justice_state=AdmissionUserProfession.STATE_APPROVE)
 
                 if student.yesh_state != data.get("yesh_state"):
                     StateChangeLog.objects.create(
