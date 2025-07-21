@@ -72,6 +72,7 @@ class TeacherCreditVolumePlanAPIView(
         school = self.request.query_params.get('school')
         department = self.request.query_params.get('department')
         teacher_id = self.request.query_params.get('teacher')
+        profession = request.query_params.get('profession')
 
         lesson_year = self.request.query_params.get('lesson_year')
         lesson_season = self.request.query_params.get('lesson_season')
@@ -90,6 +91,10 @@ class TeacherCreditVolumePlanAPIView(
 
         if teacher_id:
             self.queryset = self.queryset.filter(teacher=teacher_id)
+
+        if profession:
+            lesson_ids = LearningPlan.objects.filter(profession=profession).values_list("lesson_id", flat=True)
+            self.queryset = self.queryset.filter(lesson__in=lesson_ids)
 
         self.queryset = self.queryset.distinct('teacher', 'lesson')
 
@@ -278,113 +283,133 @@ class TeacherCreditVolumePlanEstimateAPIView(
     queryset = TeacherCreditVolumePlan.objects.all()
     serializer_class = TeacherCreditVolumePlanSerializer
 
+    @transaction.atomic
     def post(self, request):
         """ Тухайн сонгогдсон хөтөлбөрийн багийн хичээлийн жил, улирлын цагийн ачаалал тооцох """
 
         schoolId = self.request.query_params.get('schoolId')
         dep_id =  self.request.query_params.get('dep_id')
+        profession = self.request.query_params.get('profession')
         lesson_year = self.request.query_params.get('lesson_year')
         season = self.request.query_params.get('season')
-        lesson_list = []
 
         even_i = []
         odd_i = []
+        filters = dict()
+        filter_query = Q()
+        main_filters = dict()
+        learningplan_qs = None
 
-        for i in range(1,13):
+        for i in range(1, 13):
             if i % 2 == 0:
                 even_i.append(i)
             else:
                 odd_i.append(i)
 
-        # Хөтөлбөрийн багт байгаа бүх мэргэжлийн хичээлийн төлөвлөгөөнд шивэгдсэн бүх хичээлээр цагийн ачаалал үүсгэх
-        if schoolId and dep_id and season:
-            own_list_ids = LessonStandart.objects.filter(department=dep_id).values_list('id', flat=True)
-            season = Season.objects.get(pk=season)
+        if profession:
+            filters["profession"] = profession
+            main_filters["profession"] = profession
 
+        if dep_id:
+            main_filters["lesson__department"] = dep_id
+
+        # Хөтөлбөрийн багт байгаа бүх мэргэжлийн хичээлийн төлөвлөгөөнд шивэгдсэн бүх хичээлээр цагийн ачаалал үүсгэх
+        if season:
+            season = Season.objects.get(pk=season)
             season_name = season.season_name
 
             # Идэвхтэй улиралд байгаа хичээлүүдийг авах
             if season_name == 'Намар':
                 lookups = [Q(season__contains=str(value)) for value in odd_i]
 
-                filter_query = Q()
                 for lookup in lookups:
                     filter_query |= lookup
 
             else:
                 lookups = [Q(season__contains=str(value)) for value in even_i]
 
-                filter_query = Q()
                 for lookup in lookups:
                     filter_query |= lookup
 
-            lesson_ids = LearningPlan.objects.filter(lesson_id__in=own_list_ids).filter(filter_query).values_list('lesson', flat=True)
-            lesson_list = LessonStandart.objects.filter(id__in=lesson_ids)
+            learningplan_qs = LearningPlan.objects.filter(filter_query, lesson_type=LearningPlan.ZAAVAL, **main_filters)
 
-        for lesson in lesson_list:
-            with transaction.atomic():
+        try:
+            # Цагийн ачаалал анги тооцох
+            def create_groups(groups, credit_obj):
+                for row in groups:
+                    group_score_count = ScoreRegister.objects.filter(student__group=row.get('id')).count()
+                    if group_score_count == 0:
+                        stcount = Student.objects.filter(group_id=row.get('id'),status__code=1).count()
+                        learnplan = LearningPlan.objects.filter(profession_id=row.get('profession'), lesson_type=LearningPlan.ZAAVAL, lesson_id=lesson).first()
 
-                # Цагийн ачаалал анги тооцох
-                def create_groups(credit_obj):
-                    for row in groups:
-                        group_score_count = ScoreRegister.objects.filter(student__group=row.get('id')).count()
-                        if group_score_count == 0:
-                            stcount = Student.objects.filter(group_id=row.get('id'),status__code=1).count()
-                            learnplan = LearningPlan.objects.filter(profession_id=row.get('profession'), lesson_id=lesson).first()
+                        lesson_level = learnplan.lesson_level
+                        amount = SchoolLessonLevelVolume.objects.filter(school_id=schoolId,lesson_level=lesson_level).first()
 
-                            lesson_level = learnplan.lesson_level
-                            amount = SchoolLessonLevelVolume.objects.filter(school_id=schoolId,lesson_level=lesson_level).first()
+                        if not amount:
+                            amt = 40
+                        else:
+                            amt = amount.amount
 
-                            if not amount:
-                                amt = 40
-                            else:
-                                amt = amount.amount
+                        TeacherCreditVolumePlan_group.objects.update_or_create(
+                            group_id=row.get('id'),
+                            creditvolume_id=credit_obj.id,
+                            defaults={
+                                'st_count': stcount,
+                                'lesson_level': lesson_level,
+                                'exec_credit_flag': amt
+                            }
+                    )
 
-                            TeacherCreditVolumePlan_group.objects.update_or_create(
-                                group_id=row.get('id'),
-                                creditvolume_id=credit_obj.id,
-                                defaults={
-                                    'st_count': stcount,
-                                    'lesson_level': lesson_level,
-                                    'exec_credit_flag': amt
-                                }
-                        )
-                try:
-                    lesson_to_teacher = Lesson_to_teacher.objects.filter(lesson=lesson).first()
+            for learningplan in learningplan_qs:
+                lesson = learningplan.lesson
+                department = lesson.department if lesson else None
+                dep_id = department.id if department else None
+                schoolId = department.sub_orgs.id if department and department.sub_orgs else None
+                lesson_to_teacher_qs = Lesson_to_teacher.objects.filter(Q(lesson=lesson), Q(Q(lesson__lecture_kr__isnull=False) | Q(lesson__seminar_kr__isnull=False) | Q(lesson__laborator_kr__isnull=False) | Q(lesson__practic_kr__isnull=False))).distinct("teacher")
+
+                for lesson_to_teacher in lesson_to_teacher_qs:
+                    # Тухайн хичээлийг заах багш болгоноорр үүсгэнэ гэж тооцсон
                     teacher = lesson_to_teacher.teacher if lesson_to_teacher else None
-                    profession_ids = LearningPlan.objects.filter(lesson=lesson).filter(filter_query).values_list('profession', flat=True)
-                    groups = list(Group.objects.filter(profession__in=profession_ids, is_finish=False).values('id','profession'))
+
+                    profession_ids = LearningPlan.objects.filter(lesson=lesson, lesson_type=LearningPlan.ZAAVAL, **filters).filter(filter_query).values_list('profession', flat=True)
+                    groups = list(Group.objects.filter(profession__in=profession_ids, is_finish=False).values('id', 'profession'))
 
                     lecture_kredit = lesson.lecture_kr
                     seminar_kredit = lesson.seminar_kr
                     laborator_kredit = lesson.laborator_kr
+                    practic_kredit = lesson.practic_kr
 
                     # 8 кредит цаг байвал charis буюц 2 долоо хоногт 1 удаа орно. Тэгш сондгой хуваарь
                     # 16 32 кредит цаг байвал долоо хоногт 1 удаа орно. Энгийн хуваарь
                     if lecture_kredit:
-                        qs =self.queryset.filter(lesson=lesson,lesson_year=lesson_year,type=TimeTable.LECT)
-                        if not qs:
-                            create_datas = {
-                                'lesson': lesson,
-                                'lesson_year': lesson_year,
-                                "lesson_season": season,
-                                'type': TimeTable.LECT,
-                                'teacher': teacher,
-                                'credit': lecture_kredit,
-                                'department_id': dep_id,
-                                'school_id': schoolId
-                            }
+                        create_datas = {
+                            'lesson': lesson,
+                            'lesson_year': lesson_year,
+                            "lesson_season": season,
+                            'type': TimeTable.LECT,
+                            'teacher': teacher,
+                            'credit': lecture_kredit,
+                            'department_id': dep_id,
+                            'school_id': schoolId
+                        }
 
-                            if lecture_kredit == 8:
-                                create_datas['odd_even'] = TimeTable.ODD
+                        if lecture_kredit == 8:
+                            create_datas['odd_even'] = TimeTable.ODD
 
-                            obj = self.queryset.create(
+                        obj, created = self.queryset.update_or_create(
+                            lesson=lesson,
+                            lesson_year=lesson_year,
+                            lesson_season=season,
+                            type=TimeTable.LECT,
+                            teacher=teacher,
+                            defaults={
                                 **create_datas
-                            )
+                            }
+                        )
 
-                            # Цагийн ачаалал анги холбож үүсгэх
-                            if len(groups) and obj:
-                                create_groups(obj)
+                        # Цагийн ачаалал анги холбож үүсгэх
+                        if len(groups) and obj:
+                            create_groups(groups, obj)
 
                     # 16 кредит цаг байвал charis буюц 2 долоо хоногт 1 удаа орно. Тэгш сондгой хуваарь
                     # 32 кредит цаг байвал долоо хоногт 1 удаа орно. Энгийн хуваарь
@@ -418,7 +443,7 @@ class TeacherCreditVolumePlanEstimateAPIView(
 
                                 # Цагийн ачаалал анги холбож үүсгэх
                                 if len(groups) and obj:
-                                    create_groups(obj)
+                                    create_groups(groups, obj)
 
                     # 16 кредит цаг байвал charis буюц 2 долоо хоногт 1 удаа орно. Тэгш сондгой хуваарь
                     # 32 кредит цаг байвал долоо хоногт 1 удаа орно. Энгийн хуваарь
@@ -446,30 +471,28 @@ class TeacherCreditVolumePlanEstimateAPIView(
                                 create_datas['odd_even'] = TimeTable.ODD
 
                             for i in range(create_times):
-                                obj = self.queryset.create(
+                                obj, created = self.queryset.update_or_create(
                                     **create_datas
                                 )
 
                                 # Цагийн ачаалал анги холбож үүсгэх
                                 if len(groups) and obj:
-                                    create_groups(obj)
+                                    create_groups(groups, obj)
 
-                    if lesson.practic_kr:
-                        qs =self.queryset.filter(lesson=lesson,lesson_year=lesson_year,type=TimeTable.PRACTIC)
-                        if not qs:
-                            obj = self.queryset.create(
-                                lesson = lesson,
-                                lesson_year=lesson_year,
-                                lesson_season=season,
-                                type = TimeTable.PRACTIC,
-                                teacher=teacher,
-                                credit = lesson.practic_kr,
-                                department_id=dep_id,
-                                school_id = schoolId
-                            )
+                    if practic_kredit:
+                        obj, created = self.queryset.update_or_create(
+                            lesson=lesson,
+                            lesson_year=lesson_year,
+                            lesson_season=season,
+                            type=TimeTable.PRACTIC,
+                            teacher=teacher,
+                            credit=practic_kredit,
+                            department_id=dep_id,
+                            school_id=schoolId
+                        )
 
-                            if len(groups):
-                               create_groups(obj)
+                        if len(groups):
+                            create_groups(groups, obj)
 
                     # elif lesson.biedaalt_kr:
                     #     qs =self.queryset.filter(lesson=lesson,lesson_year=lesson_year,type=TimeTable.BIY_DAALT)
@@ -484,9 +507,9 @@ class TeacherCreditVolumePlanEstimateAPIView(
                     #             school_id = schoolId
                     #         )
 
-                except Exception as err:
-                    print(err)
-                    return request.send_error("ERR_002", str(err))
+        except Exception as err:
+            print(err)
+            return request.send_error("ERR_002", str(err))
 
         return request.send_info("INF_001")
 
@@ -785,7 +808,6 @@ class TeacherAEstimationAPIView(
         return_datas = self.list(request).data
 
         return request.send_data(return_datas)
-
 
 
 class TeacherAEstimationEstimateAPIView(

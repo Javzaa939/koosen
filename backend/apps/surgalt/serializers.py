@@ -137,7 +137,7 @@ class LessonStandartListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = LessonStandart
-        fields = "code", 'name', 'department', 'category', 'teachers', 'id', 'ckredit', 'professions', 'is_score', 'name_eng', 'name_uig'
+        fields = "code", 'name', 'department', 'category', 'teachers', 'id', 'ckredit', 'professions', 'is_score', 'name_eng', 'name_uig', 'lecture_kr', 'seminar_kr', 'laborator_kr', 'practic_kr', 'biedaalt_kr'
 
     def get_is_score(self, obj):
         """ Тухайн хичээл дүнтэй эсэх"""
