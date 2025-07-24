@@ -162,7 +162,8 @@ class TeacherListSerializer(serializers.ModelSerializer):
     def get_full_name(self, obj):
         """ Багшийн бүтэн нэр авах """
 
-        return obj.full_name
+        return f"{obj.last_name} {obj.first_name}"
+
 
 class TeacherLessonListSerializer(serializers.ModelSerializer):
     """ Багшийн жагсаалтыг харуулах serializer """

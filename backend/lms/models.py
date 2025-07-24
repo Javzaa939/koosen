@@ -453,6 +453,7 @@ class ProfessionIntroductionFile(models.Model):
 
         super(ProfessionIntroductionFile, self).save(*args, **kwargs)
 
+
 class LearningPlan(models.Model):
     """ Сургалтын төлөвлөгөө """
     BASIC = 1
@@ -517,6 +518,7 @@ class LearningPlan(models.Model):
 
     class Meta:
         unique_together = ('profession', 'lesson', 'school')
+
 
 class Profession_SongonKredit(models.Model):
     """ Cонгоны кредит """
@@ -741,6 +743,7 @@ class StudentFamily(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
 
 class StudentEducation(models.Model):
     """ Боловсрол """

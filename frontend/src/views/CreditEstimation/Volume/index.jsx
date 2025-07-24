@@ -142,17 +142,20 @@ const CreditVolume = () => {
     const [yearOption] = useState(generateLessonYear(5))
     const [seasonOption, setSeasonOption] = useState([])
     const [dep_id, setDepId] = useState('')
+    const [professionId, setProfessionId] = useState('')
     const [season_id, setSeasonId] = useState('')
     const [year, setYear] = useState(cyear_name)
     const [dep_name, setDepName] = useState('')
 
     const [ teacherOption, setTeacherOption ] = useState([])
     const [ teacherId, setTeacherId ] = useState('')
+    const [ profOption, setProfession] = useState([])
 
     // Api
     const creditVolumeApi = useApi().credit.volume
     const departmentApi = useApi().hrms.department
     const seasonApi = useApi().settings.season
+    const professionApi = useApi().study.professionDefinition
 
     /* Жагсаалтын дата авах функц */
 	async function getSeasons() {
@@ -164,7 +167,7 @@ const CreditVolume = () => {
 
     useEffect(() => {
         getDatas();
-    }, [sortField, currentPage, rowsPerPage, dep_id, year, teacherId, school_id, season_id])
+    }, [sortField, currentPage, rowsPerPage, dep_id, year, teacherId, school_id, season_id, professionId])
 
     async function getDatas() {
 
@@ -174,7 +177,7 @@ const CreditVolume = () => {
             setCurrentPage(page_count)
         }
 
-        const { success, data } = await allFetch(creditVolumeApi.get(rowsPerPage, currentPage, sortField, searchValue, dep_id, year, teacherId, season_id))
+        const { success, data } = await allFetch(creditVolumeApi.get(rowsPerPage, currentPage, sortField, searchValue, dep_id, year, teacherId, season_id, professionId))
         if (success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
@@ -183,8 +186,8 @@ const CreditVolume = () => {
 
     /* Устгах функц */
 	const handleEstimate = async() => {
-        if(dep_id && year){
-            const { success } = await fetchData(creditVolumeApi.estimate(dep_id, year, season_id, teacherId))
+        if((dep_id || professionId) && year){
+            const { success } = await fetchData(creditVolumeApi.estimate(dep_id, year, season_id, teacherId, professionId))
             if(success) {
                 getDatas()
             }
@@ -220,6 +223,7 @@ const CreditVolume = () => {
             {
                 getTeachers(0)
             }
+            getProfession()
         },
         [dep_id]
     )
@@ -268,6 +272,14 @@ const CreditVolume = () => {
     async function handleSearch() {
         if (searchValue.length > 0) getDatas()
     }
+
+    // Мэргэжлийн жагсаалт авах
+    async function getProfession () {
+        const { success, data } = await fetchData(professionApi.getList('', dep_id))
+        if (success) {
+            setProfession(data)
+        }
+	}
 
     // Хайлтийн хэсэг хоосон болох үед анхны датаг дуудна
     useUpdateEffect(
@@ -376,6 +388,29 @@ const CreditVolume = () => {
                             getOptionLabel={(option) => option.name}
                         />
                     </Col>
+                    <Col md={3}>
+                        <Label className="form-label" for="profession">
+                            {t('Мэргэжил')}
+                        </Label>
+                        <Select
+                            name="profession"
+                            id="profession"
+                            classNamePrefix='select'
+                            isClearable
+                            className={classnames('react-select')}
+                            isLoading={isLoading}
+                            placeholder={t('-- Сонгоно уу --')}
+                            options={profOption || []}
+                            value={profOption.find((c) => c.id === professionId)}
+                            noOptionsMessage={() => t('Хоосон байна.')}
+                            onChange={(val) => {
+                                setProfessionId(val?.id || '')
+                            }}
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.id}
+                            getOptionLabel={(option) => option.full_name}
+                        />
+                    </Col>
                     <Col md={3} className='mb-1'>
                         <Label className="form-label" for="teacher">
                             {t('Заах багш')}
@@ -403,7 +438,7 @@ const CreditVolume = () => {
                         <Button
                             color='primary'
                             size='sm'
-                            disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-credit-volume-create') && dep_id && year && season_id) ? false : true}
+                            disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-credit-volume-create') && (dep_id || professionId) && year && season_id) ? false : true}
                             onClick={() => handleEstimate()}
                             className='mb-1 mb-sm-0'
                         >

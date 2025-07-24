@@ -28,10 +28,10 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleModal) 
 		{
 			header: 'teacher__name',
 			name: `${t('Заах багш')}`,
-			selector: (row) => row?.teacher?.full_name,
+			selector: (row) => <span title={row?.teacher?.full_name}>{row?.teacher?.full_name}</span>,
             sortable: true,
-			minWidth: "100px",
-			center: true
+			minWidth: "250px",
+			left: true
         },
 		{
 			header: 'lesson_season',
@@ -44,9 +44,9 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleModal) 
 		{
 			header: 'lesson__name',
 			name: `${t('Хичээл')}`,
-			selector: (row) =>row?.lesson?.code +" "+ row?.lesson?.name,
+			selector: (row) => <span title={row?.lesson?.code +" "+ row?.lesson?.name}>{row?.lesson?.code +" "+ row?.lesson?.name}</span>,
             sortable: true,
-			minWidth: "200px",
+			minWidth: "350px",
 			center: true,
 			wrap: true
 		},
