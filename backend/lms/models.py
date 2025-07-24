@@ -2694,6 +2694,7 @@ class TeacherCreditVolumePlan(models.Model):
     credit = models.PositiveIntegerField(null=True, verbose_name="Хичээлийн төрөлд хамаарах кредит цаг")
     department = models.ForeignKey(Salbars, on_delete=models.SET_NULL, null=True, verbose_name="Хөтөлбөрийн баг")
     school = models.ForeignKey(SubOrgs, on_delete=models.SET_NULL, null=True, verbose_name="Сургууль")
+    odd_even = models.PositiveIntegerField(choices=TimeTable.ODD_EVEN_VALUE, db_index=True, default=TimeTable.ALL, verbose_name="Тэгш сондгой")
 
     is_timetable = models.BooleanField(default=False, verbose_name="Хуваарьт бүртгэгдсэн эсэх")
 
