@@ -2704,7 +2704,7 @@ class AdmissionJusticeListAPIView(
 
         # Сэтгэлзүйн сорилд тэнцсэн элсэгчид
         healt_user_ids = ConversationUser.objects.filter(Q(Q(state=ConversationUser.STATE_APPROVE) | Q(state=ConversationUser.STATE_CONDIITON))).values_list('user', flat=True)
-        queryset = queryset.filter(user__in=healt_user_ids)
+        queryset = queryset.filter(Q(user__in=healt_user_ids) | Q(profession__admission_id=11, profession__profession__id=157, state=AdmissionUserProfession.STATE_APPROVE))
 
         if elselt:
             queryset = queryset.filter(profession__admission=elselt)
