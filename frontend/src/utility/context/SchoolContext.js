@@ -16,8 +16,8 @@ export default SchoolContext;
 export const SchoolContextProvider = ({ children }) => {
 
     const [ school_id, setSchool ] = useState('')
-    const [ schoolName, setSchoolName ] = useState(t('Дотоод Хэргийн Их Сургууль'));
-    const [ parentschoolName, setParentSchoolName ] = useState(t('Дотоод Хэргийн Их Сургууль'));
+    const [ schoolName, setSchoolName ] = useState(t('Админ'));
+    const [ parentschoolName, setParentSchoolName ] = useState(t('Админ'));
 
     return (
         <SchoolContext.Provider value={{ school_id, setSchool, schoolName, setSchoolName, parentschoolName, setParentSchoolName}}>

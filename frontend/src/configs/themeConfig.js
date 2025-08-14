@@ -2,10 +2,10 @@
 //Template config options
 const themeConfig = {
   school:{
-    name:'Дотоод Хэргийн Их Сургууль'
+    name:'Админ'
   },
   app: {
-    appName: "ДХИС",
+    appName: "Админ",
     appLogoImage: require("@src/assets/images/logo/dxis_logo.png").default
   },
   layout: {

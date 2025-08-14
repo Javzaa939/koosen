@@ -193,10 +193,14 @@ class LessonToTeacherListApiView(
         list_data = self.list(request).data
         return request.send_data(list_data)
 
+
 @permission_classes([IsAuthenticated])
 class SchoolAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin
 ):
     """" Сургууль, Хамгийн том Байгууллага"""
 
@@ -205,10 +209,12 @@ class SchoolAPIView(
 
     def get(self, request, pk=None):
         " Сургуулийн жагсаалт "
-        instance = Schools.objects.first()
-        school_data = self.get_serializer(instance).data
+        if pk:
+            group = self.retrieve(request, pk).data
+            return request.send_data(group)
 
-        return request.send_data(school_data)
+        datas = self.list(request).data
+        return request.send_data(datas)
 
     def put(self, request):
 
@@ -220,6 +226,31 @@ class SchoolAPIView(
             )
 
         return request.send_info('INF_002')
+
+    @transaction.atomic()
+    def post(self, request):
+        datas = request.data
+        serializer = self.serializer_class(data=datas)
+
+        try:
+            if not serializer.is_valid():
+                return request.send_error_valid('ERR_002', serializer.errors)
+
+            serializer.save()
+
+        except Exception as e:
+            print('e', e)
+            return request.send_error("ERR_002")
+
+        return request.send_info('INF_001')
+
+    def delete(self, request, pk=None):
+        qs = self.queryset.filter(id=pk).first()
+        if qs:
+            qs.delete()
+
+        return request.send_info("INF_003")
+
 
 @permission_classes([IsAuthenticated])
 class DepartmentAPIView(
@@ -429,7 +460,6 @@ class SubSchoolAPIView(
         if not subschool:
             return request.send_error("ERR_002", "Дэд сургуулийн мэдээлэл олдсонгүй")
 
-        errors = []
         datas = request.data
         data = null_to_none(datas)
         instance = self.get_object()
@@ -437,19 +467,9 @@ class SubSchoolAPIView(
         if serializer.is_valid(raise_exception=False):
             serializer.save()
         else:
-            for key in serializer.errors:
-                return_error = {
-                    "field": key,
-                    "msg": serializer.errors
-                }
-
-                errors.append(return_error)
-
-            if len(errors) > 0:
-                return request.send_error("ERR_003", errors)
+            return request.send_error_valid(serializer.errors)
 
         return request.send_info("INF_002")
-
 
     def delete(self, request, pk=None):
         self.destroy(request)

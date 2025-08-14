@@ -75,6 +75,7 @@ const VerticalLayout = (props) =>
                         /** ----------------------------Лавлах сан ------------------------------- */
 
                         /** Сургууль */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-reference-school-read', 'reference0')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-reference-school-read', 'reference1')
 
                         /** Тэнхим*/

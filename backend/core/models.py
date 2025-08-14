@@ -269,7 +269,6 @@ class OrgPosition(models.Model):
     #     return self.name
 
 
-
 class Teachers(models.Model):
     """ Хэрэглэгчийн тухайн байгуулг дахь бүртгэл """
 

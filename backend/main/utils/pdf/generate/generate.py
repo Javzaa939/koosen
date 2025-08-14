@@ -54,7 +54,7 @@ class PDF(FPDF, HTMLMixin):
             w = 150,
             h = 5,
             markdown = True,
-            txt = 'Дотоод Хэргийн Их Сургууль',
+            txt = 'Админ',
             border = 0,
             align = 'L'
         )

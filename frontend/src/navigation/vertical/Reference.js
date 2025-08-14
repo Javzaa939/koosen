@@ -9,10 +9,16 @@ export default [
         navLink: "/reference",
         navChildren: [
             {
+                id: 'reference0',
+                title: 'Сургууль',
+                icon: <Circle size={8} />,
+                navLink: "reference/school/"
+            },
+            {
                 id: 'reference1',
                 title: 'Бүрэлдэхүүн сургууль',
                 icon: <Circle size={8} />,
-                navLink: "reference/school/"
+                navLink: "reference/subschool/"
             },
             {
                 id: 'reference2',

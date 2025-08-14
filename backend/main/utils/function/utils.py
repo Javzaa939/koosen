@@ -783,10 +783,10 @@ def get_week_num_from_date(current_date=datetime.today().strftime('%Y-%m-%d')):
 
     return weekNum
 
+
 def get_dates_from_week():
     week = get_week_num_from_date()
     weeks = get_16week_start_date()
-
 
     for day_week in weeks:
         if day_week.get('id') == week:

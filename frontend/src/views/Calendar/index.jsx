@@ -235,7 +235,7 @@ const CalendarComponent = () => {
                         />
                     </Col>
                 </Row>
-                <Row>
+                {/* <Row>
                     <Card>
                         <CardHeader>
                             <CardTitle tag={'h4'}>Системийн хандалтын мэдээлэл</CardTitle>
@@ -293,7 +293,7 @@ const CalendarComponent = () => {
                             </Row>
                         </CardBody>
                     </Card>
-                </Row>
+                </Row> */}
             </div>
 
             <div className='app-calendar overflow-hidden border'>

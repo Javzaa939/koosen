@@ -2339,6 +2339,9 @@ class TimeTableNewAPIView(
         # queryset = self.get_queryset()
         week = get_dates_from_week()
 
+        if not week:
+            return request.send_data([])
+
         begin_date = week.get('start_date')
         end_date = week.get('end_date')
         is_volume = request.query_params.get('is_volume')

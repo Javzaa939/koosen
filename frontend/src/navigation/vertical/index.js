@@ -31,7 +31,7 @@ import RemoteRoutes from './RemoteLesson'
 export default [
   ...Calendar,
   ...Elselt,
-  ...PsychologicalTesting,
+  // ...PsychologicalTesting,
   ...Reference,
   ...Study,
   ...OnlineLesson,
@@ -51,7 +51,7 @@ export default [
   // ...Service,
   ...Print,
   // ...Report,
-  ...Test,
+  // ...Test,
   ...Settings,
   ...Role,
   // ...Science
