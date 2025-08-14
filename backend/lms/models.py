@@ -15,6 +15,9 @@ from shortuuidfield import ShortUUIDField
 from django.contrib.postgres.fields import ArrayField
 
 from main.utils.function.utils import get_fullName
+from main.utils.file import (
+    remove_folder,
+)
 
 # Create your models here.
 # -------------------------------- Тохиргоо, лавлах сангийн мэдээллийн модел --------------------
@@ -1585,20 +1588,61 @@ class PaymentBalance(models.Model):
         (ORLOGO, 'Төлсөн төлбөр'),
         (ZARLAGA, 'Буцаасан төлбөр'),
     )
-    student = models.ForeignKey(Student, on_delete=models.PROTECT, verbose_name='Оюутан')
+
+    KHAAN = 1
+    REFUND = 2
+    HAND_CREATED = 3
+    EXCEL = 4
+    QPAY = 5
+
+    TRANSACTION_TYPE = (
+        (KHAAN, 'Хаан банк'),
+        (REFUND, 'Төлбөрийн буцаалт'),
+        (HAND_CREATED, 'Гараар үүсгэсэн'),
+        (EXCEL, 'Excel-с оруулсан'),
+        (QPAY, 'QPAY-с оруулсан'),
+    )
+
+    STUDY = 1
+    REPLACE_LESSON = 2
+    DORMITORY = 3
+    ADMISSION = 4
+    REPLACE_LESSON_REFUND = 5
+
+    PAYMENT_TYPE = (
+        (STUDY, "Сургалтын төлбөр"),
+        (REPLACE_LESSON, "Хичээл нөхөлт"),
+        (DORMITORY, "Дотуур байр"),
+        (ADMISSION, "Элсэлтийн хураамж"),
+        (REPLACE_LESSON_REFUND, "Хичээл нөхөлт буцаалт"),
+    )
+
+    student = models.ForeignKey(Student, on_delete=models.PROTECT, null=True, verbose_name='Оюутан')
     lesson_year = models.CharField(max_length=20, verbose_name='Хичээлийн жил')
     lesson_season = models.ForeignKey(Season, on_delete=models.SET_NULL, null=True, verbose_name='Улирал')
-    balance_date = models.DateField(verbose_name="Гүйлгээний огноо")
+    balance_date = models.DateTimeField(verbose_name="Гүйлгээний огноо")
     balance_amount = models.FloatField(verbose_name="Гүйлгээний дүн")
-    balance_desc = models.CharField(max_length=200, null=True, verbose_name="Гүйлгээний утга")
+    is_report = models.BooleanField(default=True, verbose_name='Тайлагнах эсэх')
+    is_deleted = models.BooleanField(default=False, verbose_name='Устгасан эсэх')
+    balance_desc = models.TextField(null=True, verbose_name="Гүйлгээний утга")
     flag = models.PositiveIntegerField(choices=BALANCE_FLAG, db_index=True, default=ORLOGO, verbose_name="Орлого зарлагын аль нь болох")
+    transaction_type = models.PositiveIntegerField(choices=TRANSACTION_TYPE, db_index=True, default=KHAAN, verbose_name="Гүйлгээний төрөл")
     school = models.ForeignKey(SubOrgs, on_delete=models.SET_NULL, null=True, verbose_name="Сургууль")
+
+    # Банкнаас хуулга орж ирэх үед
+    record = models.FloatField(null=True, verbose_name='Гүйлгээний дугаар /Банкнаас өгнө хуулгаа дугаарлаж өгсөн тоо/')
+    transaction_date = models.DateTimeField(null=True, verbose_name="Шилжүүлэг хийсэн огноо")
+    post_date = models.DateTimeField(null=True, verbose_name="Гүйлгээ хийгдсэн огноо")
+    journal_no = models.CharField(max_length=250, null=True, verbose_name="Журналын дугаар")
+    related_account = models.CharField(max_length=100, null=True, verbose_name="Харьцсан дансны дугаар")
+
+    payment_type = models.PositiveBigIntegerField(choices=PAYMENT_TYPE, null=True, verbose_name="Төлбөрийн зориулалт")
+
     created_user = models.ForeignKey(User, related_name='pb_cr_user', on_delete=models.SET_NULL, null=True, verbose_name="Бүртгэсэн хэрэглэгч")
     updated_user = models.ForeignKey(User, related_name='pb_up_user', on_delete=models.SET_NULL, null=True, verbose_name="Зассан хэрэглэгч")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
 class DiscountType(models.Model):
     """ Хөнгөлөлтийн төрөл"""
 
@@ -1650,6 +1694,7 @@ class PaymentEstimate(models.Model):
     in_balance = models.FloatField(null=True,verbose_name="Төлсөн төлбөр")
     out_balance = models.FloatField(null=True,verbose_name="Буцаасан төлбөр")
     last_balance = models.FloatField(null=True,verbose_name=" үлдэгдэл")
+    reduce_payment = models.FloatField(default=0, verbose_name="Авлага бууруулах төлбөр")
     school = models.ForeignKey(SubOrgs, on_delete=models.SET_NULL, null=True, verbose_name="Сургууль")
     created_user = models.ForeignKey(User, related_name='pe_cr_user', on_delete=models.SET_NULL, null=True, verbose_name="Бүртгэсэн хэрэглэгч")
     updated_user = models.ForeignKey(User, related_name='pe_up_user', on_delete=models.SET_NULL, null=True, verbose_name="Зассан хэрэглэгч")
@@ -1816,16 +1861,22 @@ class DormitoryRoomType(models.Model):
 
     STUDENT = 1
     FAMILY = 2
+    FOREIGN_ROOM_ONE = 3
+    FOREIGN_ROOM_TWO = 4
 
     RENT_TYPE = (
         (STUDENT, "Оюутан нь хичээлийн жилээр түрээслэх"),
         (FAMILY, "Айл нь сар өдрөөр түрээслэх"),
+        (FOREIGN_ROOM_ONE, "Гадаад оюутан 1 ортой"),
+        (FOREIGN_ROOM_TWO, "Гадаад оюутан 2 ортой"),
     )
 
     name = models.CharField(max_length=200, verbose_name="Өрөөний төрлийн нэр")
     rent_type = models.PositiveIntegerField(choices=RENT_TYPE, db_index=True, default=STUDENT, verbose_name="Түрээслэх хэлбэр")
     description = models.CharField(max_length=500, null=True, verbose_name="Өрөөний дэлгэрэнгүй тайлбар")
     volume = models.PositiveIntegerField(verbose_name="Өрөөний багтаамж")
+    # is_active = models.BooleanField(default=True, verbose_name='Идэвхтэй эсэх')
+    # lesson_year = models.CharField(max_length=20, null=True, verbose_name="Хичээлийн жил", default="2024-2025")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -1854,19 +1905,6 @@ class DormitoryRoomFile(models.Model):
 
         super(DormitoryRoomFile, self).save(*args, **kwargs)
 
-
-class DormitoryRoom(models.Model):
-    """ Өрөөний бүртгэл """
-
-    room_number = models.CharField(max_length=50, verbose_name="Өрөөний дугаар")
-    room_type = models.ForeignKey(DormitoryRoomType, on_delete=models.SET_NULL, null=True, verbose_name="Өрөөний төрөл")
-    gender = models.PositiveIntegerField(choices=Student.GENDER_TYPE, db_index=True, null=False, default=Student.GENDER_OTHER, verbose_name="Хүйс")
-    gateway = models.CharField(max_length=50, verbose_name="Орц")
-    floor = models.PositiveIntegerField(verbose_name="Давхар")
-    door_number = models.CharField(max_length=50, null=True, verbose_name="Гадна хаалганы дугаар")
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
 class DormitoryPayment(models.Model):
     """ Төлбөрийн тохиргоо """
@@ -1898,6 +1936,77 @@ class DormitoryBalance(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class DormitoryBuilding(models.Model):
+    """ Дотуур байрны хичээлийн байр """
+
+    def file_directory_path(instance, filename):
+        return '{0}/{1}/{2}'.format('dormitorybuilding', instance.id, filename)
+
+    name = models.CharField(max_length=500, verbose_name="Хичээлийн байрны нэр")
+    eng_name = models.CharField(max_length=500, null=True, blank=True, verbose_name="Хичээлийн байрны нэр")
+    location = models.TextField(null=True, verbose_name="Хаяг байршил")
+    location_map = models.TextField(null=True, verbose_name="Газрын зураг дах байршил")
+
+    housemaster_last_name = models.CharField(max_length=200, null=True, blank=True, verbose_name='Байрны эрхлэгчийн овог')
+    housemaster_first_name = models.CharField(max_length=200, null=True, blank=True, verbose_name='Байрны эрхлэгчийн нэр')
+    housemaster_phone = models.IntegerField(null=True, verbose_name='Байрны эрхлэгчийн утасны дугаар')
+
+    image = models.ImageField(upload_to=file_directory_path, max_length=255, null=True, verbose_name='Гадна зураг')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if self.id is None:
+            saved_image = self.image
+            self.image = None
+            super(DormitoryBuilding, self).save(*args, **kwargs)
+            self.image = saved_image
+            if 'force_insert' in kwargs:
+                kwargs.pop('force_insert')
+
+        super(DormitoryBuilding, self).save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        if self.id:
+            remove_file = os.path.join("dormitorybuilding", str(self.id))
+            if remove_file:
+                remove_folder(remove_file)
+
+        super(DormitoryBuilding, self).delete(*args, **kwargs)
+
+
+class DormitoryRegistrationSchedule(models.Model):
+    """ Дотуур байрны бүртгэлийн хуваарь """
+
+    level = models.IntegerField(verbose_name='Дамжаа')
+    start_date = models.DateField(verbose_name="Бүртгэл эхлэх өдөр")
+    finish_date = models.DateField(verbose_name="Бүртгэл дуусах өдөр")
+    live_date = models.DateField(verbose_name="Байранд орж эхлэх өдөр")
+    buildings = models.ManyToManyField(DormitoryBuilding, verbose_name="Дотуур байр")
+    lesson_year=models.CharField(max_length=20, verbose_name="Хичээлийн жил", null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class DormitoryRoom(models.Model):
+    """ Өрөөний бүртгэл """
+
+    room_number = models.CharField(max_length=50, verbose_name="Өрөөний дугаар")
+    room_type = models.ForeignKey(DormitoryRoomType, on_delete=models.SET_NULL, null=True, verbose_name="Өрөөний төрөл")
+    gender = models.PositiveIntegerField(choices=Student.GENDER_TYPE, db_index=True, null=False, default=Student.GENDER_OTHER, verbose_name="Хүйс")
+    gateway = models.CharField(max_length=50, verbose_name="Орц")
+    floor = models.PositiveIntegerField(verbose_name="Давхар")
+    door_number = models.CharField(max_length=50, null=True, verbose_name="Гадна хаалганы дугаар")
+    building = models.ForeignKey(DormitoryBuilding, null=True, on_delete=models.CASCADE, verbose_name="Хичээлийн байр")
+    is_active = models.BooleanField(default=True, verbose_name='Идэвхтэй эсэх')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
 
 class DormitoryStudent(models.Model):
     """ Дотуур байранд амьдрах хүсэлт гаргасан оюутан"""
