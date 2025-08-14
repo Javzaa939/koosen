@@ -77,10 +77,6 @@ urlpatterns = [
     # Эрдэм шинжилгээ
     path('science/', include("apps.science.urls")),
 
-
-    # NOTIF URL
-    path('p/', include("lms_package.urls")),
-
     # статистик
     path('statistic/', include("apps.statistic.urls")),
 

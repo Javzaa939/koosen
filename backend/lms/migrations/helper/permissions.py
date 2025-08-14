@@ -169,6 +169,18 @@ permissions = [
         'name' : 'lms-settings-аctiveyear-delete',
         'description' : 'Ажиллах жил устгах эрх'
     },
+    {
+        'name': 'lms-settings-employee-read',
+        'description': 'Ажилчдын тохиргоо'
+    },
+    {
+        'name': 'lms-settings-student-read',
+        'description': 'Оюутнуудын тохиргоо'
+    },
+    {
+        'name': 'lms-settings-mail-read',
+        'description': 'Цахим шуудан тохиргоо'
+    },
     # Боловсролын зэрэг
     {
         'name' : 'lms-settings-degree-read',

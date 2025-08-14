@@ -8,20 +8,14 @@ from django.contrib.postgres.fields import ArrayField
 class Zone(models.Model):
     ''' Бүсчлэл
     '''
-    class Meta:
-        db_table = 'core_buschlel'
-        managed = False
 
     name = models.CharField(unique=True, max_length=50)
     code = models.CharField(default=None, null=True, max_length=100)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
-class AimagHot(models.Model):
 
-    class Meta:
-        db_table = 'core_unit1'
-        managed = False
+class AimagHot(models.Model):
 
     name = models.CharField(unique=True, max_length=50)
     code = models.CharField(default=None, null=True, max_length=100)
@@ -32,10 +26,6 @@ class AimagHot(models.Model):
 
 class SumDuureg(models.Model):
 
-    class Meta:
-        db_table = 'core_unit2'
-        managed = False
-
     unit1 = models.ForeignKey(AimagHot, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
     code = models.CharField(default=None, null=True, max_length=100)
@@ -45,9 +35,6 @@ class SumDuureg(models.Model):
 
 class BagHoroo(models.Model):
 
-    class Meta:
-        db_table = 'core_unit3'
-        managed = False
 
     unit2 = models.ForeignKey(SumDuureg, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
@@ -59,35 +46,27 @@ class BagHoroo(models.Model):
 class PropertyType(models.Model):
     """ Өмчийн хэлбэр
     """
-    class Meta:
-        db_table = 'core_propertytype'
-        managed = False
 
     name = models.CharField(max_length=255, null=True, blank=True, verbose_name="Өмчийн төрөлийн нэр")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+
 class EducationalInstitutionCategory(models.Model):
     """ Сургалтын байгууллагын ангилал
     """
-    class Meta:
-        db_table = 'core_educationalinstitutioncategory'
-        managed = False
 
     name = models.CharField(max_length=255, null=True, blank=True, verbose_name="Сургалтын байгууллагын ангилалын нэр")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+
 class Schools(models.Model):
     """
         Хамгийн том Байгууллага
     """
-    class Meta:
-        db_table = 'core_orgs'
-        managed = False
-
 
     name = models.CharField(max_length=250, null=False)
     name_eng = models.CharField(max_length=250, null=True)
@@ -123,12 +102,20 @@ class Schools(models.Model):
     def __str__(self):
         return self.name
 
+
+class BankInfo(models.Model):
+
+    name = models.CharField(max_length=250, null=False)
+    image = models.ImageField(upload_to="logo", null=True, blank=True, verbose_name='Банк лого зураг')
+    order = models.IntegerField(default=0, null=False, blank=False, verbose_name="Зэрэглэл")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
 class SubOrgs(models.Model):
     """ Байгууллагын охин байгууллага эсвэл дэд байгууллага
     """
-    class Meta:
-        db_table = 'core_suborgs'
-        managed = False
 
     org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name='Байгууллага сонгох')
     org_code = models.CharField(max_length=2, null=True, unique=True, blank=True, verbose_name="Байгууллагын код")
@@ -162,9 +149,6 @@ class SubOrgs(models.Model):
         return self.name
 
 class User(AbstractUser):
-    class Meta:
-        db_table = 'core_user'
-        managed = False
 
     LOGIN_TYPE_MAIN = 1
     LOGIN_TYPE_SIMPLE = 2
@@ -206,9 +190,6 @@ class Salbars(models.Model):
     """
         Тухайн дэд байгууллагын салбар
     """
-    class Meta:
-        db_table = 'core_salbars'
-        managed = False
 
     org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага")
     sub_orgs = models.ForeignKey(SubOrgs, on_delete=models.CASCADE, verbose_name="Дэд байгууллага")
@@ -234,9 +215,6 @@ class Salbars(models.Model):
 class Permissions(models.Model):
     """ Эрхүүд нь """
 
-    class Meta:
-        db_table = 'core_permissions'
-        managed = False
 
     name = models.CharField(max_length=250, null=False)
     description = models.CharField(max_length=1000, null=True)
@@ -251,9 +229,6 @@ class Permissions(models.Model):
 class Roles(models.Model):
     """ Системийн нийт role ууд """
 
-    class Meta:
-        db_table = 'core_roles'
-        managed = False
 
     name = models.CharField(max_length=250, null=False)
     description = models.CharField(max_length=1000, null=True)
@@ -267,9 +242,6 @@ class MainPosition(models.Model):
     """ Үндсэн төрөлүүд
     """
 
-    class Meta:
-        db_table = 'core_mainposition'
-        managed = False
 
     name = models.CharField(max_length=250, null=False, verbose_name="Нэр")
     code = models.CharField(max_length=255, null=True, blank=True, verbose_name="Код")
@@ -278,9 +250,6 @@ class MainPosition(models.Model):
 class OrgPosition(models.Model):
     """ Тухайн байгууллагын албан тушаал
     """
-    class Meta:
-        db_table = 'core_orgposition'
-        managed = False
 
     org = models.ForeignKey(Schools, on_delete=models.CASCADE)
     description = models.CharField(max_length=5000, null=True, blank=True, verbose_name="Тайлбар")
@@ -303,9 +272,6 @@ class OrgPosition(models.Model):
 
 class Teachers(models.Model):
     """ Хэрэглэгчийн тухайн байгуулг дахь бүртгэл """
-    class Meta:
-        db_table = 'core_userinfo'
-        managed = False
 
     GENDER_MALE = 1
     GENDER_FEMALE = 2
@@ -400,9 +366,6 @@ class Teachers(models.Model):
 class Employee(models.Model):
     """ Хэрэглэгчийн тухайн байгуулг дахь бүртгэл """
 
-    class Meta:
-        db_table = 'core_employee'
-        managed = False
 
     STATE_WORKING = 1
     STATE_FIRED = 2
@@ -525,9 +488,6 @@ class Employee(models.Model):
 class NotificationType(models.Model):
     """ notif ийн төрөл """
 
-    class Meta:
-        db_table = 'core_notificationtype'
-        managed = False
 
     name = models.CharField(max_length=255, null=False, blank=False)
     color = models.CharField(max_length=255, null=False, blank=False)
@@ -536,9 +496,6 @@ class NotificationType(models.Model):
 
 
 # class Employee(Employee):
-#     class Meta:
-#         db_table = 'core_employee'
-#         managed = False
 #     pass
 
 class Orgs(Schools):
@@ -548,9 +505,6 @@ class Orgs(Schools):
 class Notification(models.Model):
     """ Үндсэн notif """
 
-    class Meta:
-        db_table = 'core_notification'
-        managed = False
 
     SCOPE_KIND_ORG = 1
     SCOPE_KIND_SUBORG = 2
@@ -655,9 +609,6 @@ class UserProfessionInfo(models.Model):
         Хэрэглэгчийн мэргэжил дээшлүүлсэн байдал 3.1. Мэргэшлийн бэлтгэл
     """
 
-    class Meta:
-        db_table = 'core_userprofessioninfo'
-        managed = False
 
     WHERE_COUNTRY_DOTOOD = 1
     WHERE_COUNTRY_GADAAD = 2

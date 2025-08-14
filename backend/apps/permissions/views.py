@@ -4,7 +4,6 @@ from rest_framework import generics
 from datetime import datetime
 from django.db import transaction
 from django.views.decorators.http import require_GET
-from lms_package.notif import create_notif
 
 from lms.models import Teachers
 from lms.models import Student

@@ -5,7 +5,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 
 from django.db import transaction
-from lms_package.notif import create_notif
 
 from django.db.models import F, Func, Value, CharField, Count
 from django.db.models.functions import TruncDay
@@ -785,19 +784,6 @@ class SurveyAPIView(
                 else:
                     scope_ids = []
 
-                # TODO үсрэх url оруулах
-                # Notification илгээх~
-
-                create_notif(
-                    request,
-                    scope_ids,
-                    "{title} судалгааны мэдээллийг хүргэж байна.".format(title=title),
-                    "Судалгаа {end_date} дуусахыг анхаарна уу".format(end_date=end_date),
-                    Notification.FROM_KIND_USER,
-                    scope_kind,
-                    'important' if survey_obj and survey_obj.is_required else 'normal'
-                )
-
                 # region to link to SoulSurvey model
                 if surveyType == 'satisfaction' and soul_type == Survey.SOUL_TYPE_TEACHERS_LESSONS:
                     lesson_year, lesson_season_id = get_active_year_season()
@@ -1013,15 +999,6 @@ class SurveyAPIView(
                     scope_ids = employees_ids
                 else:
                     scope_ids = []
-
-                create_notif(request,
-                    scope_ids,
-                    "{title} судалгааны мэдээллийг хүргэж байна.".format(title=title),
-                    "Судалгаа {end_date} дуусахыг анхаарна уу".format(end_date=end_date),
-                    Notification.FROM_KIND_USER,
-                    scope_kind,
-                    'important' if survey_obj.is_required else 'normal'
-                )
 
         except Exception as e:
             print(e)

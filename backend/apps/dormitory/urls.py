@@ -32,9 +32,6 @@ urlpatterns = [
     path('payment/', DormitoryPaymentAPIView.as_view()),
     path('payment/<int:pk>/', DormitoryPaymentAPIView.as_view()),
 
-    path('transaction/', PaymentTransactionAPIView.as_view()),
-    path('transaction/<int:pk>/', PaymentTransactionAPIView.as_view()),
-
     # ------------------- Оюутны байрны төлбөрийн тооцоо --------------------
     path('estimate/our/', OurDormitoryStudentEstimateAPIView.as_view()),
     path('estimate/our/<int:pk>/', OurDormitoryStudentEstimateAPIView.as_view()),
@@ -44,13 +41,5 @@ urlpatterns = [
 
     path('estimate/family/', DormitoryEstimationFamilyEstimateRequestAPIView.as_view()),
     path('estimate/family/<int:pk>/', DormitoryEstimationFamilyEstimateRequestAPIView.as_view()),
-
-    # ------------------- Дотуур байрны бараа материалын шаардах хуудас -------------------------
-
-    path('inventory/request/', InventoryRequestAPIView.as_view()),
-    path('inventory/request/<int:pk>/', InventoryRequestAPIView.as_view()),
-
-    # барааны жагсаалт
-    path('inventory/list/', InventoryListAPIView().as_view()),
 
 ]

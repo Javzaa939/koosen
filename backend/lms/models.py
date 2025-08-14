@@ -1328,100 +1328,6 @@ class ScoreRegister(models.Model):
 
 #------------------------------------Сургалтын төлбөр------------------------------------------------
 
-class Transaction(models.Model):
-    """ Гүйлгээний бүртгэл """
-
-    class Meta:
-        db_table = 'sankhuu\".\"finance_transaction'
-        managed = False
-
-    date = models.DateField(verbose_name="Огноо")
-    description = models.CharField(max_length=100, verbose_name="Утга")
-    number = models.CharField(max_length=100, null=True, verbose_name="Баримтын дугаар")
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-class AccountPlan(models.Model):
-    """ Дансны төлөвлөгөө """
-
-    class Meta:
-        db_table = 'sankhuu\".\"finance_accountplan'
-        managed = False
-
-    HURUNGU = 1
-    UR_TULBUR = 2
-    EZNII_UMCH = 3
-    ORLOGO = 4
-    ZARDAL = 5
-    OZND = 6
-
-    CONST_ROW=(
-        (HURUNGU, "Хөрөнгө"),
-        (UR_TULBUR, "Өр төлбөр"),
-        (EZNII_UMCH, "Эздийн өмч"),
-        (ORLOGO, "Орлого"),
-        (ZARDAL, "Зардал"),
-        (OZND, "Орлого зардлын нэгдсэн данс"),
-    )
-
-    parent = models.ForeignKey("self", on_delete=models.PROTECT, null=True, related_name='children', verbose_name="Эцэг төлөвлөгөө")
-    code = models.CharField(unique=True, max_length=50, verbose_name="Төлөвлөгөөний код")
-    name = models.CharField(max_length=500, verbose_name="Төлөвлөгөөний нэр")
-    const_row = models.PositiveIntegerField(choices=CONST_ROW, db_index=True, null=True, verbose_name="Тогтмол мөрүүд")
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-
-class Account(models.Model):
-    """ Данс """
-
-    class Meta:
-        db_table = 'sankhuu\".\"finance_account'
-        managed = False
-
-    plan = models.ForeignKey(AccountPlan, on_delete=models.PROTECT, verbose_name="Дансны төлөвлөгөө")
-    code = models.CharField(unique=True, max_length=100, verbose_name="Дансны код")
-    name = models.CharField(max_length=500, verbose_name="Дансны нэр")
-    type = models.CharField(max_length=200, null=True, verbose_name="Дансны төрөл")
-    is_active = models.BooleanField(default=True, verbose_name="Актив, пассив")
-    deprecation_account = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, verbose_name="Элэгдлийн данс")
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-
-class Journal(models.Model):
-    """ Журналын бичилт """
-
-    class Meta:
-        db_table = 'sankhuu\".\"finance_journal'
-        managed = False
-
-    transiction = models.ForeignKey(Transaction, on_delete=models.PROTECT, verbose_name="Ажил гүйлгээний бүртгэл")
-    account = models.ForeignKey(Account, on_delete=models.PROTECT, verbose_name="Дебет данс")
-    amount = models.FloatField(verbose_name="Гүйлгээний дүн")
-    is_debet = models.BooleanField(default=True, verbose_name="Орлого эсэх")
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-
-class JournalStudent(models.Model):
-    """ Оюутны журналын бичилт """
-
-    class Meta:
-        db_table = 'sankhuu\".\"finance_journalstudent'
-        managed = False
-
-    journal = models.ForeignKey(Journal, on_delete=models.PROTECT, verbose_name="Журналын бичилт")
-    student = models.ForeignKey(Student, on_delete=models.PROTECT, verbose_name="Оюутан")
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-
 class Payment(models.Model):
 
     class Meta:
@@ -1473,8 +1379,6 @@ class Payment(models.Model):
     status = models.BooleanField(default=False, verbose_name="Төлбөр төлөгдсөн эсэхийг илтгэх")
     payed_date = models.DateTimeField(verbose_name="Төлсөн огноо", null=True)
     description = models.CharField(max_length=500, null=True, verbose_name="Гүйлгээний утга")
-
-    transaction = models.ForeignKey(Transaction, on_delete=models.PROTECT, null=True, verbose_name="Гүйлгээний бүртгэл")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -2837,9 +2741,6 @@ class SchoolLessonLevelVolume(models.Model):
 
 class TeacherCreditEstimationA(models.Model):
     """ Багшийн А цагийн тооцоо бүртгэх"""
-    class Meat:
-        db_table = 'lms_teachercreditestimationa'
-        managed = False
 
     lesson = models.ForeignKey(LessonStandart, on_delete=models.CASCADE, null=True, verbose_name='Хичээл')
     lesson_year = models.CharField(max_length=20, null=True, verbose_name='Хичээлийн жил')
@@ -2886,10 +2787,6 @@ class TeacherCreditEstimationA(models.Model):
 class TeacherCreditNotChamberEstimationA(models.Model):
     """ Багшийн танхим бус А цагийн тооцоо """
 
-    class Meat:
-        db_table = 'lms_teachercreditnotchamberestimationa'
-        managed = False
-
     timeestimatea = models.ForeignKey(TeacherCreditEstimationA, on_delete=models.CASCADE, verbose_name='А цагийн танхим')
     time_estimate_settings = models.ForeignKey(TimeEstimateSettings, on_delete=models.CASCADE, verbose_name='Цагийн ачааллын тохиргоо')
     amount = models.FloatField(verbose_name='Тоо хэмжээ')
@@ -2900,9 +2797,6 @@ class TeacherCreditNotChamberEstimationA(models.Model):
 
 class TeacherCreditEstimationA_group(models.Model):
     """ А цагийн тооцоо анги холбох"""
-    class Meat:
-        db_table = 'lms_teachercreditestimationa_group'
-        managed = False
 
     creditestimation = models.ForeignKey(TeacherCreditEstimationA, on_delete=models.CASCADE, null=True, verbose_name='Багшийн заах хичээлийн бүртгэл')
     group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True, verbose_name="Суралцах ангийн бүртгэл")
@@ -3075,9 +2969,6 @@ class PartTimeTeacherCreditEstimation(models.Model):
 
 class InventionCategory(models.Model):
     """Бүтээлийн ангилал"""
-    class Meta:
-        db_table = 'teacher_inventioncategory'
-        managed = False
 
     name = models.CharField(max_length=100, verbose_name="Нэр")
     point = models.FloatField(default=0,null=False, verbose_name="Оноо")
@@ -3085,18 +2976,10 @@ class InventionCategory(models.Model):
 class PublishingSize(models.Model):
     """Хэвлэлийн хэмжээ"""
 
-    class Meta:
-        db_table = 'teacher_publishingsize'
-        managed = False
-
     name = models.CharField(max_length=100, verbose_name="Нэр")
 
 class UserInvention(models.Model):
     """ Бүтээл """
-
-    class Meta:
-        db_table = 'teacher_userinvention'
-        managed = False
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Багш")
     category = models.ForeignKey(InventionCategory, on_delete=models.CASCADE, verbose_name="Бүтээлийн ангилал")
@@ -3113,9 +2996,6 @@ class UserInvention(models.Model):
 
 class PaperCategory(models.Model):
     """Өгүүллийн ангилал"""
-    class Meta:
-        db_table = 'teacher_papercategory'
-        managed = False
 
     name = models.CharField(max_length=200, verbose_name="Нэр")
     point = models.FloatField(default=0, null=False, verbose_name="Оноо")
@@ -3123,9 +3003,6 @@ class PaperCategory(models.Model):
 
 class UserPaper(models.Model):
     """ Бүтээл """
-    class Meta:
-        db_table = 'teacher_userpaper'
-        managed = False
 
     PAPER_TYPE = (
         (1, 'Гадаад'),
@@ -3156,19 +3033,11 @@ class UserPaper(models.Model):
 class TeacherCountry(models.Model):
     """Улс"""
 
-    class Meta:
-        db_table = 'teacher_country'
-        managed = False
-
     name = models.CharField(max_length=200, verbose_name="Нэр")
 
 
 class NoteCategory(models.Model):
     '''Илтгэлийн ангилал'''
-
-    class Meta:
-        db_table = 'teacher_notecategory'
-        managed = False
 
     name = models.CharField(max_length=200, verbose_name="Ангилалын нэр")
     point = models.FloatField(default=0,null=False, verbose_name="Оноо")
@@ -3176,10 +3045,6 @@ class NoteCategory(models.Model):
 
 class UserNote(models.Model):
     """ Илтгэл """
-
-    class Meta:
-        db_table = 'teacher_usernote'
-        managed = False
 
     PAPER_CATEGORY = (
         ('Олон улсын хэмжээний хурал', 'Олон улсын хэмжээний хурал'),
@@ -3204,19 +3069,11 @@ class UserNote(models.Model):
 class QuotationCategory(models.Model):
     '''Эшлэлийн ангилал'''
 
-    class Meta:
-        db_table = 'teacher_quotationcategory'
-        managed = False
-
     name = models.CharField(max_length=200, verbose_name="Ангилалын нэр")
     point = models.FloatField(default=0,null=False, verbose_name="Оноо")
 
 class UserQuotation(models.Model):
     '''Эшлэл'''
-
-    class Meta:
-        db_table = 'teacher_userquotation'
-        managed = False
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Багш")
     category = models.ForeignKey(QuotationCategory, on_delete=models.CASCADE, verbose_name='Эшлэлйн ангилал')
@@ -3233,10 +3090,6 @@ class UserQuotation(models.Model):
 class ProjectCategory(models.Model):
     '''Төслийн ангилал'''
 
-    class Meta:
-        db_table = 'teacher_projectcategory'
-        managed = False
-
     name = models.CharField(max_length=200, verbose_name="Нэр")
     point = models.FloatField(default=0,null=False, verbose_name="Оноо")
 
@@ -3244,10 +3097,6 @@ class ProjectCategory(models.Model):
 
 class UserProject(models.Model):
     '''Төсөл'''
-
-    class Meta:
-        db_table = 'teacher_userproject'
-        managed = False
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Багш")
     category = models.ForeignKey(ProjectCategory, on_delete=models.CASCADE, verbose_name='Төслийн ангилал')
@@ -3274,10 +3123,6 @@ class UserProject(models.Model):
 class UserContractWork(models.Model):
     '''Гэрээт ажил'''
 
-    class Meta:
-        db_table = 'teacher_usercontractwork'
-        managed = False
-
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Багш")
     name = models.CharField(max_length=200, verbose_name='Гэрээт ажлын нэр')
     contract_number = models.CharField(max_length=200, verbose_name='Гэрээний дугаар')
@@ -3302,10 +3147,6 @@ class UserContractWork(models.Model):
 class UserPatent(models.Model):
     '''Шинэ бүтээлийн патент'''
 
-    class Meta:
-        db_table = 'teacher_userpatent'
-        managed = False
-
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Багш")
     name = models.CharField(max_length=200, verbose_name='Шинэ бүтээлийн нэр')
     register_number = models.CharField(max_length=200, verbose_name='Улсын бүртгэлийн дугаар')
@@ -3323,10 +3164,6 @@ class UserPatent(models.Model):
 #------------------------Ашигтай-Загварын-Патент---------------------------
 class UserModelCertPatent(models.Model):
     '''Ашигтай загварын патент'''
-
-    class Meta:
-        db_table = 'teacher_usermodelcertpatent'
-        managed = False
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Багш")
     name = models.CharField(max_length=200, verbose_name='Ашигтай загварын нэр')
@@ -3346,10 +3183,6 @@ class UserModelCertPatent(models.Model):
 class UserSymbolCert(models.Model):
     '''Барааны тэмдгийн гэрчилгээ'''
 
-    class Meta:
-        db_table = 'teacher_usersymbolcert'
-        managed = False
-
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Багш")
     register_number = models.CharField(max_length=200, verbose_name='Улсын бүртгэлийн дугаар')
     end_date = models.DateField(verbose_name='Хүчинтэй хугацаа')
@@ -3364,10 +3197,6 @@ class UserSymbolCert(models.Model):
 #---------------------Лицензийн-Гэрчилгээ---------------------------
 class UserLicenseCert(models.Model):
     '''Лицензийн гэрчилгээ'''
-
-    class Meta:
-        db_table = 'teacher_userlicensecert'
-        managed = False
 
     LICENSE_CLASS = (
         ('Онцгой', 'Онцгой'),
@@ -3391,10 +3220,6 @@ class UserLicenseCert(models.Model):
 
 class UserRightCert(models.Model):
     '''Зохиогчийн эрхийн гэрчилгээ'''
-
-    class Meta:
-        db_table = 'teacher_userrightcert'
-        managed = False
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Багш")
     register_number = models.CharField(max_length=200, verbose_name='Бүртгэлийн дугаар')
@@ -3964,7 +3789,7 @@ class ChallengeElseltUser(models.Model):
     """ Шалгалтад оролцогчид """
 
     challenge = models.ForeignKey(Challenge, on_delete=models.PROTECT)
-    elselt_user = models.ForeignKey(to='elselt.ElseltUser', on_delete=models.CASCADE)
+    elselt_user = models.ForeignKey(to='elselt.ElseltUser', on_delete=models.CASCADE, null=True)
 
     tried = models.BooleanField(default=False, verbose_name='Элсэгчийн оролдлогын тоо дүүрсэн эсэх')
 
@@ -4073,9 +3898,6 @@ class Crontab(models.Model):
 
 class IrtsQr(models.Model):
 
-    class Meta:
-        managed = False
-
     timetable = models.ForeignKey(TimeTable, on_delete=models.CASCADE, verbose_name="Хичээлийн хуваарь")
     qr_value = models.UUIDField(default=uuid.uuid4)
 
@@ -4087,9 +3909,6 @@ class IrtsQr(models.Model):
 
 
 class RegisterIrts(models.Model):
-
-    class Meta:
-        managed = False
 
     STATE_IRSEN = 1
     STATE_TAS = 2
@@ -4168,9 +3987,6 @@ class StudentViz(models.Model):
     ''' Гадаад оюутны виз шийдвэрлэх
     '''
 
-    db_table = 'lms_studentviz'
-    managed = False
-
     RECIEVED = 1
     UNDER_REVIEW = 2
     DENIED = 3
@@ -4192,233 +4008,6 @@ class StudentViz(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 # ------------------------------------------------------- Finance model ---------------------------------------------------
-
-class Currency(models.Model):
-    """ Вальют """
-
-    class Meta:
-        db_table = 'sankhuu\".\"finance_currency'
-        managed=False
-
-    code = models.CharField(max_length=3,null=False, blank=False, db_index=True, verbose_name="Валютын код")
-    image = models.ImageField(upload_to="currency/image", null=True, blank=True, verbose_name='улсын туг')
-    symbol = models.CharField(max_length=10, null=True, blank=True, verbose_name="Валютын сүлд")
-    description = models.CharField(max_length=100, null=True, blank=True, verbose_name="Валютын тайлбар")
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-
-class InventoryType(models.Model):
-    """ Бараа материалын төрөл  """
-
-    class Meta:
-        db_table = 'sankhuu\".\"finance_inventorytype'
-        managed=False
-
-    dans = models.ForeignKey(Account, on_delete=models.PROTECT, null=False, blank=False, verbose_name="Данс")
-    code = models.CharField(max_length=10, null=False, blank=False, db_index=True, verbose_name="Ангиллын код")
-    name = models.CharField(max_length=500, verbose_name="Ангиллын нэр")
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-
-class Measure(models.Model):
-    """ Хэмжих нэгж"""
-
-    class Meta:
-        db_table = 'sankhuu\".\"finance_measure'
-        managed=False
-
-    code = models.CharField(unique=True, max_length=100, verbose_name="Нэгжийн код")
-    name = models.CharField(max_length=500, verbose_name="Нэгжийн нэр")
-    nick_name = models.CharField(max_length=20, verbose_name="Товч нэр")
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-
-class InventoryCode(models.Model):
-    """Бараа материалын код"""
-
-    class Meta:
-        db_table = 'sankhuu\".\"finance_inventorycode'
-        managed=False
-
-    type = models.ForeignKey(InventoryType, on_delete=models.PROTECT, null=False, blank=False, verbose_name="БМ-ын ангилал")
-    code = models.CharField(max_length=15, null=False, blank=False, db_index=True, verbose_name="Барааны код")
-    name = models.CharField(max_length=500, verbose_name="Бараа материалын нэр")
-    measure = models.ForeignKey(Measure, on_delete=models.PROTECT, null=False, blank=False, verbose_name="БМ-ын хэмжих нэгж")
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-class BankInfo(models.Model):
-
-    class Meta:
-        db_table = '"public"."core_bankinfo"'
-        managed = False
-
-    name = models.CharField(max_length=250, null=False)
-    image = models.ImageField(upload_to="logo", null=True, blank=True, verbose_name='Банк лого зураг')
-    order = models.IntegerField(default=0, null=False, blank=False, verbose_name="Зэрэглэл")
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-
-class Client(models.Model):
-    """ Харилцагчийн бүртгэл """
-
-    class Meta:
-        db_table = 'sankhuu\".\"finance_client'
-        managed=False
-
-    CLEINT_ACTION_SUPPLIER = 1
-    CLEINT_ACTION_BUYER = 2
-    CLEINT_ACTION_BUYER_AND_SUPPLIER = 3
-    CLEINT_ACTION_NONE = 4
-
-    CLEINT_ACTION = (
-        (CLEINT_ACTION_SUPPLIER, 'Нийлүүлэгч'),
-        (CLEINT_ACTION_BUYER, 'Худалдан авагч'),
-        (CLEINT_ACTION_BUYER_AND_SUPPLIER, 'Нийлүүлэгч ба худалдан авагч'),
-        (CLEINT_ACTION_NONE, 'Аль нь ч биш'),
-    )
-
-    CLEINT_TYPE_COMPANY = 1
-    CLEINT_TYPE_PERSONALITY = 2
-
-    CLEINT_TYPE = (
-        (CLEINT_TYPE_COMPANY, 'Байгуулга'),
-        (CLEINT_TYPE_PERSONALITY, 'Хувь хүн'),
-    )
-
-    code = models.CharField(max_length=100, unique=True, null=False, blank=False, default='', verbose_name="Харилцагчийн код", error_messages={ "unique": "Харилцагчийн код давхцсан байна" })
-    name = models.CharField(max_length=100, null=False, blank=False, verbose_name="Байгууллагын нэр")
-    last_name = models.CharField(max_length=100, null=True, blank=True, verbose_name="Овог")
-    company_number = models.CharField(max_length=100, null=True, blank=True, verbose_name="Байгууллагын регистрийн дугаар")
-    client_name = models.CharField(max_length=100, null=True, blank=True, verbose_name="Байгууллагын холбоо барих төлөөлөгчийн нэр")
-    induty = models.CharField(max_length=100, null=True, blank=True, verbose_name="Үйл ажиллагааны чиглэл")
-
-    phone_number = models.IntegerField(null=False, blank=False, verbose_name="Утасны дугаар")
-    home_phone = models.IntegerField(null=True, blank=True, verbose_name="Факс")
-    email = models.EmailField(max_length=254, unique=True, blank=False, null=True, verbose_name="И-мэйл", error_messages={ "unique": "И-мэйл давхцсан байна" })
-    address = models.CharField(max_length=250, null=True, blank=True, verbose_name='Байгууллагын хаяг:')
-    web = models.CharField(max_length=250, null=True, blank=True, verbose_name='Байгууллагын веб:')
-    social = models.CharField(max_length=250, null=True, blank=True, verbose_name='Байгууллагын сошиал холбоос:')
-
-    action = models.PositiveIntegerField(choices=CLEINT_ACTION, db_index=True, null=False, blank=False, verbose_name="Харилцагчийн нийлүүлэгч худалдан авагч эсэх")
-    c_type = models.PositiveIntegerField(choices=CLEINT_TYPE, db_index=True, null=False, blank=False, verbose_name="Харилцагчийн төрөл")
-
-    logo = models.ImageField(upload_to="client/logo", null=True, blank=True, verbose_name='лого')
-    noat = models.BooleanField(default=False, null=True, verbose_name="НӨАТ суутган төлөгч эсэх")
-    is_active = models.BooleanField(default=True, verbose_name="Идэвхитэй эсэх")
-    bank = models.ForeignKey(BankInfo,on_delete=models.CASCADE, verbose_name="Банк")
-    number = models.CharField(max_length=250, null=False, blank=False, unique=True, verbose_name="Дансны дугаар")
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-
-class InventoryTransaction(models.Model):
-    """Бараа материалын гүйлгээ"""
-
-    class Meta:
-        db_table = 'sankhuu\".\"finance_inventorytransaction'
-        managed=False
-
-    number = models.CharField(unique=True, max_length=50,  verbose_name="Баримтын дугаар")
-    client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True, verbose_name="Харилцагч")
-    description = models.CharField(max_length=100, null=True, verbose_name="Бараа, ажил үйлчилгээний нэр")
-    transaction_date = models.DateField(verbose_name="Гүйлгээний огноо")
-    currency = models.ForeignKey(Currency, on_delete=models.PROTECT, default=1, verbose_name="Валют")
-    rate = models.FloatField(default=1, verbose_name="Ханш")
-    amount = models.FloatField(verbose_name="Гүйлгээний дүн")
-    is_debet = models.BooleanField(default=True, verbose_name="Орлого эсэх")
-    transaction = models.ForeignKey(Transaction, on_delete=models.SET_NULL, null=True, verbose_name="Ажил гүйлгээ холболт")
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-
-class InventoryRegister(models.Model):
-    """Барааны орлогын бүртгэл"""
-
-    class Meta:
-        db_table = 'sankhuu\".\"finance_inventoryregister'
-        managed=False
-
-    inventory_transaction = models.ForeignKey(InventoryTransaction, on_delete=models.PROTECT, null=False, blank=False, verbose_name="БМ-ын бичилт")
-    code = models.ForeignKey(InventoryCode, on_delete=models.PROTECT, null=False, blank=False, verbose_name="БМ-ын код")
-    inventory_code = models.CharField(max_length=500, null=True, verbose_name="БМ нэг бүрийн код")
-    set_count = models.FloatField(default=1, verbose_name="Савлагааны тоо")
-    per_set = models.FloatField(default=1, verbose_name="Савлагаан дах тоо хэмжээ")
-    amount = models.FloatField(verbose_name="Тоо хэмжээ")
-    price = models.FloatField(verbose_name="Нэгжийн үнэ")
-    description = models.CharField(max_length=500, null=True, verbose_name="Барааны тайлбар")
-    image = models.ImageField(upload_to="inventory/image", null=True, blank=True, verbose_name='Барааны зураг')
-    storeman = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True,verbose_name="Нярав")
-    location = models.CharField(max_length=200, null=True, verbose_name="Агуулахын байршил")
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-
-class InventoryRequest(models.Model):
-    """ Барааны хүсэлт """
-
-    class Meta:
-        db_table = 'sankhuu\".\"finance_inventoryrequest'
-        managed=False
-
-    def image_old_directory_path(instance, filename):
-        return '{0}/{1}/{2}'.format(settings.INV_OLD, instance.id, filename)
-
-    def image_new_directory_path(instance, filename):
-        return '{0}/{1}/{2}'.format(settings.INV_NEW, instance.id, filename)
-
-    WAITING = 1
-    DECLINED = 2
-    APPROVED = 3
-
-    STATE_TYPE = (
-        (WAITING, 'Хүсэлт илгээгдсэн'),
-        (DECLINED, 'Татгалзсан'),
-        (APPROVED, 'Зөвшөөрсөн'),
-    )
-
-    employee = models.ForeignKey(Employee, on_delete=models.PROTECT, verbose_name="Багш ажилтан")
-    name = models.CharField(max_length=250, verbose_name="Барааны нэр")
-    amount = models.FloatField(verbose_name="Тоо хэмжээ")
-    description = models.CharField(max_length=500, null=True, verbose_name="Тайлбар")
-    deadline = models.DateField(verbose_name="Бэлэн байх шаардлагатай огноо")
-    inventory = models.ForeignKey(InventoryRegister, on_delete=models.SET_NULL, null=True, verbose_name="Олгосон бараа материал")
-    state = models.PositiveIntegerField(choices=STATE_TYPE, db_index=True, null=False, default=WAITING, verbose_name="Шийдвэрийн төpөл")
-    image_new = models.ImageField(upload_to=image_new_directory_path, null=True, max_length=255, verbose_name='Сольсон шинэ барааны зураг')
-    image_old = models.ImageField(upload_to=image_old_directory_path, null=True, max_length=255, verbose_name='Гэмтсэн барааны зураг')
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def save(self, *args, **kwargs):
-        if self.id is None:
-            saved_image = self.image_old
-            saved_image_new = self.image_new
-
-            self.image_old = None
-            self.image_new = None
-
-            super(InventoryRequest, self).save(*args, **kwargs)
-            self.image_old = saved_image
-            self.image_new = saved_image_new
-
-            if 'force_insert' in kwargs:
-                kwargs.pop('force_insert')
-
-        super(InventoryRequest, self).save(*args, **kwargs)
-
 
 class AdmissionRegister(models.Model):
     """ Элсэлтийн үйл явцын бүртгэл"""

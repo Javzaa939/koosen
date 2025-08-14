@@ -35,7 +35,7 @@ export default [
   ...Reference,
   ...Study,
   ...OnlineLesson,
-  ...RemoteRoutes,
+  // ...RemoteRoutes,
   ...Student,
   ...Credit,
   ...TimeTable,
@@ -55,5 +55,5 @@ export default [
   ...Settings,
   ...Role,
   // ...Science
-  ...StudentBrowsers,
+  // ...StudentBrowsers,
 ];

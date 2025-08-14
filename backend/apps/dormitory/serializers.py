@@ -17,7 +17,6 @@ from main.utils.function.utils import fix_format_date
 
 # Create your tests here.
 from lms.models import DormitoryRoom
-from lms.models import JournalStudent
 from lms.models import DormitoryStudent
 from lms.models import DormitoryPayment
 from lms.models import DormitoryRoomType
@@ -25,10 +24,7 @@ from lms.models import DormitoryRoomFile
 from lms.models import DormitoryOtherStudent
 from lms.models import DormitoryFamilyContract
 from lms.models import DormitoryEstimationFamily
-from lms.models import InventoryRequest
 from lms.models import Employee
-from lms.models import InventoryRegister
-from lms.models import InventoryCode
 from lms.models import OtherStudentInformation
 
 from lms.models import DormitoryEstimationFamily, Payment
@@ -40,12 +36,14 @@ from core.serializers import TeacherListSerializer
 
 from student.serializers import StudentInfoSerializer
 
+
 # Дотуур байрны төлбөрийн тохиргоо
 class DormitoryPaymentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DormitoryPayment
         fields = "__all__"
+
 
 # Дотуур байрны өрөөний төрөл
 class DormitoryRoomTypeSerializer(serializers.ModelSerializer):
@@ -407,35 +405,6 @@ class FamilyRegisterSerializer(serializers.ModelSerializer):
 
 # ----------------------------------Дотуур байрны бараа материалын шаардах хуудас ------------------------------------
 
-# БМ шаардах хуудас шинээр үүсгэх ашиглах serializer
-class InventoryRequestSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = InventoryRequest
-        fields = "__all__"
-
-
-# Бараа материал serializer
-class InventoryListSerializer(serializers.ModelSerializer):
-    inventory_code = serializers.SerializerMethodField(read_only=True)
-
-    class Meta:
-        model = InventoryRegister
-        fields = "__all__"
-
-    def get_inventory_code(self, obj):
-        " олгогдсон барааны нэр, код"
-        code_and_name = ''
-        code_id=obj.code.id
-
-        if code_id:
-            code_data = InventoryCode.objects.filter(id=code_id).first()
-            code = code_data.code
-            name = code_data.name
-            code_and_name = name + " " + "("+ code +")"
-
-        return code_and_name
-
 class  UserSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -450,24 +419,6 @@ class EmployeeListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Employee
         fields = ["id", "user", "full_name", 'register_code', 'state']
-
-
-# БМ жагсаалт, засах ашиглах serializer
-class InventoryRequestListSerializer(serializers.ModelSerializer):
-    employee = EmployeeListSerializer(many=False, read_only=True)
-    inventory = InventoryListSerializer(many=False, read_only=True)
-
-    class Meta:
-        model = InventoryRequest
-        fields = "__all__"
-
-
-class InventoryRequestPutSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = InventoryRequest
-        exclude = ["image_old"]
-
 
 
 class PaymentSerializer(serializers.ModelSerializer):

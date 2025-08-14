@@ -114,9 +114,6 @@ INSTALLED_APPS = [
     'rest_framework',
     "corsheaders",
 
-    # NOTIF package
-    'lms_package',
-
     'core',
     'lms',
     "apps.user",

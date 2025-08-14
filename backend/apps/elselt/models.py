@@ -2,19 +2,20 @@ from django.db import models
 from django.db.models import Sum
 
 from lms.models import (
-    AimagHot,
     AdmissionRegisterProfession,
-    User,
     PsychologicalTest,
     AdmissionIndicator,
+)
+
+from core.models import (
+    User,
+    AimagHot,
     SumDuureg,
     BagHoroo
 )
-class ElseltUser(models.Model):
 
-    class Meta:
-        db_table = 'elselt_user'
-        managed = False
+
+class ElseltUser(models.Model):
 
     username = models.CharField(
         max_length=255,
@@ -74,10 +75,6 @@ class ElseltUser(models.Model):
 class UserScore(models.Model):
     """ Хэрэглэгчийн ЭЕШ онооны мэдээлэл """
 
-    class Meta:
-        db_table = 'elselt_userscore'
-        managed = False
-
     user = models.ForeignKey(ElseltUser, on_delete=models.CASCADE, verbose_name='Элсэгч')
     exam_loc = models.CharField(max_length=200, verbose_name="Шалгалт өгсөн газар", default="")
     exam_loc_code = models.IntegerField(verbose_name="Шалгалт өгсөн газар", default=0)
@@ -93,10 +90,6 @@ class UserScore(models.Model):
 
 
 class Setting(models.Model):
-    class Meta:
-        db_table = 'elselt_setting'
-        managed = False
-
     une = models.IntegerField(verbose_name="Нэгжийн үнэ", default=1)
     eec_api_url = models.CharField(verbose_name="EEC API зам", default="", max_length=500)
     eec_api_username = models.CharField(verbose_name="EEC api username", default="", max_length=500)
@@ -114,9 +107,6 @@ class Setting(models.Model):
 
 class UserInfo(models.Model):
     """ Хэрэглэгчийн дэлгэрэнгүй мэдээлэл """
-    class Meta:
-        db_table = 'elselt_userinfo'
-        managed = False
 
     STATE_CORRECT = 1
     STATE_EDIT = 2
@@ -148,9 +138,6 @@ class UserInfo(models.Model):
 
 
 class AdmissionUserProfession(models.Model):
-
-    class Meta:
-        db_table = 'elselt_admissionuserprofession'
 
     STATE_SEND = 1
     STATE_APPROVE = 2
@@ -208,10 +195,6 @@ class AdmissionUserProfession(models.Model):
 
 class ContactInfo(models.Model):
     """ Холбоо барих """
-
-    class Meta:
-        db_table = 'elselt_contactinfo'
-        managed=False
 
     email = models.CharField(max_length=500, verbose_name='Байгууллагын и-мэйл')
     address = models.CharField(max_length=5000, verbose_name='Байгууллагын хаяг')
@@ -329,9 +312,6 @@ class PhysqueUser(models.Model):
 
 class MentalUser(models.Model):
     """ Элсэгчдийн сэтгэлзүйн сорил """
-
-    class Meta:
-        db_table = 'elselt_mentaluser'
 
     user = models.ForeignKey(ElseltUser, on_delete=models.CASCADE, verbose_name='Элсэгч')
     challenge = models.ForeignKey(PsychologicalTest, on_delete=models.CASCADE, verbose_name='Сэтгэлзүйн сорил', null=True)
