@@ -232,11 +232,13 @@ class SchoolAPIView(
         datas = request.data
         serializer = self.serializer_class(data=datas)
 
+        # NOTE if "try" block is used then @transaction.atomic() from outside does not work
         try:
-            if not serializer.is_valid():
-                return request.send_error_valid('ERR_002', serializer.errors)
+            with transaction.atomic():
+                if not serializer.is_valid():
+                    return request.send_error_valid('ERR_002', serializer.errors)
 
-            serializer.save()
+                serializer.save()
 
         except Exception as e:
             print('e', e)
