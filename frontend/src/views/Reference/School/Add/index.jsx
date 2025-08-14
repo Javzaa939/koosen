@@ -66,7 +66,7 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
         } else {
             /** Алдааны мессэжийг input дээр харуулна */
             for (let key in errors) {
-                setError(errors[key].field, { type: 'custom', message:  errors[key].msg});
+                setError(key, { type: 'custom', message:  errors[key]});
             }
         }
 
