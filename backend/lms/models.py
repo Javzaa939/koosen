@@ -1991,6 +1991,7 @@ class DormitoryRegistrationSchedule(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+
 class DormitoryRoom(models.Model):
     """ Өрөөний бүртгэл """
 
