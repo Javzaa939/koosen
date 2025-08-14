@@ -1357,7 +1357,7 @@ def get_cdn_urls():
 
     # Орчиноос шалтгаалж url авах
     if settings.DEBUG:
-        path = 'http://192.168.1.7:8003/cdn/'
+        path = 'http://192.168.1.31:8008/cdn/'
 
     return path
 
