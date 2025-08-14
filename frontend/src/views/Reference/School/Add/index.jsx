@@ -54,11 +54,12 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
     const schoolsApi = useApi().hrms.school
 
     async function onSubmit(cdata) {
+        cdata['logo'] = image
         cdata = convertDefaultValue(cdata)
         const formData = new FormData()
         Object.keys(cdata).map(key => formData.append(key, cdata[key]))
 
-        const { success, errors } = await postFetch(schoolsApi.post(cdata))
+        const { success, errors } = await postFetch(schoolsApi.post(formData))
         if(success) {
             reset()
             refreshDatas()
