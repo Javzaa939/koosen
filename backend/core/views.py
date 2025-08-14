@@ -439,9 +439,13 @@ class SubSchoolAPIView(
         self.serializer_class = SubSchoolListSerailizer
 
         org = request.exactly_org_filter.get("org")
+        sub_school = request.query_params.get("school")
 
         if org:
             self.queryset = self.queryset.filter(org=org.id if hasattr(org, "id") else org)
+
+        if sub_school:
+            self.queryset = self.queryset.filter(id=sub_school)
 
         if pk:
             group = self.retrieve(request, pk).data
