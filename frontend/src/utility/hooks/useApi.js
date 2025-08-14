@@ -145,7 +145,7 @@ function useApi(isDisplay=false) {
 					addToast(
 						{
 							type: 'error',
-							text: err?.message || 'Алдаа гарлаа. Системийн админд хандана уу.'
+							text: err?.message || 'Та түр хүлээгээд дахин оролдоно уу'
 						}
 					)
 				}

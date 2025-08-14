@@ -27,6 +27,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
     """ Хэрэглэгчийн дэлгэрэнгүйг харуулах serializer"""
 
     school_id = serializers.SerializerMethodField()
+    school_name = serializers.SerializerMethodField()
     permissions = serializers.SerializerMethodField()
     full_name = serializers.SerializerMethodField()
     position = serializers.SerializerMethodField()
@@ -34,7 +35,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "real_photo", "username", "email", "is_active", "is_superuser", "phone_number", "school_id", "permissions", "full_name", "position", "position_id"]
+        fields = ["id", "real_photo", "username", "email", "is_active", "is_superuser", "phone_number", "school_id", "permissions", "full_name", "position", "position_id", "school_name"]
 
     def get_full_name(self, obj):
 
@@ -77,10 +78,24 @@ class UserInfoSerializer(serializers.ModelSerializer):
         emp_list = Employee.objects.filter(user=user_id, state=Employee.STATE_WORKING).first()
         if emp_list and emp_list.sub_org:
             school = emp_list.sub_org.id
+        elif obj.info and obj.info.sub_org:
+            school = obj.info.sub_org.id
+
         if school:
             school_info = SubOrgs.objects.filter(id=school, is_school=False).first()
             if school_info:
                 school = ''
+
+        return school
+
+    def get_school_name(self, obj):
+        school = ''
+        user_id = obj.id
+        emp_list = Employee.objects.filter(user=user_id, state=Employee.STATE_WORKING).first()
+        if emp_list and emp_list.sub_org and emp_list.sub_org.is_school:
+            school = emp_list.sub_org.name
+        elif obj.info and obj.info.sub_org and obj.info.sub_org.is_school:
+            school = obj.info.sub_org.name
 
         return school
 

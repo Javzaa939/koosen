@@ -74,7 +74,7 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
         cdata['created_user'] = user.id
         cdata['updated_user'] = user.id
         cdata['org'] = 1
-        cdata['sub_orgs']= school_id
+        cdata['sub_orgs'] = school_id
         cdata = convertDefaultValue(cdata)
 
         const { success, error } = await postFetch(departmentApi.postRegister(cdata))
