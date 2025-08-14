@@ -1,4 +1,6 @@
+from contextlib import suppress
 import json
+import traceback
 import requests
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
@@ -15,7 +17,7 @@ from .serializers import (
     generate_model_serializer
 )
 
-from main.utils.function.utils import filter_queries
+from main.utils.function.utils import create_file_to_cdn, filter_queries, remove_file_from_cdn
 from main.utils.function.pagination import CustomPagination
 from main.utils.function.utils import get_teacher_queryset, null_to_none, calculate_birthday
 
@@ -229,19 +231,36 @@ class SchoolAPIView(
 
     @transaction.atomic()
     def post(self, request):
-        datas = request.data
+        # to copy querydict to make it mutable
+        datas = request.data.copy()
+
+        logo = datas.pop('logo')[0] if datas.get('logo') else None
+        created_cdn_files = []
         serializer = self.serializer_class(data=datas)
 
         # NOTE if "try" block is used then @transaction.atomic() from outside does not work
         try:
             with transaction.atomic():
                 if not serializer.is_valid():
-                    return request.send_error_valid('ERR_002', serializer.errors)
+                    return request.send_error_valid(serializer.errors)
 
-                serializer.save()
+                if logo:
+                    created_cdn_files.append(create_file_to_cdn('reference', logo)['full_path'])
 
-        except Exception as e:
-            print('e', e)
+                instance = serializer.save()
+
+                if created_cdn_files:
+                    instance.logo = created_cdn_files[0]
+                    instance.save()
+
+        except Exception:
+            traceback.print_exc()
+
+            # to clear trash
+            with suppress(Exception):
+                for file in created_cdn_files:
+                    remove_file_from_cdn(file)
+
             return request.send_error("ERR_002")
 
         return request.send_info('INF_001')
