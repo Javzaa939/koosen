@@ -230,10 +230,15 @@ class SchoolAPIView(
         return request.send_info('INF_002')
 
     def post(self, request):
+        # API options
+        is_use_cdn = False
+
         # to copy querydict to make it mutable
         datas = request.data.copy()
 
-        logo = datas.pop('logo')[0] if datas.get('logo') else None
+        if is_use_cdn:
+            logo = datas.pop('logo')[0] if datas.get('logo') else None
+
         created_cdn_files = []
         serializer = self.serializer_class(data=datas)
 
@@ -243,8 +248,9 @@ class SchoolAPIView(
                 if not serializer.is_valid():
                     return request.send_error_valid(serializer.errors)
 
-                if logo:
-                    created_cdn_files.append(create_file_to_cdn('reference', logo)['full_path'])
+                if is_use_cdn:
+                    if logo:
+                        created_cdn_files.append(create_file_to_cdn('reference', logo)['full_path'])
 
                 instance = serializer.save()
 
@@ -255,7 +261,7 @@ class SchoolAPIView(
         except Exception:
             traceback.print_exc()
 
-            # to clear trash
+            # to clear trash from CDN
             with suppress(Exception):
                 for file in created_cdn_files:
                     remove_file_from_cdn(file)
