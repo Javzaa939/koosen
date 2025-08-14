@@ -41,6 +41,7 @@ from lms.models import UserModelCertPatent
 from lms.models import UserSymbolCert
 from lms.models import UserLicenseCert
 from lms.models import UserRightCert
+from main.utils.function.utils import build_url
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
@@ -175,10 +176,30 @@ class TeacherLessonListSerializer(serializers.ModelSerializer):
 
 # Сургууль жагсаалт
 class SchoolsRegisterSerailizer(serializers.ModelSerializer):
+    logo = serializers.SerializerMethodField()
 
     class Meta:
         model = Schools
         fields = "__all__"
+
+    def get_logo(self, obj):
+        # API options
+        is_use_cdn = False
+
+        result = None
+
+        if obj.logo:
+            if is_use_cdn:
+                result = build_url(obj.logo.name)
+
+            else:
+                request = self.context.get('request')
+
+                if request:
+                    result = request.build_absolute_uri(obj.logo.url)
+
+        return result
+
 
 # дэд байгууллага шинээр үүсгэх
 class SubSchoolsRegisterPostSerailizer(serializers.ModelSerializer):
