@@ -55,7 +55,6 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
 
     async function onSubmit(cdata) {
         cdata['logo'] = image
-        cdata = convertDefaultValue(cdata)
         const formData = new FormData()
         Object.keys(cdata).map(key => formData.append(key, cdata[key]))
 
