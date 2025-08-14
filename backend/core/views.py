@@ -229,7 +229,6 @@ class SchoolAPIView(
 
         return request.send_info('INF_002')
 
-    @transaction.atomic()
     def post(self, request):
         # to copy querydict to make it mutable
         datas = request.data.copy()
