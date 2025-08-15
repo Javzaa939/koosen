@@ -288,12 +288,12 @@ const AddModal = ({ open, handleModal, refreshDatas }) => {
                             />
                             {errors.phone_number && <FormFeedback className='d-block'>{errors.phone_number.message}</FormFeedback>}
                         </Col>
-                        <Col md={12}>
-                            <Button className="me-2" color="primary" type="submit" disabled={postLoading}>
+                        <Col className='text-center mt-2' md={12}>
+                            <Button className="me-2" size='sm' color="primary" type="submit" disabled={postLoading}>
                                 {postLoading &&<Spinner size='sm' className='me-1'/>}
                                 {t('Хадгалах')}
                             </Button>
-                            <Button color="secondary" type="reset" outline  onClick={handleModal}>
+                            <Button size='sm' color="secondary" type="reset" outline onClick={handleModal}>
                                 {t('Буцах')}
                             </Button>
                         </Col>

@@ -288,6 +288,9 @@ const UpdateModal = ({ open, handleEdit, refreshDatas, datas }) => {
                             <Button className="me-2" size='sm' color="primary" type="submit">
                                 {t('Хадгалах')}
                             </Button>
+                            <Button size='sm' color="secondary" type="reset" outline onClick={handleEdit}>
+                                {t('Буцах')}
+                            </Button>
                         </Col>
                     </Row>
                 </ModalBody>
