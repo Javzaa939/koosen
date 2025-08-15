@@ -8,7 +8,11 @@ from core.models import AimagHot
 from core.models import SumDuureg
 from core.models import BagHoroo
 from core.models import OrgPosition
-from core.models import User, Roles, Permissions
+
+from core.models import User
+from core.models import Permissions
+from core.models import  Roles
+
 
 from lms.models import TimeTable, QuestionTitle, ChallengeQuestions
 from lms.models import LessonStandart
@@ -43,6 +47,7 @@ from lms.models import UserLicenseCert
 from lms.models import UserRightCert
 from main.utils.function.utils import build_url
 
+from main.utils.function.utils import fix_format_date
 
 class UserRegisterSerializer(serializers.ModelSerializer):
 
@@ -206,7 +211,7 @@ class SchoolsRegisterSerailizer(serializers.ModelSerializer):
         try:
             org_position=''
 
-            role = Roles.objects.filter(name=name).first()
+            role = Roles.objects.filter(name=name, org_id=org_id).first()
             if role:
                 is_hr = False
                 is_director = False
@@ -258,20 +263,37 @@ class SchoolsRegisterSerailizer(serializers.ModelSerializer):
                     filters.add(Q(name__endswith='restore'), Q.OR)
                     permissions_list.remove('restore')
 
+                if 'lms-login' in  permissions_list:
+                    filters.add(Q(name__endswith='lms-login'), Q.OR)
+                    permissions_list.remove('lms-login')
+
                 filters.add(Q(name__in=permissions_list), Q.OR)
 
                 if filters:
                     permissions = Permissions.objects.filter(filters)
-                role_new = Roles.objects.create(name=name, description=description)
+                role_new = Roles.objects.create(name=name, description=description, org_id=org_id)
 
                 if permissions:
                     role_new.permissions.set(permissions)
 
                 if role_new:
-                    org_position = OrgPosition.objects.create(name=name, description=description, org_id=org_id)
-                    org_position.roles.set(role_new)
+                    is_hr = False
+                    is_director = False
+                    if name.lower() == 'хүний нөөц':
+                        is_hr = True
+                    if name.lower() == 'удирдах ажилтан':
+                        is_director = True
+                    org_position, created = OrgPosition.objects.update_or_create(
+                        name=name,
+                        description=description,
+                        org_id=org_id,
+                        is_hr=is_hr,
+                        is_director=is_director
+                    )
+                    org_position.roles.add(role_new)
             return True
-        except:
+        except Exception as e:
+            print('e', e)
             return False
 
 
@@ -582,6 +604,11 @@ class EmployeePostSerializer(serializers.ModelSerializer):
         model = Employee
         fields = ["user", "register_code",'org_position',  'org', "sub_org", "salbar", "state"]
 
+class OrgPositionPostSerializer(serializers.ModelSerializer):
+       class Meta:
+        model = OrgPosition
+        fields = ["id", "name", "is_teacher", "name", "description", "org", "is_director", "is_hr", "created_at", "updated_at"]
+
 
 class UserFirstRegisterSerializer(serializers.ModelSerializer):
     class Meta:
@@ -606,11 +633,17 @@ class UserSaveSerializer(serializers.ModelSerializer):
 
 
 class OrgPositionSerializer(serializers.ModelSerializer):
-
+    org = SubSchoolsSerializer(many=False)
+    created_at = serializers.SerializerMethodField()
     class Meta:
         model = OrgPosition
-        fields = ["id", "name"]
+        fields = ["id", "name", "is_teacher", "name", "description", "org", "is_director", "is_hr", "created_at", "updated_at"]
 
+
+    def get_created_at(self, obj):
+
+        fixed_date = fix_format_date(obj.created_at, format='%Y-%m-%d %H:%M:%S')
+        return fixed_date
 # --------------------- Багшийн мэдээлэл -------------------------
 
 class TeacherInfoSerializer(serializers.ModelSerializer):
@@ -1010,3 +1043,10 @@ def generate_model_serializer(Model, inserted_fields='__all__'):
             fields = inserted_fields
 
     return TemplateSerializer
+
+
+class PermissionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Permissions
+        fields = "__all__"

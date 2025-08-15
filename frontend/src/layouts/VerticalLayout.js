@@ -83,6 +83,8 @@ const VerticalLayout = (props) =>
 
                         /** Багш */
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-reference-teacher-read', 'reference3')
+                        // childrenDatas = checkPerm(childrenDatas, menus,'lms-org-position-read', 'reference4')
+                        childrenDatas = checkPerm(childrenDatas, menus,'lms-reference-teacher-read', 'reference4')
 
                         /** ---------------------------- Элсэлт------------------------------- */
 
@@ -157,10 +159,10 @@ const VerticalLayout = (props) =>
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-settings-mail-read', 'settings_mail')
 
                         /** Эрх */
-                        childrenDatas = checkPerm(childrenDatas, menus, user.is_superuser, 'settingsLevel15')
-                        childrenDatas = checkPerm(childrenDatas, menus, user.is_superuser, 'settingsLevel16')
-                        childrenDatas = checkPerm(childrenDatas, menus, user.is_superuser, 'settingsLevel17')
-                        childrenDatas = checkPerm(childrenDatas, menus, user.is_superuser, 'settings')
+                        childrenDatas = checkPerm(childrenDatas, menus, user.is_hr, 'settingsLevel15')
+                        childrenDatas = checkPerm(childrenDatas, menus, user.is_hr, 'settingsLevel16')
+                        childrenDatas = checkPerm(childrenDatas, menus, user.is_hr, 'settingsLevel17')
+                        childrenDatas = checkPerm(childrenDatas, menus, user.is_hr, 'settings')
 
                         /** Role */
                         // childrenDatas = checkPerm(childrenDatas, menus, 'role-read', 'settingsLevel16')
@@ -169,7 +171,7 @@ const VerticalLayout = (props) =>
                         // childrenDatas = checkPerm(childrenDatas, menus, true, 'settingsLevel17')
 
                         /** Дүрэм журмын файл */
-                        childrenDatas = checkPerm(childrenDatas, menus, user.is_superuser, 'settingsLevel18')
+                        childrenDatas = checkPerm(childrenDatas, menus, user.is_hr, 'settingsLevel18')
 
                         /** ----------------------------- Хичээлийн хуваарь ---------------------------- */
 

@@ -1751,6 +1751,11 @@ class RolesAPIView(
         """ Role жагсаалт
         """
 
+        org = getattr(request, 'exactly_org_filter', {}).get('org')
+
+        if org:
+            self.queryset = self.queryset.filter(org=org)
+
         self.serializer_class = RolesListSerializer
         list = self.list(request, pk).data
         return request.send_data(list)
@@ -1760,6 +1765,13 @@ class RolesAPIView(
     def post(self, request):
         """ Role үүсгэх
         """
+
+        org = getattr(request, 'exactly_org_filter', {}).get('org')
+
+        if not org:
+            return request.send_error("ERR_002", "Роль үүсгэх эрхгүй байна")
+
+        request.data["org"] = org.id
 
         saved_data = post_put_action(self, request, 'post', request.data, get_res=True)
         querysets = OrgPosition.objects.filter(id__in=request.data.get('orgpositions'))

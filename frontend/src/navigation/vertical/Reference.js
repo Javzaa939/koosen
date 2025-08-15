@@ -27,6 +27,12 @@ export default [
                 navLink: "reference/departments/"
             },
             {
+                id: 'reference4',
+                title: 'Албан тушаал',
+                icon: <Circle size={8} />,
+                navLink: "reference/position/"
+            },
+            {
                 id: 'reference3',
                 title: 'Багш / Ажилчид',
                 icon: <Circle size={8} />,

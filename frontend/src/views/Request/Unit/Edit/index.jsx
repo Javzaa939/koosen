@@ -47,7 +47,7 @@ const EditModal = ({ isOpen, handleModal, editId, refreshDatas }) => {
     const unitApi = useApi().request.unit
 
     async function getPosition() {
-        const { success, data } = await fetchData(positionApi.get())
+        const { success, data } = await fetchData(positionApi.getList())
         if(success) {
             setPositionOption(data)
         }

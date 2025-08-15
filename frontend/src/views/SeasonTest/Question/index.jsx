@@ -89,7 +89,7 @@ export default function Question() {
 
 	/* Албан тушаал дата авах функц */
 	async function getPositionData() {
-		const { success, data } = await fetchData(positionApi.get())
+		const { success, data } = await fetchData(positionApi.getList())
 		if (success) {
 			setOrgPositions(data)
 		}
