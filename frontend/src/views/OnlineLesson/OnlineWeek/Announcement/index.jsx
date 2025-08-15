@@ -1,28 +1,24 @@
-import { useEffect, useState } from "react";
-import { Button, Col, Modal, ModalHeader, Row } from "reactstrap";
-import AddAnnouncementModal from "./AddAnnouncement";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import Accordion from "@mui/material/Accordion";
-import AccordionDetails from "@mui/material/AccordionDetails";
-import AccordionSummary from "@mui/material/AccordionSummary";
+import { useEffect, useState } from 'react';
+import { Button, Col, Modal, ModalHeader, Row } from 'reactstrap';
+import AddAnnouncementModal from './AddAnnouncement';
 
-import useApi from "@hooks/useApi";
+import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import useModal from '@hooks/useModal';
-import { useParams } from "react-router-dom";
-import { Clock } from "react-feather";
-import moment from "moment";
-
+import { useParams } from 'react-router-dom';
+import { Clock } from 'react-feather';
+import moment from 'moment';
+import { ExpandIcon } from 'lucide-react';
 
 function Announcement({ lesson }) {
-    const { index } = useParams()
+    const { index } = useParams();
 
     const [modal, setModal] = useState(false);
-	const [editData, setEditData] = useState([]);
+    const [editData, setEditData] = useState([]);
     const [data, setData] = useState([]);
     const announcementAPI = useApi().announcement;
 
-    const { fetchData } = useLoader({})
+    const { fetchData } = useLoader({});
 
     const { showWarning } = useModal();
 
@@ -33,25 +29,25 @@ function Announcement({ lesson }) {
         }
     }
 
-    const handleDelete = async(id) => {
+    const handleDelete = async (id) => {
         const { success, data } = await fetchData(announcementAPI.delete(id));
         if (success) {
-            getAnnouncements()
+            getAnnouncements();
         }
-    }
+    };
 
     useEffect(() => {
         getAnnouncements();
     }, []);
 
     // const handleEdit = (item) => {
-	// 	getAnnouncements();
+    // 	getAnnouncements();
     //     setEditData(item);
     // };
 
     const maxLength = 100;
 
-	const toggle = () => {
+    const toggle = () => {
         if (modal) {
             setEditData(null);
         }
@@ -76,9 +72,14 @@ function Announcement({ lesson }) {
                     backdrop="static"
                     isOpen={modal}
                     toggle={toggle}
-                    >
+                >
                     <ModalHeader toggle={toggle}>Зарлал оруулах</ModalHeader>
-                    <AddAnnouncementModal toggle={toggle} lesson={lesson} editData={editData} refreshDatas={getAnnouncements}/>
+                    <AddAnnouncementModal
+                        toggle={toggle}
+                        lesson={lesson}
+                        editData={editData}
+                        refreshDatas={getAnnouncements}
+                    />
                 </Modal>
             </div>
             <div className="m-1">
@@ -86,7 +87,7 @@ function Announcement({ lesson }) {
                     data.map((item, index) => (
                         <Accordion key={item.id}>
                             <AccordionSummary
-                                expandIcon={<ExpandMoreIcon />}
+                                expandIcon={<ExpandIcon />}
                                 aria-controls="panel3-content"
                                 id="panel3-header"
                             >
@@ -94,40 +95,50 @@ function Announcement({ lesson }) {
                                     <Col>
                                         <Row>
                                             <Col>
-                                                {index + 1}.  {`${item?.title}`}
+                                                {index + 1}. {`${item?.title}`}
                                             </Col>
                                         </Row>
                                         <Row>
                                             <Col>
                                                 <Clock size={10} />
-                                                <small className='ms-1' >
-                                                    {moment(item?.created_at).format('YYYY-MM-DD HH:mm:ss')} - {item?.full_name}
+                                                <small className="ms-1">
+                                                    {moment(item?.created_at).format(
+                                                        'YYYY-MM-DD HH:mm:ss',
+                                                    )}{' '}
+                                                    - {item?.full_name}
                                                 </small>
                                             </Col>
                                         </Row>
                                     </Col>
                                 </Row>
                             </AccordionSummary>
-                            <AccordionDetails style={{ backgroundColor: "#E5E5E5" }}>
+                            <AccordionDetails style={{ backgroundColor: '#E5E5E5' }}>
                                 <div className="text-end">
                                     <Button
-                                        size='sm'
-                                        color='danger'
-                                        onClick={() => showWarning({
-                                            header: {
-                                                title: 'Устгах үйлдэл',
-                                            },
-                                            question: 'Та энэхүү зарлалыг устгахдаа итгэлтэй байна уу?',
-                                            onClick: () => handleDelete(item.id),
-                                            btnText: 'Устгах',
-                                        })}
+                                        size="sm"
+                                        color="danger"
+                                        onClick={() =>
+                                            showWarning({
+                                                header: {
+                                                    title: 'Устгах үйлдэл',
+                                                },
+                                                question:
+                                                    'Та энэхүү зарлалыг устгахдаа итгэлтэй байна уу?',
+                                                onClick: () => handleDelete(item.id),
+                                                btnText: 'Устгах',
+                                            })
+                                        }
                                         className="ms-1"
                                     >
                                         Устгах
                                     </Button>
                                 </div>
                                 <div className="d-flex">
-                                    <div className={`width-auto`} id="announcements" dangerouslySetInnerHTML={{ __html: item?.body }} ></div>
+                                    <div
+                                        className={`width-auto`}
+                                        id="announcements"
+                                        dangerouslySetInnerHTML={{ __html: item?.body }}
+                                    ></div>
                                 </div>
                             </AccordionDetails>
                         </Accordion>

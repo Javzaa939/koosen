@@ -24,7 +24,6 @@ import { getColumns } from './helpers';
 import { useNavigate } from 'react-router-dom';
 import { getPagination, ReactSelectStyles } from '@utils';
 import EditModal from './EditModal';
-import StateModal from '../../Elselt/User/StateModal';
 import AuthContext from '@src/utility/context/AuthContext';
 
 import classnames from 'classnames';
@@ -351,13 +350,13 @@ const Enrollment = () => {
 
     return (
         <Fragment>
-            <StateModal
-                getDatas={getDatas}
-                stateModalHandler={stateModalHandler}
-                stateModal={stateModal}
-                selectedStudents={selectedRows}
-                stateop={stateop}
-            />
+            {/* <StateModal */}
+            {/*     getDatas={getDatas} */}
+            {/*     stateModalHandler={stateModalHandler} */}
+            {/*     stateModal={stateModal} */}
+            {/*     selectedStudents={selectedRows} */}
+            {/*     stateop={stateop} */}
+            {/* /> */}
             <Card>
                 {isLoading && Loader}
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom pt-0'">

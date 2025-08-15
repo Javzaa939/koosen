@@ -1,6 +1,5 @@
 // #region 3rd party
 import { Fragment, useEffect, useRef, useState } from "react";
-import { GoDotFill } from "react-icons/go";
 import { Link } from "react-router-dom";
 import { Card, CardBody, CardHeader, Col, Row, Button, Modal, UncontrolledTooltip, Label, Input, Spinner } from "reactstrap";
 import { ChevronDown, ChevronsRight, Grid, List, X } from 'react-feather'
@@ -29,6 +28,7 @@ import { getColumns } from './helpers'
 // css files
 import './style.css'
 import moment from "moment";
+import { DotIcon } from "lucide-react";
 // #endregion
 
 export default function AllLessons() {
@@ -352,7 +352,7 @@ export default function AllLessons() {
                                                                     <Row className="w-100">
                                                                         <Col xs={9}>
                                                                             {" "}
-                                                                            <GoDotFill style={{ color: "#14B8A6", fontSize: "2rem" }} />
+                                                                            <DotIcon style={{ color: "#14B8A6", fontSize: "2rem" }} />
                                                                             Хичээл
                                                                         </Col>
                                                                         <Col xs={3}>{lesson?.total_homeworks_and_exams.week_count}</Col>

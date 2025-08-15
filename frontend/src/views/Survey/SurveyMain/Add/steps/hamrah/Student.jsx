@@ -255,51 +255,51 @@ function Student({ onChosenScopeChange }) {
                             />
                         )}
                         <div className="checkbox">
-                            <TreeView
-                                data={flattenTree(formatData)}
-                                aria-label="Checkbox tree"
-                                multiSelect
-                                propagateSelect
-                                propagateSelectUpwards
-                                togglableSelect
-                                onSelect={handleTreeSelect}
-                                nodeRenderer={({
-                                    element,
-                                    isBranch,
-                                    isExpanded,
-                                    isSelected,
-                                    isHalfSelected,
-                                    getNodeProps,
-                                    level,
-                                    handleSelect,
-                                    handleExpand,
-                                }) => {
-                                    return (
-                                        <div
-                                            {...getNodeProps({ onClick: handleExpand })}
-                                            style={{ marginLeft: 40 * (level - 1) }}
-                                        >
-                                            {isBranch && <ArrowIcon isOpen={isExpanded} />}
-                                            <CheckBoxIcon
-                                                className="checkbox-icon"
-                                                size={20}
-                                                onClick={(e) => {
-                                                    handleSelect(e);
-                                                    e.stopPropagation();
-                                                }}
-                                                variant={
-                                                    isHalfSelected
-                                                        ? 'some'
-                                                        : isSelected
-                                                        ? 'all'
-                                                        : 'none'
-                                                }
-                                            />
-                                            <span className="name">{element.name}</span>
-                                        </div>
-                                    );
-                                }}
-                            />
+                            {/* <TreeView */}
+                            {/*     data={flattenTree(formatData)} */}
+                            {/*     aria-label="Checkbox tree" */}
+                            {/*     multiSelect */}
+                            {/*     propagateSelect */}
+                            {/*     propagateSelectUpwards */}
+                            {/*     togglableSelect */}
+                            {/*     onSelect={handleTreeSelect} */}
+                            {/*     nodeRenderer={({ */}
+                            {/*         element, */}
+                            {/*         isBranch, */}
+                            {/*         isExpanded, */}
+                            {/*         isSelected, */}
+                            {/*         isHalfSelected, */}
+                            {/*         getNodeProps, */}
+                            {/*         level, */}
+                            {/*         handleSelect, */}
+                            {/*         handleExpand, */}
+                            {/*     }) => { */}
+                            {/*         return ( */}
+                            {/*             <div */}
+                            {/*                 {...getNodeProps({ onClick: handleExpand })} */}
+                            {/*                 style={{ marginLeft: 40 * (level - 1) }} */}
+                            {/*             > */}
+                            {/*                 {isBranch && <ArrowIcon isOpen={isExpanded} />} */}
+                            {/*                 <CheckBoxIcon */}
+                            {/*                     className="checkbox-icon" */}
+                            {/*                     size={20} */}
+                            {/*                     onClick={(e) => { */}
+                            {/*                         handleSelect(e); */}
+                            {/*                         e.stopPropagation(); */}
+                            {/*                     }} */}
+                            {/*                     variant={ */}
+                            {/*                         isHalfSelected */}
+                            {/*                             ? 'some' */}
+                            {/*                             : isSelected */}
+                            {/*                             ? 'all' */}
+                            {/*                             : 'none' */}
+                            {/*                     } */}
+                            {/*                 /> */}
+                            {/*                 <span className="name">{element.name}</span> */}
+                            {/*             </div> */}
+                            {/*         ); */}
+                            {/*     }} */}
+                            {/* /> */}
                         </div>
                     </div>
                 </Col>

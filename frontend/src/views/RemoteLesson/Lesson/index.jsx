@@ -1,17 +1,16 @@
-import useApi from '@hooks/useApi'
-import useLoader from '@hooks/useLoader'
-import { useEffect, useState } from 'react'
-import { ChevronsLeft } from 'react-feather'
-import { useTranslation } from 'react-i18next'
-import { CiUser } from 'react-icons/ci'
-import { PiCertificate, PiExam } from 'react-icons/pi'
-import { useLocation, useParams } from 'react-router-dom'
-import { Badge, Card, CardBody, CardTitle, Col, Row } from 'reactstrap'
-import GroupStudentBlock from '../components/GroupStudentBlock'
-import StudentListBlock from '../components/StudentListBlock'
-import OnlineInfoBlock from '../components/OnlineInfoBlock'
-import useApiCustom from '../hooks/useApiCustom'
-import OnlineSubInfoDetailsBlock from '../components/OnlineSubInfoDetailsBlock'
+import useApi from '@hooks/useApi';
+import useLoader from '@hooks/useLoader';
+import { useEffect, useState } from 'react';
+import { ChevronsLeft } from 'react-feather';
+import { useTranslation } from 'react-i18next';
+import { useLocation, useParams } from 'react-router-dom';
+import { Badge, Card, CardBody, CardTitle, Col, Row } from 'reactstrap';
+import GroupStudentBlock from '../components/GroupStudentBlock';
+import StudentListBlock from '../components/StudentListBlock';
+import OnlineInfoBlock from '../components/OnlineInfoBlock';
+import useApiCustom from '../hooks/useApiCustom';
+import OnlineSubInfoDetailsBlock from '../components/OnlineSubInfoDetailsBlock';
+import { BadgeIcon, FileIcon, UserIcon } from 'lucide-react';
 
 function Lesson() {
     // #region to paginate students in datatable
@@ -21,144 +20,192 @@ function Lesson() {
 
     const handlePagination = (page) => {
         setCurrentPage(page.selected + 1);
-    }
+    };
     // #endregion
 
     // #region to search students using text input in datatable
     const [searchValue, setSearchValue] = useState('');
 
-    useEffect(
-        () => {
-            if (searchValue.length === 0) {
-                setRefreshStudents((current) => !current)
-            }
-        },
-        [searchValue]
-    )
+    useEffect(() => {
+        if (searchValue.length === 0) {
+            setRefreshStudents((current) => !current);
+        }
+    }, [searchValue]);
     // #endregion
 
-    const { id } = useParams()
-    const remoteApi = useApi().remote
+    const { id } = useParams();
+    const remoteApi = useApi().remote;
 
     // #region to get Elearn basic data
-    const location = useLocation()
-    let elearnData = null
-    let isLoadingElearn = false
+    const location = useLocation();
+    let elearnData = null;
+    let isLoadingElearn = false;
 
-    if (location.state) elearnData = location.state
+    if (location.state) elearnData = location.state;
     else {
-        const getElearn = () => remoteApi.getOne(id)
+        const getElearn = () => remoteApi.getOne(id);
 
         const { data: elearnDatas, isLoading: isLoadingElearnLocal } = useApiCustom({
-            apiFunction: getElearn
-        })
+            apiFunction: getElearn,
+        });
 
-        elearnData = { selectedELearn: elearnDatas }
-        isLoadingElearn = isLoadingElearnLocal
+        elearnData = { selectedELearn: elearnDatas };
+        isLoadingElearn = isLoadingElearnLocal;
     }
 
-    const { selectedELearn } = elearnData
-    const { title, students, start_date, end_date, is_end_exam, is_certificate } = selectedELearn || {}
+    const { selectedELearn } = elearnData;
+    const { title, students, start_date, end_date, is_end_exam, is_certificate } =
+        selectedELearn || {};
     // #endregion
 
     // #region API usage
     // #region to get Elearn's students data
-    const [refreshStudents, setRefreshStudents] = useState(false)
+    const [refreshStudents, setRefreshStudents] = useState(false);
 
-    const getStudents = () => remoteApi.students.get({
-        limit: rowsPerPage,
-        page: currentPage,
-        search: searchValue,
-        elearnId: id,
-        sort: 'id',
-    })
+    const getStudents = () =>
+        remoteApi.students.get({
+            limit: rowsPerPage,
+            page: currentPage,
+            search: searchValue,
+            elearnId: id,
+            sort: 'id',
+        });
 
     const { data: studentsDatasOriginal, isLoading: isLoadingStudents } = useApiCustom({
         apiFunction: getStudents,
-        deps: [refreshStudents, currentPage, rowsPerPage]
-    })
+        deps: [refreshStudents, currentPage, rowsPerPage],
+    });
 
-    const studentsDatas = studentsDatasOriginal?.results
+    const studentsDatas = studentsDatasOriginal?.results;
 
     useEffect(() => {
-        setTotalCount(studentsDatasOriginal?.count)
-    }, [studentsDatasOriginal])
+        setTotalCount(studentsDatasOriginal?.count);
+    }, [studentsDatasOriginal]);
     // #endregion
 
     // #region to get OnlineInfo data
-    const [refreshOnlineInfo, setRefreshOnlineInfo] = useState(false)
+    const [refreshOnlineInfo, setRefreshOnlineInfo] = useState(false);
 
-    const getOnlineInfo = () => remoteApi.onlineInfo.get({
-        elearnId: id,
-        sort: 'id',
-    })
+    const getOnlineInfo = () =>
+        remoteApi.onlineInfo.get({
+            elearnId: id,
+            sort: 'id',
+        });
 
     const { data: onlineInfoDatas, isLoading: isLoadingOnlineInfo } = useApiCustom({
         apiFunction: getOnlineInfo,
-        deps: [refreshOnlineInfo]
-    })
+        deps: [refreshOnlineInfo],
+    });
     // #endregion
 
     // #region to get OnlineSubInfo data
-    const [refreshOnlineSubInfo, setRefreshOnlineSubInfo] = useState(false)
+    const [refreshOnlineSubInfo, setRefreshOnlineSubInfo] = useState(false);
 
-    const getOnlineSubInfo = () => remoteApi.onlineSubInfo.get({
-        elearnId: id,
-        sort: 'id'
-    })
+    const getOnlineSubInfo = () =>
+        remoteApi.onlineSubInfo.get({
+            elearnId: id,
+            sort: 'id',
+        });
 
     const { data: onlineSubInfoDatas, isLoading: isLoadingOnlineSubInfo } = useApiCustom({
         apiFunction: getOnlineSubInfo,
-        deps: [refreshOnlineSubInfo]
-    })
+        deps: [refreshOnlineSubInfo],
+    });
     // #endregion
     // #endregion API usage
 
     const { isLoading: isLoadingGeneral, Loader, fetchData } = useLoader({});
-    const isLoading = isLoadingGeneral || isLoadingStudents || isLoadingOnlineInfo || isLoadingOnlineSubInfo || isLoadingElearn
+    const isLoading =
+        isLoadingGeneral ||
+        isLoadingStudents ||
+        isLoadingOnlineInfo ||
+        isLoadingOnlineSubInfo ||
+        isLoadingElearn;
 
     const { t } = useTranslation();
 
     // #region to act on OnlineSubInfo select
-    const [selectedOnlineSubInfo, setSelectedOnlineSubInfo] = useState()
+    const [selectedOnlineSubInfo, setSelectedOnlineSubInfo] = useState();
 
     function handleSelectOnlineSubInfo(onlineSubInfoData, onlineInfoTitle) {
-        setSelectedOnlineSubInfo({ onlineSubInfoData: onlineSubInfoData, onlineInfoTitle: onlineInfoTitle })
+        setSelectedOnlineSubInfo({
+            onlineSubInfoData: onlineSubInfoData,
+            onlineInfoTitle: onlineInfoTitle,
+        });
     }
     // #endregion
 
     return (
         <>
             {isLoading && Loader}
-            <a href='/remote_lesson' className='mb-1 fw-bold text-decoration-underline'><ChevronsLeft size={18} strokeWidth={2.5} /> {t('Буцах')}</a>
-            <Row className='mt-2'>
+            <a href="/remote_lesson" className="mb-1 fw-bold text-decoration-underline">
+                <ChevronsLeft size={18} strokeWidth={2.5} /> {t('Буцах')}
+            </a>
+            <Row className="mt-2">
                 <Col>
-                    <Card className='bg-white w-100'>
+                    <Card className="bg-white w-100">
                         <CardBody>
-                            <CardTitle tag="h4">{t("Сургалтын мэдээлэл")}</CardTitle>
+                            <CardTitle tag="h4">{t('Сургалтын мэдээлэл')}</CardTitle>
                             <div>
-                                <h2 className=''>{title}</h2>
+                                <h2 className="">{title}</h2>
                             </div>
                             <div>
-                                <div className='d-flex justify-content-between'>
+                                <div className="d-flex justify-content-between">
                                     <div>
                                         <div>
-                                            <span>Эхлэх хугацаа: {start_date && new Date(start_date)?.toISOString()?.split('T')[0]}</span>
+                                            <span>
+                                                Эхлэх хугацаа:{' '}
+                                                {start_date &&
+                                                    new Date(start_date)
+                                                        ?.toISOString()
+                                                        ?.split('T')[0]}
+                                            </span>
                                         </div>
                                         <div>
-                                            <span>Дуусах хугацаа: {end_date && new Date(end_date)?.toISOString()?.split('T')[0]}</span>
+                                            <span>
+                                                Дуусах хугацаа:{' '}
+                                                {end_date &&
+                                                    new Date(end_date)
+                                                        ?.toISOString()
+                                                        ?.split('T')[0]}
+                                            </span>
                                         </div>
                                     </div>
                                     <p className="d-flex align-items-center justify-content-center fw-medium gap-1 mb-0">
-                                        <Badge color='primary' pill title='Оюутны тоо' className='d-flex align-items-center gap-25' style={{ height: "24px" }}>
-                                            <CiUser style={{ width: "12px", height: "12px" }} /> {students?.length || 0}
+                                        <Badge
+                                            color="primary"
+                                            pill
+                                            title="Оюутны тоо"
+                                            className="d-flex align-items-center gap-25"
+                                            style={{ height: '24px' }}
+                                        >
+                                            <UserIcon style={{ width: '12px', height: '12px' }} />{' '}
+                                            {students?.length || 0}
                                         </Badge>
-                                        {is_end_exam && <Badge color={`light-success`} pill title={'Төгсөлтийн шалгалттай'} className='d-flex align-items-center gap-25'>
-                                            <PiExam style={{ width: "24px", height: "24px" }} />
-                                        </Badge>}
-                                        {is_certificate && <Badge color={`light-danger`} pill title={'Сертификаттай'} className='d-flex align-items-center gap-25'>
-                                            <PiCertificate style={{ width: "24px", height: "24px" }} />
-                                        </Badge>}
+                                        {is_end_exam && (
+                                            <Badge
+                                                color={`light-success`}
+                                                pill
+                                                title={'Төгсөлтийн шалгалттай'}
+                                                className="d-flex align-items-center gap-25"
+                                            >
+                                                <FileIcon
+                                                    style={{ width: '24px', height: '24px' }}
+                                                />
+                                            </Badge>
+                                        )}
+                                        {is_certificate && (
+                                            <Badge
+                                                color={`light-danger`}
+                                                pill
+                                                title={'Сертификаттай'}
+                                                className="d-flex align-items-center gap-25"
+                                            >
+                                                <BadgeIcon
+                                                    style={{ width: '24px', height: '24px' }}
+                                                />
+                                            </Badge>
+                                        )}
                                     </p>
                                 </div>
                             </div>
@@ -209,7 +256,7 @@ function Lesson() {
                 </Col>
             </Row>
         </>
-    )
+    );
 }
 
-export default Lesson
+export default Lesson;
