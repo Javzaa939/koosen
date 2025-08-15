@@ -43,6 +43,7 @@ from lms.models import UserSymbolCert
 from lms.models import UserLicenseCert
 from lms.models import UserRightCert
 
+from main.utils.function.utils import fix_format_date
 
 class UserRegisterSerializer(serializers.ModelSerializer):
 
@@ -494,11 +495,16 @@ class OrgPositionPostSerializer(serializers.ModelSerializer):
         fields = ["id", "name", "is_teacher", "name", "description", "org", "is_director", "is_hr", "created_at", "updated_at"]
 class OrgPositionSerializer(serializers.ModelSerializer):
     org = SubSchoolsSerializer(many=False)
-
+    created_at = serializers.SerializerMethodField()
     class Meta:
         model = OrgPosition
         fields = ["id", "name", "is_teacher", "name", "description", "org", "is_director", "is_hr", "created_at", "updated_at"]
 
+
+    def get_created_at(self, obj):
+
+        fixed_date = fix_format_date(obj.created_at, format='%Y-%m-%d %H:%M:%S')
+        return fixed_date
 # --------------------- Багшийн мэдээлэл -------------------------
 
 class TeacherInfoSerializer(serializers.ModelSerializer):

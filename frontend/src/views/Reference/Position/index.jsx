@@ -76,21 +76,14 @@ const Position = () => {
         if (page_count < currentPage && page_count != 0) {
             setCurrentPage(page_count)
         }
-        const { success, data } = await allFetch(positionApi.get(rowsPerPage, currentPage, sortField, searchValue))
+        const { success, data } = await allFetch(positionApi.get(searchValue))
         if(success) {
             setDatas(data)
+            setTotalCount(data?.count)
         }
     }
-    console.log('data', datas, total_count)
+    console.log('data', total_count)
 
-
-    /* Тэнхим дата авах функц */
-    // async function getDepartmentOption() {
-    //     const { success, data } = await fetchData(departmentApi.getSelectSchool())
-    //     if (success) {
-    //         setDepartmentData(data)
-    //     }
-    // }
 
     // addModal
     const handleModal =() =>{
@@ -139,15 +132,10 @@ const Position = () => {
     }
 
     async function handleDelete(pk) {
-        const { success } = await fetchData(teacherApi.delete(pk))
+        const { success } = await fetchData(positionApi.delete(pk))
         if (success) {
             getDatas()
         }
-    }
-
-    /* Password сэргээх функц */
-    const changePassModal = async(id) => {
-        await fetchData(teacherApi.resetPassword(id))
     }
 
     return (
@@ -197,7 +185,7 @@ const Position = () => {
                                     <h5>Өгөгдөл байхгүй байна.</h5>
                                 </div>
                             )}
-                            columns={getColumns(currentPage, rowsPerPage, total_count, handleEdit, handleDelete, user, changePassModal)}
+                            columns={getColumns(currentPage, rowsPerPage, total_count, handleEdit, handleDelete, user)}
                             onSort={handleSort}
                             sortIcon={<ChevronDown size={10} />}
                             paginationPerPage={rowsPerPage}

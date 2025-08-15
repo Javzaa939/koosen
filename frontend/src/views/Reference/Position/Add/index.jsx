@@ -68,15 +68,13 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
     const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
 
     const [orgOption, setOrgOption] = useState([]);
-    const [permission_option, setPermissionData] = useState([]);
-    const [permissionId, setPermissionId] = useState([]);
     const [checked1, setOnlyCheck1] = useState(false)
     const [checked2, setOnlyCheck2] = useState(false)
     const [checked3, setOnlyCheck3] = useState(false)
 
 
     // Loader
-	const { Loader, isLoading, fetchData } = useLoader({});
+	const { fetchData } = useLoader({});
 
     // Api
     const orgApi = useApi().hrms.subschool
@@ -89,15 +87,6 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
 			setOrgOption(data)
 		}
 	}
-    console.log('dd', errors )
-
-    /* Permission  */
-    // async function getPermission() {
-    //     const { success, data } = await fetchData(orgPositionApi.getPerList())
-    //     if (success) {
-    //         setPermissionData(data)
-    //     }
-    // }
 
     useEffect(() => {
         getSchool()

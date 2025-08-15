@@ -22,16 +22,13 @@ import Select from 'react-select'
 import classnames from "classnames";
 
 
-const UpdateModal = ({ open, editId, handleEdit,  refreshDatas }) => {
+const UpdateModal = ({ open, editId, handleEdit, refreshDatas }) => {
     const CloseBtn = (
         <X className="cursor-pointer" size={15} onClick={handleEdit} />
     )
-    // const [checked1, setOnlyCheck1] = useState(false)
-    // const [checked2, setOnlyCheck2] = useState(false)
-    // const [checked3, setOnlyCheck3] = useState(false)
+
     const [orgOption, setOrgOption] = useState([]);
     const [edit_data, setEditData] = useState([]);
-    
 
     // Loader
     const {isLoading, fetchData } = useLoader({})
@@ -53,17 +50,6 @@ const UpdateModal = ({ open, editId, handleEdit,  refreshDatas }) => {
                         setValue(key, data[key])
                     else setValue(key, '')
                     if(key === 'org'){
-                        console.log("id",  data[key].id)
-                        setValue(data[key])
-                    }
-
-                    if(key === 'is_hr'){
-                        setValue(data[key])
-                    }
-                    if(key === 'is_director'){
-                        setValue(data[key])
-                    }
-                    if(key === 'is_teacher'){
                         setValue(data[key])
                     }
 
@@ -85,8 +71,6 @@ const UpdateModal = ({ open, editId, handleEdit,  refreshDatas }) => {
 
     },[editId])
 
-
-    console.log("eeee", edit_data)
     async function onSubmit(cdata) {
         if(editId) {
             cdata = convertDefaultValue(cdata)
@@ -94,6 +78,7 @@ const UpdateModal = ({ open, editId, handleEdit,  refreshDatas }) => {
             if(success) {
                 refreshDatas()
                 handleEdit()
+                reset()
             }
             else {
                 /** Алдааны мессэжийг input дээр харуулна */

@@ -4,7 +4,7 @@ import { Lock, Edit, X} from 'react-feather'
 import useModal from "@hooks/useModal"
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, handleDelete, user, changePassModal) {
+export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, handleDelete, user) {
 	const page_count = Math.ceil(total_count/ rowsPerPage)
 	if (currentPage > page_count) {
         currentPage = 1
@@ -29,7 +29,12 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, h
 			selector: (row) => row?.org?.name,
 			minWidth: "30px",
 			center: true,
-			wrap: true,
+		},
+		    {
+			name: `${t("Сургуулийн нэр")}`,
+			selector: (row) => row?.created_at,
+			minWidth: "30px",
+			center: true,
 		},
 
 		 {
@@ -37,7 +42,6 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, h
 			selector: (row) => console.log('rr', row),
 			minWidth: "30px",
 			center: true,
-			wrap: true,
 		},
 		{
             name: `${t('Үйлдэл')}`,
@@ -55,17 +59,17 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, h
                             <UncontrolledTooltip placement='top' target={`updateSchool${row?.id}`}>Засах</UncontrolledTooltip>
 						</>
                     }
-					{/* {
-						user?.permissions?.includes('lms-reference-teacher-delete')
-						&&
+					{
+						// user?.permissions?.includes('lms-org-position-delete')
+						// &&
 						<>
 							<a role="button"
 								className='ms-1'
 								onClick={() => showWarning({
 									header: {
-										title: `${t('Багшийн мэдээлэл устгах')}`,
+										title: `${t('Албан тушаал устгах')}`,
 									},
-									question: `Та  ${row?.full_name} багшийн мэдээллийг устгахдаа итгэлтэй байна уу?`,
+									question: `Та  ${row?.name} албан тушаал устгахдаа итгэлтэй байна уу?`,
 									onClick: () => handleDelete(row?.id),
 									btnText: 'Устгах',
 								})}
@@ -75,7 +79,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, h
 							</a>
 							<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${row?.id}`} >Устгах</UncontrolledTooltip>
 						</>
-					} */}
+					}
 				</div>
             ),
             minWidth: "200px",

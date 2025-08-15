@@ -893,11 +893,15 @@ class OrgPositionListAPIView(
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin,
     mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin
 ):
     """ Албан тушаалын жагсаалт """
 
     queryset = OrgPosition.objects
     serializer_class = OrgPositionSerializer
+
+    filter_backends = [SearchFilter]
+    search_fields = ['org__name', 'name', "created_at"]
 
     def get(self, request, pk=None):
 
@@ -912,11 +916,6 @@ class OrgPositionListAPIView(
 
         self.serializer_class = OrgPositionPostSerializer
 
-        data = request.data
-        print("data",data)
-        # if data.get('sub_org'):
-        #     data['sub_org']=data.get('sub_org')
-
         with transaction.atomic():
             try:
                 self.create(request).data
@@ -926,12 +925,10 @@ class OrgPositionListAPIView(
         return request.send_info("INF_001")
 
     def put(self, request, pk=None):
-        self.serializer_class = OrgPositionPostSerializer
+        # self.serializer_class = OrgPositionPostSerializer
 
         request_data = request.data
         instance = self.queryset.filter(id=pk).first()
-        if instance:
-            print('instance', instance)
 
         serializer = self.get_serializer(instance, data=request_data)
 
@@ -942,7 +939,8 @@ class OrgPositionListAPIView(
                     self.update(request).data
                     is_success = True
                 except Exception:
-                    raise
+                    print(e)
+
             if is_success:
                 return request.send_info("INF_002")
 
@@ -964,6 +962,11 @@ class OrgPositionListAPIView(
 
         return request.send_info("INF_002")
 
+    def delete(self, request, pk=None):
+        if pk:
+            self.destroy(request, pk)
+
+        return request.send_info('INF_003')
 @permission_classes([IsAuthenticated])
 class PermissionListAPIView(
     generics.GenericAPIView,
