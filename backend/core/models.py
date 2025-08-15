@@ -238,7 +238,7 @@ class Permissions(models.Model):
 class Roles(models.Model):
     """ Системийн нийт role ууд """
 
-    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага")
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
     name = models.CharField(max_length=250, null=False)
     description = models.CharField(max_length=1000, null=True)
     permissions = models.ManyToManyField(Permissions)
