@@ -1124,11 +1124,10 @@ class OrgPositionListAPIView(
 
             if serializer.is_valid(raise_exception=False):
                 self.update(request).data
-                is_success = True
 
                 return request.send_info("INF_002")
             else:
-                return request.send_error_valid("ERR_003", serializer.errors)
+                return request.send_error_valid(serializer.errors)
 
         except Exception as e:
             print('e', e)

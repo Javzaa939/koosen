@@ -39,7 +39,10 @@ const UpdateModal = ({ open, editId, handleEdit, refreshDatas, school_id }) => {
                 // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
                 if(data === null) return
                 for(let key in data) {
-                    if(data[key] !== null)
+                    if(key === "org") {
+                        setValue(key, data[key]?.id)
+                    }
+                    else if(data[key] !== null)
                         setValue(key, data[key])
                     else setValue(key, '')
                 }
@@ -55,7 +58,6 @@ const UpdateModal = ({ open, editId, handleEdit, refreshDatas, school_id }) => {
         if(editId) {
             cdata = convertDefaultValue(cdata)
             console.log('cadata', cdata)
-            cdata['org'] = school_id
             const { success, error } = await fetchData(getPositionApi.put(cdata, editId))
             if(success) {
                 refreshDatas()
@@ -121,70 +123,71 @@ const UpdateModal = ({ open, editId, handleEdit, refreshDatas, school_id }) => {
                             {errors.name && <FormFeedback className='d-block'>{errors.name.message}</FormFeedback>}
                         </Col>
                         <Col md={12} className='d-flex align-items-center mt-1'>
-                        <Controller
-                            control={control}
-                            name="is_hr"
-                            defaultValue={false}
-                            render={({ field }) => (
-                                <Input
-                                    {...field}
-                                    id="is_hr"
-                                    type="checkbox"
-                                    checked={field.value}
-                                    onChange={(e) => field.onChange(e.target.checked)}
-                                />
-                            )}
-                        />
-                        <Label className="checkbox-wrapper" for="is_hr">
-                            {t('Хүний нөөцийн ажилтан эсэх')}
-                        </Label>
-                    </Col>
-                    <Col md={12} className='d-flex align-items-center mt-1'>
-                        <Controller
-                            control={control}
-                            name="is_director"
-                            defaultValue={false}
-                            render={({ field }) => (
-                                <>
+                            <Controller
+                                control={control}
+                                name="is_hr"
+                                defaultValue={false}
+                                render={({ field }) => (
                                     <Input
                                         {...field}
-                                        id="is_director"
-                                        className="dataTable-check mb-50 me-1"
+                                        id="is_hr"
                                         type="checkbox"
-                                        bsSize="sm-5"
-                                        onChange={(e) => field.onChange(e.target.checked)}
-                                        checked={field.value}
-                                    />
-                                    <Label className="checkbox-wrapper" for="is_director">
-                                        {t('Удирдах албан тушаалтан эсэх')}
-                                    </Label>
-                                </>
-                            )}
-                        />
-                    </Col>
-                    <Col md={12} className='d-flex align-items-center mt-1'>
-                        <Controller
-                            control={control}
-                            name="is_teacher"
-                            defaultValue={false}
-                            render={({ field }) => (
-                                <>
-                                    <Input
-                                        {...field}
-                                        id="is_teacher"
                                         className="dataTable-check mb-50 me-1"
-                                        type="checkbox"
-                                        bsSize="sm-5"
-                                        onChange={(e) => field.onChange(e.target.checked)}
                                         checked={field.value}
+                                        onChange={(e) => field.onChange(e.target.checked)}
                                     />
-                                    <Label className="checkbox-wrapper" for="is_teacher">
-                                        {t('Багш эсэх')}
-                                    </Label>
-                                </>
-                            )}
-                        />
-                    </Col>
+                                )}
+                            />
+                            <Label className="checkbox-wrapper" for="is_hr">
+                                {t('Хүний нөөцийн ажилтан эсэх')}
+                            </Label>
+                        </Col>
+                        <Col md={12} className='d-flex align-items-center mt-1'>
+                            <Controller
+                                control={control}
+                                name="is_director"
+                                defaultValue={false}
+                                render={({ field }) => (
+                                    <>
+                                        <Input
+                                            {...field}
+                                            id="is_director"
+                                            className="dataTable-check mb-50 me-1"
+                                            type="checkbox"
+                                            bsSize="sm-5"
+                                            onChange={(e) => field.onChange(e.target.checked)}
+                                            checked={field.value}
+                                        />
+                                        <Label className="checkbox-wrapper" for="is_director">
+                                            {t('Удирдах албан тушаалтан эсэх')}
+                                        </Label>
+                                    </>
+                                )}
+                            />
+                        </Col>
+                        <Col md={12} className='d-flex align-items-center mt-1'>
+                            <Controller
+                                control={control}
+                                name="is_teacher"
+                                defaultValue={false}
+                                render={({ field }) => (
+                                    <>
+                                        <Input
+                                            {...field}
+                                            id="is_teacher"
+                                            className="dataTable-check mb-50 me-1"
+                                            type="checkbox"
+                                            bsSize="sm-5"
+                                            onChange={(e) => field.onChange(e.target.checked)}
+                                            checked={field.value}
+                                        />
+                                        <Label className="checkbox-wrapper" for="is_teacher">
+                                            {t('Багш эсэх')}
+                                        </Label>
+                                    </>
+                                )}
+                            />
+                        </Col>
                         <Col md={12}>
                             <Label className="form-label" for="description">
                                 {t('Тайлбар')}

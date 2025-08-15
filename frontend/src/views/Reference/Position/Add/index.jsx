@@ -39,15 +39,12 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
     const [is_loading, setLoader] = useState(false)
     const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
 
-    const [checked1, setOnlyCheck1] = useState(false)
-    const [checked2, setOnlyCheck2] = useState(false)
-    const [checked3, setOnlyCheck3] = useState(false)
-
     // Api
     const orgPositionApi = useApi().hrms.position
 
     async function onSubmit(cdata) {
         cdata = convertDefaultValue(cdata)
+        console.log('cdata', cdata)
         const { success, error } = await postFetch(orgPositionApi.post(cdata))
         if(success) {
             reset()
@@ -62,20 +59,6 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
         }
 
 	}
-
-    useEffect(
-        () => {
-            if(editData === null) return
-            for(let key in editData) {
-                if(editData[key] !== null)
-                    setValue(key, editData[key])
-                else setValue(key,'')
-                if (key === 'org') {
-                    setValue(key, editData[key]?.id)
-                }
-            }
-        }, [editData]
-    )
 
     return (
         <Fragment>
@@ -128,44 +111,71 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
                             />
                             {errors.name && <FormFeedback className='d-block'>{errors.name.message}</FormFeedback>}
                         </Col>
-                        <Col md={12} className='d-flex align-items-center mt-50'>
-                            <Input
-                                id="is_hr"
-                                className="dataTable-check mb-50 me-1"
-                                type="checkbox"
-                                bsSize="sm-5"
-                                onChange={(e) => setOnlyCheck1(e.target.checked)}
-                                checked={checked1}
+                        <Col md={12} className='d-flex align-items-center mt-1'>
+                            <Controller
+                                control={control}
+                                name="is_hr"
+                                defaultValue={false}
+                                render={({ field }) => (
+                                    <Input
+                                        {...field}
+                                        id="is_hr"
+                                        type="checkbox"
+                                        className="dataTable-check mb-50 me-1"
+                                        checked={field.value}
+                                        onChange={(e) => field.onChange(e.target.checked)}
+                                    />
+                                )}
                             />
                             <Label className="checkbox-wrapper" for="is_hr">
                                 {t('Хүний нөөцийн ажилтан эсэх')}
                             </Label>
                         </Col>
-                        <Col md={12} className='d-flex align-items-center mt-50'>
-                            <Input
-                                id="is_director"
-                                className="dataTable-check mb-50 me-1"
-                                type="checkbox"
-                                bsSize="sm-5"
-                                onChange={(e) => setOnlyCheck2(e.target.checked)}
-                                checked={checked2}
+                        <Col md={12} className='d-flex align-items-center mt-1'>
+                            <Controller
+                                control={control}
+                                name="is_director"
+                                defaultValue={false}
+                                render={({ field }) => (
+                                    <>
+                                        <Input
+                                            {...field}
+                                            id="is_director"
+                                            className="dataTable-check mb-50 me-1"
+                                            type="checkbox"
+                                            bsSize="sm-5"
+                                            onChange={(e) => field.onChange(e.target.checked)}
+                                            checked={field.value}
+                                        />
+                                        <Label className="checkbox-wrapper" for="is_director">
+                                            {t('Удирдах албан тушаалтан эсэх')}
+                                        </Label>
+                                    </>
+                                )}
                             />
-                            <Label className="checkbox-wrapper" for="is_director">
-                                {t('Удирдах албан тушаалтан эсэх')}
-                            </Label>
                         </Col>
-                        <Col md={12} className='d-flex align-items-center mt-50'>
-                            <Input
-                                id="is_teacher"
-                                className="dataTable-check mb-50 me-1"
-                                type="checkbox"
-                                bsSize="sm-5"
-                                onChange={(e) => setOnlyCheck3(e.target.checked)}
-                                checked={checked3}
+                        <Col md={12} className='d-flex align-items-center mt-1'>
+                            <Controller
+                                control={control}
+                                name="is_teacher"
+                                defaultValue={false}
+                                render={({ field }) => (
+                                    <>
+                                        <Input
+                                            {...field}
+                                            id="is_teacher"
+                                            className="dataTable-check mb-50 me-1"
+                                            type="checkbox"
+                                            bsSize="sm-5"
+                                            onChange={(e) => field.onChange(e.target.checked)}
+                                            checked={field.value}
+                                        />
+                                        <Label className="checkbox-wrapper" for="is_teacher">
+                                            {t('Багш эсэх')}
+                                        </Label>
+                                    </>
+                                )}
                             />
-                            <Label className="checkbox-wrapper" for="is_teacher">
-                                {t('Багш эсэх')}
-                            </Label>
                         </Col>
                         <Col md={12}>
                             <Label className="form-label" for="description">
