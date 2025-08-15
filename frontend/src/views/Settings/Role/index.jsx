@@ -100,7 +100,7 @@ export default function Role()
                     [
                         fetchData(roleApi.get()),
                         fetchData(permissionApi.list()),
-                        fetchData(hrmsApi.position.getAll())
+                        fetchData(hrmsApi.position.getList())
                     ]
                 ).then((values) => {
                     setRoles(values[0]?.data)

@@ -32,10 +32,16 @@ class UserInfoSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     position = serializers.SerializerMethodField()
     position_id = serializers.SerializerMethodField()
+    is_hr = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ["id", "real_photo", "username", "email", "is_active", "is_superuser", "phone_number", "school_id", "permissions", "full_name", "position", "position_id", "school_name"]
+        fields = ["id", "real_photo", "username", "email", "is_active", "is_superuser", "phone_number", "school_id", "permissions", "full_name", "position", "position_id", "school_name", "is_hr"]
+
+    def get_is_hr(self, obj):
+        employee_qs = Employee.objects.filter(user=obj, state=Employee.STATE_WORKING).first()
+
+        return obj.is_superuser or (employee_qs.org_position.is_hr if employee_qs.org_position else False)
 
     def get_full_name(self, obj):
 

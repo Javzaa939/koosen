@@ -307,6 +307,10 @@ class SchoolAPIView(
             # Шинээр үүссэн байгуулгат хэрэглэгчийн ажилтны мэдээллийг үүсгэх
             org_position = OrgPosition.objects.filter(org_id=instance, is_hr=True).first()
 
+            if not org_position:
+                transaction.savepoint_rollback(sid)
+                return request.send_error("ERR_002")
+
             employee_body = {
                 'org_position': org_position.id,
                 'org': instance.id,

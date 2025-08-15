@@ -211,7 +211,7 @@ class SchoolsRegisterSerailizer(serializers.ModelSerializer):
         try:
             org_position=''
 
-            role = Roles.objects.filter(name=name).first()
+            role = Roles.objects.filter(name=name, org_id=org_id).first()
             if role:
                 is_hr = False
                 is_director = False
@@ -263,20 +263,37 @@ class SchoolsRegisterSerailizer(serializers.ModelSerializer):
                     filters.add(Q(name__endswith='restore'), Q.OR)
                     permissions_list.remove('restore')
 
+                if 'lms-login' in  permissions_list:
+                    filters.add(Q(name__endswith='lms-login'), Q.OR)
+                    permissions_list.remove('lms-login')
+
                 filters.add(Q(name__in=permissions_list), Q.OR)
 
                 if filters:
                     permissions = Permissions.objects.filter(filters)
-                role_new = Roles.objects.create(name=name, description=description)
+                role_new = Roles.objects.create(name=name, description=description, org_id=org_id)
 
                 if permissions:
                     role_new.permissions.set(permissions)
 
                 if role_new:
-                    org_position = OrgPosition.objects.create(name=name, description=description, org_id=org_id)
-                    org_position.roles.set(role_new)
+                    is_hr = False
+                    is_director = False
+                    if name.lower() == 'хүний нөөц':
+                        is_hr = True
+                    if name.lower() == 'удирдах ажилтан':
+                        is_director = True
+                    org_position, created = OrgPosition.objects.update_or_create(
+                        name=name,
+                        description=description,
+                        org_id=org_id,
+                        is_hr=is_hr,
+                        is_director=is_director
+                    )
+                    org_position.roles.add(role_new)
             return True
-        except:
+        except Exception as e:
+            print('e', e)
             return False
 
 
