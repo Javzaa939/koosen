@@ -271,6 +271,10 @@ class SchoolAPIView(
         for key in [*datas.keys()]:
             if key not in necessary_fields:
                 del datas[key]
+
+    @staticmethod
+    def is_access_denied(user):
+        return not user.is_superuser
     # endregion
 
     @login_required()
@@ -297,6 +301,9 @@ class SchoolAPIView(
 
         try:
             with transaction.atomic():
+                if self.is_access_denied(request.user):
+                    return request.send_error("ERR_002")
+
                 instance = self.get_object()
 
                 # to copy querydict to make it mutable
@@ -339,6 +346,9 @@ class SchoolAPIView(
         created_cdn_files = {}
 
         try:
+            if self.is_access_denied(request.user):
+                return request.send_error("ERR_002")
+
             # to copy querydict to make it mutable
             datas = request.data.copy()
 
@@ -406,6 +416,9 @@ class SchoolAPIView(
         return request.send_info('INF_001')
 
     def delete(self, request, pk=None):
+        if self.is_access_denied(request.user):
+            return request.send_error("ERR_002")
+
         qs = self.queryset.filter(id=pk).first()
         if qs:
             qs.delete()
