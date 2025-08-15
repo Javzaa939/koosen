@@ -145,7 +145,7 @@ function useApi(isDisplay=false) {
 					addToast(
 						{
 							type: 'error',
-							text: err?.message || 'Алдаа гарлаа. Системийн админд хандана уу.'
+							text: err?.message || 'Та түр хүлээгээд дахин оролдоно уу'
 						}
 					)
 				}
@@ -552,7 +552,7 @@ function useApi(isDisplay=false) {
 			},
 			/** Бүрэлдэхүүн сургууль */
 			subschool: {
-				get: (search='') => instance.get(`/core/subschool/?search=${search}`),
+				get: (search='') => instance.get(`/core/subschool/?search=${search}&school=${school_id}`),
 				getOne: (pk) => instance.get(`/core/subschool/${pk}/`),
 				put: (data, pk) => instance.put(`/core/subschool/${pk}/`, data),
 				post: data => instance.post(`/core/subschool/`, data),

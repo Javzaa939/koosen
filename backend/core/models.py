@@ -2,6 +2,10 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import ArrayField
 
+from .managers import EmployeeManager
+from .managers import SalbarManager
+from .managers import SubOrgManager
+
 
 # # -------------------------------- HRMS модел --------------------
 
@@ -145,8 +149,11 @@ class SubOrgs(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    objects = SubOrgManager()
+
     def __str__(self):
         return self.name
+
 
 class User(AbstractUser):
 
@@ -208,6 +215,8 @@ class Salbars(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    objects = SalbarManager()
+
     # def __str__(self):
     #     return self.name
 
@@ -241,7 +250,6 @@ class Roles(models.Model):
 class MainPosition(models.Model):
     """ Үндсэн төрөлүүд
     """
-
 
     name = models.CharField(max_length=250, null=False, verbose_name="Нэр")
     code = models.CharField(max_length=255, null=True, blank=True, verbose_name="Код")
@@ -314,7 +322,7 @@ class Teachers(models.Model):
         (ACTION_TYPE_ALL, 'бүх мэдээлэл'),
     )
 
-    user = models.ForeignKey(User,on_delete=models.CASCADE, verbose_name="Хэрэглэгч")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Хэрэглэгч")
     urgiin_ovog = models.CharField(default='', null=True , max_length=100, verbose_name="Ургийн овог", blank=True)
     last_name = models.CharField(default='', null=True , max_length=50, verbose_name="Эцэг эхийн нэр")
     first_name = models.CharField(default='', null=True , max_length=50, verbose_name="Хэрэглэгчийн нэр")
@@ -364,7 +372,6 @@ class Teachers(models.Model):
 
 class Employee(models.Model):
     """ Хэрэглэгчийн тухайн байгуулг дахь бүртгэл """
-
 
     STATE_WORKING = 1
     STATE_FIRED = 2
@@ -451,6 +458,8 @@ class Employee(models.Model):
     degree_type = models.PositiveIntegerField(choices=DEGREE_TYPE, db_index=True, null=True, blank=True, default=None, verbose_name="Эрдмийн зэрэг")
     updated_at = models.DateTimeField(auto_now=True)
 
+    objects = EmployeeManager()
+
     @property
     def is_hr(self):
         return self.user.is_superuser or (self.org_position.is_hr if self.org_position else False)
@@ -465,7 +474,7 @@ class Employee(models.Model):
 
     @staticmethod
     def exactly_our_employees(request):
-        return Employee.objects.filter(**request.exactly_org_filter, state=Employee.STATE_WORKING)
+        return Employee.objects.filter(**request.exactly_org_filter)
 
     @staticmethod
     def get_filter(request):

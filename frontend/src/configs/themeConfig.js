@@ -2,10 +2,10 @@
 //Template config options
 const themeConfig = {
   school:{
-    name:'Админ'
+    name: ''
   },
   app: {
-    appName: "Админ",
+    appName: "Удирдлага",
     appLogoImage: require("@src/assets/images/logo/dxis_logo.png").default
   },
   layout: {

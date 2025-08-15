@@ -6245,6 +6245,7 @@ class QuestionExcelAPIView(generics.GenericAPIView, mixins.ListModelMixin):
 
         return choice_ids
 
+
 @permission_classes([IsAuthenticated])
 class TestTeacherApiView(
     generics.GenericAPIView,
@@ -6265,12 +6266,6 @@ class TestTeacherApiView(
         "Багшийн мэдээллийг сургууль, Хөтөлбөрийн багаар харуулах "
 
         queryset = self.queryset
-        teacher_queryset = queryset.all().values_list('user', flat=True)
-        qs_employee_user = Employee.objects.filter(user_id__in=list(teacher_queryset), state=Employee.STATE_WORKING).values_list('user', flat=True)
-        if qs_employee_user:
-            queryset = queryset.filter(user_id__in = list(qs_employee_user))
-
-        queryset = get_teacher_queryset()
         sub_org = self.request.query_params.get('sub_org')
         salbar = self.request.query_params.get('salbar')
         position = self.request.query_params.get('position')
@@ -6318,6 +6313,7 @@ class TestTeacherApiView(
 
         teach_info = self.list(request).data
         return request.send_data(teach_info)
+
 
 @permission_classes([IsAuthenticated])
 class TestLessonTeacherApiView(

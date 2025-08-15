@@ -14,6 +14,8 @@ from django.db import transaction
 from django.conf import settings
 from .help.roles import default_roles
 
+from main.decorators import login_required
+
 from .serializers import (
     generate_model_serializer
 )
@@ -216,6 +218,11 @@ class SchoolAPIView(
             group = self.retrieve(request, pk).data
             return request.send_data(group)
 
+        org = request.exactly_org_filter.get("org")
+
+        if org:
+            self.queryset = self.queryset.filter(id=org.id if hasattr(org, "id") else org)
+
         datas = self.list(request).data
         return request.send_data(datas)
 
@@ -365,6 +372,7 @@ class DepartmentAPIView(
 
         self.serializer_class = DepartmentPostSerailizer
         datas = request.data
+
         sub_org = SubOrgs.objects.filter(id=datas.get('sub_orgs')).first()
         datas['org'] = sub_org.org.id
         serializer = self.get_serializer(data=datas)
@@ -501,9 +509,19 @@ class SubSchoolAPIView(
     queryset = SubOrgs.objects.all().filter(is_school=True).order_by('name')
     serializer_class = SubSchoolRegisterSerailizer
 
+    @login_required()
     def get(self, request, pk=None):
         " дэд сургуулийн жагсаалт "
         self.serializer_class = SubSchoolListSerailizer
+
+        org = request.exactly_org_filter.get("org")
+        sub_school = request.query_params.get("school")
+
+        if org:
+            self.queryset = self.queryset.filter(org=org.id if hasattr(org, "id") else org)
+
+        if sub_school:
+            self.queryset = self.queryset.filter(id=sub_school)
 
         if pk:
             group = self.retrieve(request, pk).data

@@ -136,7 +136,7 @@ MIDDLEWARE = [
     'django_user_agents.middleware.UserAgentMiddleware',
 
     "corsheaders.middleware.CorsMiddleware",
-
+    "main.middleware.check_org.check_org",
     'main.middleware.success_rp.success_rp',
     'main.middleware.error_handler.ErrorHandlerMiddleware',
     'main.middleware.requestLog.RequestLogMiddleware',
