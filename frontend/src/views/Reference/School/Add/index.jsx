@@ -1,39 +1,33 @@
 // ** React imports
-import React, { Fragment, useState, useEffect, useContext } from 'react'
+import { Fragment, useContext, useState } from 'react';
 
 import { X } from "react-feather";
-
-import Select from 'react-select'
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 
-import { ReactSelectStyles } from "@utils"
-
-import classnames from "classnames";
-
-import { useForm, Controller } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 
 import {
-    Row,
+    Button,
     Col,
-	Form,
-	Modal,
-	Input,
-	Label,
-	Button,
+    Form,
+    FormFeedback,
+    Input,
+    Label,
+    Modal,
+    ModalBody,
+    ModalHeader,
+    Row,
     Spinner,
-	ModalBody,
-	ModalHeader,
-	FormFeedback,
 } from "reactstrap";
 
-import { validate, convertDefaultValue } from "@utils"
+import { validate } from "@utils";
 
 import { t } from 'i18next';
 
-import AuthContext from '@context/AuthContext'
-import SchoolContext from "@context/SchoolContext"
+import AuthContext from '@context/AuthContext';
+import SchoolContext from "@context/SchoolContext";
 
 import { validateSchema } from './validateSchema';
 
