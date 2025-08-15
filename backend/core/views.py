@@ -12,6 +12,7 @@ from rest_framework.filters import SearchFilter
 
 from django.db import transaction
 from django.conf import settings
+from .help.roles import default_roles
 
 from .serializers import (
     generate_model_serializer
@@ -95,8 +96,8 @@ from .serializers import TeacherListSchoolFilterSerializer
 from .serializers import DepartmentPostSerailizer
 from .serializers import EmployeePostSerializer
 from .serializers import UserRegisterSerializer
-from .serializers import UserInfoSerializer
-from .serializers import EmployeeSerializer, UserSerializer
+from .serializers import UserInfoSerializer, UserSaveSerializer
+from .serializers import EmployeeSerializer, UserSerializer, UserFirstRegisterSerializer
 
 from lms.models import ProfessionDefinition
 from lms.models import LessonStandart
@@ -229,9 +230,12 @@ class SchoolAPIView(
 
         return request.send_info('INF_002')
 
+    @transaction.atomic()
     def post(self, request):
         # API options
         is_use_cdn = False
+
+        sid = transaction.savepoint()
 
         # to copy querydict to make it mutable
         datas = request.data.copy()
@@ -244,19 +248,65 @@ class SchoolAPIView(
 
         # NOTE if "try" block is used then @transaction.atomic() from outside does not work
         try:
-            with transaction.atomic():
-                if not serializer.is_valid():
-                    return request.send_error_valid(serializer.errors)
+            if not serializer.is_valid():
+                transaction.savepoint_rollback(sid)
+                return request.send_error_valid(serializer.errors)
 
-                if is_use_cdn:
-                    if logo:
-                        created_cdn_files.append(create_file_to_cdn('reference', logo)['full_path'])
+            if is_use_cdn:
+                if logo:
+                    created_cdn_files.append(create_file_to_cdn('reference', logo)['full_path'])
 
-                instance = serializer.save()
+            instance = serializer.save()
 
-                if created_cdn_files:
-                    instance.logo = created_cdn_files[0]
-                    instance.save()
+            if created_cdn_files:
+                instance.logo = created_cdn_files[0]
+                instance.save()
+
+            # Байгуулгын хүний нөөцийн ажилтан эрх
+            for role_info in default_roles:
+                org_position = self.serializer_class.create_defualt_role(role_info['name'], role_info['description'], role_info['permissions'], instance.id)
+                if org_position is False:
+                    transaction.savepoint_rollback(sid)
+                    return request.send_error("ERR_002")
+
+            user_body = {
+                'password': request.data['phone_number'],
+                'email': request.data['email'],
+                'phone_number': request.data['phone_number'],
+                'username': request.data['email'],
+                'mail_verified': True,
+            }
+
+            # Байгуулгын хүний нөөцийн ажилтаны account үүсгэх
+            user_serializer = UserSaveSerializer(data=user_body)
+            if not user_serializer.is_valid():
+                user_serializer = UserFirstRegisterSerializer(data=request.data)
+                user_serializer.is_valid()
+                transaction.savepoint_rollback(sid)
+                return request.send_error_valid(user_serializer.errors)
+
+            user = user_serializer.save()
+
+            #  хоосон userinfo үүсгэх
+            if user:
+                Teachers.objects.create(user=user, first_name=user.email, action_status=Teachers.APPROVED, action_status_type=Teachers.ACTION_TYPE_ALL)
+
+            # Шинээр үүссэн байгуулгат хэрэглэгчийн ажилтны мэдээллийг үүсгэх
+            org_position = OrgPosition.objects.filter(org_id=instance, is_hr=True).first()
+
+            employee_body = {
+                'org_position': org_position.id,
+                'org': instance.id,
+                'user': user.id,
+            }
+
+            employee_serializer = EmployeeSerializer(data=employee_body)
+
+            if not employee_serializer.is_valid():
+                transaction.savepoint_rollback(sid)
+                return request.send_error_valid(employee_serializer.errors)
+
+            employee_serializer.save()
 
         except Exception:
             traceback.print_exc()
