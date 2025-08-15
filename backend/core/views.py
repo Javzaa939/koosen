@@ -212,13 +212,14 @@ class SchoolAPIView(
     queryset = Schools.objects
     serializer_class = SchoolsRegisterSerailizer
 
+    @login_required()
     def get(self, request, pk=None):
         " Сургуулийн жагсаалт "
         if pk:
             group = self.retrieve(request, pk).data
             return request.send_data(group)
 
-        org = request.exactly_org_filter.get("org")
+        org = getattr(request, 'exactly_org_filter', {}).get('org')
 
         if org:
             self.queryset = self.queryset.filter(id=org.id if hasattr(org, "id") else org)
@@ -514,7 +515,7 @@ class SubSchoolAPIView(
         " дэд сургуулийн жагсаалт "
         self.serializer_class = SubSchoolListSerailizer
 
-        org = request.exactly_org_filter.get("org")
+        org = getattr(request, 'exactly_org_filter', {}).get('org')
         sub_school = request.query_params.get("school")
 
         if org:
