@@ -8,7 +8,11 @@ from core.models import AimagHot
 from core.models import SumDuureg
 from core.models import BagHoroo
 from core.models import OrgPosition
-from core.models import User, Roles, Permissions
+
+from core.models import User
+from core.models import Permissions
+from core.models import  Roles
+
 
 from lms.models import TimeTable, QuestionTitle, ChallengeQuestions
 from lms.models import LessonStandart
@@ -43,6 +47,7 @@ from lms.models import UserLicenseCert
 from lms.models import UserRightCert
 from main.utils.function.utils import build_url
 
+from main.utils.function.utils import fix_format_date
 
 class UserRegisterSerializer(serializers.ModelSerializer):
 
@@ -582,6 +587,11 @@ class EmployeePostSerializer(serializers.ModelSerializer):
         model = Employee
         fields = ["user", "register_code",'org_position',  'org', "sub_org", "salbar", "state"]
 
+class OrgPositionPostSerializer(serializers.ModelSerializer):
+       class Meta:
+        model = OrgPosition
+        fields = ["id", "name", "is_teacher", "name", "description", "org", "is_director", "is_hr", "created_at", "updated_at"]
+
 
 class UserFirstRegisterSerializer(serializers.ModelSerializer):
     class Meta:
@@ -606,11 +616,17 @@ class UserSaveSerializer(serializers.ModelSerializer):
 
 
 class OrgPositionSerializer(serializers.ModelSerializer):
-
+    org = SubSchoolsSerializer(many=False)
+    created_at = serializers.SerializerMethodField()
     class Meta:
         model = OrgPosition
-        fields = ["id", "name"]
+        fields = ["id", "name", "is_teacher", "name", "description", "org", "is_director", "is_hr", "created_at", "updated_at"]
 
+
+    def get_created_at(self, obj):
+
+        fixed_date = fix_format_date(obj.created_at, format='%Y-%m-%d %H:%M:%S')
+        return fixed_date
 # --------------------- Багшийн мэдээлэл -------------------------
 
 class TeacherInfoSerializer(serializers.ModelSerializer):
@@ -1010,3 +1026,10 @@ def generate_model_serializer(Model, inserted_fields='__all__'):
             fields = inserted_fields
 
     return TemplateSerializer
+
+
+class PermissionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Permissions
+        fields = "__all__"
