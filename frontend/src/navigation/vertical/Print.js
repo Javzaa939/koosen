@@ -1,11 +1,11 @@
-import { Circle } from 'react-feather'
+import { PrinterIcon, Circle } from 'lucide-react';
 
 export default [
     {
         id: 'print',
         title: 'Хэвлэх',
-        icon: <i className="far fa-print"></i>,
-        navLink: "/print",
+        icon: <PrinterIcon />,
+        navLink: '/print',
         navChildren: [
             // {
             //     id: 'print1',
@@ -17,7 +17,7 @@ export default [
                 id: 'print2',
                 title: 'Хичээлийн хуваарь',
                 icon: <Circle size={8} />,
-                navLink: "print/schedule/"
+                navLink: 'print/schedule/',
             },
             // {
             //     id: 'print4',
@@ -29,7 +29,7 @@ export default [
                 id: 'print5',
                 title: 'Голч дүн',
                 icon: <Circle size={8} />,
-                navLink: "print/gpa/"
+                navLink: 'print/gpa/',
             },
             // {
             //     id: 'print6',
@@ -37,6 +37,6 @@ export default [
             //     icon: <Circle size={8} />,
             //     navLink: "print/graduation/"
             // },
-        ]
-    }
-]
+        ],
+    },
+];

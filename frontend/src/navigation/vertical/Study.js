@@ -1,25 +1,25 @@
 // ** Icons Import
-import { Circle } from 'react-feather'
+import { BookOpenCheckIcon, Circle } from 'lucide-react';
 
 export default [
     {
         id: 'study',
         title: 'Сургалт',
-        icon: <i className="fas fa-users-class"></i>,
-        navLink: "/study",
+        icon: <BookOpenCheckIcon />,
+        navLink: '/study',
         navChildren: [
             {
                 id: 'study1',
                 title: 'Хичээлийн стандарт',
                 icon: <Circle size={8} />,
-                navLink: "study/lessonStandart/"
+                navLink: 'study/lessonStandart/',
             },
             {
                 id: 'study2',
                 title: 'Хөтөлбөр',
                 icon: <Circle size={8} />,
-                navLink: "study/profession-definition/"
+                navLink: 'study/profession-definition/',
             },
-        ]
-    }
-]
+        ],
+    },
+];

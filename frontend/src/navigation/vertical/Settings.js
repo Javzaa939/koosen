@@ -1,44 +1,44 @@
 // ** Icons Import
-import { Circle, Settings } from 'react-feather'
 
-import ableLogo from "@src/assets/images/ableLogo.png"
+// import ableLogo from "@src/assets/images/ableLogo.png"
+import { SettingsIcon, Circle } from 'lucide-react';
 
 export default [
     {
         id: 'settings',
+        icon: <SettingsIcon />,
         title: 'Тохиргоо',
-        icon: <Settings size={20} />,
-        navLink: "/settings",
+        navLink: '/settings',
         navChildren: [
             {
                 id: 'settings_employee',
                 title: 'Ажилчдын тохиргоо',
                 icon: <Circle size={8} />,
-                navLink: "settings/teacher/"
+                navLink: 'settings/teacher/',
             },
             {
                 id: 'settings_student',
                 title: 'Оюутнуудын тохиргоо',
                 icon: <Circle size={8} />,
-                navLink: "settings/student/"
+                navLink: 'settings/student/',
             },
             {
                 id: 'settings_mail',
                 title: 'Цахим шуудан тохиргоо',
                 icon: <Circle size={8} />,
-                navLink: "settings/mail/"
+                navLink: 'settings/mail/',
             },
             {
                 id: 'settingsLevel15',
                 title: 'Эрх',
                 icon: <Circle size={8} />,
-                navLink: "settings/permission/"
+                navLink: 'settings/permission/',
             },
             {
                 id: 'settingsLevel16',
                 title: 'Role',
                 icon: <Circle size={8} />,
-                navLink: "settings/role/"
+                navLink: 'settings/role/',
             },
             // {
             //     id: 'settingsLevel17',
@@ -52,6 +52,6 @@ export default [
             //     icon: <Circle size={8} />,
             //     navLink: "settings/rule/"
             // },
-        ]
-    }
-]
+        ],
+    },
+];
