@@ -29,7 +29,7 @@ import AddEventSidebar from './Add';
 // import SwiperFade from './SwiperFade';
 import AccessHistory from './AccessHistory';
 
-import '@styles/react/apps/app-calendar.scss';
+// import '@styles/react/apps/app-calendar.scss';
 
 import { VOLUNTEER_ACTION_TYPE } from '@utility/consts';
 
