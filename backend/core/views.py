@@ -268,7 +268,7 @@ class SchoolAPIView(
             'phone_number',
         ]
 
-        for key in datas:
+        for key in [*datas.keys()]:
             if key not in necessary_fields:
                 del datas[key]
     # endregion
