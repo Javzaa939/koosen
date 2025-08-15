@@ -1,11 +1,8 @@
 // ** React imports
 import React, { Fragment, useState, useEffect, useContext } from 'react'
 import { X } from "react-feather";
-import Select from 'react-select'
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
-import { ReactSelectStyles } from "@utils"
-import classnames from "classnames";
 import { useForm, Controller } from "react-hook-form";
 
 import {
@@ -22,80 +19,35 @@ import {
 	FormFeedback,
 } from "reactstrap";
 
-import { validate, convertDefaultValue, get_emp_state } from "@utils"
+import { validate, convertDefaultValue } from "@utils"
 import { t } from 'i18next';
 
-import AuthContext from '@context/AuthContext'
 import SchoolContext from "@context/SchoolContext"
 
 import { validateSchema } from './validateSchema';
 
 const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
 
-    const rank_type_option = [
-        {
-            'id': 1,
-            'name': 'Дадлагажигч багш',
-        },
-        {
-            'id': 2,
-            'name': 'Багш',
-        },
-        {
-            'id': 3,
-            'name': 'Ахлах багш',
-        },
-        {
-            'id': 4,
-            'name': 'Дэд профессор',
-        },
-        {
-            'id': 5,
-            'name': 'Профессор',
-        }
-    ]
-
     const CloseBtn = (
         <X className="cursor-pointer" size={15} onClick={handleModal} />
     )
-    const { user } = useContext(AuthContext)
     const { school_id } = useContext(SchoolContext)
 
     // ** Hook
-    const { control, handleSubmit, reset, setError, formState: { errors }, setValue, getValues, watch } = useForm(validate(validateSchema));
+    const { control, handleSubmit, reset, setError, formState: { errors }, setValue } = useForm(validate(validateSchema));
 
     const [is_loading, setLoader] = useState(false)
     const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
 
-    const [orgOption, setOrgOption] = useState([]);
     const [checked1, setOnlyCheck1] = useState(false)
     const [checked2, setOnlyCheck2] = useState(false)
     const [checked3, setOnlyCheck3] = useState(false)
 
-
-    // Loader
-	const { fetchData } = useLoader({});
-
     // Api
-    const orgApi = useApi().hrms.subschool
     const orgPositionApi = useApi().hrms.position
-
-    /* Сургууль жагсаалт авах функц */
-	async function getSchool() {
-		const { success, data } = await fetchData(orgApi.get())
-		if (success) {
-			setOrgOption(data)
-		}
-	}
-
-    useEffect(() => {
-        getSchool()
-    },[])
 
     async function onSubmit(cdata) {
         cdata = convertDefaultValue(cdata)
-        cdata['org'] = school_id
-
         const { success, error } = await postFetch(orgPositionApi.post(cdata))
         if(success) {
             reset()
@@ -122,7 +74,7 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
                     setValue(key, editData[key]?.id)
                 }
             }
-        }, [editData,]
+        }, [editData]
     )
 
     return (
@@ -154,38 +106,6 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
                 </ModalHeader>
                 <ModalBody className="flex-grow-1">
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
-                        {/* <Col md={12}>
-                            <Label className="form-label" for="org">
-                                {t('Сургууль')}
-                            </Label>
-                            <Controller
-                                control={control}
-                                defaultValue=''
-                                name="org"
-                                render={({ field: { value, onChange} }) => {
-                                    return (
-                                        <Select
-                                            name="org"
-                                            id="org"
-                                            classNamePrefix='select'
-                                            isClearable
-                                            className={classnames('react-select opacity-100', { 'is-invalid': errors.org})}
-                                            placeholder={t('-- Сонгоно уу --')}
-                                            options={orgOption || []}
-                                            value={value && orgOption.find((c) => c.id === value)}
-                                            noOptionsMessage={() => t('Хоосон байна.')}
-                                            onChange={(val) => {
-                                                onChange(val?.id || '')
-                                            }}
-                                            styles={ReactSelectStyles}
-                                            getOptionValue={(option) => option.id}
-                                            getOptionLabel={(option) => option.name}
-                                        />
-                                    )
-                                }}
-                            ></Controller>
-                            {errors.org && <FormFeedback className='d-block'>{errors.org.message}</FormFeedback>}
-                        </Col> */}
                         <Col md={12}>
                             <Label className="form-label" for="name">
                                 {t('Нэр')}
@@ -208,7 +128,7 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
                             />
                             {errors.name && <FormFeedback className='d-block'>{errors.name.message}</FormFeedback>}
                         </Col>
-                        <Col md={12} className='d-flex align-items-center mt-1'>
+                        <Col md={12} className='d-flex align-items-center mt-50'>
                             <Input
                                 id="is_hr"
                                 className="dataTable-check mb-50 me-1"
@@ -221,7 +141,7 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
                                 {t('Хүний нөөцийн ажилтан эсэх')}
                             </Label>
                         </Col>
-                        <Col md={12} className='d-flex align-items-center mt-1'>
+                        <Col md={12} className='d-flex align-items-center mt-50'>
                             <Input
                                 id="is_director"
                                 className="dataTable-check mb-50 me-1"
@@ -234,7 +154,7 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
                                 {t('Удирдах албан тушаалтан эсэх')}
                             </Label>
                         </Col>
-                        <Col md={12} className='d-flex align-items-center mt-1'>
+                        <Col md={12} className='d-flex align-items-center mt-50'>
                             <Input
                                 id="is_teacher"
                                 className="dataTable-check mb-50 me-1"
@@ -262,7 +182,7 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
                                         bsSize="sm"
                                         placeholder={t("Тайлбар")}
                                         {...field}
-                                        type="text"
+                                        type="textarea"
                                         invalid={errors.description && true}
                                     />
                                 )}

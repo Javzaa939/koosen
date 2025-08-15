@@ -53,7 +53,7 @@ export const Addmodal = ( { open, refreshDatas, handleModal, type, editData } ) 
 
     // Хөтөлбөрийн жагсаалт
     async function getPosition() {
-        const { success, data } = await fetchData(positionApi.get())
+        const { success, data } = await fetchData(positionApi.getList())
         if (success) {
             setPositionOption(data)
         }

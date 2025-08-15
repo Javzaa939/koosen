@@ -646,7 +646,8 @@ function useApi(isDisplay=false) {
 
 			/** Албан тушаал */
 			position: {
-				get: (limit, page,school_id, search) => instance.get(`/core/position/?page=${page}&limit=${limit}&school=${school_id}&search=${search}`),
+				get: (limit, page, school_id, search) => instance.get(`/core/position/?page=${page}&limit=${limit}&school=${school_id}&search=${search}`),
+				getList: () => instance.get(`/core/position/list/?school=${school_id}`),
 				getOne: (pk) => instance.get(`/core/position/${pk}/`),
 				getPerList: () => instance.get(`/core/permission/`),
 				post: (data) => instance.post(`/core/position/`, data),

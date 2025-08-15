@@ -98,7 +98,7 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
 
     /* Албан тушаалын жагсаалт авах функц */
 	async function getPositionOption() {
-		const { success, data } = await fetchData(orgPositionApi.get())
+		const { success, data } = await fetchData(orgPositionApi.getList())
 		if (success) {
 			setOrgPositionData(data)
 		}
@@ -148,16 +148,19 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
 
     useEffect(
         () => {
-            if(editData === null) return
-            for(let key in editData) {
-                if(editData[key] !== null)
-                    setValue(key, editData[key])
-                else setValue(key,'')
-                if (key === 'salbar') {
-                    setValue(key, editData[key]?.id)
+            if(editData && Object.keys(editData)?.length == 0) {
+                setValue("state", 1)
+            } else if (editData && Object.keys(editData)?.length > 0) {
+                for(let key in editData) {
+                    if(editData[key] !== null)
+                        setValue(key, editData[key])
+                    else setValue(key,'')
+                    if (key === 'salbar') {
+                        setValue(key, editData[key]?.id)
+                    }
                 }
             }
-        }, [editData,]
+        }, [editData]
     )
 
     return (

@@ -46,7 +46,7 @@ const AddModal = ({ isOpen, handleModal, refreshDatas }) => {
 	const requestUnitApi = useApi().request.unit
 
     async function getPosition() {
-        const { success, data } = await fetchData(positionApi.get())
+        const { success, data } = await fetchData(positionApi.getList())
         if(success) {
             setPositionOption(data)
         }

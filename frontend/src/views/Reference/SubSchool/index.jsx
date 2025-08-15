@@ -14,10 +14,8 @@ import AuthContext from '@context/AuthContext'
 import SchoolContext from '@context/SchoolContext'
 
 import { getColumns } from './helpers';
-import UpdateModal from "./Edit"
 import AddModal from "./Add"
 import UpdateModal from "./Edit"
-
 
 import { useTranslation } from "react-i18next";
 
@@ -116,8 +114,7 @@ const SubSchool = () => {
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
 						<Button
                             color='primary'
-                            disabled={Object.keys(user).length > 0  ? false : true}
-
+                            disabled={Object.keys(user).length > 0 ? false : true}
                             onClick={() => handleModal()}>
                             <Plus size={15} />
                             <span className='align-middle ms-50'>{t('Нэмэх')}</span>
