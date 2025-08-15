@@ -37,6 +37,7 @@ class ProfessionalDegree(models.Model):
 class Learning(models.Model):
     """ Суралцах хэлбэр """
 
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
     learn_code = models.IntegerField(unique=True)
     learn_name = models.CharField(max_length=255, verbose_name="Суралцах хэлбэрийн нэр")
 
@@ -47,6 +48,7 @@ class Learning(models.Model):
 class StudentRegister(models.Model):
     """ Оюутны бүртгэлийн хэлбэр """
 
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
     code  = models.IntegerField(unique=True)
     name = models.CharField(max_length=255, verbose_name="Бүртгэлийн хэлбэрийн нэр")
     status_name_eng = models.CharField(max_length=255, verbose_name="Бүртгэлийн англи хэлбэрийн нэр", null=True)
@@ -58,6 +60,7 @@ class StudentRegister(models.Model):
 class LessonCategory(models.Model):
     """ Хичээлийн ангилал """
 
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
     category_code = models.IntegerField(unique=True)
     category_name = models.CharField(max_length=255, verbose_name="Хичээлийн ангиллын нэр")
 
@@ -68,6 +71,7 @@ class LessonCategory(models.Model):
 class LessonType(models.Model):
     """ Хичээлийн төрөл """
 
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
     type_code = models.IntegerField(unique=True)
     type_name = models.CharField(max_length=255, verbose_name="Хичээлийн төрлийн нэр")
 
@@ -78,6 +82,7 @@ class LessonType(models.Model):
 class LessonLevel(models.Model):
     """  Хичээлийн түвшин """
 
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
     level_code = models.IntegerField(unique=True)
     level_name = models.CharField(max_length=255, verbose_name=" Хичээлийн түвшний нэр")
 
@@ -88,6 +93,7 @@ class LessonLevel(models.Model):
 class LessonGroup(models.Model):
     """ Хичээлийн бүлэг """
 
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
     group_code = models.IntegerField(unique=True)
     group_name = models.CharField(max_length=255, verbose_name="Хичээлийн бүлгийн нэр")
 
@@ -98,6 +104,7 @@ class LessonGroup(models.Model):
 class Season(models.Model):
     """ Улирал """
 
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
     season_code = models.IntegerField(unique=True)
     season_name = models.CharField(max_length=255, verbose_name="Улирлын нэр")
     season_name_eng = models.CharField(max_length=255, verbose_name="Улирлын англи нэр", null=True)
@@ -109,6 +116,7 @@ class Season(models.Model):
 class Score(models.Model):
     """ Дүнгийн бүртгэл """
 
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
     score_code = models.IntegerField(unique=True)
     score_max = models.FloatField(verbose_name="Дүнгийн доод оноо")
     score_min = models.FloatField(verbose_name="Дүнгийн дээд оноо")
@@ -117,6 +125,7 @@ class Score(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
 
 class Country(models.Model):
 
@@ -248,6 +257,7 @@ class Lesson_title_plan(models.Model):
     lesson_type = models.PositiveIntegerField(choices=LESSON_TYPE, db_index=True, default=LECT, verbose_name="Хичээллэх төрөл")
     title = models.CharField(max_length=500,null=True, verbose_name="Хичээлийн сэдэв")
     content = models.TextField(null=True, verbose_name="Агуулга")
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -334,6 +344,7 @@ class Lesson_assignment(models.Model):
 class AdmissionLesson(models.Model):
     """ ЭЕШ-ын хичээл """
 
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
     lesson_code = models.CharField(max_length=20, unique=True, verbose_name='Элсэлтийн шалгалтын хичээлийн код')
     lesson_name = models.CharField(max_length=100, verbose_name='Элсэлтийн шалгалтын хичээлийн нэр')
 
@@ -549,6 +560,7 @@ class SystemSettings(models.Model):
         (CLOSED, 'Хаагдсан'),
     )
 
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
     active_lesson_year = models.CharField( max_length=20, verbose_name='Идэвхтэй хичээлийн жил')
     active_lesson_season = models.ForeignKey(Season, related_name='active', on_delete=models.SET_NULL, null=True, verbose_name='Идэвхтэй улирал')
     prev_lesson_year = models.CharField(max_length=20, verbose_name='Өмнөх хичээлийн жил')
@@ -932,14 +944,17 @@ class Lesson_assignment_student_file(models.Model):
 
 #--------------------------------------Хичээлийн хуваарь бүртгэл----------------------------------------------------
 
+
 class Building(models.Model):
     """ Хичээлийн байр """
 
     code = models.CharField(max_length=20, verbose_name='Хичээлийн байрны код')
     name = models.CharField(max_length=100, verbose_name='Хичээлийн байрна нэр')
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Харьяалагдах сургууль")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
 
 class Room(models.Model):
     """ Хичээлийн байр """
@@ -1000,6 +1015,7 @@ class Room(models.Model):
             full_name = full_name + ' (' + volume +')'
 
         return full_name
+
 
 class TimeTable(models.Model):
     """ Хичээлийн хуваарь """
@@ -1262,6 +1278,7 @@ class GradeLetter(models.Model):
     letter = models.CharField(max_length=10, verbose_name="Үсгэн тэмдэглэгээ")
     description = models.TextField(verbose_name="Тайлбар")
     tovch = models.CharField(verbose_name="Товч утга", max_length=500, null=True)
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -1400,6 +1417,7 @@ class Payment(models.Model):
 
         return qpay_payment_total
 
+
 class StudentOnlinePayment(models.Model):
     """ Онлайн төлөлтийн мэдээлэл оюутны"""
 
@@ -1425,6 +1443,7 @@ class StudentOnlinePayment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+
 class OtherOnlinePayment(models.Model):
     """ Онлайн төлөлтийн мэдээлэл багш болон бусад"""
 
@@ -1437,6 +1456,7 @@ class OtherOnlinePayment(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
 
 class PaymentBeginBalance(models.Model):
     """ Сургалтын төлбөрийн эхний үлдэгдэл"""
@@ -1547,11 +1567,14 @@ class PaymentBalance(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
 class DiscountType(models.Model):
     """ Хөнгөлөлтийн төрөл"""
 
     code = models.CharField(max_length=20, unique=True, verbose_name='Тэтгэлэгийн төрлийн код')
     name = models.CharField(max_length=100, verbose_name='Тэтгэлэгийн төрлийн нэр')
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -1674,8 +1697,6 @@ class StipendFile(models.Model):
         super(StipendFile, self).save(*args, **kwargs)
 
 
-
-
 class StipentStudent(models.Model):
     """Тэтгэлэгт хамрагдах оюутны бүртгэл"""
 
@@ -1700,6 +1721,7 @@ class StipentStudent(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+
 class StipentStudentFile(models.Model):
     """Тэтгэлэгт хамрагдах оюутны бүртгэлд хавсаргасан файл"""
 
@@ -1712,6 +1734,7 @@ class StipentStudentFile(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
 
 class LearningCalendar(models.Model):
     """ Сургалтын хуанли """
@@ -1750,6 +1773,7 @@ class LearningCalendar(models.Model):
     scope = models.PositiveIntegerField(choices=SCOPE, db_index=True, default=OTHER, verbose_name="Хэн хамрагдах")
     start = models.DateTimeField(verbose_name="Эхлэх хугацаа")
     end = models.DateTimeField(verbose_name="Дуусах хугацаа")
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
     color = models.CharField(max_length=250, null=True, blank=True, default="#3788D8", verbose_name="Өнгө")
     description = models.CharField(max_length=250, null=True, verbose_name="Тайлбар")
     created_user = models.ForeignKey(User, related_name='lc_cr_user', on_delete=models.SET_NULL, null=True, verbose_name="Бүртгэсэн хэрэглэгч")
@@ -1779,6 +1803,7 @@ class DormitoryRoomType(models.Model):
     rent_type = models.PositiveIntegerField(choices=RENT_TYPE, db_index=True, default=STUDENT, verbose_name="Түрээслэх хэлбэр")
     description = models.CharField(max_length=500, null=True, verbose_name="Өрөөний дэлгэрэнгүй тайлбар")
     volume = models.PositiveIntegerField(verbose_name="Өрөөний багтаамж")
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
     # is_active = models.BooleanField(default=True, verbose_name='Идэвхтэй эсэх')
     # lesson_year = models.CharField(max_length=20, null=True, verbose_name="Хичээлийн жил", default="2024-2025")
 
@@ -1824,6 +1849,7 @@ class DormitoryPayment(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
 
 class DormitoryBalance(models.Model):
     """ Дотуур байрны төлбөрийн гүйлгээ """
@@ -2085,6 +2111,7 @@ class StudentOrderLibrary(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+
 class GymPaymentSettings(models.Model):
     """Фитнесийн сургалтын тохиргоо"""
 
@@ -2252,6 +2279,7 @@ class Club(models.Model):
     start_year = models.PositiveIntegerField(null=True, verbose_name="Байгуулагдсан он")
     member_count = models.PositiveIntegerField(null=True, verbose_name="Идэвхтэй гишүүдийн тоо")
     leader = models.CharField(max_length=100, verbose_name="Удирдагчийн мэдээлэл")
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -2350,6 +2378,7 @@ class StudentNotice(models.Model):
     department = models.ForeignKey(Salbars, on_delete=models.SET_NULL, null=True, verbose_name="Хөтөлбөрийн баг")
     is_news = models.BooleanField(default=False)
     school = models.ForeignKey(SubOrgs, on_delete=models.SET_NULL, null=True, verbose_name="Сургууль")
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
     created_user = models.ForeignKey(User, related_name='news_cr_user', on_delete=models.SET_NULL, null=True, verbose_name="Бүртгэсэн хэрэглэгч")
     updated_user = models.ForeignKey(User, related_name='news_up_user', on_delete=models.SET_NULL, null=True, verbose_name="Зассан хэрэглэгч")
 
@@ -2421,6 +2450,7 @@ class Complaint_unit(models.Model):
     unit = models.PositiveIntegerField(choices=SOLVED_UNIT, db_index=True, default=BMA, verbose_name="Хүсэлтийн нэгж")
     position = models.ManyToManyField(OrgPosition, blank=True, verbose_name="Хамаарах албан тушаал")
     menus = models.TextField(null=True)
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -2454,9 +2484,11 @@ class Complaint(models.Model):
     file = models.FileField(null=True, verbose_name="Хавсаргасан файл")
     is_solved = models.PositiveIntegerField(choices=StudentRequestTutor.REQUEST_FLAG, db_index=True, default=StudentRequestTutor.SEND, verbose_name="Шийдвэрлэсэн эсэх")
     solved_message = models.CharField(max_length=500, null=True, verbose_name="Шийдвэрийн тайлбар")
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
 
 class Complaint_Answer(models.Model):
     """ Өргөдөлд хариу илгээсэн бүртгэл """
@@ -2707,6 +2739,7 @@ class TeacherCreditVolumePlan(models.Model):
     credit = models.PositiveIntegerField(null=True, verbose_name="Хичээлийн төрөлд хамаарах кредит цаг")
     department = models.ForeignKey(Salbars, on_delete=models.SET_NULL, null=True, verbose_name="Хөтөлбөрийн баг")
     school = models.ForeignKey(SubOrgs, on_delete=models.SET_NULL, null=True, verbose_name="Сургууль")
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
     odd_even = models.PositiveIntegerField(choices=TimeTable.ODD_EVEN_VALUE, db_index=True, default=TimeTable.ALL, verbose_name="Тэгш сондгой")
 
     is_timetable = models.BooleanField(default=False, verbose_name="Хуваарьт бүртгэгдсэн эсэх")
@@ -2732,6 +2765,7 @@ class SchoolLessonLevelVolume(models.Model):
     """ Гүйцэтгэлийн кр тооцох коэффициент"""
 
     school = models.ForeignKey(SubOrgs, on_delete=models.SET_NULL, null=True, verbose_name="Сургууль")
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
     lesson_level = models.PositiveIntegerField(choices=LearningPlan.LESSON_LEVEL, db_index=True, null=False, default=LearningPlan.BASIC, verbose_name="Хичээлийн түвшин")
     amount = models.PositiveIntegerField(default=40, verbose_name="Гүйцэтгэлийн кр тооцох коэфф")
 
@@ -2873,6 +2907,7 @@ class PermissionsOtherInterval(models.Model):
         (PRACTICE, "Дадлагын оноо байршуулах хугацаа")
     )
 
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
     lesson_year = models.CharField(max_length=20, null=True, verbose_name='Хичээлийн жил')
     lesson_season = models.ForeignKey(Season, on_delete=models.SET_NULL, null=True, verbose_name='Улирал')
     permission_type = models.PositiveIntegerField(choices=PERMISSION_TYPE, db_index=True, null=False, default=TIMETABLE, verbose_name="Хандах эрх")
@@ -2898,6 +2933,7 @@ class SignaturePeoples(models.Model):
         (ATTACHMENT, "Хавсралт")
     )
 
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
     dedication_type = models.PositiveIntegerField(choices=DEDICATION_TYPE, db_index=True, null=False, default=DIPLOM, verbose_name="Зориулалт")
     school_id = models.PositiveIntegerField(null=True, verbose_name="Сургууль")
 
@@ -2970,6 +3006,7 @@ class PartTimeTeacherCreditEstimation(models.Model):
 class InventionCategory(models.Model):
     """Бүтээлийн ангилал"""
 
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
     name = models.CharField(max_length=100, verbose_name="Нэр")
     point = models.FloatField(default=0,null=False, verbose_name="Оноо")
 
@@ -2977,6 +3014,7 @@ class PublishingSize(models.Model):
     """Хэвлэлийн хэмжээ"""
 
     name = models.CharField(max_length=100, verbose_name="Нэр")
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
 
 class UserInvention(models.Model):
     """ Бүтээл """
@@ -2999,6 +3037,7 @@ class PaperCategory(models.Model):
 
     name = models.CharField(max_length=200, verbose_name="Нэр")
     point = models.FloatField(default=0, null=False, verbose_name="Оноо")
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
 
 
 class UserPaper(models.Model):
@@ -3041,6 +3080,7 @@ class NoteCategory(models.Model):
 
     name = models.CharField(max_length=200, verbose_name="Ангилалын нэр")
     point = models.FloatField(default=0,null=False, verbose_name="Оноо")
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
 
 
 class UserNote(models.Model):
@@ -3071,6 +3111,7 @@ class QuotationCategory(models.Model):
 
     name = models.CharField(max_length=200, verbose_name="Ангилалын нэр")
     point = models.FloatField(default=0,null=False, verbose_name="Оноо")
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
 
 class UserQuotation(models.Model):
     '''Эшлэл'''
@@ -3092,7 +3133,7 @@ class ProjectCategory(models.Model):
 
     name = models.CharField(max_length=200, verbose_name="Нэр")
     point = models.FloatField(default=0,null=False, verbose_name="Оноо")
-
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
 
 
 class UserProject(models.Model):
@@ -3270,6 +3311,7 @@ class SurveyQuestionTitle(models.Model):
         ]
 
     name = models.CharField(max_length=255, null=True, verbose_name='Сэдвийн нэр')
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -3357,6 +3399,7 @@ class Survey(models.Model):
     image = models.ImageField(upload_to='survey', null=True, blank=True, verbose_name='зураг')
 
     questions = models.ManyToManyField(SurveyQuestions)
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
 
     start_date = models.DateTimeField(null=False, blank=False, verbose_name="Эхлэх хугацаа")
     end_date = models.DateTimeField(null=False, blank=False, verbose_name="Дуусах хугацаа")
@@ -3414,6 +3457,7 @@ class PsychologicalQuestionTitle(models.Model):
 
     name = models.CharField(max_length=255, null=True, verbose_name='Сэдвийн нэр')
     created_at = models.DateTimeField(auto_now=True)
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
 
 
 class PsychologicalQuestionChoices(models.Model):
@@ -3450,6 +3494,7 @@ class PsychologicalTestQuestions(models.Model):
     question_number = models.PositiveIntegerField(null=True, blank=True, verbose_name="Асуултын дугаар")
     question = models.CharField(max_length=1000, null=False, blank=False, verbose_name="Асуулт")
     image = models.ImageField(upload_to=get_image_path, null=True, blank=True, verbose_name='зураг')
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
 
     title = models.ManyToManyField(PsychologicalQuestionTitle, verbose_name='Асуултын ерөнхий сэдэв')
     has_score = models.BooleanField(null=True, default=False, verbose_name="Энэ асуулт оноотой юу гэдгийг шалгана")
@@ -3511,6 +3556,7 @@ class PsychologicalTest(models.Model):
 
     start_date = models.DateTimeField(null=False, blank=False, verbose_name="Эхлэх хугацаа")
     end_date = models.DateTimeField(null=False, blank=False, verbose_name="Дуусах хугацаа")
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
 
     created_by = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="+")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -3549,6 +3595,7 @@ class QuestionMainTitle(models.Model):
 
     name = models.CharField(max_length=255, null=True, verbose_name='Сэдвийн нэр')
     is_open = models.BooleanField(default=False, verbose_name='Нээлттэй сэдэв эсэх')
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
     created_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(Teachers, on_delete=models.CASCADE, related_name="+", null=True)
 
@@ -3570,6 +3617,7 @@ class QuestionTitle(models.Model):
     is_graduate = models.BooleanField(default=False, verbose_name='Төгсөлтийн шалгалтын сэдэв эсэх')
     is_admission = models.BooleanField(default=False, verbose_name='Элсэлтийн шалгалтын сэдэв эсэх')
     is_open = models.BooleanField(default=False, verbose_name='Нээлттэй сэдэв эсэх')
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
     created_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(Teachers, on_delete=models.CASCADE, related_name="+", null=True)
 
@@ -3648,6 +3696,8 @@ class ChallengeQuestions(models.Model):
 
     # KIND_ONE_CHOICE болон KIND_MULTI_CHOICE үед
     choices = models.ManyToManyField(QuestionChoices)
+
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
 
     created_by = models.ForeignKey(Teachers, on_delete=models.CASCADE, related_name="+")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -3740,6 +3790,8 @@ class Challenge(models.Model):
 
     deleted_by = models.ForeignKey(Teachers, on_delete=models.CASCADE, related_name="deleted", null=True, blank=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
+
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
 
     created_by = models.ForeignKey(Teachers, on_delete=models.CASCADE, related_name="+")
     updated_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
@@ -3848,8 +3900,6 @@ class NotificationState(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     created_at = models.DateTimeField(auto_now_add=True)
-
-
 
 
 class SoulSurvey(models.Model):
@@ -4025,6 +4075,7 @@ class AdmissionRegister(models.Model):
     is_active = models.BooleanField(default=False, verbose_name='Идэвхтэй эсэх')
     is_store = models.BooleanField(default=False, verbose_name='Нөөцлөх эсэх')
     payment = models.IntegerField(default=0, verbose_name='Элсэлтийн хураамж')
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
 
     home_description = models.CharField(max_length=5000, null=True, verbose_name='Нүүр хуудасны харуулах тайлбар')
     alert_description = models.CharField(max_length=5000, null=True, verbose_name='Тухайн элсэлтэд зориулаад санамж')
@@ -4078,7 +4129,6 @@ class AdmissionIndicator(models.Model):
     ESSE_MHB = 13
 
     INDICATOR_VALUE = (
-
         (EESH_EXAM, 'ЭЕШ-ын оноо'),
         (XYANALTIIN_TOO, 'Хяналтын тоо'),
 
@@ -4121,6 +4171,7 @@ class PrintSettings(models.Model):
         (MM, "мм"),
     )
 
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
     deed = models.FloatField(verbose_name="дээд хэмжээ")
     dood = models.FloatField(verbose_name="доод хэмжээ")
     right = models.FloatField(verbose_name="баруун хэмжээ")
@@ -4664,6 +4715,7 @@ class Announcement(models.Model):
     week_number = models.IntegerField(verbose_name='7 хоногийн дугаар', null=True)
     online_lesson = models.ForeignKey(OnlineLesson, on_delete=models.CASCADE, verbose_name='Онлайн хичээл', null=True)
     timetable = models.ForeignKey(TimeTable, on_delete=models.CASCADE, verbose_name='Хичээлийн хуваарь', null=True)
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
 
     created_user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Үүсгэсэн хэрэглэгч', null=True)
     created_at = models.DateTimeField(auto_now_add=True)
