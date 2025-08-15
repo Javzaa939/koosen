@@ -247,39 +247,6 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
                                 {t('Багш эсэх')}
                             </Label>
                         </Col>
-                        {/* <Col md={12}>
-                            <Label className="form-label" for="permission">
-                                {t('эрх')}
-                            </Label>
-                            <Controller
-                                control={control}
-                                defaultValue=''
-                                name="permission"
-                                render={({ field: { value, onChange} }) => {
-                                    return (
-                                        <Select
-                                            name="permission"
-                                            id="permission"
-                                            classNamePrefix='select'
-                                            isClearable
-                                            className={classnames('react-select opacity-100', { 'is-invalid': errors.permission})}
-                                            placeholder={t('-- Сонгоно уу --')}
-                                            options={permission_option || []}
-                                            value={value && permission_option.find((c) => c.id === permissionId)}
-                                            noOptionsMessage={() => t('Хоосон байна.')}
-                                            onChange={(val) => {
-                                                // onChange(val?.id || '')
-                                                setPermissionId(val?.id)
-                                            }}
-                                            styles={ReactSelectStyles}
-                                            getOptionValue={(option) => option.id}
-                                            getOptionLabel={(option) => option.name}
-                                        />
-                                    )
-                                }}
-                            ></Controller>
-                            {errors.permission && <FormFeedback className='d-block'>{errors.permission.message}</FormFeedback>}
-                        </Col> */}
                         <Col md={12}>
                             <Label className="form-label" for="description">
                                 {t('Тайлбар')}
