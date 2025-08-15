@@ -33,6 +33,7 @@ from core.models import Teachers
 from core.models import Employee
 from core.models import OrgPosition
 from core.models import User
+from core.models import Permissions
 
 
 from lms.models import Country
@@ -94,7 +95,7 @@ from .serializers import DepartmentPostSerailizer
 from .serializers import EmployeePostSerializer
 from .serializers import UserRegisterSerializer
 from .serializers import UserInfoSerializer
-from .serializers import EmployeeSerializer, UserSerializer
+from .serializers import EmployeeSerializer, UserSerializer, PermissionSerializer, OrgPositionPostSerializer
 
 from lms.models import ProfessionDefinition
 from lms.models import LessonStandart
@@ -889,11 +890,89 @@ class TeacherInfoAPIView(
 class OrgPositionListAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.RetrieveModelMixin,
 ):
     """ Албан тушаалын жагсаалт """
 
     queryset = OrgPosition.objects
     serializer_class = OrgPositionSerializer
+
+    def get(self, request, pk=None):
+
+        if pk:
+            group = self.retrieve(request, pk).data
+            return request.send_data(group)
+
+        datas = self.list(request).data
+        return request.send_data(datas)
+
+    def post(self, request):
+
+        self.serializer_class = OrgPositionPostSerializer
+
+        data = request.data
+        print("data",data)
+        # if data.get('sub_org'):
+        #     data['sub_org']=data.get('sub_org')
+
+        with transaction.atomic():
+            try:
+                self.create(request).data
+            except Exception as e:
+                print(e)
+                return request.send_error('ERR_002')
+        return request.send_info("INF_001")
+
+    def put(self, request, pk=None):
+        self.serializer_class = OrgPositionPostSerializer
+
+        request_data = request.data
+        instance = self.queryset.filter(id=pk).first()
+        if instance:
+            print('instance', instance)
+
+        serializer = self.get_serializer(instance, data=request_data)
+
+        if serializer.is_valid(raise_exception=False):
+            is_success = False
+            with transaction.atomic():
+                try:
+                    self.update(request).data
+                    is_success = True
+                except Exception:
+                    raise
+            if is_success:
+                return request.send_info("INF_002")
+
+            return request.send_error("ERR_002")
+        else:
+            error_obj = []
+            for key in serializer.errors:
+                msg = "Хоосон байна"
+
+                return_error = {
+                    "field": key,
+                    "msg": msg
+                }
+
+                error_obj.append(return_error)
+
+            if len(error_obj) > 0:
+                return request.send_error("ERR_003", error_obj)
+
+        return request.send_info("INF_002")
+
+@permission_classes([IsAuthenticated])
+class PermissionListAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+):
+    """ Албан тушаалын жагсаалт """
+
+    queryset = Permissions.objects
+    serializer_class = PermissionSerializer
 
     def get(self, request):
 
@@ -926,7 +1005,7 @@ class DepLeaderAPIView(
 
 class TeacherPartListApiView(
     generics.GenericAPIView,
-    mixins.ListModelMixin
+    mixins.ListModelMixin,
 ):
     """ Цагийн багшийн жагсаалт авах """
 

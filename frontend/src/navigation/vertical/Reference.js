@@ -32,6 +32,12 @@ export default [
                 icon: <Circle size={8} />,
                 navLink: "reference/teachers/"
             },
+            {
+                id: 'reference4',
+                title: 'Албан тушаал',
+                icon: <Circle size={8} />,
+                navLink: "reference/position/"
+            },
         ]
     }
 ]

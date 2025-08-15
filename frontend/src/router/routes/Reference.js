@@ -5,6 +5,7 @@ const SubSchool = lazy(() => import("@views/Reference/SubSchool"))
 const Departments = lazy(() => import("@views/Reference/Departments"))
 const Teachers = lazy(() => import("@views/Reference/Teacher"))
 const INFO = lazy(() => import("@views/Reference/Teacher/INFO"))
+const Positions = lazy(() => import("@views/Reference/Position"))
 
 const ReferenceRoutes = [
     {
@@ -26,6 +27,10 @@ const ReferenceRoutes = [
     {
         path: 'reference/teachers/:teacher_id/info/',
         element: <INFO />
+    },
+    {
+        path: 'reference/position/',
+        element: <Positions />
     },
 ]
 

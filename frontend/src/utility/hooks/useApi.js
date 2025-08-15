@@ -647,7 +647,12 @@ function useApi(isDisplay=false) {
 			/** Албан тушаал */
 			position: {
 				get: () => instance.get(`/core/position/`),
-				getAll: () => instance.get(`/core/position/all/`),
+				getOne: (pk) => instance.get(`/core/position/${pk}/`),
+				getPerList: () => instance.get(`/core/permission/`),
+				post: (data) => instance.post(`/core/position/`, data),
+				put: (data, pk) => instance.put(`/core/position/${pk}/`, data),
+				delete: (pk) => instance.delete(`/core/position/${pk}/`),
+				// getAll: () => instance.get(`/core/position/all/`),
 			},
 
 		},

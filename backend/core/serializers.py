@@ -9,6 +9,7 @@ from core.models import SumDuureg
 from core.models import BagHoroo
 from core.models import OrgPosition
 from core.models import User
+from core.models import Permissions
 
 from lms.models import TimeTable, QuestionTitle, ChallengeQuestions
 from lms.models import LessonStandart
@@ -487,12 +488,16 @@ class EmployeePostSerializer(serializers.ModelSerializer):
         model = Employee
         fields = ["user", "register_code",'org_position',  'org', "sub_org", "salbar", "state"]
 
-
+class OrgPositionPostSerializer(serializers.ModelSerializer):
+       class Meta:
+        model = OrgPosition
+        fields = ["id", "name", "is_teacher", "name", "description", "org", "is_director", "is_hr", "created_at", "updated_at"]
 class OrgPositionSerializer(serializers.ModelSerializer):
+    org = SubSchoolsSerializer(many=False)
 
     class Meta:
         model = OrgPosition
-        fields = ["id", "name"]
+        fields = ["id", "name", "is_teacher", "name", "description", "org", "is_director", "is_hr", "created_at", "updated_at"]
 
 # --------------------- Багшийн мэдээлэл -------------------------
 
@@ -893,3 +898,10 @@ def generate_model_serializer(Model, inserted_fields='__all__'):
             fields = inserted_fields
 
     return TemplateSerializer
+
+
+class PermissionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Permissions
+        fields = "__all__"

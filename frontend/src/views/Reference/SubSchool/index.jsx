@@ -16,6 +16,8 @@ import SchoolContext from '@context/SchoolContext'
 import { getColumns } from './helpers';
 import UpdateModal from "./Edit"
 import AddModal from "./Add"
+import UpdateModal from "./Edit"
+
 
 import { useTranslation } from "react-i18next";
 
