@@ -1,21 +1,8 @@
 // ** React Imports
 import { Fragment, useState, useEffect } from 'react';
 import { Book, User } from 'react-feather';
-import {
-    Card,
-    CardBody,
-    CardTitle,
-    Row,
-    Col,
-    CardText,
-    CardHeader,
-    DropdownMenu,
-    DropdownItem,
-    DropdownToggle,
-    UncontrolledDropdown,
-} from 'reactstrap';
+import { Card, CardBody, CardTitle, Row, Col } from 'reactstrap';
 
-import { TrendingUp, Box, DollarSign } from 'react-feather';
 import classnames from 'classnames';
 import Avatar from '@components/avatar';
 import useApi from '@hooks/useApi';
@@ -27,7 +14,7 @@ import Calendar from './Calendar';
 // import SidebarLeft from './SidebarLeft'
 import AddEventSidebar from './Add';
 // import SwiperFade from './SwiperFade';
-import AccessHistory from './AccessHistory';
+// import AccessHistory from './AccessHistory';
 
 // import '@styles/react/apps/app-calendar.scss';
 

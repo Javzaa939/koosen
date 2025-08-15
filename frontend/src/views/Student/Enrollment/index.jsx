@@ -1,23 +1,34 @@
-import { Fragment, useState, useEffect, useContext } from 'react'
-import { Controller, useForm } from 'react-hook-form'
-import { Row, Col, Card, Input, Label, CardTitle, CardHeader, Spinner, Button, UncontrolledTooltip } from 'reactstrap'
-import { ChevronDown, Edit, Edit2, Edit3, Printer, Search } from 'react-feather'
-import { useTranslation } from 'react-i18next'
-import Select from 'react-select'
-import DataTable from 'react-data-table-component'
+import { Fragment, useState, useEffect, useContext } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import {
+    Row,
+    Col,
+    Card,
+    Input,
+    Label,
+    CardTitle,
+    CardHeader,
+    Spinner,
+    Button,
+    UncontrolledTooltip,
+} from 'reactstrap';
+import { ChevronDown, Edit, Edit2, Edit3, Printer, Search } from 'react-feather';
+import { useTranslation } from 'react-i18next';
+import Select from 'react-select';
+import DataTable from 'react-data-table-component';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import { utils, writeFile } from 'xlsx-js-style';
 import { getColumns } from './helpers';
 
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom';
 import { getPagination, ReactSelectStyles } from '@utils';
-import EditModal from './EditModal'
-import StateModal from '../../Elselt/User/StateModal'
-import AuthContext from '@src/utility/context/AuthContext'
-import { RiEditFill } from 'react-icons/ri'
-import { HiOutlineDocumentReport } from 'react-icons/hi'
-import classnames from "classnames";
+import EditModal from './EditModal';
+import StateModal from '../../Elselt/User/StateModal';
+import AuthContext from '@src/utility/context/AuthContext';
+
+import classnames from 'classnames';
+import { FileIcon, SquarePenIcon } from 'lucide-react';
 
 const Enrollment = () => {
     const genderOp = [
@@ -27,110 +38,123 @@ const Enrollment = () => {
         },
         {
             id: 2,
-            name: 'Эмэгтэй'
-        }
-    ]
+            name: 'Эмэгтэй',
+        },
+    ];
     const stateop = [
         {
-            'id': 1,
-            'name': 'БҮРТГҮҮЛСЭН'
+            id: 1,
+            name: 'БҮРТГҮҮЛСЭН',
         },
         {
-            'id': 2,
-            'name': 'ТЭНЦСЭН'
+            id: 2,
+            name: 'ТЭНЦСЭН',
         },
         {
-            'id': 3,
-            'name': 'ТЭНЦЭЭГҮЙ'
-        }
-    ]
+            id: 3,
+            name: 'ТЭНЦЭЭГҮЙ',
+        },
+    ];
 
-    const { user } = useContext(AuthContext)
-    const [stateModal, setStateModal] = useState(false)
-    const [gender, setGender] = useState("")
+    const { user } = useContext(AuthContext);
+    const [stateModal, setStateModal] = useState(false);
+    const [gender, setGender] = useState('');
 
     var values = {
         admission: '',
         profession: '',
-    }
+    };
 
-    const [sortField, setSort] = useState('')
-    const navigate = useNavigate()
+    const [sortField, setSort] = useState('');
+    const navigate = useNavigate();
 
-    const { Loader, isLoading, fetchData } = useLoader({})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({})
+    const { Loader, isLoading, fetchData } = useLoader({});
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({});
 
-    const [datas, setDatas] = useState([])
+    const [datas, setDatas] = useState([]);
 
-    const [currentPage, setCurrentPage] = useState(1)
+    const [currentPage, setCurrentPage] = useState(1);
 
-    const { t } = useTranslation()
+    const { t } = useTranslation();
 
-    const { control, formState: { errors } } = useForm({});
-    const [rowsPerPage, setRowsPerPage] = useState(20)
-    const [searchValue, setSearchValue] = useState("");
+    const {
+        control,
+        formState: { errors },
+    } = useForm({});
+    const [rowsPerPage, setRowsPerPage] = useState(20);
+    const [searchValue, setSearchValue] = useState('');
     const [select_value, setSelectValue] = useState(values);
-    const [editModal, setEditModal] = useState(false)
+    const [editModal, setEditModal] = useState(false);
 
-    const [total_count, setTotalCount] = useState(1)
+    const [total_count, setTotalCount] = useState(1);
 
-    const default_page = [10, 20, 50, 75, 100]
+    const default_page = [10, 20, 50, 75, 100];
 
     // Const Option
-    const [admissionOption, setAdmisionOption] = useState([])
-    const [professionOption, setProfessionOption] = useState([])
-    const [selectedRows, setSelectedRows] = useState([])
+    const [admissionOption, setAdmisionOption] = useState([]);
+    const [professionOption, setProfessionOption] = useState([]);
+    const [selectedRows, setSelectedRows] = useState([]);
 
     // API
-    const professionApi = useApi().elselt.profession
-    const admissionYearApi = useApi().elselt
-    const elseltApproveApi = useApi().elselt.approve
+    const professionApi = useApi().elselt.profession;
+    const admissionYearApi = useApi().elselt;
+    const elseltApproveApi = useApi().elselt.approve;
 
     // элсэлт
     async function getAdmissionYear() {
-        const { success, data } = await fetchData(admissionYearApi.getAll())
+        const { success, data } = await fetchData(admissionYearApi.getAll());
         if (success) {
-            setAdmisionOption(data)
+            setAdmisionOption(data);
         }
     }
 
     // Хөтөлбөрийн жагсаалт авах
     async function getProfession() {
-        const { success, data } = await fetchData(professionApi.getList(select_value?.admission))
+        const { success, data } = await fetchData(professionApi.getList(select_value?.admission));
 
         if (success) {
-            setProfessionOption(data)
+            setProfessionOption(data);
         }
     }
 
     // data avah heseg
     async function getDatas() {
-        var profession = select_value?.profession
-        var admission = select_value?.admission
+        var profession = select_value?.profession;
+        var admission = select_value?.admission;
 
-        const page_count = Math.ceil(total_count / rowsPerPage)
+        const page_count = Math.ceil(total_count / rowsPerPage);
         if (page_count < currentPage && page_count != 0) {
-            setCurrentPage(page_count)
+            setCurrentPage(page_count);
         }
 
-        const { success, data } = await allFetch(elseltApproveApi.get(rowsPerPage, currentPage, sortField, searchValue, admission, profession, gender))
+        const { success, data } = await allFetch(
+            elseltApproveApi.get(
+                rowsPerPage,
+                currentPage,
+                sortField,
+                searchValue,
+                admission,
+                profession,
+                gender,
+            ),
+        );
         if (success) {
-            setTotalCount(data?.count)
-            setDatas(data?.results)
+            setTotalCount(data?.count);
+            setDatas(data?.results);
         }
     }
 
-    const handleFilter = e => {
+    const handleFilter = (e) => {
         const value = e.target.value.trimStart();
-        setSearchValue(value)
-    }
+        setSearchValue(value);
+    };
 
     function handlePerPage(e) {
-        setRowsPerPage(parseInt(e.target.value))
+        setRowsPerPage(parseInt(e.target.value));
     }
 
     async function handleSearch() {
-        getDatas()
+        getDatas();
     }
 
     const handlePagination = (page) => {
@@ -139,26 +163,23 @@ const Enrollment = () => {
 
     function handleSort(column, sort) {
         if (sort === 'asc') {
-            setSort(column.header)
+            setSort(column.header);
         } else {
-            setSort('-' + column.header)
+            setSort('-' + column.header);
         }
     }
 
     useEffect(() => {
-        getAdmissionYear()
-    }, [])
-
-    useEffect(
-        () => {
-            getProfession()
-        },
-        [select_value.admission]
-    )
+        getAdmissionYear();
+    }, []);
 
     useEffect(() => {
-        getDatas()
-    }, [select_value, rowsPerPage, currentPage, sortField])
+        getProfession();
+    }, [select_value.admission]);
+
+    useEffect(() => {
+        getDatas();
+    }, [select_value, rowsPerPage, currentPage, sortField]);
 
     useEffect(() => {
         if (searchValue.length == 0) {
@@ -170,50 +191,55 @@ const Enrollment = () => {
 
             return () => clearTimeout(timeoutId);
         }
-    }, [rowsPerPage, currentPage, sortField, searchValue, select_value.admission, select_value.profession, gender]);
+    }, [
+        rowsPerPage,
+        currentPage,
+        sortField,
+        searchValue,
+        select_value.admission,
+        select_value.profession,
+        gender,
+    ]);
 
     function onSelectedRowsChange(state) {
-        var selectedRows = state.selectedRows
+        var selectedRows = state.selectedRows;
 
         setSelectedRows(selectedRows);
     }
 
     const toggleEditModal = () => {
-        setEditModal(!editModal)
-    }
+        setEditModal(!editModal);
+    };
 
     function stateModalHandler() {
-        setStateModal(!stateModal)
+        setStateModal(!stateModal);
     }
 
     function convert() {
         const mainData = datas.map((data, idx) => {
-            return (
-                {
-                    '№': idx + 1,
-                    'Овог': data?.user?.last_name || '',
-                    'Нэр': data?.user?.first_name || '',
-                    'РД': data?.user?.register || '',
-                    'Хөтөлбөр': data?.profession?.profession?.name || '',
-                    'Тушаалын дугаар': data?.admission_number || '',
-                    'Тушаалын огноо': data?.admission_date || '',
-                    'Суурь шалгалт оноо': data?.first_yesh || '',
-                    'Дагалдан шалгалт оноо': data?.second_yesh || '',
-                    'Дундаж шалгалт оноо': data?.score_avg || '',
-
-                }
-            )
-        })
+            return {
+                '№': idx + 1,
+                Овог: data?.user?.last_name || '',
+                Нэр: data?.user?.first_name || '',
+                РД: data?.user?.register || '',
+                Хөтөлбөр: data?.profession?.profession?.name || '',
+                'Тушаалын дугаар': data?.admission_number || '',
+                'Тушаалын огноо': data?.admission_date || '',
+                'Суурь шалгалт оноо': data?.first_yesh || '',
+                'Дагалдан шалгалт оноо': data?.second_yesh || '',
+                'Дундаж шалгалт оноо': data?.score_avg || '',
+            };
+        });
 
         const combo = [
             // ...header,
-            ...mainData
-        ]
+            ...mainData,
+        ];
 
         const worksheet = utils.json_to_sheet(combo);
 
         const workbook = utils.book_new();
-        utils.book_append_sheet(workbook, worksheet, "Элсэгчдийн мэдээлэл");
+        utils.book_append_sheet(workbook, worksheet, 'Элсэгчдийн мэдээлэл');
 
         const staticCells = [
             '№',
@@ -228,59 +254,58 @@ const Enrollment = () => {
             'Дундаж шалгалт оноо',
         ];
 
-        utils.sheet_add_aoa(worksheet, [staticCells], { origin: "A1" });
-
+        utils.sheet_add_aoa(worksheet, [staticCells], { origin: 'A1' });
 
         const headerCell = {
             border: {
-                top: { style: "thin", color: { rgb: "000000" } },
-                bottom: { style: "thin", color: { rgb: "000000" } },
-                left: { style: "thin", color: { rgb: "000000" } },
-                right: { style: "thin", color: { rgb: "000000" } }
+                top: { style: 'thin', color: { rgb: '000000' } },
+                bottom: { style: 'thin', color: { rgb: '000000' } },
+                left: { style: 'thin', color: { rgb: '000000' } },
+                right: { style: 'thin', color: { rgb: '000000' } },
             },
             alignment: {
                 horizontal: 'center',
                 vertical: 'center',
-                wrapText: true
+                wrapText: true,
             },
             font: {
                 sz: 10,
-                bold: true
-            }
+                bold: true,
+            },
         };
 
         const defaultCell = {
             border: {
-                top: { style: "thin", color: { rgb: "000000" } },
-                bottom: { style: "thin", color: { rgb: "000000" } },
-                left: { style: "thin", color: { rgb: "000000" } },
-                right: { style: "thin", color: { rgb: "000000" } }
+                top: { style: 'thin', color: { rgb: '000000' } },
+                bottom: { style: 'thin', color: { rgb: '000000' } },
+                left: { style: 'thin', color: { rgb: '000000' } },
+                right: { style: 'thin', color: { rgb: '000000' } },
             },
             alignment: {
                 horizontal: 'left',
                 vertical: 'center',
-                wrapText: true
+                wrapText: true,
             },
             font: {
-                sz: 10
-            }
+                sz: 10,
+            },
         };
 
         const defaultCenteredCell = {
             border: {
-                top: { style: "thin", color: { rgb: "000000" } },
-                bottom: { style: "thin", color: { rgb: "000000" } },
-                left: { style: "thin", color: { rgb: "000000" } },
-                right: { style: "thin", color: { rgb: "000000" } }
+                top: { style: 'thin', color: { rgb: '000000' } },
+                bottom: { style: 'thin', color: { rgb: '000000' } },
+                left: { style: 'thin', color: { rgb: '000000' } },
+                right: { style: 'thin', color: { rgb: '000000' } },
             },
             alignment: {
                 horizontal: 'center',
                 vertical: 'center',
-                wrapText: true
+                wrapText: true,
             },
             font: {
-                sz: 10
-            }
+                sz: 10,
+            },
         };
 
         const styleRow = 0;
@@ -296,14 +321,16 @@ const Enrollment = () => {
                     worksheet[cellNum] = {};
                 }
 
-                worksheet[cellNum].s = row === 0 ? headerCell : col === 0 ? defaultCenteredCell : defaultCell
-
+                worksheet[cellNum].s =
+                    row === 0 ? headerCell : col === 0 ? defaultCenteredCell : defaultCell;
             }
         }
 
-        const phaseZeroCells = Array.from({ length: 3 }, (_) => { return ({ wch: 10 }) })
+        const phaseZeroCells = Array.from({ length: 3 }, (_) => {
+            return { wch: 10 };
+        });
 
-        worksheet["!cols"] = [
+        worksheet['!cols'] = [
             { wch: 3 },
             ...phaseZeroCells,
             { wch: 25 },
@@ -313,14 +340,13 @@ const Enrollment = () => {
             { wch: 10 },
         ];
 
-        const phaseOneRow = Array.from({ length: datas.length }, (_) => { return ({ hpx: 30 }) })
+        const phaseOneRow = Array.from({ length: datas.length }, (_) => {
+            return { hpx: 30 };
+        });
 
-        worksheet["!rows"] = [
-            { hpx: 40 },
-            ...phaseOneRow
-        ]
+        worksheet['!rows'] = [{ hpx: 40 }, ...phaseOneRow];
 
-        writeFile(workbook, "Элсэгчдийн мэдээлэл.xlsx", { compression: true });
+        writeFile(workbook, 'Элсэгчдийн мэдээлэл.xlsx', { compression: true });
     }
 
     return (
@@ -336,32 +362,42 @@ const Enrollment = () => {
                 {isLoading && Loader}
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom pt-0'">
                     <CardTitle tag="h4">{t('Тэнцсэн элсэгчид')}</CardTitle>
-                    <div className='d-flex flex-wrap mt-md-0 mt-1'>
-
-                        <Button
-                            color='primary'
-                            className='m-50'
-                            onClick={() => toggleEditModal()}
-                        >
+                    <div className="d-flex flex-wrap mt-md-0 mt-1">
+                        <Button color="primary" className="m-50" onClick={() => toggleEditModal()}>
                             <Edit3 size={15} />
-                            <span className='align-middle ms-50'>{t('Элсэгчдийг оюутан болгох')}</span>
+                            <span className="align-middle ms-50">
+                                {t('Элсэгчдийг оюутан болгох')}
+                            </span>
                         </Button>
 
                         <Button
-                            color='primary'
-                            className='m-50'
+                            color="primary"
+                            className="m-50"
                             disabled={!select_value?.profession}
-                            onClick={() => { navigate(`printlist`, { state: { 'selectedRows': selectedRows, 'select_value': select_value }, }) }}
+                            onClick={() => {
+                                navigate(`printlist`, {
+                                    state: {
+                                        selectedRows: selectedRows,
+                                        select_value: select_value,
+                                    },
+                                });
+                            }}
                         >
                             <Printer size={15} />
-                            <span className='align-middle ms-50'>{t('Хэвлэх')}</span>
+                            <span className="align-middle ms-50">{t('Хэвлэх')}</span>
                         </Button>
-                        <Button color='primary' className='m-50' id='excel_button' onClick={() => convert()}>
-                            <HiOutlineDocumentReport className='me-25' />
-                            <span className='align-middle ms-50'>{t('Excel')}</span>
+                        <Button
+                            color="primary"
+                            className="m-50"
+                            id="excel_button"
+                            onClick={() => convert()}
+                        >
+                            <FileIcon className="me-25" />
+                            <span className="align-middle ms-50">{t('Excel')}</span>
                         </Button>
-                        <UncontrolledTooltip target='excel_button'>
-                            Доорхи хүснэгтэнд харагдаж байгаа мэдээллийн жагсаалтаар эксел файл үүсгэнэ
+                        <UncontrolledTooltip target="excel_button">
+                            Доорхи хүснэгтэнд харагдаж байгаа мэдээллийн жагсаалтаар эксел файл
+                            үүсгэнэ
                         </UncontrolledTooltip>
                     </div>
                 </CardHeader>
@@ -373,20 +409,20 @@ const Enrollment = () => {
                         <Select
                             name="degree"
                             id="degree"
-                            classNamePrefix='select'
+                            classNamePrefix="select"
                             isClearable
-                            className='react-select'
+                            className="react-select"
                             placeholder={t('-- Сонгоно уу --')}
                             options={admissionOption || []}
                             value={admissionOption.find((c) => c.id === select_value.admission)}
                             noOptionsMessage={() => t('Хоосон байна.')}
                             onChange={(val) => {
-                                setSelectValue(current => {
+                                setSelectValue((current) => {
                                     return {
                                         ...current,
                                         admission: val?.id || '',
-                                    }
-                                })
+                                    };
+                                });
                             }}
                             styles={ReactSelectStyles}
                             getOptionValue={(option) => option.id}
@@ -400,25 +436,26 @@ const Enrollment = () => {
                         <Select
                             name="profession"
                             id="profession"
-                            classNamePrefix='select'
+                            classNamePrefix="select"
                             isClearable
-                            className='react-select'
+                            className="react-select"
                             placeholder={t('-- Сонгоно уу --')}
                             options={professionOption || []}
-                            value={professionOption.find((c) => c.prof_id === select_value.profession)}
+                            value={professionOption.find(
+                                (c) => c.prof_id === select_value.profession,
+                            )}
                             noOptionsMessage={() => t('Хоосон байна.')}
                             onChange={(val) => {
-                                setSelectValue(current => {
+                                setSelectValue((current) => {
                                     return {
                                         ...current,
                                         profession: val?.prof_id || '',
-                                    }
-                                })
+                                    };
+                                });
                             }}
                             styles={ReactSelectStyles}
                             getOptionValue={(option) => option.prof_id}
-                            getOptionLabel={(option) => option.name
-                            }
+                            getOptionLabel={(option) => option.name}
                         />
                     </Col>
                     <Col md={3}>
@@ -428,7 +465,7 @@ const Enrollment = () => {
                         <Select
                             name="genderOp"
                             id="genderOp"
-                            classNamePrefix='select'
+                            classNamePrefix="select"
                             isClearable
                             className={classnames('react-select')}
                             isLoading={isLoading}
@@ -437,7 +474,7 @@ const Enrollment = () => {
                             value={genderOp.find((c) => c.name === gender)}
                             noOptionsMessage={() => t('Хоосон байна.')}
                             onChange={(val) => {
-                                setGender(val?.name || '')
+                                setGender(val?.name || '');
                             }}
                             styles={ReactSelectStyles}
                             getOptionValue={(option) => option.id}
@@ -445,108 +482,123 @@ const Enrollment = () => {
                         />
                     </Col>
                 </Row>
-                <div className='d-flex justify-content-between my-50 mt-1'>
-                    <div className='px-1'>
+                <div className="d-flex justify-content-between my-50 mt-1">
+                    <div className="px-1">
                         <Button
-                            color='primary'
-                            disabled={(selectedRows.length != 0 && user.permissions.includes('lms-elselt-admission-approve')) ? false : true}
-                            className='d-flex align-items-center px-75'
-                            id='state_button'
+                            color="primary"
+                            disabled={
+                                selectedRows.length != 0 &&
+                                user.permissions.includes('lms-elselt-admission-approve')
+                                    ? false
+                                    : true
+                            }
+                            className="d-flex align-items-center px-75"
+                            id="state_button"
                             onClick={() => stateModalHandler()}
                         >
-                            <RiEditFill className='me-25' />
+                            <SquarePenIcon className="me-25" />
                             Төлөв солих
                         </Button>
-                        <UncontrolledTooltip target='state_button'>
+                        <UncontrolledTooltip target="state_button">
                             Доорхи сонгосон элсэгчдийн төлөвийг нэг дор солих
                         </UncontrolledTooltip>
                     </div>
                 </div>
-                <Row className='justify-content-between mx-0 mb-1'>
-                    <Col className='d-flex align-items-center justify-content-start' md={6} sm={12}>
-                        <Col md={2} sm={3} className='pe-1'>
+                <Row className="justify-content-between mx-0 mb-1">
+                    <Col className="d-flex align-items-center justify-content-start" md={6} sm={12}>
+                        <Col md={2} sm={3} className="pe-1">
                             <Input
-                                type='select'
-                                bsSize='sm'
-                                style={{ height: "30px" }}
+                                type="select"
+                                bsSize="sm"
+                                style={{ height: '30px' }}
                                 value={rowsPerPage}
-                                onChange={e => handlePerPage(e)}
+                                onChange={(e) => handlePerPage(e)}
                             >
-                                {
-                                    default_page.map((page, idx) => (
-                                        <option
-                                            key={idx}
-                                            value={page}
-                                        >
-                                            {page}
-                                        </option>
-                                    ))}
+                                {default_page.map((page, idx) => (
+                                    <option key={idx} value={page}>
+                                        {page}
+                                    </option>
+                                ))}
                             </Input>
                         </Col>
                         <Col md={10} sm={3}>
-                            <Label for='sort-select'>{t('Хуудсанд харуулах тоо')}</Label>
+                            <Label for="sort-select">{t('Хуудсанд харуулах тоо')}</Label>
                         </Col>
                     </Col>
-                    <Col className='d-flex align-items-center mobile-datatable-search mt-1' md={4} sm={12}>
+                    <Col
+                        className="d-flex align-items-center mobile-datatable-search mt-1"
+                        md={4}
+                        sm={12}
+                    >
                         <Input
-                            className='dataTable-filter mb-50'
-                            type='text'
-                            bsSize='sm'
-                            id='search-input'
+                            className="dataTable-filter mb-50"
+                            type="text"
+                            bsSize="sm"
+                            id="search-input"
                             placeholder={t('Хайх')}
                             value={searchValue}
                             onChange={handleFilter}
-                            onKeyPress={e => e.key === 'Enter' && handleSearch()}
+                            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                         />
                         <Button
-                            size='sm'
-                            className='ms-50 mb-50'
-                            color='primary'
+                            size="sm"
+                            className="ms-50 mb-50"
+                            color="primary"
                             onClick={handleSearch}
                         >
                             <Search size={15} />
-                            <span className='align-middle ms-50'></span>
+                            <span className="align-middle ms-50"></span>
                         </Button>
                     </Col>
                 </Row>
-                <div className='react-dataTable react-dataTable-selectable-rows'>
+                <div className="react-dataTable react-dataTable-selectable-rows">
                     <DataTable
                         noHeader
                         pagination
                         paginationServer
-                        className='react-dataTable'
+                        className="react-dataTable"
                         progressPending={isTableLoading}
                         progressComponent={
-                            <div className='my-2 d-flex align-items-center justify-content-center'>
-                                <Spinner className='me-1' color="" size='sm' /><h5>Түр хүлээнэ үү...</h5>
+                            <div className="my-2 d-flex align-items-center justify-content-center">
+                                <Spinner className="me-1" color="" size="sm" />
+                                <h5>Түр хүлээнэ үү...</h5>
                             </div>
                         }
-                        noDataComponent={(
+                        noDataComponent={
                             <div className="my-2">
                                 <h5>{t('Өгөгдөл байхгүй байна')}</h5>
                             </div>
-                        )}
+                        }
                         onSort={handleSort}
                         sortIcon={<ChevronDown size={10} />}
                         columns={getColumns(currentPage, rowsPerPage, total_count)}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}
-                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
+                        paginationComponent={getPagination(
+                            handlePagination,
+                            currentPage,
+                            rowsPerPage,
+                            total_count,
+                        )}
                         data={datas}
                         fixedHeader
-                        fixedHeaderScrollHeight='62vh'
+                        fixedHeaderScrollHeight="62vh"
                         selectableRows
                         onSelectedRowsChange={(state) => onSelectedRowsChange(state)}
                     />
                 </div>
             </Card>
 
-            {
-                editModal &&
-                <EditModal editModal={editModal} toggleEditModal={toggleEditModal} selectedRows={selectedRows} getDatas={getDatas} profession={select_value.profession} />
-            }
-
+            {editModal && (
+                <EditModal
+                    editModal={editModal}
+                    toggleEditModal={toggleEditModal}
+                    selectedRows={selectedRows}
+                    getDatas={getDatas}
+                    profession={select_value.profession}
+                />
+            )}
         </Fragment>
-    )
-}
+    );
+};
 export default Enrollment;
