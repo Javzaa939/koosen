@@ -1,5 +1,5 @@
 // ** React imports
-import { Fragment, useContext, useState } from 'react';
+import { Fragment, useState } from 'react';
 
 import { X } from "react-feather";
 
@@ -26,20 +26,15 @@ import { validate } from "@utils";
 
 import { t } from 'i18next';
 
-import AuthContext from '@context/AuthContext';
-import SchoolContext from "@context/SchoolContext";
-
 import { validateSchema } from './validateSchema';
 
 const AddModal = ({ open, handleModal, refreshDatas}) =>{
     const CloseBtn = (
         <X className="cursor-pointer" size={15} onClick={handleModal} />
     )
-    const { user } = useContext(AuthContext)
-    const { school_id } = useContext(SchoolContext)
 
     // ** Hook
-    const { control, handleSubmit, reset, setError, formState: { errors } } = useForm(validate(validateSchema));
+    const { control, handleSubmit, setError, formState: { errors } } = useForm(validate(validateSchema));
 
     // states
     const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
@@ -50,11 +45,10 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
     async function onSubmit(cdata) {
         cdata['logo'] = image
         const formData = new FormData()
-        Object.keys(cdata).map(key => formData.append(key, cdata[key]))
+        Object.keys(cdata).forEach(key => formData.append(key, cdata[key]))
 
         const { success, errors } = await postFetch(schoolsApi.post(formData))
         if(success) {
-            reset()
             refreshDatas()
             handleModal()
         } else {

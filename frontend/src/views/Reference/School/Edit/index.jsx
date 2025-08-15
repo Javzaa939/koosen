@@ -57,7 +57,7 @@ const UpdateModal = ({ open, handleEdit, refreshDatas, datas }) => {
         if(editId) {
             cdata['logo'] = image
             const formData = new FormData()
-            Object.keys(cdata).map(key => formData.append(key, cdata[key]))
+            Object.keys(cdata).forEach(key => formData.append(key, cdata[key]))
             const { success, errors } = await fetchData(getSchoolApi.put(formData, editId))
 
             if(success) {
