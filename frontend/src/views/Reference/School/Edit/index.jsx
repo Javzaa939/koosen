@@ -27,7 +27,7 @@ const UpdateModal = ({ open, handleEdit, refreshDatas, datas }) => {
     // Loader
     const {isLoading, fetchData } = useLoader({})
 
-    const { control, handleSubmit, setValue, reset, setError, formState: { errors } } = useForm();
+    const { control, handleSubmit, setValue, setError, formState: { errors } } = useForm();
 
     // Api
     const getSchoolApi = useApi().hrms.school
