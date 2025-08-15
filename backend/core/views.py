@@ -273,8 +273,21 @@ class SchoolAPIView(
                 del datas[key]
 
     @staticmethod
-    def is_access_denied(user):
+    def is_access_denied_for_not_admin(user):
         return not user.is_superuser
+
+    @staticmethod
+    def is_access_denied_for_hr(user, school_id):
+        employee_obj = Employee.objects.filter(user=user, org_position__is_hr=True, state=Employee.STATE_WORKING).first()
+
+        if not employee_obj:
+            return True
+
+        # to check org_id in org_position because org_id field is not nullable only in org_position table
+        if employee_obj.org_position.org_id != school_id:
+            return True
+
+        return False
     # endregion
 
     @login_required()
@@ -301,8 +314,9 @@ class SchoolAPIView(
 
         try:
             with transaction.atomic():
-                if self.is_access_denied(request.user):
-                    return request.send_error("ERR_002", "Access denied")
+                if self.is_access_denied_for_not_admin(request.user):
+                    if self.is_access_denied_for_hr(request.user, pk):
+                        return request.send_error("ERR_002", "Access denied")
 
                 instance = self.get_object()
 
@@ -346,7 +360,7 @@ class SchoolAPIView(
         created_cdn_files = {}
 
         try:
-            if self.is_access_denied(request.user):
+            if self.is_access_denied_for_not_admin(request.user):
                 return request.send_error("ERR_002", "Access denied")
 
             # to copy querydict to make it mutable
@@ -421,7 +435,7 @@ class SchoolAPIView(
         return request.send_info('INF_001')
 
     def delete(self, request, pk=None):
-        if self.is_access_denied(request.user):
+        if self.is_access_denied_for_not_admin(request.user):
             return request.send_error("ERR_002", "Access denied")
 
         qs = self.queryset.filter(id=pk).first()
