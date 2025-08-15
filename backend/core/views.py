@@ -897,13 +897,21 @@ class OrgPositionListAPIView(
 ):
     """ Албан тушаалын жагсаалт """
 
-    queryset = OrgPosition.objects
+
+    queryset = OrgPosition.objects.all()
     serializer_class = OrgPositionSerializer
 
+    pagination_class = CustomPagination
     filter_backends = [SearchFilter]
     search_fields = ['org__name', 'name', "created_at"]
 
+
     def get(self, request, pk=None):
+        sub_org = self.request.query_params.get('school')
+
+        # Бүрэлдэхүүн сургууль
+        if sub_org:
+            self.queryset = self.queryset.filter(org_id=sub_org)
 
         if pk:
             group = self.retrieve(request, pk).data
@@ -925,7 +933,7 @@ class OrgPositionListAPIView(
         return request.send_info("INF_001")
 
     def put(self, request, pk=None):
-        # self.serializer_class = OrgPositionPostSerializer
+        self.serializer_class = OrgPositionPostSerializer
 
         request_data = request.data
         instance = self.queryset.filter(id=pk).first()

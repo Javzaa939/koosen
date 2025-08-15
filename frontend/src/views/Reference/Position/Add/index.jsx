@@ -94,32 +94,18 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
 
     async function onSubmit(cdata) {
         cdata = convertDefaultValue(cdata)
+        cdata['org'] = school_id
 
-        if (editData && editData?.id) {
-            const { success, error } = await postFetch(orgPositionApi.put(cdata, editData?.id))
-            if(success) {
-                reset()
-                handleModal()
-                refreshDatas()
-            } else {
-                setLoader(false)
-                /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in error) {
-                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
-                }
-            }
+        const { success, error } = await postFetch(orgPositionApi.post(cdata))
+        if(success) {
+            reset()
+            handleModal()
+            refreshDatas()
         } else {
-            const { success, error } = await postFetch(orgPositionApi.post(cdata))
-            if(success) {
-                reset()
-                handleModal()
-                refreshDatas()
-            } else {
-                setLoader(false)
-                /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in error) {
-                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
-                }
+            setLoader(false)
+            /** Алдааны мессэжийг input дээр харуулна */
+            for (let key in error) {
+                setError(error[key].field, { type: 'custom', message:  error[key].msg});
             }
         }
 
@@ -168,7 +154,7 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
                 </ModalHeader>
                 <ModalBody className="flex-grow-1">
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
-                        <Col md={12}>
+                        {/* <Col md={12}>
                             <Label className="form-label" for="org">
                                 {t('Сургууль')}
                             </Label>
@@ -199,46 +185,7 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
                                 }}
                             ></Controller>
                             {errors.org && <FormFeedback className='d-block'>{errors.org.message}</FormFeedback>}
-                        </Col>
-                        <Col md={12} className='d-flex align-items-center mt-1'>
-                        <Input
-                            id="is_hr"
-                            className="dataTable-check mb-50 me-1"
-                            type="checkbox"
-                            bsSize="sm-5"
-                            onChange={(e) => setOnlyCheck1(e.target.checked)}
-                            checked={checked1}
-                        />
-                        <Label className="checkbox-wrapper" for="is_hr">
-                            {t('Хүний нөөцийн ажилтан эсэх')}
-                        </Label>
-                    </Col>
-                    <Col md={12} className='d-flex align-items-center mt-1'>
-                        <Input
-                            id="is_director"
-                            className="dataTable-check mb-50 me-1"
-                            type="checkbox"
-                            bsSize="sm-5"
-                            onChange={(e) => setOnlyCheck2(e.target.checked)}
-                            checked={checked2}
-                        />
-                        <Label className="checkbox-wrapper" for="is_director">
-                            {t('Удирдах албан тушаалтан эсэх')}
-                        </Label>
-                    </Col>
-                    <Col md={12} className='d-flex align-items-center mt-1'>
-                        <Input
-                            id="is_teacher"
-                            className="dataTable-check mb-50 me-1"
-                            type="checkbox"
-                            bsSize="sm-5"
-                            onChange={(e) => setOnlyCheck3(e.target.checked)}
-                            checked={checked3}
-                        />
-                        <Label className="checkbox-wrapper" for="is_teacher">
-                            {t('Багш эсэх')}
-                        </Label>
-                    </Col>
+                        </Col> */}
                         <Col md={12}>
                             <Label className="form-label" for="name">
                                 {t('Нэр')}
@@ -260,6 +207,45 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
                                 )}
                             />
                             {errors.name && <FormFeedback className='d-block'>{errors.name.message}</FormFeedback>}
+                        </Col>
+                        <Col md={12} className='d-flex align-items-center mt-1'>
+                            <Input
+                                id="is_hr"
+                                className="dataTable-check mb-50 me-1"
+                                type="checkbox"
+                                bsSize="sm-5"
+                                onChange={(e) => setOnlyCheck1(e.target.checked)}
+                                checked={checked1}
+                            />
+                            <Label className="checkbox-wrapper" for="is_hr">
+                                {t('Хүний нөөцийн ажилтан эсэх')}
+                            </Label>
+                        </Col>
+                        <Col md={12} className='d-flex align-items-center mt-1'>
+                            <Input
+                                id="is_director"
+                                className="dataTable-check mb-50 me-1"
+                                type="checkbox"
+                                bsSize="sm-5"
+                                onChange={(e) => setOnlyCheck2(e.target.checked)}
+                                checked={checked2}
+                            />
+                            <Label className="checkbox-wrapper" for="is_director">
+                                {t('Удирдах албан тушаалтан эсэх')}
+                            </Label>
+                        </Col>
+                        <Col md={12} className='d-flex align-items-center mt-1'>
+                            <Input
+                                id="is_teacher"
+                                className="dataTable-check mb-50 me-1"
+                                type="checkbox"
+                                bsSize="sm-5"
+                                onChange={(e) => setOnlyCheck3(e.target.checked)}
+                                checked={checked3}
+                            />
+                            <Label className="checkbox-wrapper" for="is_teacher">
+                                {t('Багш эсэх')}
+                            </Label>
                         </Col>
                         {/* <Col md={12}>
                             <Label className="form-label" for="permission">

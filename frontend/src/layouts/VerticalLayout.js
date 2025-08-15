@@ -83,6 +83,7 @@ const VerticalLayout = (props) =>
 
                         /** Багш */
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-reference-teacher-read', 'reference3')
+                        // childrenDatas = checkPerm(childrenDatas, menus,'lms-org-position-read', 'reference4')
                         childrenDatas = checkPerm(childrenDatas, menus,'lms-reference-teacher-read', 'reference4')
 
                         /** ---------------------------- Элсэлт------------------------------- */

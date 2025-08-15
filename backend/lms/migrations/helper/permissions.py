@@ -1424,4 +1424,9 @@ permissions = [
         'name': 'lms-exam-report-read',
         'description' : 'Улирлын шалгалтын тайлан эрх'
     },
+     # --------------------- Албан тушаал --------------
+    {
+        'name': 'lms-org-position-read',
+        'description' : 'Албан тушаал унших эрх'
+    },
 ]

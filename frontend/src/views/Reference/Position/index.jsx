@@ -22,20 +22,11 @@ import SchoolContext from '@context/SchoolContext'
 
 import { getColumns } from './helpers';
 import AddModal from './Add';
-import UpdateModal from './Edit';
+import UpdateModal from './Edit'
 
 const Position = () => {
 
-    var values = {
-        state: '',
-        position_id: '',
-        department_id: ''
-    }
-
     const { t } = useTranslation()
-
-    // ** Hook
-    const { control, setValue, formState: { errors } } = useForm({});
 
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10)
@@ -48,9 +39,6 @@ const Position = () => {
     const { school_id } = useContext(SchoolContext)
 
     const [datas, setDatas] = useState([]);
-    const [department, setDepartmentData] = useState([]);
-    const [position_option, setOrgPositions] = useState([]);
-    const [selected_values, setSelectValue] = useState(values);
     const [add_modal, setAddModal] = useState(false)
     const [update_modal, setUpdateModal] = useState(false)
     const [editData, setEditData] = useState({})
@@ -65,8 +53,6 @@ const Position = () => {
     const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({});
 
     // Api
-    const teacherApi = useApi().hrms.teacher
-    const departmentApi = useApi().hrms.department
     const positionApi = useApi().hrms.position
 
     /* Жагсаалтын дата сургууль, тэнхим авах функц */
@@ -76,14 +62,12 @@ const Position = () => {
         if (page_count < currentPage && page_count != 0) {
             setCurrentPage(page_count)
         }
-        const { success, data } = await allFetch(positionApi.get(searchValue))
+        const { success, data } = await allFetch(positionApi.get(rowsPerPage, currentPage, school_id, searchValue))
         if(success) {
-            setDatas(data)
+            setDatas(data?.results)
             setTotalCount(data?.count)
         }
     }
-    console.log('data', total_count)
-
 
     // addModal
     const handleModal =() =>{
@@ -100,11 +84,11 @@ const Position = () => {
 
             return () => clearTimeout(timeoutId);
         }
-    },[sortField, searchValue, currentPage, school_id])
+    },[rowsPerPage, searchValue, currentPage, school_id])
 
     useUpdateEffect(() => {
         getDatas();
-    },[])
+    },[rowsPerPage, searchValue, currentPage, school_id])
 
     function handleEdit(data) {
         setUpdateModal(!update_modal)
@@ -147,7 +131,7 @@ const Position = () => {
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
                         <Button
                             color='primary'
-                            disabled={Object.keys(user).length > 0 ? false : true}
+                            disabled={Object.keys(user).length > 0 && school_id  ? false : true}
                             onClick={() => handleModal()}>
                             <Plus size={15} />
                             <span className='align-middle ms-50'>{t('Нэмэх')}</span>
@@ -185,7 +169,7 @@ const Position = () => {
                                     <h5>Өгөгдөл байхгүй байна.</h5>
                                 </div>
                             )}
-                            columns={getColumns(currentPage, rowsPerPage, total_count, handleEdit, handleDelete, user)}
+                            columns={getColumns(currentPage, rowsPerPage, total_count, handleEdit, handleDelete, user, school_id)}
                             onSort={handleSort}
                             sortIcon={<ChevronDown size={10} />}
                             paginationPerPage={rowsPerPage}
@@ -198,9 +182,8 @@ const Position = () => {
                     </div>
                 }
             </Card>
-			{ update_modal && <UpdateModal open={update_modal} editId={edit_id}  handleEdit={handleEdit} refreshDatas={getDatas} editData={editData}/> }
-
             { add_modal && <AddModal open={add_modal} handleModal={handleModal} refreshDatas={getDatas} editData={editData}/> }
+			{ update_modal && <UpdateModal open={update_modal} editId={edit_id}  handleEdit={handleEdit} refreshDatas={getDatas} editData={editData}/> }
         </Fragment>
     )
 }

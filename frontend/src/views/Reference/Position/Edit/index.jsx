@@ -15,11 +15,9 @@ import { t } from 'i18next';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import { useForm, Controller } from "react-hook-form";
-import React, { Fragment, useEffect, useState} from 'react'
-import { convertDefaultValue , validate, ReactSelectStyles} from "@utils"
+import React, { Fragment, useEffect} from 'react'
+import { convertDefaultValue } from "@utils"
 import { X } from "react-feather";
-import Select from 'react-select'
-import classnames from "classnames";
 
 
 const UpdateModal = ({ open, editId, handleEdit, refreshDatas }) => {
@@ -27,53 +25,36 @@ const UpdateModal = ({ open, editId, handleEdit, refreshDatas }) => {
         <X className="cursor-pointer" size={15} onClick={handleEdit} />
     )
 
-    const [orgOption, setOrgOption] = useState([]);
-    const [edit_data, setEditData] = useState([]);
-
     // Loader
     const {isLoading, fetchData } = useLoader({})
 
     const { control, handleSubmit, setValue, reset, setError, formState: { errors } } = useForm();
 
     // Api
-    const getSchoolApi = useApi().hrms.subschool
     const getPositionApi = useApi().hrms.position
     async function getDatas() {
         if(editId) {
             const { success, data } = await fetchData(getPositionApi.getOne(editId))
             if(success) {
-                setEditData(data)
                 // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
                 if(data === null) return
                 for(let key in data) {
                     if(data[key] !== null)
                         setValue(key, data[key])
                     else setValue(key, '')
-                    if(key === 'org'){
-                        setValue(data[key])
-                    }
-
                 }
             }
         }
     }
 
-    /* Сургууль жагсаалт авах функц */
-	async function getSchool() {
-		const { success, data } = await fetchData(getSchoolApi.get())
-		if (success) {
-			setOrgOption(data)
-		}
-	}
-     useEffect(() => {
+    useEffect(() => {
         getDatas()
-        getSchool()
-
     },[editId])
 
     async function onSubmit(cdata) {
         if(editId) {
             cdata = convertDefaultValue(cdata)
+            console.log("cdata", cdata)
             const { success, error } = await fetchData(getPositionApi.put(cdata, editId))
             if(success) {
                 refreshDatas()
@@ -96,6 +77,7 @@ const UpdateModal = ({ open, editId, handleEdit, refreshDatas }) => {
                 className="sidebar-md"
                 modalClassName='modal-slide-in'
                 contentClassName='pt-0'
+                backdrop='static'
             >
                 {
                     isLoading &&
@@ -115,38 +97,27 @@ const UpdateModal = ({ open, editId, handleEdit, refreshDatas }) => {
                 </ModalHeader>
                 <ModalBody className="flex-grow-1">
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
-                       <Col md={12}>
-                            <Label className="form-label" for="org">
-                                {t('Сургууль')}
+                        <Col md={12}>
+                            <Label className="form-label" for="name">
+                                {t('Нэр')}
                             </Label>
                             <Controller
-                                control={control}
-                                // defaultValue={edit_data?.org?.name}
                                 defaultValue=''
-                                name="org"
-                                render={({ field: { value, onChange} }) => {
-                                    return (
-                                        <Select
-                                            name="org"
-                                            id="org"
-                                            classNamePrefix='select'
-                                            isClearable
-                                            className={classnames('react-select opacity-100', { 'is-invalid': errors.org})}
-                                            placeholder={t('-- Сонгоно уу --')}
-                                            options={orgOption || []}
-                                            value={orgOption.find((c) => c.id === value)}
-                                            noOptionsMessage={() => t('Хоосон байна.')}
-                                            onChange={(val) => {
-                                                onChange(val?.id || '')
-                                            }}
-                                            styles={ReactSelectStyles}
-                                            getOptionValue={(option) => option.id}
-                                            getOptionLabel={(option) => option.name}
-                                        />
-                                    )
-                                }}
-                            ></Controller>
-                            {errors.org && <FormFeedback className='d-block'>{errors.org.message}</FormFeedback>}
+                                control={control}
+                                id="name"
+                                name="name"
+                                render={({ field }) => (
+                                    <Input
+                                        id ="name"
+                                        bsSize="sm"
+                                        placeholder={t("Нэр")}
+                                        {...field}
+                                        type="text"
+                                        invalid={errors.name && true}
+                                    />
+                                )}
+                            />
+                            {errors.name && <FormFeedback className='d-block'>{errors.name.message}</FormFeedback>}
                         </Col>
                         <Col md={12} className='d-flex align-items-center mt-1'>
                         <Controller
@@ -213,28 +184,6 @@ const UpdateModal = ({ open, editId, handleEdit, refreshDatas }) => {
                             )}
                         />
                     </Col>
-                        <Col md={12}>
-                            <Label className="form-label" for="name">
-                                {t('Нэр')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                id="name"
-                                name="name"
-                                render={({ field }) => (
-                                    <Input
-                                        id ="name"
-                                        bsSize="sm"
-                                        placeholder={t("Нэр")}
-                                        {...field}
-                                        type="text"
-                                        invalid={errors.name && true}
-                                    />
-                                )}
-                            />
-                            {errors.name && <FormFeedback className='d-block'>{errors.name.message}</FormFeedback>}
-                        </Col>
                         <Col md={12}>
                             <Label className="form-label" for="description">
                                 {t('Тайлбар')}
