@@ -54,7 +54,6 @@ const UpdateModal = ({ open, editId, handleEdit, refreshDatas }) => {
     async function onSubmit(cdata) {
         if(editId) {
             cdata = convertDefaultValue(cdata)
-            console.log("cdata", cdata)
             const { success, error } = await fetchData(getPositionApi.put(cdata, editId))
             if(success) {
                 refreshDatas()
