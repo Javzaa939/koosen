@@ -302,7 +302,7 @@ class SchoolAPIView(
         try:
             with transaction.atomic():
                 if self.is_access_denied(request.user):
-                    return request.send_error("ERR_002")
+                    return request.send_error("ERR_002", "Access denied")
 
                 instance = self.get_object()
 
@@ -347,7 +347,7 @@ class SchoolAPIView(
 
         try:
             if self.is_access_denied(request.user):
-                return request.send_error("ERR_002")
+                return request.send_error("ERR_002", "Access denied")
 
             # to copy querydict to make it mutable
             datas = request.data.copy()
@@ -417,7 +417,7 @@ class SchoolAPIView(
 
     def delete(self, request, pk=None):
         if self.is_access_denied(request.user):
-            return request.send_error("ERR_002")
+            return request.send_error("ERR_002", "Access denied")
 
         qs = self.queryset.filter(id=pk).first()
         if qs:
