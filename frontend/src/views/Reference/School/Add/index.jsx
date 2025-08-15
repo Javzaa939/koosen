@@ -27,17 +27,26 @@ import { validate } from "@utils";
 import { t } from 'i18next';
 
 import { validateSchema } from './validateSchema';
+import useToast from '@src/utility/hooks/useToast';
 
-const AddModal = ({ open, handleModal, refreshDatas}) =>{
-    const CloseBtn = (
-        <X className="cursor-pointer" size={15} onClick={handleModal} />
-    )
+const AddModal = ({ open, handleModal, refreshDatas }) => {
+    const CloseBtn = <X className="cursor-pointer" size={15} onClick={handleModal} />
 
     // ** Hook
     const { control, handleSubmit, setError, formState: { errors } } = useForm(validate(validateSchema));
-
-    // states
     const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
+    const addToast = useToast()
+
+    const necessaryFields = [
+        'name',
+        'name_eng',
+        'address',
+        'web',
+        'social',
+        'logo',
+        'email',
+        'phone_number',
+    ]
 
     // Api
     const schoolsApi = useApi().hrms.school
@@ -46,18 +55,24 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
         cdata['logo'] = image
         const formData = new FormData()
         Object.keys(cdata).forEach(key => formData.append(key, cdata[key]))
-
         const { success, errors } = await postFetch(schoolsApi.post(formData))
-        if(success) {
+
+        if (success) {
             refreshDatas()
             handleModal()
         } else {
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in errors) {
-                setError(key, { type: 'custom', message:  errors[key]});
+            for (let key in errors) setError(key, { type: 'custom', message: errors[key] })
+
+            const notFormKeys = Object.keys(errors).filter(field => !necessaryFields.includes(field))
+            const notFormErrors = {}
+            notFormKeys.forEach(key => notFormErrors[key] = errors[key])
+
+            if (notFormKeys.length) {
+                console.warn(notFormErrors);
+                addToast({ type: 'warning', text: 'Та түр хүлээгээд дахин оролдоно уу' })
             }
         }
-
 	}
 
     // #region Зураг авах функц

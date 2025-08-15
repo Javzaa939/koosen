@@ -378,9 +378,14 @@ class SchoolAPIView(
 
             # Байгуулгын хүний нөөцийн ажилтаны account үүсгэх
             user_serializer = UserSaveSerializer(data=user_body)
+
             if not user_serializer.is_valid():
-                user_serializer = UserFirstRegisterSerializer(data=request.data)
-                user_serializer.is_valid()
+                transaction.savepoint_rollback(sid)
+                return request.send_error_valid(user_serializer.errors)
+
+            user_serializer = UserFirstRegisterSerializer(data=request.data)
+
+            if not user_serializer.is_valid():
                 transaction.savepoint_rollback(sid)
                 return request.send_error_valid(user_serializer.errors)
 
