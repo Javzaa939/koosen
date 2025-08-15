@@ -1,25 +1,22 @@
-import { createContext, useState } from "react";
-import { initialModal } from "@lms_components/Modal";
+import { createContext, useState } from 'react';
+import { initialModal } from '@lms_components/Modal';
 
-import { AlertCircle } from "react-feather";
+export const ModalContext = createContext();
 
-export const ModalContext = createContext()
-
-export default function ModalContextProvider({ children })
-{
-    const [show, setShow] = useState(false)
-    const [modal, setModal] = useState(initialModal)
+export default function ModalContextProvider({ children }) {
+    const [show, setShow] = useState(false);
+    const [modal, setModal] = useState(initialModal);
 
     /** Модал хаах товч дарахад
      * @param {function} callback товч дарсны дараа ажиллах функц
-    */
+     */
     const onClose = (callback) => {
-        setShow(false)
+        setShow(false);
 
         if (callback) {
-            callback()
+            callback();
         }
-    }
+    };
 
     /**
     * return Модал буцаана
@@ -42,14 +39,10 @@ export default function ModalContextProvider({ children })
     * Анхааруулга
     *  1. keyboard, backdrop 2 хамтдаа ажиллана.
     */
-    const setDisplay = (modal) =>
-    {
-        setShow(true)
-        setModal
-        (
-            modal
-        )
-    }
+    const setDisplay = (modal) => {
+        setShow(true);
+        setModal(modal);
+    };
 
     /**
      * Анхааруулгын модал харуулах функц.
@@ -60,52 +53,49 @@ export default function ModalContextProvider({ children })
      * @param {string} btnText Товчны нэр
      * @param {string} btnClassName Товчны className
      * @param {boolean} btnShow false үед зөюхөн буцах товч харагдана.
-    */
-    const showWarning = (modal) =>
-    {
-        setShow(true)
+     */
+    const showWarning = (modal) => {
+        setShow(true);
 
-        const handleAction = () =>
-        {
-            if (modal.onClick)
-            {
-                modal.onClick()
+        const handleAction = () => {
+            if (modal.onClick) {
+                modal.onClick();
             }
-            onClose()
-        }
+            onClose();
+        };
 
-        setModal(
-            {
-                ...initialModal,
-                header: {
-                    show: modal?.header?.show || true,
-                    title: modal?.header?.title || ''
-                },
-                size: "sm",
-                body:<div className="d-flex flex-column bd-highlight">
+        setModal({
+            ...initialModal,
+            header: {
+                show: modal?.header?.show || true,
+                title: modal?.header?.title || '',
+            },
+            size: 'sm',
+            body: (
+                <div className="d-flex flex-column bd-highlight">
                     <div className="pt-0 bd-highlight text-center">
                         {modal.question || 'Уг үйлдэлийг хийхдээ итгэлтэй байна уу?'}
                     </div>
-                </div>,
-                btnAction: {
-                    show: typeof modal.btnShow === 'boolean' ? modal.btnShow : true,
-                    icon: modal.btnIcon || "",
-                    on: () => handleAction(),
-                    className: modal.btnClassName || "",
-                    text: modal.btnText || "Тийм",
-                    type: "button",
-                    color: modal.btnVariant || 'warning',
-                },
-                handleHide: modal.handleHide || null
-            }
-        )
-    }
-
+                </div>
+            ),
+            btnAction: {
+                show: typeof modal.btnShow === 'boolean' ? modal.btnShow : true,
+                icon: modal.btnIcon || '',
+                on: () => handleAction(),
+                className: modal.btnClassName || '',
+                text: modal.btnText || 'Тийм',
+                type: 'button',
+                color: modal.btnVariant || 'warning',
+            },
+            handleHide: modal.handleHide || null,
+        });
+    };
 
     return (
-        <ModalContext.Provider value={{ show, modal, setDisplay, onClose, setShow, showWarning, setModal }}>
+        <ModalContext.Provider
+            value={{ show, modal, setDisplay, onClose, setShow, showWarning, setModal }}
+        >
             {children}
         </ModalContext.Provider>
     );
 }
-

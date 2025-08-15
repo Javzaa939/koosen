@@ -6,7 +6,6 @@ import { useNavigate } from 'react-router-dom'
 
 import SchoolContext from "@context/SchoolContext"
 import ActiveYearContext from '@context/ActiveYearContext'
-import { library } from "@fortawesome/fontawesome-svg-core";
 
 const multiPart = { headers: { 'content-type': 'multipart/form-data' } }
 function getCookie(name) {

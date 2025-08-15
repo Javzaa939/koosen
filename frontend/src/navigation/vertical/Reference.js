@@ -1,43 +1,43 @@
 // ** Icons Import
-import { Circle } from 'react-feather'
+import { ContactIcon, Circle } from 'lucide-react';
 
 export default [
     {
         id: 'reference',
         title: 'Лавлах сан',
-        icon: <i className="far fa-address-book"></i>,
-        navLink: "/reference",
+        icon: <ContactIcon />,
+        navLink: '/reference',
         navChildren: [
             {
                 id: 'reference0',
                 title: 'Сургууль',
                 icon: <Circle size={8} />,
-                navLink: "reference/school/"
+                navLink: 'reference/school/',
             },
             {
                 id: 'reference1',
                 title: 'Салбар сургуулиуд',
                 icon: <Circle size={8} />,
-                navLink: "reference/subschool/"
+                navLink: 'reference/subschool/',
             },
             {
                 id: 'reference2',
                 title: 'Салбар / Тэнхим',
                 icon: <Circle size={8} />,
-                navLink: "reference/departments/"
+                navLink: 'reference/departments/',
             },
             {
                 id: 'reference4',
                 title: 'Албан тушаал',
                 icon: <Circle size={8} />,
-                navLink: "reference/position/"
+                navLink: 'reference/position/',
             },
             {
                 id: 'reference3',
                 title: 'Багш / Ажилчид',
                 icon: <Circle size={8} />,
-                navLink: "reference/teachers/"
+                navLink: 'reference/teachers/',
             },
-        ]
-    }
-]
+        ],
+    },
+];

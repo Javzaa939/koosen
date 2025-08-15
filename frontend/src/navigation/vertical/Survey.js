@@ -1,25 +1,24 @@
-import { Circle } from 'react-feather'
+import { ListChecksIcon, Circle } from 'lucide-react';
 
 export default [
     {
         id: 'survey',
         title: 'Судалгаа',
-        icon: <i className="fal fa-ballot-check"></i>,
-        navLink: "/survey",
+        icon: <ListChecksIcon />,
+        navLink: '/survey',
         navChildren: [
             {
                 id: 'takesurvey',
                 title: 'Судалгааны жагсаалт',
                 icon: <Circle size={8} />,
-                navLink: "survey/surveymain"
+                navLink: 'survey/surveymain',
             },
             {
                 id: 'surveyreg',
                 title: 'Үр дүн',
                 icon: <Circle size={8} />,
-                navLink: "survey/results/"
+                navLink: 'survey/results/',
             },
-
-        ]
-    }
-]
+        ],
+    },
+];

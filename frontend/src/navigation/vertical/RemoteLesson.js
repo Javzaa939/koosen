@@ -1,12 +1,11 @@
-import React from "react";
-import { IoIosDesktop } from "react-icons/io";
+import { MonitorPlayIcon } from 'lucide-react';
 
 const RemoteRoutes = [
     {
-        id: "remotelesson",
-        title: "Зайн сургалт",
-        icon: <IoIosDesktop />,
-        navLink: "/remote_lesson",
+        id: 'remotelesson',
+        title: 'Зайн сургалт',
+        icon: <MonitorPlayIcon />,
+        navLink: '/remote_lesson',
     },
 ];
 
