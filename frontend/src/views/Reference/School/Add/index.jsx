@@ -93,7 +93,7 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                     postLoading &&
                         <div className='suspense-loader'>
                             <Spinner size='bg'/>
-                            <span className='ms-50'>Түр хүлээнэ үү...</span>
+                            <span className='ms-50'>{t('Түр хүлээнэ үү')}...</span>
                         </div>
                 }
 
@@ -214,7 +214,7 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                             {errors.social && <FormFeedback className='d-block'>{t(errors.social.message)}</FormFeedback>}
                         </Col>
                         <Col lg={12} xs={12}>
-                            <Label className="form-label" for="email">
+                            <Label className="form-label" for="logo">
                                 {t('Лого')}
                             </Label>
                             <Controller

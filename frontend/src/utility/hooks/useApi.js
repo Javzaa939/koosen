@@ -547,7 +547,8 @@ function useApi(isDisplay=false) {
 			/** Үндсэн сургууль */
 			school: {
 				get: () => instance.get(`/core/school/`),
-				put: (data) => instance.put(`/core/school/`, data),
+				getOne: (pk) => instance.get(`/core/school/${pk}/`),
+				put: (data, pk) => instance.put(`/core/school/${pk}/`, data),
 				post: (data) => instance.post(`/core/school/`, data),
 			},
 			/** Бүрэлдэхүүн сургууль */

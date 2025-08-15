@@ -20,9 +20,10 @@ from .serializers import (
     generate_model_serializer
 )
 
-from main.utils.function.utils import create_file_to_cdn, filter_queries, remove_file_from_cdn
+from main.utils.function.utils import create_file_to_cdn, remove_from_cdn_ignore_not_found_error, remove_file_from_cdn
 from main.utils.function.pagination import CustomPagination
 from main.utils.function.utils import get_teacher_queryset, null_to_none, calculate_birthday
+from main.utils.function.serializer import dynamic_serializer
 
 from django.apps import apps
 from django.db import transaction
@@ -212,12 +213,73 @@ class SchoolAPIView(
     queryset = Schools.objects
     serializer_class = SchoolsRegisterSerailizer
 
+    # region to reduce duplicated code
+    @staticmethod
+    def get_input_data(datas, is_use_cdn):
+        logo_for_cdn = None
+
+        if is_use_cdn:
+            logo_for_cdn = datas.pop('logo')[0] if datas.get('logo') else None
+
+        return datas, logo_for_cdn
+
+    @staticmethod
+    def save_data(serializer, created_cdn_files, is_use_cdn, logo):
+        if is_use_cdn:
+            if logo:
+                created_cdn_files['logo'] = create_file_to_cdn('reference', logo)['full_path']
+
+        instance = serializer.save()
+
+        if created_cdn_files:
+            instance.logo = created_cdn_files['logo']
+            instance.save()
+
+        return instance
+
+    @staticmethod
+    def cdn_garbage_clean_silently(created_cdn_files):
+        """ to clear trash from CDN optimistically """
+
+        with suppress(Exception):
+            for key in created_cdn_files:
+                remove_file_from_cdn(created_cdn_files[key])
+
+    @staticmethod
+    def skip_file_replacing_if_empty(datas):
+        is_skip = False
+
+        if not datas.get('logo'):
+            del datas['logo']
+            is_skip = True
+
+        return is_skip
+
+    @staticmethod
+    def keep_only_necessary_fields(datas):
+        necessary_fields = [
+            'name',
+            'name_eng',
+            'address',
+            'web',
+            'social',
+            'logo',
+            'email',
+            'phone_number',
+        ]
+
+        for key in datas:
+            if key not in necessary_fields:
+                del datas[key]
+    # endregion
+
     @login_required()
     def get(self, request, pk=None):
         " Сургуулийн жагсаалт "
+
         if pk:
-            group = self.retrieve(request, pk).data
-            return request.send_data(group)
+            data = self.retrieve(request, pk).data
+            return request.send_data(data)
 
         org = getattr(request, 'exactly_org_filter', {}).get('org')
 
@@ -227,14 +289,44 @@ class SchoolAPIView(
         datas = self.list(request).data
         return request.send_data(datas)
 
-    def put(self, request):
+    def put(self, request, pk=None):
+        # API options
+        is_use_cdn = False
 
-        datas = request.data
-        instance = Schools.objects.first()
-        with transaction.atomic():
-            Schools.objects.filter(pk=instance.id).update(
-                **datas
-            )
+        created_cdn_files = {}
+
+        try:
+            with transaction.atomic():
+                instance = self.get_object()
+
+                # to copy querydict to make it mutable
+                datas = request.data.copy()
+
+                is_skip = self.skip_file_replacing_if_empty(datas)
+                datas, logo_for_cdn = self.get_input_data(datas, is_use_cdn)
+                self.keep_only_necessary_fields(datas)
+                serializer = dynamic_serializer(self.queryset.model, "__all__", 0)(instance, data=datas)
+
+                if not serializer.is_valid():
+                    return request.send_error_valid(serializer.errors)
+
+                old_file = instance.logo
+
+                self.save_data(serializer, created_cdn_files, is_use_cdn, logo_for_cdn)
+
+                # to remove only after saving to not lose old file if saving is failed
+                if old_file and not is_skip:
+                    if old_file.storage.exists(old_file.name):
+                        if instance.logo.name != old_file.name:
+                            old_file.delete(save=False)
+
+                    elif is_use_cdn:
+                        remove_from_cdn_ignore_not_found_error(old_file.name)
+
+        except Exception:
+            traceback.print_exc()
+            self.cdn_garbage_clean_silently(created_cdn_files)
+            return request.send_error("ERR_002")
 
         return request.send_info('INF_002')
 
@@ -244,31 +336,20 @@ class SchoolAPIView(
         is_use_cdn = False
 
         sid = transaction.savepoint()
+        created_cdn_files = {}
 
-        # to copy querydict to make it mutable
-        datas = request.data.copy()
-
-        if is_use_cdn:
-            logo = datas.pop('logo')[0] if datas.get('logo') else None
-
-        created_cdn_files = []
-        serializer = self.serializer_class(data=datas)
-
-        # NOTE if "try" block is used then @transaction.atomic() from outside does not work
         try:
+            # to copy querydict to make it mutable
+            datas = request.data.copy()
+
+            datas, logo_for_cdn = self.get_input_data(datas, is_use_cdn)
+            serializer = dynamic_serializer(self.queryset.model, "__all__", 0)(data=datas)
+
             if not serializer.is_valid():
                 transaction.savepoint_rollback(sid)
                 return request.send_error_valid(serializer.errors)
 
-            if is_use_cdn:
-                if logo:
-                    created_cdn_files.append(create_file_to_cdn('reference', logo)['full_path'])
-
-            instance = serializer.save()
-
-            if created_cdn_files:
-                instance.logo = created_cdn_files[0]
-                instance.save()
+            instance = self.save_data(serializer, created_cdn_files, is_use_cdn, logo_for_cdn)
 
             # Байгуулгын хүний нөөцийн ажилтан эрх
             for role_info in default_roles:
@@ -317,13 +398,9 @@ class SchoolAPIView(
             employee_serializer.save()
 
         except Exception:
+            transaction.savepoint_rollback(sid)
             traceback.print_exc()
-
-            # to clear trash from CDN
-            with suppress(Exception):
-                for file in created_cdn_files:
-                    remove_file_from_cdn(file)
-
+            self.cdn_garbage_clean_silently(created_cdn_files)
             return request.send_error("ERR_002")
 
         return request.send_info('INF_001')

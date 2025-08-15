@@ -27,7 +27,6 @@ const School = () => {
 	const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({})
 
 	// Modal
-	const [edit_id, setEditId] = useState('')
 	const [detailModalData, setDetailModalData ] = useState({})
 	const [update_modal, setUpdateModal] = useState(false)
 	const [add_modal, setAddModal]= useState(false)
@@ -49,8 +48,7 @@ const School = () => {
 	}
 
 	// Засах функц
-    function handleUpdateModal(id, data) {
-        setEditId(id)
+    function handleUpdateModal(data) {
         setUpdateModal(!update_modal)
         setDetailModalData(data)
     }
@@ -108,7 +106,7 @@ const School = () => {
 					/>
 				</div>
 			</Card>
-			{ update_modal && <UpdateModal editId={edit_id} open={update_modal} handleEdit={handleUpdateModal} refreshDatas={getDatas} datas={detailModalData}/> }
+			{ update_modal && <UpdateModal open={update_modal} handleEdit={handleUpdateModal} refreshDatas={getDatas} datas={detailModalData}/> }
 			{ add_modal && <AddModal open={add_modal} handleModal={handleModal} refreshDatas={getDatas}/>}
         </Fragment>
     )

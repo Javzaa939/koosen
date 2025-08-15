@@ -1859,3 +1859,27 @@ def build_url(url):
         # url = settings.CDN_MAIN_DOMAIN + 'files/' + url
         url = settings.CDN_FILE_URL + url
     return url
+
+
+def remove_from_cdn_ignore_not_found_error(file_path):
+    """
+    to remove cdn file and ignore exception if it already not exists or to always raise exception
+    """
+
+    try:
+        is_removed = remove_file_from_cdn(file_path)
+
+        if not (is_removed == True):
+            raise Exception('Файл утсгахад алдаа гарсан байна. \n' + 'True is not returned')
+
+    except Exception as e:
+        error_text = e.__str__()
+
+        if "Зам олдсонгүй" in error_text:
+            # to ignore error because if file is not found then it may be mean it was already deleted
+           pass
+
+        else:
+            # TODO maybe need to make "impossible to remove file" log to clean garbage files from CDN later
+            raise
+
