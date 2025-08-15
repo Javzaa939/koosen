@@ -36,6 +36,7 @@ const IntlDropdown = () => {
         const {success, data} = await fetchData(parentschoolApi.get())
         if(success) {
             if(data?.length === 1) {
+                setSchoolName(data?.[0]?.name)
                 setParentSchoolName(data?.[0]?.name)
             }
         }
