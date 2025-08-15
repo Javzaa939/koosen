@@ -16,19 +16,19 @@ export default [
             },
             {
                 id: 'reference1',
-                title: 'Бүрэлдэхүүн сургууль',
+                title: 'Салбар сургуулиуд',
                 icon: <Circle size={8} />,
                 navLink: "reference/subschool/"
             },
             {
                 id: 'reference2',
-                title: 'Тэнхим',
+                title: 'Салбар / Тэнхим',
                 icon: <Circle size={8} />,
                 navLink: "reference/departments/"
             },
             {
                 id: 'reference3',
-                title: 'Багш',
+                title: 'Багш / Ажилчид',
                 icon: <Circle size={8} />,
                 navLink: "reference/teachers/"
             },

@@ -114,7 +114,7 @@ const Departments = () => {
 					<div className='d-flex flex-wrap mt-md-0 mt-1'>
 						<Button
                             color='primary'
-                            disabled={Object.keys(user).length > 0 && school_id ?  false : true}
+                            disabled={Object.keys(user).length > 0 && school_id ? false : true}
                             onClick={() => handleModal()}>
                             <Plus size={15} />
                             <span className='align-middle ms-50'>{t('Нэмэх')}</span>

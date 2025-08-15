@@ -48,12 +48,6 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 			maxwidth: "250px",
 			center: true
 		},
-		{
-			name: `${t('Цолын нэр')}`,
-			selector: (row) => <span title={row?.tsol_name}>{row?.tsol_name}</span>,
-			maxwidth: "250px",
-			center: true
-		},
         // {
 		// 	name: `${t('Нийтийн сүлжээ')}`,
 		// 	selector: (row) => row?.social,

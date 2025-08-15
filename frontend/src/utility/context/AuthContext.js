@@ -4,6 +4,7 @@ import { createContext, useState, useEffect } from "react";
 import useApi from "@hooks/useApi"
 import useLoader from "@hooks/useLoader"
 import { useNavigate, useLocation } from 'react-router-dom'
+import themeConfig from "@configs/themeConfig"
 
 const AuthContext = createContext();
 
@@ -32,6 +33,8 @@ export const AuthProvider = ({ children }) => {
             if (success) {
                 if (Object.keys(data).length > 0) {
                     setUser(data)
+                    // themeConfig.school.name = data?.school_name || "Sus"
+                    // themeConfig.app.appName = data?.school_name || "Sus"
                 } else {
                     if (location.pathname !== '/reset-password/') {
                         navigate('/login')

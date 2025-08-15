@@ -1,4 +1,6 @@
+from contextlib import suppress
 import json
+import traceback
 import requests
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
@@ -10,12 +12,15 @@ from rest_framework.filters import SearchFilter
 
 from django.db import transaction
 from django.conf import settings
+from .help.roles import default_roles
+
+from main.decorators import login_required
 
 from .serializers import (
     generate_model_serializer
 )
 
-from main.utils.function.utils import filter_queries
+from main.utils.function.utils import create_file_to_cdn, filter_queries, remove_file_from_cdn
 from main.utils.function.pagination import CustomPagination
 from main.utils.function.utils import get_teacher_queryset, null_to_none, calculate_birthday
 
@@ -96,6 +101,10 @@ from .serializers import EmployeePostSerializer
 from .serializers import UserRegisterSerializer
 from .serializers import UserInfoSerializer
 from .serializers import EmployeeSerializer, UserSerializer, PermissionSerializer, OrgPositionPostSerializer
+
+from .serializers import UserInfoSerializer, UserSaveSerializer
+from .serializers import EmployeeSerializer, UserSerializer, UserFirstRegisterSerializer
+
 
 from lms.models import ProfessionDefinition
 from lms.models import LessonStandart
@@ -208,11 +217,17 @@ class SchoolAPIView(
     queryset = Schools.objects
     serializer_class = SchoolsRegisterSerailizer
 
+    @login_required()
     def get(self, request, pk=None):
         " Сургуулийн жагсаалт "
         if pk:
             group = self.retrieve(request, pk).data
             return request.send_data(group)
+
+        org = getattr(request, 'exactly_org_filter', {}).get('org')
+
+        if org:
+            self.queryset = self.queryset.filter(id=org.id if hasattr(org, "id") else org)
 
         datas = self.list(request).data
         return request.send_data(datas)
@@ -230,17 +245,90 @@ class SchoolAPIView(
 
     @transaction.atomic()
     def post(self, request):
-        datas = request.data
+        # API options
+        is_use_cdn = False
+
+        sid = transaction.savepoint()
+
+        # to copy querydict to make it mutable
+        datas = request.data.copy()
+
+        if is_use_cdn:
+            logo = datas.pop('logo')[0] if datas.get('logo') else None
+
+        created_cdn_files = []
         serializer = self.serializer_class(data=datas)
 
+        # NOTE if "try" block is used then @transaction.atomic() from outside does not work
         try:
             if not serializer.is_valid():
-                return request.send_error_valid('ERR_002', serializer.errors)
+                transaction.savepoint_rollback(sid)
+                return request.send_error_valid(serializer.errors)
 
-            serializer.save()
+            if is_use_cdn:
+                if logo:
+                    created_cdn_files.append(create_file_to_cdn('reference', logo)['full_path'])
 
-        except Exception as e:
-            print('e', e)
+            instance = serializer.save()
+
+            if created_cdn_files:
+                instance.logo = created_cdn_files[0]
+                instance.save()
+
+            # Байгуулгын хүний нөөцийн ажилтан эрх
+            for role_info in default_roles:
+                org_position = self.serializer_class.create_defualt_role(role_info['name'], role_info['description'], role_info['permissions'], instance.id)
+                if org_position is False:
+                    transaction.savepoint_rollback(sid)
+                    return request.send_error("ERR_002")
+
+            user_body = {
+                'password': request.data['phone_number'],
+                'email': request.data['email'],
+                'phone_number': request.data['phone_number'],
+                'username': request.data['email'],
+                'mail_verified': True,
+            }
+
+            # Байгуулгын хүний нөөцийн ажилтаны account үүсгэх
+            user_serializer = UserSaveSerializer(data=user_body)
+            if not user_serializer.is_valid():
+                user_serializer = UserFirstRegisterSerializer(data=request.data)
+                user_serializer.is_valid()
+                transaction.savepoint_rollback(sid)
+                return request.send_error_valid(user_serializer.errors)
+
+            user = user_serializer.save()
+
+            #  хоосон userinfo үүсгэх
+            if user:
+                Teachers.objects.create(user=user, first_name=user.email, action_status=Teachers.APPROVED, action_status_type=Teachers.ACTION_TYPE_ALL)
+
+            # Шинээр үүссэн байгуулгат хэрэглэгчийн ажилтны мэдээллийг үүсгэх
+            org_position = OrgPosition.objects.filter(org_id=instance, is_hr=True).first()
+
+            employee_body = {
+                'org_position': org_position.id,
+                'org': instance.id,
+                'user': user.id,
+            }
+
+            employee_serializer = EmployeeSerializer(data=employee_body)
+
+            if not employee_serializer.is_valid():
+                transaction.savepoint_rollback(sid)
+                return request.send_error_valid(employee_serializer.errors)
+
+            employee_serializer.save()
+
+        except Exception:
+            traceback.print_exc()
+
+            # to clear trash from CDN
+            with suppress(Exception):
+                for file in created_cdn_files:
+                    remove_file_from_cdn(file)
+
             return request.send_error("ERR_002")
 
         return request.send_info('INF_001')
@@ -290,6 +378,7 @@ class DepartmentAPIView(
 
         self.serializer_class = DepartmentPostSerailizer
         datas = request.data
+
         sub_org = SubOrgs.objects.filter(id=datas.get('sub_orgs')).first()
         datas['org'] = sub_org.org.id
         serializer = self.get_serializer(data=datas)
@@ -426,9 +515,19 @@ class SubSchoolAPIView(
     queryset = SubOrgs.objects.all().filter(is_school=True).order_by('name')
     serializer_class = SubSchoolRegisterSerailizer
 
+    @login_required()
     def get(self, request, pk=None):
         " дэд сургуулийн жагсаалт "
         self.serializer_class = SubSchoolListSerailizer
+
+        org = getattr(request, 'exactly_org_filter', {}).get('org')
+        sub_school = request.query_params.get("school")
+
+        if org:
+            self.queryset = self.queryset.filter(org=org.id if hasattr(org, "id") else org)
+
+        if sub_school:
+            self.queryset = self.queryset.filter(id=sub_school)
 
         if pk:
             group = self.retrieve(request, pk).data

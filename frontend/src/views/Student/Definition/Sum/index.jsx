@@ -83,7 +83,7 @@ export default function Sum()
                         <img className="fallback-logo" width={100} height={100} src={logo} alt="logo" onLoad={imageLoaded} />
                         <div className="d-flex flex-column text-center fw-bolder">
                             <span className='mt-1 text-uppercase'>
-                                Дотоод хэргийн их сургууль
+                                Sus
                             </span>
                             <span style={{ marginTop: '6px' }} className="text-uppercase">
                                 {/* {datas?.school_data?.name_eng?.toUpperCase()} */}

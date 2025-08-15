@@ -1,7 +1,7 @@
 import useModal from '@hooks/useModal';
 import { t } from 'i18next';
 import { Badge, UncontrolledTooltip} from 'reactstrap'
-import { Edit, X } from 'react-feather'
+import { Download, Edit } from 'react-feather'
 
 // Хүснэгтийн баганууд
 export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, handleDelete) {
@@ -18,59 +18,84 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 		{
 			name: "№",
 			selector: (row, index) => (currentPage-1) * rowsPerPage + index + 1,
-			maxWidth: "30px",
-			center: true
+			center: true,
+			minWidth: "60px",
+			maxWidth: "60px",
 		},
 		{
 			name: `${t('Нэр')}`,
 			selector: (row) => <span title={row?.name}>{row?.name}</span>,
+			left: true,
 			minWidth: "250px",
 			wrap: true,
-			left: true
 		},
-        // {
-		// 	name: `${t('Нийтийн сүлжээ')}`,
-		// 	selector: (row) => row?.social,
-		// 	maxwidth: "250px",
-		// 	wrap: false,
-		// 	center: true
-		// },
-        // {
-		// 	name: `${t('Вэб')}`,
-		// 	selector: (row) => row?.web,
-		// 	maxWidth: "250px",
-		// 	wrap: false,
-		// 	center: true
-		// },
+		{
+			name: `${t('Хаяг')}`,
+			selector: (row) => (
+				<>
+					<div id={`address${row?.id}`} className='cursor-default'>
+						{row?.address}
+					</div>
+					<UncontrolledTooltip placement='top' target={`address${row?.id}`}>{row?.address}</UncontrolledTooltip>
+				</>
+			),
+			center: true,
+			minWidth: "250px",
+			wrap: true,
+		},
+		{
+			name: `${t('Вэб')}`,
+			selector: (row) => row?.web,
+			center: true,
+			minWidth: "250px",
+			wrap: true,
+		},
+		{
+			name: `${t('Лого')}`,
+			selector: (row) =>
+				<Badge
+					color="light-info"
+					pill
+					tag="a"
+					href={row?.logo}
+					id={`logo`}
+					className={row?.logo ? `` : ` opacity-25`}
+				>
+					<Download width={"15px"} />
+					<UncontrolledTooltip placement='top' target={`logo`}>{t('Татах')}</UncontrolledTooltip>
+				</Badge>,
+			center: true,
+			minWidth: "70px",
+			maxWidth: "70px",
+		},
+		{
+			name: `${t('И-мэйл')}`,
+			selector: (row) => row?.email,
+			center: true,
+			minWidth: "250px",
+			wrap: true,
+		},
+		{
+			name: `${t('Утасны дугаар')}`,
+			selector: (row) => row?.phone_number,
+			center: true
+		},
 		// {
-		// 	name: `${t('Хаяг')}`,
+		// 	name: `${t('Үйлдэл')}`,
 		// 	selector: (row) => (
-		// 		<>
-		// 			<div id={`address${row?.id}`} className='cursor-default'>
-		// 				{row?.address}
-		// 			</div>
-		// 			<UncontrolledTooltip placement='top' target={`address${row?.id}`}>{row?.address}</UncontrolledTooltip>
-		// 		</>
-		// 	),
-		// 	maxWidth: "250px",
-		// 	center: true
-		// },
-		// {
-        //     name: `${t('үйлдэл')}`,
-        //     selector:  (row) => (
-        //         <div className="text-center" style={{ width: "auto" }}>
-        //             {
-        //                 <>
-        //                     <a role="button"
-        //                         onClick={() => handleUpdateModal(row?.id, false, row)}
-        //                         id={`updateSchool${row?.id}`}
-        //                     >
-        //                         <Badge color="light-primary" pill><Edit width={"100px"} /></Badge>
-        //                     </a>
-        //                     <UncontrolledTooltip placement='top' target={`updateSchool${row?.id}`}>засах</UncontrolledTooltip>
+		// 		<div className="text-center" style={{ width: "auto" }}>
+		// 			{
+		// 				<>
+		// 					<a role="button"
+		// 						onClick={() => handleUpdateModal(row?.id, false, row)}
+		// 						id={`updateSchool${row?.id}`}
+		// 					>
+		// 						<Badge color="light-primary" pill><Edit width={"100px"} /></Badge>
+		// 					</a>
+		// 					<UncontrolledTooltip placement='top' target={`updateSchool${row?.id}`}>{t('Засах')}</UncontrolledTooltip>
 		// 				</>
-        //             }
-		// 		{
+		// 			}
+					//{/* // 		{
 		// 			<>
 		// 				<a role="button"
 		// 					className='ms-1'
@@ -88,13 +113,11 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 		// 				</a>
 		// 				<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${row?.id}`} >Устгах</UncontrolledTooltip>
 		// 			</>
-		// 		}
+		// 		} */}
 		// 		</div>
-        //     ),
-        //     Width: "50px",
-        //     // minWidth: "350px",
-        //     center: true,
-        // },
+		// 	),
+		// 	center: true,
+		// },
 	]
 
 
