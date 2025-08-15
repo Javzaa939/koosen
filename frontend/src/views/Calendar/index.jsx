@@ -1,6 +1,6 @@
 // ** React Imports
-import { Fragment, useState, useEffect } from 'react'
-import { Book, User } from 'react-feather'
+import { Fragment, useState, useEffect } from 'react';
+import { Book, User } from 'react-feather';
 import {
     Card,
     CardBody,
@@ -12,226 +12,206 @@ import {
     DropdownMenu,
     DropdownItem,
     DropdownToggle,
-    UncontrolledDropdown
- } from 'reactstrap'
+    UncontrolledDropdown,
+} from 'reactstrap';
 
-import { TrendingUp, Box, DollarSign } from 'react-feather'
-import classnames from 'classnames'
-import Avatar from '@components/avatar'
+import { TrendingUp, Box, DollarSign } from 'react-feather';
+import classnames from 'classnames';
+import Avatar from '@components/avatar';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
-import { useRTL } from '@hooks/useRTL'
+import { useRTL } from '@hooks/useRTL';
 
 // ** Calendar App Component Imports
-import Calendar from './Calendar'
+import Calendar from './Calendar';
 // import SidebarLeft from './SidebarLeft'
-import AddEventSidebar from './Add'
+import AddEventSidebar from './Add';
 // import SwiperFade from './SwiperFade';
-import AccessHistory from './AccessHistory'
+import AccessHistory from './AccessHistory';
 
-import '@styles/react/apps/app-calendar.scss'
+import '@styles/react/apps/app-calendar.scss';
 
-import { VOLUNTEER_ACTION_TYPE } from '@utility/consts'
+import { VOLUNTEER_ACTION_TYPE } from '@utility/consts';
 
-import StatsHorizontal from '@components/widgets/stats/StatsHorizontal'
-
+import StatsHorizontal from '@components/widgets/stats/StatsHorizontal';
 
 const CalendarComponent = () => {
-
     const blankEvent = {
         title: '',
         start: '',
         end: '',
-    }
+    };
 
-    const { fetchData } = useLoader({})
+    const { fetchData } = useLoader({});
 
     // ** states
-    const [addSidebarOpen, setAddSidebarOpen] = useState(false)
-    const [leftSidebarOpen, setLeftSidebarOpen] = useState(false)
-    const [datas, setDatas] = useState([])
-    const [edit_id, setEditId] = useState('')
-    const [is_new, setNew] = useState(false)
-    const [searchChecked, setSearchChecked] = useState([])
-    const [dates, setDates] = useState(blankEvent)
-    const [active_week, setActiveWeek] = useState(1)
+    const [addSidebarOpen, setAddSidebarOpen] = useState(false);
+    const [leftSidebarOpen, setLeftSidebarOpen] = useState(false);
+    const [datas, setDatas] = useState([]);
+    const [edit_id, setEditId] = useState('');
+    const [is_new, setNew] = useState(false);
+    const [searchChecked, setSearchChecked] = useState([]);
+    const [dates, setDates] = useState(blankEvent);
+    const [active_week, setActiveWeek] = useState(1);
     const [info, setInfo] = useState({
-        salbar_data: []
-    })
+        salbar_data: [],
+    });
 
-    const [selectItem, setSelectItem] = useState(
-        {
-            'id': 'day',
-            'name': 'Өнөөдөр'
-        }
-    )
-    const [systemInfo, setSystemInfo] = useState(
-        {
-            'total': 0,
-            'sis': 0,
-            'student': 0,
-            'teacher': 0
-        }
-    )
+    const [selectItem, setSelectItem] = useState({
+        id: 'day',
+        name: 'Өнөөдөр',
+    });
+    const [systemInfo, setSystemInfo] = useState({
+        total: 0,
+        sis: 0,
+        student: 0,
+        teacher: 0,
+    });
 
-    const [datas1, setDatas1] = useState([])
+    const [datas1, setDatas1] = useState([]);
     const date_list = [
         {
-            'id': 'day',
-            'name': 'Өнөөдөр'
+            id: 'day',
+            name: 'Өнөөдөр',
         },
         {
-            'id': 'week',
-            'name': 'Сүүлийн 7 хоног'
+            id: 'week',
+            name: 'Сүүлийн 7 хоног',
         },
         {
-            'id': 'last_month',
-            'name': 'Сүүлийн 1 сар'
+            id: 'last_month',
+            name: 'Сүүлийн 1 сар',
         },
         {
-            'id': 'three_month',
-            'name': 'Сүүлийн 3 сар'
+            id: 'three_month',
+            name: 'Сүүлийн 3 сар',
         },
-    ]
+    ];
 
     // ** Hooks
-    const [isRtl] = useRTL()
+    const [isRtl] = useRTL();
 
     // Api
-    const calendarListApi = useApi().calendar
-    const parentschoolApi = useApi().calendarCard
-    const calendarNewsApi = useApi().calendarNews
-    const coreApi = useApi().hrms
+    const calendarListApi = useApi().calendar;
+    const parentschoolApi = useApi().calendarCard;
+    const calendarNewsApi = useApi().calendarNews;
+    const coreApi = useApi().hrms;
 
     // ** AddEventSidebar Toggle Function
     const handleAddEventSidebar = () => {
-        setAddSidebarOpen(!addSidebarOpen)
+        setAddSidebarOpen(!addSidebarOpen);
         if (addSidebarOpen) {
-            setEditId('')
+            setEditId('');
         }
-    }
+    };
 
     // ** LeftSidebar Toggle Function
-    const toggleSidebar = val => setLeftSidebarOpen(val)
+    const toggleSidebar = (val) => setLeftSidebarOpen(val);
 
-    async function getDatas()
-    {
-        const { success, data } = await fetchData(calendarListApi.get(searchChecked))
-        if(success) {
-            setActiveWeek(data?.active_week)
+    async function getDatas() {
+        const { success, data } = await fetchData(calendarListApi.get(searchChecked));
+        if (success) {
+            setActiveWeek(data?.active_week);
 
             if (data.datas) {
+                var calendarDatas = data.datas;
 
-                var calendarDatas = data.datas
-
-                calendarDatas.forEach(data => {
+                calendarDatas.forEach((data) => {
                     if (data.action_type == VOLUNTEER_ACTION_TYPE) {
-                        data['title'] = 'ОНА' + ' ' + data?.title
-                        data['color'] = '#e9ff70'
+                        data['title'] = 'ОНА' + ' ' + data?.title;
+                        data['color'] = '#e9ff70';
                     } else {
-                        data['textColor'] = 'white'
+                        data['textColor'] = 'white';
                     }
                 });
 
-                setDatas(calendarDatas)
+                setDatas(calendarDatas);
             }
         }
     }
 
     useEffect(() => {
-        getDatas()
-    },[searchChecked])
-
+        getDatas();
+    }, [searchChecked]);
 
     // Хуанли дах card-уудын мэдээлэл
     async function getDatas1() {
-        const {success, data} = await fetchData(parentschoolApi.get())
-        if(success) {
-            setInfo(data)
+        const { success, data } = await fetchData(parentschoolApi.get());
+        if (success) {
+            setInfo(data);
         }
     }
 
-    useEffect(
-        () =>
-        {
-            getDatas1()
-        },
-        []
-    )
-
+    useEffect(() => {
+        getDatas1();
+    }, []);
 
     // Хуанли дах мэдээлэллийн хэсэг
 
-    async function getDatas2()
-    {
-        const { success, data } = await fetchData(calendarNewsApi.get())
-        if(success)
-        {
-            setDatas1(data)
+    async function getDatas2() {
+        const { success, data } = await fetchData(calendarNewsApi.get());
+        if (success) {
+            setDatas1(data);
         }
     }
 
-    useEffect(
-        () =>
-        {
-            getDatas2()
-        },
-        []
-    )
+    useEffect(() => {
+        getDatas2();
+    }, []);
 
     const handleSysChange = (item) => {
-        setSelectItem(item)
-    }
+        setSelectItem(item);
+    };
 
     async function getSysInfo() {
-        const { success, data } = await fetchData(coreApi.get(selectItem?.id))
+        const { success, data } = await fetchData(coreApi.get(selectItem?.id));
         if (success) {
-            setSystemInfo(data)
+            setSystemInfo(data);
         }
     }
 
-    useEffect(
-        () =>
-        {
-            getSysInfo()
-        },
-        [selectItem]
-    )
+    useEffect(() => {
+        getSysInfo();
+    }, [selectItem]);
 
     return (
         <Fragment>
-            <div className=' pt-0'>
+            <div className=" pt-0">
                 <Row>
-                    <Col lg='3' sm='6'>
+                    <Col lg="3" sm="6">
                         <StatsHorizontal
-                            color='warning'
-                            statTitle='Нийт хөтөлбөрийн тоо'
+                            color="warning"
+                            statTitle="Нийт хөтөлбөрийн тоо"
                             icon={<Book size={20} />}
-                            renderStats={<h3 className='fw-bolder mb-75'>{info?.total_profession}</h3>}
+                            renderStats={
+                                <h3 className="fw-bolder mb-75">{info?.total_profession}</h3>
+                            }
                         />
                     </Col>
-                    <Col lg='3' sm='6'>
+                    <Col lg="3" sm="6">
                         <StatsHorizontal
-                            color='warning'
-                            statTitle='Нийт хичээлийн тоо'
+                            color="warning"
+                            statTitle="Нийт хичээлийн тоо"
                             icon={<Book size={20} />}
-                            renderStats={<h3 className='fw-bolder mb-75'>{info?.total_studies}</h3>}
+                            renderStats={<h3 className="fw-bolder mb-75">{info?.total_studies}</h3>}
                         />
                     </Col>
-                    <Col lg='3' sm='6'>
+                    <Col lg="3" sm="6">
                         <StatsHorizontal
-                            color='primary'
-                            statTitle='Нийт багшийн тоо'
+                            color="primary"
+                            statTitle="Нийт багшийн тоо"
                             icon={<User size={20} />}
-                            renderStats={<h3 className='fw-bolder mb-75'>{info?.total_workers}</h3>}
+                            renderStats={<h3 className="fw-bolder mb-75">{info?.total_workers}</h3>}
                         />
                     </Col>
-                    <Col lg='3' sm='6'>
+                    <Col lg="3" sm="6">
                         <StatsHorizontal
-                            color='danger'
-                            statTitle='Нийт суралцагчдын тоо'
+                            color="danger"
+                            statTitle="Нийт суралцагчдын тоо"
                             icon={<User size={20} />}
-                            renderStats={<h3 className='fw-bolder mb-75'>{info?.total_students}</h3>}
+                            renderStats={
+                                <h3 className="fw-bolder mb-75">{info?.total_students}</h3>
+                            }
                         />
                     </Col>
                 </Row>
@@ -296,13 +276,16 @@ const CalendarComponent = () => {
                 </Row> */}
             </div>
 
-            <div className='app-calendar overflow-hidden border'>
-                <Row className='g-0'>
+            <div className="app-calendar overflow-hidden border">
+                <Row className="g-0">
                     <Col
-                        id='app-calendar-sidebar'
-                        className={classnames('col app-calendar-sidebar flex-grow-0 overflow-hidden d-flex flex-column', {
-                            show: leftSidebarOpen
-                        })}
+                        id="app-calendar-sidebar"
+                        className={classnames(
+                            'col app-calendar-sidebar flex-grow-0 overflow-hidden d-flex flex-column',
+                            {
+                                show: leftSidebarOpen,
+                            },
+                        )}
                     >
                         {/* <SidebarLeft */}
                         {/*     toggleSidebar={toggleSidebar} */}
@@ -312,7 +295,7 @@ const CalendarComponent = () => {
                         {/*     active_week={active_week} */}
                         {/* /> */}
                     </Col>
-                    <Col className='position-relative'>
+                    <Col className="position-relative">
                         <Calendar
                             isRtl={isRtl}
                             toggleSidebar={toggleSidebar}
@@ -328,23 +311,20 @@ const CalendarComponent = () => {
                     <Col lg="3" sm="9" className="m-2">
                         <Card className="text-center">
                             <CardBody>
-                                <CardTitle tag="h3">
-                                    Сүүлд нэмэгдсэн мэдээ, мэдээлэл
-                                </CardTitle>
+                                <CardTitle tag="h3">Сүүлд нэмэгдсэн мэдээ, мэдээлэл</CardTitle>
                                 {datas1.length > 0 ? (
-                                    <></>
-                                    {/* <SwiperFade datas={datas1} /> */}
+                                    <div>{/* <SwiperFade datas={datas1} /> */}</div>
                                 ) : (
                                     <h5>Мэдээлэл байхгүй байна!</h5>
                                 )}
                             </CardBody>
                         </Card>
-                        <AccessHistory />
+                        {/* <AccessHistory /> */}
                     </Col>
 
                     <div
                         className={classnames('body-content-overlay', {
-                            show: leftSidebarOpen === true
+                            show: leftSidebarOpen === true,
                         })}
                         onClick={() => toggleSidebar(false)}
                     ></div>
@@ -360,7 +340,7 @@ const CalendarComponent = () => {
                 dates={dates}
             />
         </Fragment>
-    )
-}
+    );
+};
 
-export default CalendarComponent
+export default CalendarComponent;
