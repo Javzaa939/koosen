@@ -24,9 +24,9 @@ import { useRTL } from '@hooks/useRTL'
 
 // ** Calendar App Component Imports
 import Calendar from './Calendar'
-import SidebarLeft from './SidebarLeft'
+// import SidebarLeft from './SidebarLeft'
 import AddEventSidebar from './Add'
-import SwiperFade from './SwiperFade';
+// import SwiperFade from './SwiperFade';
 import AccessHistory from './AccessHistory'
 
 import '@styles/react/apps/app-calendar.scss'
@@ -304,13 +304,13 @@ const CalendarComponent = () => {
                             show: leftSidebarOpen
                         })}
                     >
-                        <SidebarLeft
-                            toggleSidebar={toggleSidebar}
-                            handleAddEventSidebar={handleAddEventSidebar}
-                            searchValue={setSearchChecked}
-                            setNew={setNew}
-                            active_week={active_week}
-                        />
+                        {/* <SidebarLeft */}
+                        {/*     toggleSidebar={toggleSidebar} */}
+                        {/*     handleAddEventSidebar={handleAddEventSidebar} */}
+                        {/*     searchValue={setSearchChecked} */}
+                        {/*     setNew={setNew} */}
+                        {/*     active_week={active_week} */}
+                        {/* /> */}
                     </Col>
                     <Col className='position-relative'>
                         <Calendar
@@ -332,7 +332,8 @@ const CalendarComponent = () => {
                                     Сүүлд нэмэгдсэн мэдээ, мэдээлэл
                                 </CardTitle>
                                 {datas1.length > 0 ? (
-                                    <SwiperFade datas={datas1} />
+                                    <></>
+                                    {/* <SwiperFade datas={datas1} /> */}
                                 ) : (
                                     <h5>Мэдээлэл байхгүй байна!</h5>
                                 )}
