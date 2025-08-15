@@ -30,6 +30,13 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 			wrap: true,
 		},
 		{
+			name: `${t('Англи нэр')}`,
+			selector: (row) => <span title={row?.name}>{row?.name_eng}</span>,
+			left: true,
+			minWidth: "250px",
+			wrap: true,
+		},
+		{
 			name: `${t('Хаяг')}`,
 			selector: (row) => (
 				<>
@@ -46,6 +53,13 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 		{
 			name: `${t('Вэб')}`,
 			selector: (row) => row?.web,
+			center: true,
+			minWidth: "250px",
+			wrap: true,
+		},
+		{
+			name: `${t('Сошиал холбоос')}`,
+			selector: (row) => row?.social,
 			center: true,
 			minWidth: "250px",
 			wrap: true,
