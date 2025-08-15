@@ -31,7 +31,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, h
 			center: true,
 		},
 		    {
-			name: `${t("Сургуулийн нэр")}`,
+			name: `${t("Үүсгэсэн огноо")}`,
 			selector: (row) => row?.created_at,
 			minWidth: "30px",
 			center: true,

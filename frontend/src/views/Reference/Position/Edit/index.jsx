@@ -20,7 +20,7 @@ import { convertDefaultValue } from "@utils"
 import { X } from "react-feather";
 
 
-const UpdateModal = ({ open, editId, handleEdit, refreshDatas }) => {
+const UpdateModal = ({ open, editId, handleEdit, refreshDatas, school_id }) => {
     const CloseBtn = (
         <X className="cursor-pointer" size={15} onClick={handleEdit} />
     )
@@ -54,6 +54,8 @@ const UpdateModal = ({ open, editId, handleEdit, refreshDatas }) => {
     async function onSubmit(cdata) {
         if(editId) {
             cdata = convertDefaultValue(cdata)
+            console.log('cadata', cdata)
+            cdata['org'] = school_id
             const { success, error } = await fetchData(getPositionApi.put(cdata, editId))
             if(success) {
                 refreshDatas()
