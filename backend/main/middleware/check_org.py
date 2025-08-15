@@ -113,22 +113,22 @@ def check_org(get_response):
             #         exactly_org_filter.update({ "salbar": None })
 
             #  салбар нь exactly өөрөө бол ашиглана
-            request.org_filter = org_filter
-            request.exactly_org_filter = exactly_org_filter
+        request.org_filter = org_filter
+        request.exactly_org_filter = exactly_org_filter
 
-            request.org_lvl = org_lvl
-            request.salbar_pos = salbar_pos
-            request.salbar_child_ids = salbar_child_ids
+        request.org_lvl = org_lvl
+        request.salbar_pos = salbar_pos
+        request.salbar_child_ids = salbar_child_ids
 
-            org_salbar_filter = {**request.org_filter}
-            # if request.salbar_child_ids or (request.employee.org_position and not request.employee.org_position.is_hr):
-            #     org_salbar_filter['salbar__in'] = request.salbar_child_ids
+        org_salbar_filter = {**request.org_filter}
+        # if request.salbar_child_ids or (request.employee.org_position and not request.employee.org_position.is_hr):
+        #     org_salbar_filter['salbar__in'] = request.salbar_child_ids
 
-            #     if org_salbar_filter.get('salbar'):
-            #         del org_salbar_filter['salbar']
+        #     if org_salbar_filter.get('salbar'):
+        #         del org_salbar_filter['salbar']
 
-            #  салбар нь өөрөө болон өөрөөсөө доошоо салбаруудыг хайх хэрэгтэй бол ашиглана
-            request.org_salbar_filter = org_salbar_filter
+        #  салбар нь өөрөө болон өөрөөсөө доошоо салбаруудыг хайх хэрэгтэй бол ашиглана
+        request.org_salbar_filter = org_salbar_filter
 
         response = get_response(request)
         return response

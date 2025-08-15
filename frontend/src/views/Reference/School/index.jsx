@@ -1,7 +1,7 @@
 // ** React Imports
 import { Fragment, useState, useEffect, useContext} from 'react'
 
-import { Col, Card, Input, CardTitle, CardHeader, Spinner, Button, Label } from 'reactstrap'
+import { Card, CardTitle, CardHeader, Spinner, Button } from 'reactstrap'
 
 import { ChevronDown, Plus } from 'react-feather'
 import DataTable from 'react-data-table-component'
@@ -9,9 +9,7 @@ import DataTable from 'react-data-table-component'
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 
-import { getPagination } from '@utils';
 import AuthContext from '@context/AuthContext'
-import SchoolContext from '@context/SchoolContext'
 
 import { getColumns } from './helpers';
 import UpdateModal from "./Edit"
@@ -20,21 +18,9 @@ import AddModal from "./Add"
 import { useTranslation } from "react-i18next";
 
 const School = () => {
-
 	const { user } = useContext(AuthContext)
-	const { school_id } = useContext(SchoolContext)
-
-    const [currentPage, setCurrentPage] = useState(1);
-    const [rowsPerPage, setRowsPerPage] = useState(10)
-
-	const [searchValue, setSearchValue] = useState("");
-
-	const [filteredData, setFilteredData] = useState([]);
 	const [datas, setDatas] = useState([]);
 	const { t } = useTranslation();
-
-    // Нийт датаны тоо
-    const [total_count, setTotalCount] = useState(1)
 
 	// Loader
 	const { Loader, isLoading, fetchData } = useLoader({});
@@ -56,24 +42,11 @@ const School = () => {
 
 	/* Жагсаалтын дата авах функц */
 	async function getDatas() {
-		const { success, data } = await allFetch(schoolApi.get(searchValue))
+		const { success, data } = await allFetch(schoolApi.get())
 		if(success) {
 			setDatas(data)
-			setTotalCount(data.length)
 		}
 	}
-
-	useEffect(() => {
-		if (searchValue.length == 0) {
-			getDatas();
-		} else {
-			const timeoutId = setTimeout(() => {
-				getDatas();
-			}, 600);
-
-			return () => clearTimeout(timeoutId);
-		}
-	}, [searchValue]);
 
 	// Засах функц
     function handleUpdateModal(id, data) {
@@ -93,22 +66,12 @@ const School = () => {
 		}
 	}
 
-
-	// Хайлт хийх үед ажиллах хэсэг
-	const handleFilter = e => {
-        const value = e.target.value.trimStart();
-        setSearchValue(value)
-    }
-
-	// Хуудас солих үед ажиллах хэсэг
-	const handlePagination = (page) => {
-		setCurrentPage(page.selected + 1);
-	};
+	useEffect(() => { getDatas() }, [])
 
 	return (
 		<Fragment>
-			<Card>
-			{isLoading && Loader}
+			<Card className='pb-1'>
+				{isLoading && Loader}
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
 					<CardTitle tag='h4'>{t('Сургууль')}</CardTitle>
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
@@ -121,28 +84,15 @@ const School = () => {
                             <span className='align-middle ms-50'>{t('Нэмэх')}</span>
                         </Button>
                     </div>
-                </CardHeader>
-                <Col className="mx-1 mt-1" md={3} sm={6}>
-					<Label>Хайлт</Label>
-					<Input
-						className=" mb-50"
-						type="text"
-						bsSize="sm"
-						id="search-input"
-						value={searchValue}
-						onChange={handleFilter}
-						placeholder={t('Хайх...')}
-					/>
-				</Col>
+				</CardHeader>
 				<div className="react-dataTable react-dataTable-selectable-rows mx-1">
 					<DataTable
 						noHeader
-						pagination
 						className='react-dataTable'
 						progressPending={isTableLoading}
 						progressComponent={
 							<div className='my-2 d-flex align-items-center justify-content-center'>
-								<Spinner className='me-1' size='sm'/><h5>Түр хүлээнэ үү...</h5>
+								<Spinner className='me-1' size='sm'/><h5>{t('Түр хүлээнэ үү')}...</h5>
 							</div>
 						}
 						noDataComponent={(
@@ -150,12 +100,9 @@ const School = () => {
 								<h5>{t('Өгөгдөл байхгүй байна')}</h5>
 							</div>
 						)}
-						columns={getColumns(currentPage, rowsPerPage, datas, handleUpdateModal, handleDelete)}
+						columns={getColumns(1, 1000, datas, handleUpdateModal, handleDelete)}
 						sortIcon={<ChevronDown size={10} />}
-						paginationPerPage={rowsPerPage}
-						paginationDefaultPage={currentPage}
 						data={datas}
-						paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count, searchValue, filteredData)}
 						fixedHeader
 						fixedHeaderScrollHeight='62vh'
 					/>

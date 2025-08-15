@@ -174,7 +174,7 @@ class User(AbstractUser):
     username = models.CharField(max_length=255, unique=True, null=True)
     home_phone = models.IntegerField(null=True, blank=True, verbose_name="Гэрийн утасны дугаар")
     mail_verified = models.BooleanField(null=True, blank=True, default=False, verbose_name="Гэрийн утасны дугаар")
-    login_type = models.PositiveIntegerField(choices=LOGIN_TYPE, db_index=True, null=False, default=LOGIN_TYPE_SIMPLE, verbose_name="Хэрэглэгчийн төлөв")
+    login_type = models.PositiveIntegerField(choices=LOGIN_TYPE, db_index=True, null=False, default=LOGIN_TYPE_MAIN, verbose_name="Хэрэглэгчийн төлөв")
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []

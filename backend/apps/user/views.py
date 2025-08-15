@@ -302,6 +302,7 @@ class UserAPILoginView(
 
         return request.send_info("INF_004", user_detail)
 
+
 class UserAPILogoutView(
     generics.GenericAPIView
 ):

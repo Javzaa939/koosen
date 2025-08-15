@@ -247,9 +247,9 @@ def get_user_permissions(user):
         permissions = list(Permissions.objects.all().exclude(name__contains='elselt').filter(name__startswith='lms').values_list('name', flat=True))
 
     elif emp_list and not user.is_superuser:
-        permissions = list(emp_list.org_position.roles.values_list("permissions__name", flat=True))
-        removed_perms = list(emp_list.org_position.removed_perms.values_list("name", flat=True))
-        permissions = permissions + list(emp_list.org_position.permissions.values_list("name", flat=True))
+        permissions = list(emp_list.org_position.roles.values_list("permissions__name", flat=True)) if emp_list.org_position and emp_list.org_position.roles else list()
+        removed_perms = list(emp_list.org_position.removed_perms.values_list("name", flat=True)) if emp_list.org_position and emp_list.org_position.removed_perms else list()
+        permissions = permissions + list(emp_list.org_position.permissions.values_list("name", flat=True)) if emp_list.org_position and emp_list.org_position.permissions else list()
 
         removed_perms = set(removed_perms)
         permissions = set(permissions)
@@ -1357,7 +1357,7 @@ def get_cdn_urls():
 
     # Орчиноос шалтгаалж url авах
     if settings.DEBUG:
-        path = 'http://192.168.1.7:8003/cdn/'
+        path = 'http://192.168.1.31:8008/cdn/'
 
     return path
 

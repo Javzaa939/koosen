@@ -43,7 +43,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
         user_id = obj.id
         user_info = Teachers.objects.filter(user=user_id, action_status=Teachers.APPROVED).first()
 
-        if user_info:
+        if user_info and user_info.last_name:
             full_name = user_info.last_name.upper()[0] + '. ' + user_info.first_name
 
         return full_name
@@ -113,9 +113,9 @@ class UserInfoSerializer(serializers.ModelSerializer):
                 permissions = list(Permissions.objects.all().filter(Q(name__startswith='lms') | (Q(name='role-read'))).values_list('name', flat=True))
 
         elif emp_list and not obj.is_superuser:
-            permissions = list(emp_list.org_position.roles.values_list("permissions__name", flat=True))
-            removed_perms = list(emp_list.org_position.removed_perms.values_list("name", flat=True))
-            permissions = permissions + list(emp_list.org_position.permissions.values_list("name", flat=True))
+            permissions = list(emp_list.org_position.roles.values_list("permissions__name", flat=True)) if emp_list.org_position and emp_list.org_position.roles else list()
+            removed_perms = list(emp_list.org_position.removed_perms.values_list("name", flat=True)) if emp_list.org_position and emp_list.org_position.removed_perms else list()
+            permissions = permissions + list(emp_list.org_position.permissions.values_list("name", flat=True)) if emp_list.org_position and emp_list.org_position.permissions else list()
 
             removed_perms = set(removed_perms)
             permissions = set(permissions)
