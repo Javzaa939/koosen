@@ -35,13 +35,14 @@ const UpdateModal = ({ open, handleEdit, refreshDatas, datas }) => {
     async function getDatas() {
         if(editId) {
             const { success, data } = await fetchData(getSchoolApi.getOne(editId))
+
             if(success) {
                 // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
                 if(data === null) return
-                data['logo'] = null
-                for(const key in data) {
-                    if(data[key] !== null)
-                        setValue(key, data[key])
+
+                for (const key in data) {
+                    if (key === 'logo') continue
+                    if(data[key] !== null) setValue(key, data[key])
                     else setValue(key, '')
                 }
             }
@@ -57,15 +58,12 @@ const UpdateModal = ({ open, handleEdit, refreshDatas, datas }) => {
             cdata['logo'] = image
             const formData = new FormData()
             Object.keys(cdata).map(key => formData.append(key, cdata[key]))
+            const { success, errors } = await fetchData(getSchoolApi.put(formData, editId))
 
-            const allres = await fetchData(getSchoolApi.put(formData, editId))
-            console.log(allres)
-            const { success, errors } = allres
             if(success) {
                 refreshDatas()
                 handleEdit()
-            }
-            else {
+            } else {
                 /** Алдааны мессэжийг input дээр харуулна */
                 for (let key in errors) {
                     setError(errors[key], { type: 'custom', message:  errors[key]});
