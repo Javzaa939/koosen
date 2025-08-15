@@ -1,11 +1,11 @@
-import { Circle } from 'react-feather'
+import { Circle, GlassesIcon } from 'lucide-react'
 import { t } from 'i18next';
 
 export default [
     {
         id: 'role',
         title: 'Хандах эрх',
-        icon: <i className="far fa-universal-access"></i>,
+        icon: <GlassesIcon />,
         navLink: "/role",
         navChildren: [
             {
