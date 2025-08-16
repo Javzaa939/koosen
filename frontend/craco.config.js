@@ -35,26 +35,5 @@ module.exports = {
             '@lms_components': path.resolve(__dirname, 'src/components'),
             '@views': path.resolve(__dirname, 'src/views'),
         },
-        // configure: (webpackConfig, { env, paths }) => {
-        //     webpackConfig.module.rules.push({
-        //         test: /\.(js|mjs|jsx|ts|tsx)$/,
-        //         include: [
-        //             path.resolve(__dirname, 'node_modules/pdfjs-dist'),
-        //             path.resolve(__dirname, 'node_modules/highcharts'),
-        //         ],
-        //         use: {
-        //             loader: 'babel-loader',
-        //             options: {
-        //                 presets: ['@babel/preset-env', '@babel/preset-react'],
-        //                 plugins: [
-        //                     '@babel/plugin-proposal-optional-chaining',
-        //                     '@babel/plugin-proposal-nullish-coalescing-operator',
-        //                 ],
-        //             },
-        //         },
-        //     });
-        //
-        //     return webpackConfig;
-        // },
     },
 };

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react"
+import { useContext } from "react"
 import { useSkin } from "@hooks/useSkin"
 
 import { Link, useNavigate } from "react-router-dom"
@@ -32,21 +32,14 @@ const HomeRoute = '/calendar'
 const Login = () => {
 	const { skin } = useSkin()
 	const navigate = useNavigate()
-    const { user, setUser } = useContext(AuthContext)
-
-	// useEffect(() => {
-	// 	if(user.id){
-	// 		navigate(`/calendar`)
-	// 	}
-	// },[])
+    const { setUser } = useContext(AuthContext)
 
 	const illustration = skin === "dark" ? "login-v2-dark.svg" : "login-v2.svg",
-	source = require(`@src/assets/images/pages/${illustration}`).default
-	const logo = require("@src/assets/images/logo/dxis_logo.png").default
+	source = require(`@src/assets/images/pages/${illustration}`)
+	const logo = require("@src/assets/images/logo/dxis_logo.png")
 
 	const userApi = useApi().user
 	const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
-	// const [isDisabled, setIsDisabled] = useState(false)
 
 	const { setSchool } = useContext(SchoolContext)
 
@@ -60,10 +53,6 @@ const Login = () => {
         handleSubmit,
         formState: { errors }
     } = useForm({ mode: 'onChange', resolver: yupResolver(SignupSchema) })
-
-	// const handleClick = () => {
-	// 	setIsDisabled(true);
-	//   };
 
     async function onSubmit (datas) {
       const { success, data } = await fetchData(userApi.login(datas))

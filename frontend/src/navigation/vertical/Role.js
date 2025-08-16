@@ -1,5 +1,4 @@
 import { Circle, GlassesIcon } from 'lucide-react'
-import { t } from 'i18next';
 
 export default [
     {
