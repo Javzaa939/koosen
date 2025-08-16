@@ -6,8 +6,8 @@ const themeConfig = {
     },
     app: {
         appName: 'Удирдлага',
-        // appLogoImage: require("@src/assets/images/logo/dxis_logo.png").default
-        appLogoImage: '/assets/images/app-logo.png',
+        appLogoImage: require("@src/assets/images/logo/dxis_logo.png")
+        // appLogoImage: '/assets/images/app-logo.png',
     },
     layout: {
         isRTL: false,
