@@ -15,6 +15,7 @@ from django.conf import settings
 from .help.roles import default_roles
 
 from main.decorators import login_required
+from rest_framework.exceptions import ErrorDetail
 
 from .serializers import (
     generate_model_serializer
@@ -1398,14 +1399,7 @@ class EmployeeApiView(
             sub_org = SubOrgs.objects.get(id=request.data.get('sub_org'))
 
             if check_user and check_user.exists:
-                return request.send_error_valid(
-                    [
-                        {
-                            'field': 'register',
-                            'msg': 'Системд бүртгэлтэй хэрэглэгч байна'
-                        }
-                    ]
-                )
+                return [{'register': [ErrorDetail(string='Системд бүртгэлтэй хэрэглэгч байна', code='unique')]}]
             else:
                 # Register ийн сүүлийн 8 оронг нууц үг болгох нь
                 request.data['password'] = request.data['register'][-8:]

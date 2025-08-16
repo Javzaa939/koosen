@@ -75,8 +75,7 @@ const School = () => {
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
 						<Button
                             color='primary'
-                            disabled={Object.keys(user).length > 0  ? false : true}
-
+                            disabled={Object.keys(user).length > 0 && user?.is_superuser ? false : true}
                             onClick={() => handleModal()}>
                             <Plus size={15} />
                             <span className='align-middle ms-50'>{t('Нэмэх')}</span>
@@ -98,7 +97,7 @@ const School = () => {
 								<h5>{t('Өгөгдөл байхгүй байна')}</h5>
 							</div>
 						)}
-						columns={getColumns(1, 1000, datas, handleUpdateModal, handleDelete)}
+						columns={getColumns(1, 1000, datas, handleUpdateModal, handleDelete, user?.is_hr)}
 						sortIcon={<ChevronDown size={10} />}
 						data={datas}
 						fixedHeader

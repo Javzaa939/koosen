@@ -15,6 +15,7 @@ from lms.models import (
     AccessHistoryLms
 )
 
+
 class UserListSerializer(serializers.ModelSerializer):
     """ Хэрэглэгчийн жагсаалтыг харуулах serializer """
 

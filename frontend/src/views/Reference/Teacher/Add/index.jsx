@@ -117,7 +117,7 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
         cdata = convertDefaultValue(cdata)
 
         if (editData && editData?.id) {
-            const { success, error } = await postFetch(teacherApi.putRegister(cdata, editData?.id))
+            const { success, errors } = await postFetch(teacherApi.putRegister(cdata, editData?.id))
             if(success) {
                 reset()
                 handleModal()
@@ -125,12 +125,12 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
             } else {
                 setLoader(false)
                 /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in error) {
-                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
+                for (let key in errors) {
+                    setError(key, { type: 'custom', message: errors[key][0]});
                 }
             }
         } else {
-            const { success, error } = await postFetch(teacherApi.postRegister(cdata))
+            const { success, errors } = await postFetch(teacherApi.postRegister(cdata))
             if(success) {
                 reset()
                 handleModal()
@@ -138,8 +138,8 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
             } else {
                 setLoader(false)
                 /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in error) {
-                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
+                for (let key in errors) {
+                    setError(key, { type: 'custom', message: errors[key][0]});
                 }
             }
         }

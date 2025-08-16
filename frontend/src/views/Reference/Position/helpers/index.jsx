@@ -1,6 +1,6 @@
 import { t } from 'i18next';
 import { Badge, UncontrolledTooltip} from 'reactstrap'
-import { Lock, Edit, X} from 'react-feather'
+import { Edit, X} from 'react-feather'
 import useModal from "@hooks/useModal"
 
 // Хүснэгтийн баганууд
@@ -36,52 +36,44 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, h
 			minWidth: "30px",
 			center: true,
 		},
-		{
-            name: `${t('Үйлдэл')}`,
+	]
 
+	if(user?.is_hr && school_id) {
+		var add_column = {
+            name: `${t('Үйлдэл')}`,
             selector:  (row) => (
                 <div className="text-center" style={{ width: "auto" }}>
-                    {
-						school_id
-						&&
-                        <>
-                            <a role="button"
-                                onClick={() => handleEdit(row)}
-                                id={`updateSchool${row?.id}`}
-                            >
-                                <Badge color="light-primary" pill><Edit width={"100px"} /></Badge>
-                            </a>
-                            <UncontrolledTooltip placement='top' target={`updateSchool${row?.id}`}>Засах</UncontrolledTooltip>
-						</>
-                    }
-					{
-						school_id
-						&&
-						<>
-							<a role="button"
-								className='ms-1'
-								onClick={() => showWarning({
-									header: {
-										title: `${t('Албан тушаал устгах')}`,
-									},
-									question: `Та  ${row?.name} албан тушаал устгахдаа итгэлтэй байна уу?`,
-									onClick: () => handleDelete(row?.id),
-									btnText: 'Устгах',
-								})}
-								id={`complaintListDatatableCancel${row?.id}`}
-							>
-								<Badge color="light-danger" pill><X width={"100px"} /></Badge>
-							</a>
-							<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${row?.id}`} >Устгах</UncontrolledTooltip>
-						</>
-					}
+					<a role="button"
+						onClick={() => handleEdit(row)}
+						id={`updateSchool${row?.id}`}
+					>
+						<Badge color="light-primary" pill><Edit width={"100px"} /></Badge>
+					</a>
+					<UncontrolledTooltip placement='top' target={`updateSchool${row?.id}`}>Засах</UncontrolledTooltip>
+					<a role="button"
+						className='ms-1'
+						onClick={() => showWarning({
+							header: {
+								title: `${t('Албан тушаал устгах')}`,
+							},
+							question: `Та  ${row?.name} албан тушаал устгахдаа итгэлтэй байна уу?`,
+							onClick: () => handleDelete(row?.id),
+							btnText: 'Устгах',
+						})}
+						id={`complaintListDatatableCancel${row?.id}`}
+					>
+						<Badge color="light-danger" pill><X width={"100px"} /></Badge>
+					</a>
+					<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${row?.id}`} >Устгах</UncontrolledTooltip>
 				</div>
             ),
             minWidth: "200px",
             maxWidth: "200px",
             center: true,
-        },
-	]
+        }
+
+		columns.push(add_column)
+	}
     return columns
 }
 

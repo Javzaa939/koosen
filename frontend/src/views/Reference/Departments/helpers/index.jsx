@@ -4,7 +4,7 @@ import { Edit, X} from 'react-feather'
 import useModal from "@hooks/useModal"
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, total_count, handleUpdateModal, handleDelete) {
+export function getColumns (currentPage, rowsPerPage, total_count, handleUpdateModal, handleDelete, is_hr) {
 	const page_count = Math.ceil(total_count / rowsPerPage)
 	if (currentPage > page_count) {
         currentPage = 1
@@ -55,9 +55,11 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleUpdateM
 		// 	minWidth: "50px",
 		// 	center: true
 		// },
-		{
-            name: `${t('Үйлдэл')}`,
+	]
 
+	if(is_hr) {
+		var add_column = {
+            name: `${t('Үйлдэл')}`,
             selector:  (row) => (
                 <div className="text-center" style={{ width: "auto" }}>
                     {
@@ -95,10 +97,9 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleUpdateM
             minWidth: "200px",
             maxWidth: "200px",
             center: true,
-        },
-	]
-
+        }
+		columns.push(add_column)
+	}
 
     return columns
-
 }

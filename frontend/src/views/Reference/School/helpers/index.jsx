@@ -1,11 +1,9 @@
-import useModal from '@hooks/useModal';
 import { t } from 'i18next';
 import { Badge, UncontrolledTooltip} from 'reactstrap'
 import { Download, Edit } from 'react-feather'
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, handleDelete) {
-    const { showWarning } = useModal()
+export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, handleDelete, is_hr) {
 
     const page_count = Math.ceil(datas.length / rowsPerPage)
 
@@ -95,7 +93,11 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 			selector: (row) => row?.phone_number,
 			center: true
 		},
-		{
+	]
+
+	// Сургуультай байх эсэх
+	if(is_hr) {
+		var add_column = {
 			name: `${t('Үйлдэл')}`,
 			selector: (row) => (
 				<div className="text-center" style={{ width: "auto" }}>
@@ -110,31 +112,12 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 							<UncontrolledTooltip placement='top' target={`updateSchool${row?.id}`}>{t('Засах')}</UncontrolledTooltip>
 						</>
 					}
-					{/* // 		{
-		// 			<>
-		// 				<a role="button"
-		// 					className='ms-1'
-		// 					onClick={() => showWarning({
-		// 						header: {
-		// 							title: `${t('Бүрэлдэхүүн сургууль устгах')}`,
-		// 						},
-		// 						question: `Та  ${row?.name} устгахдаа итгэлтэй байна уу?`,
-		// 						onClick: () => handleDelete(row?.id),
-		// 						btnText: 'Устгах',
-		// 					})}
-		// 					id={`complaintListDatatableCancel${row.id}`}
-		// 				>
-		// 					<Badge color="light-danger" pill><X width={"100px"} /></Badge>
-		// 				</a>
-		// 				<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${row?.id}`} >Устгах</UncontrolledTooltip>
-		// 			</>
-		// 		} */}
 		 		</div>
 			),
 			center: true,
-		},
-	]
-
+		}
+		columns.push(add_column)
+	}
 
     return columns
 

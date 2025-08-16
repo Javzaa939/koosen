@@ -1,14 +1,10 @@
 // ** React Imports
 import { Fragment, useState, useEffect, useContext } from 'react'
 
-import { Controller, useForm } from 'react-hook-form'
-
 import { Row, Col, Card, Input, Label, CardTitle, CardHeader, Spinner, Button } from 'reactstrap'
 
 import { ChevronDown, Plus } from 'react-feather'
 import { useTranslation } from 'react-i18next'
-
-import Select from 'react-select'
 
 import DataTable from 'react-data-table-component'
 
@@ -16,7 +12,7 @@ import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import useUpdateEffect from '@hooks/useUpdateEffect'
 
-import { getPagination, ReactSelectStyles, get_emp_state } from '@utils';
+import { getPagination } from '@utils';
 import AuthContext from '@context/AuthContext'
 import SchoolContext from '@context/SchoolContext'
 
@@ -131,7 +127,7 @@ const Position = () => {
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
                         <Button
                             color='primary'
-                            disabled={Object.keys(user).length > 0 ? false : true}
+                            disabled={Object.keys(user).length > 0 && user?.is_hr ? false : true}
                             onClick={() => handleModal()}>
                             <Plus size={15} />
                             <span className='align-middle ms-50'>{t('Нэмэх')}</span>
