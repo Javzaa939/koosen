@@ -30,6 +30,13 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 			wrap: true,
 		},
 		{
+			name: `${t('Англи нэр')}`,
+			selector: (row) => <span title={row?.name}>{row?.name_eng}</span>,
+			left: true,
+			minWidth: "250px",
+			wrap: true,
+		},
+		{
 			name: `${t('Хаяг')}`,
 			selector: (row) => (
 				<>
@@ -51,6 +58,13 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 			wrap: true,
 		},
 		{
+			name: `${t('Сошиал холбоос')}`,
+			selector: (row) => row?.social,
+			center: true,
+			minWidth: "250px",
+			wrap: true,
+		},
+		{
 			name: `${t('Лого')}`,
 			selector: (row) =>
 				<Badge
@@ -58,6 +72,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 					pill
 					tag="a"
 					href={row?.logo}
+  					target="_blank"
 					id={`logo`}
 					className={row?.logo ? `` : ` opacity-25`}
 				>
@@ -80,22 +95,22 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 			selector: (row) => row?.phone_number,
 			center: true
 		},
-		// {
-		// 	name: `${t('Үйлдэл')}`,
-		// 	selector: (row) => (
-		// 		<div className="text-center" style={{ width: "auto" }}>
-		// 			{
-		// 				<>
-		// 					<a role="button"
-		// 						onClick={() => handleUpdateModal(row?.id, false, row)}
-		// 						id={`updateSchool${row?.id}`}
-		// 					>
-		// 						<Badge color="light-primary" pill><Edit width={"100px"} /></Badge>
-		// 					</a>
-		// 					<UncontrolledTooltip placement='top' target={`updateSchool${row?.id}`}>{t('Засах')}</UncontrolledTooltip>
-		// 				</>
-		// 			}
-					//{/* // 		{
+		{
+			name: `${t('Үйлдэл')}`,
+			selector: (row) => (
+				<div className="text-center" style={{ width: "auto" }}>
+					{
+						<>
+							<a role="button"
+								onClick={() => handleUpdateModal(row)}
+								id={`updateSchool${row?.id}`}
+							>
+								<Badge color="light-primary" pill><Edit width={"100px"} /></Badge>
+							</a>
+							<UncontrolledTooltip placement='top' target={`updateSchool${row?.id}`}>{t('Засах')}</UncontrolledTooltip>
+						</>
+					}
+					{/* // 		{
 		// 			<>
 		// 				<a role="button"
 		// 					className='ms-1'
@@ -114,10 +129,10 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 		// 				<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${row?.id}`} >Устгах</UncontrolledTooltip>
 		// 			</>
 		// 		} */}
-		// 		</div>
-		// 	),
-		// 	center: true,
-		// },
+		 		</div>
+			),
+			center: true,
+		},
 	]
 
 

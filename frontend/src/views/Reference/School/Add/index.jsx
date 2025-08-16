@@ -1,5 +1,5 @@
 // ** React imports
-import { Fragment, useContext, useState } from 'react';
+import { Fragment, useState } from 'react';
 
 import { X } from "react-feather";
 
@@ -26,23 +26,27 @@ import { validate } from "@utils";
 
 import { t } from 'i18next';
 
-import AuthContext from '@context/AuthContext';
-import SchoolContext from "@context/SchoolContext";
-
 import { validateSchema } from './validateSchema';
+import useToast from '@src/utility/hooks/useToast';
 
-const AddModal = ({ open, handleModal, refreshDatas}) =>{
-    const CloseBtn = (
-        <X className="cursor-pointer" size={15} onClick={handleModal} />
-    )
-    const { user } = useContext(AuthContext)
-    const { school_id } = useContext(SchoolContext)
+const AddModal = ({ open, handleModal, refreshDatas }) => {
+    const CloseBtn = <X className="cursor-pointer" size={15} onClick={handleModal} />
 
     // ** Hook
-    const { control, handleSubmit, reset, setError, formState: { errors } } = useForm(validate(validateSchema));
-
-    // states
+    const { control, handleSubmit, setError, formState: { errors } } = useForm(validate(validateSchema));
     const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
+    const addToast = useToast()
+
+    const necessaryFields = [
+        'name',
+        'name_eng',
+        'address',
+        'web',
+        'social',
+        'logo',
+        'email',
+        'phone_number',
+    ]
 
     // Api
     const schoolsApi = useApi().hrms.school
@@ -50,20 +54,25 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
     async function onSubmit(cdata) {
         cdata['logo'] = image
         const formData = new FormData()
-        Object.keys(cdata).map(key => formData.append(key, cdata[key]))
-
+        Object.keys(cdata).forEach(key => formData.append(key, cdata[key]))
         const { success, errors } = await postFetch(schoolsApi.post(formData))
-        if(success) {
-            reset()
+
+        if (success) {
             refreshDatas()
             handleModal()
         } else {
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in errors) {
-                setError(key, { type: 'custom', message:  errors[key]});
+            for (let key in errors) setError(key, { type: 'custom', message: errors[key] })
+
+            const notFormKeys = Object.keys(errors).filter(field => !necessaryFields.includes(field))
+            const notFormErrors = {}
+            notFormKeys.forEach(key => notFormErrors[key] = errors[key])
+
+            if (notFormKeys.length) {
+                console.warn(notFormErrors);
+                addToast({ type: 'warning', text: 'Та түр хүлээгээд дахин оролдоно уу' })
             }
         }
-
 	}
 
     // #region Зураг авах функц
@@ -93,7 +102,7 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                     postLoading &&
                         <div className='suspense-loader'>
                             <Spinner size='bg'/>
-                            <span className='ms-50'>Түр хүлээнэ үү...</span>
+                            <span className='ms-50'>{t('Түр хүлээнэ үү')}...</span>
                         </div>
                 }
 
@@ -214,7 +223,7 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                             {errors.social && <FormFeedback className='d-block'>{t(errors.social.message)}</FormFeedback>}
                         </Col>
                         <Col lg={12} xs={12}>
-                            <Label className="form-label" for="email">
+                            <Label className="form-label" for="logo">
                                 {t('Лого')}
                             </Label>
                             <Controller
@@ -279,12 +288,12 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                             />
                             {errors.phone_number && <FormFeedback className='d-block'>{errors.phone_number.message}</FormFeedback>}
                         </Col>
-                        <Col md={12}>
-                            <Button className="me-2" color="primary" type="submit" disabled={postLoading}>
+                        <Col className='text-center mt-2' md={12}>
+                            <Button className="me-2" size='sm' color="primary" type="submit" disabled={postLoading}>
                                 {postLoading &&<Spinner size='sm' className='me-1'/>}
                                 {t('Хадгалах')}
                             </Button>
-                            <Button color="secondary" type="reset" outline  onClick={handleModal}>
+                            <Button size='sm' color="secondary" type="reset" outline onClick={handleModal}>
                                 {t('Буцах')}
                             </Button>
                         </Col>

@@ -13,33 +13,36 @@ import {
 import { t } from 'i18next';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
-import { validateSchema } from './validateSchema'
 import { useForm, Controller } from "react-hook-form";
 import React, { Fragment, useEffect, useState} from 'react'
-import { convertDefaultValue , validate } from "@utils"
 import { X } from "react-feather";
 
-const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
+const UpdateModal = ({ open, handleEdit, refreshDatas, datas }) => {
+    const editId = datas?.id
+
     const CloseBtn = (
         <X className="cursor-pointer" size={15} onClick={handleEdit} />
     )
+
     // Loader
     const {isLoading, fetchData } = useLoader({})
 
-    const { control, handleSubmit, setValue, reset, setError, formState: { errors } } = useForm();
+    const { control, handleSubmit, setValue, setError, formState: { errors } } = useForm();
 
     // Api
-    const getSchoolApi = useApi().hrms.subschool
+    const getSchoolApi = useApi().hrms.school
 
     async function getDatas() {
         if(editId) {
             const { success, data } = await fetchData(getSchoolApi.getOne(editId))
+
             if(success) {
                 // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
                 if(data === null) return
-                for(let key in data) {
-                    if(data[key] !== null)
-                        setValue(key, data[key])
+
+                for (const key in data) {
+                    if (key === 'logo') continue
+                    if(data[key] !== null) setValue(key, data[key])
                     else setValue(key, '')
                 }
             }
@@ -52,20 +55,37 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
 
     async function onSubmit(cdata) {
         if(editId) {
-            cdata = convertDefaultValue(cdata)
-            const { success, error } = await fetchData(getSchoolApi.put(cdata, editId))
+            cdata['logo'] = image
+            const formData = new FormData()
+            Object.keys(cdata).forEach(key => formData.append(key, cdata[key]))
+            const { success, errors } = await fetchData(getSchoolApi.put(formData, editId))
+
             if(success) {
                 refreshDatas()
                 handleEdit()
-            }
-            else {
+            } else {
                 /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in error) {
-                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
+                for (let key in errors) {
+                    setError(errors[key], { type: 'custom', message:  errors[key]});
                 }
             }
         }
 	}
+
+    // #region Зураг авах функц
+    const [image, setImage] = useState('')
+
+	const onChange = (e) => {
+		const reader = new FileReader()
+        const files = e.target.files
+
+        if (files.length > 0) {
+            setImage(files[0])
+            reader.readAsDataURL(files[0])
+        }
+	}
+    // #endregion
+
 	return (
         <Fragment>
             <Modal
@@ -79,7 +99,7 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
                     isLoading &&
                         <div className='suspense-loader'>
                             <Spinner size='bg'/>
-                            <span className='ms-50'>Түр хүлээнэ үү...</span>
+                            <span className='ms-50'>{t('Түр хүлээнэ үү')}...</span>
                         </div>
                 }
 
@@ -116,47 +136,24 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
                             {errors.name && <FormFeedback className='d-block'>{t(errors.name.message)}</FormFeedback>}
                         </Col>
                         <Col md={12}>
-                            <Label className="form-label" for="org_code">
-                                {t('Сургуулийн код')}
+                            <Label className="form-label" for="name_eng">
+                                {t('Сургуулийн англи нэр')}
                             </Label>
                             <Controller
                                 defaultValue=''
                                 control={control}
-                                id="org_code"
-                                name="org_code"
+                                id="name_eng"
+                                name="name_eng"
                                 render={({ field }) => (
                                     <Input
-                                        {...field}
-                                        id="org_code"
+                                        id ="name_eng"
                                         bsSize="sm"
-                                        placeholder={t('Сургуулийн код')}
+                                        placeholder={t('сургуулийн англи нэр')}
+                                        {...field}
                                         type="text"
-                                        maxLength={2}
                                     />
                                 )}
                             />
-                            {errors.org_code && <FormFeedback className='d-block'>{t(errors.org_code.message)}</FormFeedback>}
-                        </Col>
-                        <Col md={12}>
-                            <Label className="form-label" for="social">
-                                {t('Сургуулийн цахим шуудан')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                id="social"
-                                name="social"
-                                render={({ field }) => (
-                                    <Input
-                                        {...field}
-                                        id="social"
-                                        bsSize="sm"
-                                        placeholder={t('Сургуулийн цахим шуудан')}
-                                        type="email"
-                                    />
-                                )}
-                            />
-                            {errors.social && <FormFeedback className='d-block'>{t(errors.social.message)}</FormFeedback>}
                         </Col>
                         <Col md={12}>
                             <Label className="form-label" for="address">
@@ -180,185 +177,119 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
                             {errors.address && <FormFeedback className='d-block'>{t(errors.address.message)}</FormFeedback>}
                         </Col>
                         <Col md={12}>
-                            <Label className="form-label" for="name_eng">
-                                {t('Сургуулийн англи нэр')}
+                            <Label className="form-label" for="web">
+                                {t('Сургуулийн веб')}
                             </Label>
                             <Controller
                                 defaultValue=''
                                 control={control}
-                                id="name_eng"
-                                name="name_eng"
+                                id="web"
+                                name="web"
                                 render={({ field }) => (
                                     <Input
-                                        id ="name_eng"
-                                        bsSize="sm"
-                                        placeholder={t('сургуулийн англи нэр')}
                                         {...field}
-                                        type="text"
-                                        invalid={errors.name_eng && true}
+                                        id="web"
+                                        bsSize="sm"
+                                        placeholder={t('Сургуулийн веб')}
+                                        type="textarea"
                                     />
                                 )}
                             />
-                            {errors.name_eng && <FormFeedback className='d-block'>{t(errors.name_eng.message)}</FormFeedback>}
+                            {errors.web && <FormFeedback className='d-block'>{t(errors.web.message)}</FormFeedback>}
                         </Col>
                         <Col md={12}>
-                            <Label className="form-label" for="name_uig">
-                                {t('Сургуулийн уйгаржин нэр')}
+                            <Label className="form-label" for="social">
+                                {t('Сошиал холбоос')}
                             </Label>
                             <Controller
                                 defaultValue=''
                                 control={control}
-                                id="name_uig"
-                                name="name_uig"
+                                id="social"
+                                name="social"
                                 render={({ field }) => (
                                     <Input
                                         {...field}
-                                        id ="name_uig"
+                                        id="social"
                                         bsSize="sm"
-                                        placeholder={t('сургуулийн уйгаржин нэр')}
-                                        type="text"
-                                        style={{ fontFamily: 'mongolianScript', fontSize: '15px'}}
-                                        invalid={errors.name_uig && true}
+                                        placeholder={t('Сошиал холбоос')}
+                                        type="textarea"
                                     />
                                 )}
                             />
-                            {errors.name_uig && <FormFeedback className='d-block'>{t(errors.name_uig.message)}</FormFeedback>}
+                            {errors.social && <FormFeedback className='d-block'>{t(errors.social.message)}</FormFeedback>}
                         </Col>
-                        <Col md={12}>
-                            <Label className="form-label" for="zahiral_name">
-                                {t('Захиралын нэр')}
+                        <Col lg={12} xs={12}>
+                            <Label className="form-label" for="logo">
+                                {t('Лого')}
                             </Label>
                             <Controller
-                                defaultValue=''
                                 control={control}
-                                id="zahiral_name"
-                                name="zahiral_name"
-                                render={({ field }) => (
-                                    <Input
-                                        id ="zahiral_name"
-                                        bsSize="sm"
-                                        placeholder={t('захиралын нэр')}
-                                        {...field}
-                                        type="text"
-                                        invalid={errors.zahiral_name && true}
-                                    />
-                                )}
-                            />
-                        </Col>
-                        <Col md={12}>
-                            <Label className="form-label" for="zahiral_name_eng">
-                                {t('Захиралын англи нэр')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                id="zahiral_name_eng"
-                                name="zahiral_name_eng"
-                                render={({ field }) => (
-                                    <Input
-                                        id ="zahiral_name_eng"
-                                        bsSize="sm"
-                                        placeholder={t('захиралын англи нэр')}
-                                        {...field}
-                                        type="text"
-                                        invalid={errors.zahiral_name_eng && true}
-                                    />
-                                )}
+                                id="logo"
+                                name="logo"
+                                render={({ field }) => {
+                                    return (
+                                        <Input
+                                            {...field}
+                                            type='file'
+                                            id='logo'
+                                            name='logo'
+                                            onChange={(e) => onChange(e)}
+                                            accept='image/*'
+                                        />
+                                    )
+                                }}
                             />
                         </Col>
-                        <Col md={12}>
-                            <Label className="form-label" for="zahiral_name_uig">
-                                {t('Захиралын уйгаржин нэр')}
+                        <Col lg={12} xs={12}>
+                            <Label className="form-label" for="email">
+                                {t('И-мэйл')}
                             </Label>
                             <Controller
                                 defaultValue=''
                                 control={control}
-                                id="zahiral_name_uig"
-                                name="zahiral_name_uig"
+                                id="email"
+                                name="email"
                                 render={({ field }) => (
                                     <Input
-                                        id ="zahiral_name_uig"
+                                        id ="email"
                                         bsSize="sm"
-                                        placeholder={t('захиралын уйгаржин нэр')}
+                                        placeholder={t("И-мэйл")}
                                         {...field}
-                                        type="text"
-                                        style={{ fontFamily: 'mongolianScript', fontSize: '15px'}}
-                                        invalid={errors.zahiral_name_uig && true}
+                                        type="email"
+                                        invalid={errors.email && true}
                                     />
                                 )}
                             />
-                            {errors.zahiral_name_uig && <FormFeedback className='d-block'>{t(errors.zahiral_name_uig.message)}</FormFeedback>}
+                            {errors.email && <FormFeedback className='d-block'>{errors.email.message}</FormFeedback>}
                         </Col>
-                        <Col md={12}>
-                            <Label className="form-label" for="erdem_tsol_name">
-                                {t('Эрдмийн цол')}
+                        <Col lg={12} xs={12}>
+                            <Label className="form-label" for="phone_number">
+                                {t('Утасны дугаар')}
                             </Label>
                             <Controller
                                 defaultValue=''
                                 control={control}
-                                id="erdem_tsol_name"
-                                name="erdem_tsol_name"
+                                id="phone_number"
+                                name="phone_number"
                                 render={({ field }) => (
                                     <Input
-                                        id ="erdem_tsol_name"
+                                        id ="phone_number"
                                         bsSize="sm"
-                                        placeholder={t('цол')}
+                                        placeholder={t("Утасны дугаар")}
                                         {...field}
-                                        type="text"
-                                        invalid={errors.erdem_tsol_name && true}
+                                        type="number"
+                                        invalid={errors.phone_number && true}
                                     />
                                 )}
                             />
-                            {errors.erdem_tsol_name && <FormFeedback className='d-block'>{t(errors.erdem_tsol_name.message)}</FormFeedback>}
-                        </Col>
-                        <Col md={12}>
-                            <Label className="form-label" for="erdem_tsol_name_eng">
-                                {t('Эрдмийн цол англи нэр')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                id="erdem_tsol_name_eng"
-                                name="erdem_tsol_name_eng"
-                                render={({ field }) => (
-                                    <Input
-                                        id ="erdem_tsol_name_eng"
-                                        bsSize="sm"
-                                        placeholder={t('Эрдмийн цол англи нэр')}
-                                        {...field}
-                                        type="text"
-                                        invalid={errors.erdem_tsol_name_eng && true}
-                                    />
-                                )}
-                            />
-                            {errors.erdem_tsol_name_eng && <FormFeedback className='d-block'>{t(errors.erdem_tsol_name_eng.message)}</FormFeedback>}
-                        </Col>
-                        <Col md={12}>
-                            <Label className="form-label" for="erdem_tsol_name_uig">
-                                {t('Эрдмийн цол уйгаржин нэр')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                id="erdem_tsol_name_uig"
-                                name="erdem_tsol_name_uig"
-                                render={({ field }) => (
-                                    <Input
-                                        id ="erdem_tsol_name_uig"
-                                        bsSize="sm"
-                                        placeholder={t('цол уйгаржин нэр')}
-                                        {...field}
-                                        type="text"
-                                        style={{ fontFamily: 'mongolianScript', fontSize: '15px'}}
-                                        invalid={errors.erdem_tsol_name_uig && true}
-                                    />
-                                )}
-                            />
-                            {errors.erdem_tsol_name_uig && <FormFeedback className='d-block'>{t(errors.erdem_tsol_name_uig.message)}</FormFeedback>}
+                            {errors.phone_number && <FormFeedback className='d-block'>{errors.phone_number.message}</FormFeedback>}
                         </Col>
                         <Col className='text-center mt-2' md={12}>
                             <Button className="me-2" size='sm' color="primary" type="submit">
                                 {t('Хадгалах')}
+                            </Button>
+                            <Button size='sm' color="secondary" type="reset" outline onClick={handleEdit}>
+                                {t('Буцах')}
                             </Button>
                         </Col>
                     </Row>
