@@ -483,7 +483,7 @@ class Employee(models.Model):
 
     @staticmethod
     def exactly_our_employees(request):
-        return Employee.objects.filter(**request.exactly_org_filter)
+        return Employee.objects.filter(**request.org_filter)
 
     @staticmethod
     def get_filter(request):

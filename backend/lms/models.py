@@ -2859,6 +2859,7 @@ class PermissionsTeacherScore(models.Model):
     class Meta:
         unique_together = ('lesson_year', 'lesson_season', 'teacher_scoretype')
 
+
 class PermissionsStudentChoice(models.Model):
     """ Оюутны хичээл сонголтыг төлбөрөөс хамааралгүйгээр хийх эрх"""
 

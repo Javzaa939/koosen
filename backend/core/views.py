@@ -304,7 +304,7 @@ class SchoolAPIView(
             data = self.retrieve(request, pk).data
             return request.send_data(data)
 
-        org = getattr(request, 'exactly_org_filter', {}).get('org')
+        org = getattr(request, 'org_filter', {}).get('org')
 
         if org:
             self.queryset = self.queryset.filter(id=org.id if hasattr(org, "id") else org)
@@ -482,7 +482,7 @@ class DepartmentAPIView(
     def get(self, request, pk=None):
         " Салбарын жагсаалт "
 
-        org = getattr(request, 'exactly_org_filter', {}).get('org')
+        org = getattr(request, 'org_filter', {}).get('org')
 
         if org:
             self.queryset = self.queryset.filter(org=org)
@@ -500,7 +500,7 @@ class DepartmentAPIView(
         self.serializer_class = DepartmentPostSerailizer
         datas = request.data
 
-        org = getattr(request, 'exactly_org_filter', {}).get('org')
+        org = getattr(request, 'org_filter', {}).get('org')
 
         if not org:
             return request.send_error("ERR_002", "Салбар тэнхим нэмэх эрхгүй байна")
@@ -590,7 +590,7 @@ class DepartmentListAPIView(
     def get_queryset(self):
         queryset = self.queryset
         school = self.request.query_params.get('school')
-        org = getattr(self.request, 'exactly_org_filter', {}).get('org')
+        org = getattr(self.request, 'org_filter', {}).get('org')
 
         if org:
             queryset = queryset.filter(org=org)
@@ -653,7 +653,7 @@ class SubSchoolAPIView(
         " дэд сургуулийн жагсаалт "
         self.serializer_class = SubSchoolListSerailizer
 
-        org = getattr(request, 'exactly_org_filter', {}).get('org')
+        org = getattr(request, 'org_filter', {}).get('org')
         sub_school = request.query_params.get("school")
 
         if org:
@@ -675,7 +675,7 @@ class SubSchoolAPIView(
         data = request.data
         data['is_school'] = True
 
-        org = getattr(request, 'exactly_org_filter', {}).get('org')
+        org = getattr(request, 'org_filter', {}).get('org')
 
         if not org:
             return request.send_error("ERR_002", "Салбар бүрэлдэхүүн нэмэх эрхгүй байна")
@@ -853,7 +853,7 @@ class TeacherApiView(
         teacher_queryset = queryset.all().values_list('user', flat=True)
         qs_employee_user = Employee.objects.filter(user__in=list(teacher_queryset))
 
-        org = getattr(self.request, 'exactly_org_filter', {}).get('org')
+        org = getattr(self.request, 'org_filter', {}).get('org')
 
         if org:
             self.queryset = self.queryset.filter(org=org)
@@ -895,7 +895,7 @@ class TeacherApiView(
     def get(self, request):
         " нийт багшийн жагсаалт"
 
-        org = getattr(request, 'exactly_org_filter', {}).get('org')
+        org = getattr(request, 'org_filter', {}).get('org')
 
         if org:
             self.queryset = self.queryset.filter(org=org)
@@ -923,7 +923,7 @@ class TeacherListApiView(
         school = self.request.query_params.get('school')
         department = self.request.query_params.get('department')
 
-        org = getattr(request, 'exactly_org_filter', {}).get('org')
+        org = getattr(request, 'org_filter', {}).get('org')
 
         if org:
             self.queryset = self.queryset.filter(org=org)
@@ -971,7 +971,7 @@ class TeacherAllListApiView(
         school = self.request.query_params.get('school')
         department = self.request.query_params.get('department')
 
-        org = getattr(request, 'exactly_org_filter', {}).get('org')
+        org = getattr(request, 'org_filter', {}).get('org')
 
         if org:
             self.queryset = self.queryset.filter(org=org)
@@ -1001,7 +1001,7 @@ class TeacherListSubschoolApiView(
     def get(self, request):
         school = self.request.query_params.get('school')
 
-        org = getattr(request, 'exactly_org_filter', {}).get('org')
+        org = getattr(request, 'org_filter', {}).get('org')
 
         if org:
             self.queryset = self.queryset.filter(org=org)
@@ -1165,7 +1165,7 @@ class AllOrgPositionListAPIView(
 
     @login_required()
     def get(self, request):
-        org = getattr(request, 'exactly_org_filter', {}).get('org')
+        org = getattr(request, 'org_filter', {}).get('org')
 
         if org:
             self.queryset = self.queryset.filter(org=org)
@@ -1194,7 +1194,7 @@ class OrgPositionListAPIView(
 
     @login_required()
     def get(self, request, pk=None):
-        org = getattr(request, 'exactly_org_filter', {}).get('org')
+        org = getattr(request, 'org_filter', {}).get('org')
 
         if org:
             self.queryset = self.queryset.filter(org=org)
@@ -1209,7 +1209,7 @@ class OrgPositionListAPIView(
     @login_required()
     def post(self, request):
 
-        org = getattr(request, 'exactly_org_filter', {}).get('org')
+        org = getattr(request, 'org_filter', {}).get('org')
 
         if not org:
             return request.send_error("ERR_002", "Албан тушаал нэмэх эрхгүй байна")

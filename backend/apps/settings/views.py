@@ -1751,7 +1751,7 @@ class RolesAPIView(
         """ Role жагсаалт
         """
 
-        org = getattr(request, 'exactly_org_filter', {}).get('org')
+        org = getattr(request, 'org_filter', {}).get('org')
 
         if org:
             self.queryset = self.queryset.filter(org=org)
@@ -1766,7 +1766,7 @@ class RolesAPIView(
         """ Role үүсгэх
         """
 
-        org = getattr(request, 'exactly_org_filter', {}).get('org')
+        org = getattr(request, 'org_filter', {}).get('org')
 
         if not org:
             return request.send_error("ERR_002", "Роль үүсгэх эрхгүй байна")
