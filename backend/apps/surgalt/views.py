@@ -163,6 +163,10 @@ class LessonStandartAPIView(
 
         department = request.query_params.get('department')
         category = request.query_params.get('category')
+        org = getattr(request, 'org_filter', {}).get('org')
+
+        if org:
+            self.queryset = self.queryset.filter(school__org=org)
 
         if department:
             self.queryset = self.queryset.filter(department=department)
@@ -6273,6 +6277,11 @@ class TestTeacherApiView(
         sorting = self.request.query_params.get('sorting')
         is_season = self.request.query_params.get('season')
         stype = self.request.query_params.get('type')
+
+        org = getattr(self.request, 'org_filter', {}).get('org')
+
+        if org:
+            queryset = queryset.filter(org=org)
 
         # Бүрэлдэхүүн сургууль
         if sub_org:

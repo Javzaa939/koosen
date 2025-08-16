@@ -2379,12 +2379,11 @@ class TimeTableNewAPIView(
             ELSE ''
             END AS type_name,
             t.group,
-            ta.group_list,
-            public.get_time(tt.id) as time
+            ta.group_list
             FROM lms_teachercreditvolumeplan tt
             LEFT JOIN lms_lessonstandart ls
             ON tt.lesson_id = ls.id
-            LEFT JOIN core_userinfo cu
+            LEFT JOIN core_teachers cu
             ON tt.teacher_id = cu.id,
             LATERAL (
                 SELECT ARRAY(
@@ -2432,15 +2431,14 @@ class TimeTableNewAPIView(
             END AS type_name,
             t.group,
             ta.group_list,
-            (SELECT  case when COUNT(*)>0 THEN True ELSE False end gg FROM lms_scoreregister  ls WHERE ls.lesson_id = tt.lesson_id and ls.teacher_id = tt.teacher_id and lesson_year='{year}' and lesson_season_id={season})  as is_score,
-            public.get_color(tt.color) as textColor
+            (SELECT  case when COUNT(*)>0 THEN True ELSE False end gg FROM lms_scoreregister  ls WHERE ls.lesson_id = tt.lesson_id and ls.teacher_id = tt.teacher_id and lesson_year='{year}' and lesson_season_id={season})  as is_score
 
             FROM lms_timetable tt
             LEFT JOIN lms_lessonstandart ls
             ON tt.lesson_id = ls.id
             LEFT JOIN lms_room r
             ON tt.room_id = r.id
-            LEFT JOIN core_userinfo cu
+            LEFT JOIN core_teachers cu
             ON tt.teacher_id = cu.id,
             LATERAL (
                 SELECT ARRAY(

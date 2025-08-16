@@ -403,12 +403,6 @@ class SchoolAPIView(
                 transaction.savepoint_rollback(sid)
                 return request.send_error_valid(user_serializer.errors)
 
-            user_serializer = UserFirstRegisterSerializer(data=request.data)
-
-            if not user_serializer.is_valid():
-                transaction.savepoint_rollback(sid)
-                return request.send_error_valid(user_serializer.errors)
-
             user = user_serializer.save()
 
             #  хоосон userinfo үүсгэх

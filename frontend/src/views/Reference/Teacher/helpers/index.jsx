@@ -88,7 +88,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, h
             selector:  (row) => (
                 <div className="text-center" style={{ width: "auto" }}>
                     {
-						user?.permissions?.includes('lms-reference-teacher-update')
+						user?.permissions?.includes('lms-reference-teacher-update') || user?.is_hr
 						&&
                         <>
                             <a role="button"
@@ -101,7 +101,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, h
 						</>
                     }
 					{
-						user?.permissions?.includes('lms-reference-teacher-delete')
+						user?.permissions?.includes('lms-reference-teacher-delete') || user?.is_hr
 						&&
 						<>
 							<a role="button"
@@ -122,7 +122,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, h
 						</>
 					}
 					{
-						(user.permissions.includes('lms-subschools-password-update')) &&
+						(user.permissions.includes('lms-subschools-password-update')) || user?.is_hr &&
                         <>
                             <a
 								role="button"

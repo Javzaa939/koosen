@@ -37,6 +37,9 @@ const AddModal = ({ open, handleModal, refreshDatas }) => {
     const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
     const addToast = useToast()
 
+    // #region Зураг авах функц
+    const [image, setImage] = useState('')
+
     const necessaryFields = [
         'name',
         'name_eng',
@@ -62,7 +65,7 @@ const AddModal = ({ open, handleModal, refreshDatas }) => {
             handleModal()
         } else {
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in errors) setError(key, { type: 'custom', message: errors[key] })
+            for (let key in errors) setError(key, { type: 'custom', message: errors[key][0] })
 
             const notFormKeys = Object.keys(errors).filter(field => !necessaryFields.includes(field))
             const notFormErrors = {}
@@ -74,9 +77,6 @@ const AddModal = ({ open, handleModal, refreshDatas }) => {
             }
         }
 	}
-
-    // #region Зураг авах функц
-    const [image, setImage] = useState('')
 
 	const onChange = (e) => {
 		const reader = new FileReader()
@@ -155,9 +155,11 @@ const AddModal = ({ open, handleModal, refreshDatas }) => {
                                         placeholder={t('сургуулийн англи нэр')}
                                         {...field}
                                         type="text"
+                                        invalid={errors.name_eng && true}
                                     />
                                 )}
                             />
+                            {errors.name_eng && <FormFeedback className='d-block'>{t(errors.name_eng.message)}</FormFeedback>}
                         </Col>
                         <Col md={12}>
                             <Label className="form-label" for="address">
@@ -173,6 +175,7 @@ const AddModal = ({ open, handleModal, refreshDatas }) => {
                                         {...field}
                                         id="address"
                                         bsSize="sm"
+                                        invalid={errors.address && true}
                                         placeholder={t('Сургуулийн хаяг')}
                                         type="textarea"
                                     />
@@ -196,6 +199,7 @@ const AddModal = ({ open, handleModal, refreshDatas }) => {
                                         bsSize="sm"
                                         placeholder={t('Сургуулийн веб')}
                                         type="textarea"
+                                        invalid={errors.web && true}
                                     />
                                 )}
                             />
@@ -217,6 +221,7 @@ const AddModal = ({ open, handleModal, refreshDatas }) => {
                                         bsSize="sm"
                                         placeholder={t('Сошиал холбоос')}
                                         type="textarea"
+                                        invalid={errors.social && true}
                                     />
                                 )}
                             />
@@ -243,6 +248,8 @@ const AddModal = ({ open, handleModal, refreshDatas }) => {
                                         )
                                     }}
                             />
+                            {errors.logo && <FormFeedback className='d-block'>{t(errors.logo.message)}</FormFeedback>}
+
                         </Col>
                         <Col lg={12} xs={12}>
                             <Label className="form-label" for="email">
