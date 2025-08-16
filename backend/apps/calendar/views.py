@@ -33,6 +33,10 @@ class LearningCalendarAPIView(
         " Сургалтын хуанлийн жагсаалт "
 
         scopeType = self.request.query_params.getlist('scopeType')
+        org = getattr(request, 'org_filter', {}).get('org')
+
+        if org:
+            self.queryset = self.queryset.filter(org=org)
 
         return_datas = dict()
         calendar_qs = self.queryset
@@ -74,6 +78,12 @@ class LearningCalendarAPIView(
         end = request_data.get('end')
         description = request_data.get('description')
         action_type = request_data.get('action_type')
+        org = getattr(request, 'org_filter', {}).get('org')
+
+        if not org:
+            return request.send_error("ERR_002", "Үйл ажиллагаа нэмэх эрхгүй байна")
+
+        request_data["org"] = org.id
 
         request_data = remove_key_from_dict(request_data, 'scope')
 
@@ -88,15 +98,16 @@ class LearningCalendarAPIView(
                             scope_id = scope.get('id')
                             scope_color = scope.get('color')
                             LearningCalendar.objects.create(
-                                    end=end,
-                                    title=title,
-                                    start=start,
-                                    scope=scope_id,
-                                    color=scope_color,
-                                    organiser=organiser,
-                                    description=description,
-                                    action_type=action_type,
-                                )
+                                end=end,
+                                org_id=org.id,
+                                title=title,
+                                start=start,
+                                scope=scope_id,
+                                color=scope_color,
+                                organiser=organiser,
+                                description=description,
+                                action_type=action_type,
+                            )
                     else:
                         self.create(request).data
 

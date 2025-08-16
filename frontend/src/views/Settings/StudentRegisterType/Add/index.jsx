@@ -143,7 +143,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, editId }) => {
                         </Col>
                         <Col md={12}>
                             <Label className="form-label" for="status_name_eng">
-                                {t('Нэр')}
+                                {t('Англи нэр')}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -155,7 +155,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, editId }) => {
                                         {...field}
                                         id="status_name_eng"
                                         bsSize="sm"
-                                        placeholder={t('Нэр')}
+                                        placeholder={t('Англи нэр')}
                                         type="text"
                                         invalid={errors.status_name_eng && true}
                                     />

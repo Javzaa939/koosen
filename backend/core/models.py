@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import ArrayField
 
+from django.apps import apps
+
 from .managers import EmployeeManager
 from .managers import SalbarManager
 from .managers import SubOrgManager
@@ -105,6 +107,45 @@ class Schools(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        # First save the School itself (so it has an ID)
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+
+        if is_new:
+            StudentRegister = apps.get_model('lms', 'StudentRegister')
+            Season = apps.get_model('lms', 'Season')
+
+            static_student_register_data = [
+                {'name': 'Суралцаж буй', 'code': 1},
+                {'name': 'Төгссөн', 'code': 2},
+                {'name': 'Жилийн чөлөө авсан', 'code': 3},
+                {'name': 'Сургуулиас гарсан', 'code': 4},
+                {'name': 'Шилжсэн', 'code': 5},
+                {'name': 'Сурахгүй байгаа', 'code': 6},
+            ]
+
+            static_season_data = [
+                {'season_code': 1, 'season_name': 'Намар'},
+                {'season_code': 2, 'season_name': 'Хавар'}
+            ]
+
+            # Create StudentRegister if not exists
+            for value in static_student_register_data:
+                StudentRegister.objects.get_or_create(
+                    org=self,
+                    code=value['code'],
+                    defaults={'name': value['name']}
+                )
+
+            # Create Season if not exists
+            for value in static_season_data:
+                Season.objects.get_or_create(
+                    org=self,
+                    season_code=value['season_code'],
+                    defaults={'season_name': value['season_name']}
+                )
 
 
 class BankInfo(models.Model):

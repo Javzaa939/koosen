@@ -4,6 +4,7 @@ import { Row, Label, Col, Input, Spinner } from 'reactstrap';
 import useApi from '@hooks/useApi';
 
 import { ChevronRight, Square, CheckSquare, MinusSquare } from 'react-feather';
+import TreeView, { flattenTree } from 'react-accessible-treeview'
 
 import { t } from 'i18next';
 import useLoader from '@hooks/useLoader';

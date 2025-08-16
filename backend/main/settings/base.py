@@ -140,6 +140,7 @@ MIDDLEWARE = [
     'main.middleware.success_rp.success_rp',
     'main.middleware.error_handler.ErrorHandlerMiddleware',
     'main.middleware.requestLog.RequestLogMiddleware',
+    "main.middleware.request_utiles.RequestMiddleware",
 ]
 
 ROOT_URLCONF = 'main.urls'

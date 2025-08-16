@@ -16,6 +16,30 @@ import { get_par_from_strTime } from '@utils';
 import SchoolContext from '@context/SchoolContext';
 import './style.css';
 
+import styled from "@emotion/styled";
+
+export const StyleWrapper = styled.div`
+    .fc-timeline-event-harness  {
+        top: 2px !important;
+    },
+    .fc-license-message {
+        z-index: 11 !important;
+        display: none !important
+    },
+    .fc-event-title {
+        font-size: 9px;
+        white-space: pre-wrap;
+    }
+    .fc-resource-timeline table tbody tr .fc-datagrid-cell div { height: 33px !important; }
+        .fc .fc-timeline-overlap-enabled .fc-timeline-lane-frame .fc-timeline-events{
+            padding-bottom: 0 !important;
+            height: 33px !important;
+        }
+    .fc-timeline-event{
+        padding: 4px 1px !important;
+    }
+`;
+
 const Calendar1 = (props) => {
     // ** Refs
     const calendarRef = useRef(null);

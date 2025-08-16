@@ -14,6 +14,8 @@ from shortuuidfield import ShortUUIDField
 
 from django.contrib.postgres.fields import ArrayField
 
+from .managers import SystemSettingsManager
+
 from main.utils.function.utils import get_fullName
 from main.utils.file import (
     remove_folder,
@@ -25,7 +27,8 @@ from main.utils.file import (
 class ProfessionalDegree(models.Model):
     """ Боловсролын зэрэг """
 
-    degree_code = models.CharField(unique=True, max_length=255)
+    org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
+    degree_code = models.CharField(max_length=255)
     degree_name = models.CharField(max_length=255, verbose_name="Зэргийн нэр")
     degree_eng_name = models.CharField(max_length=255, null=True, verbose_name="Зэргийн англи нэр")
     degree_uig_name = models.CharField(max_length=255, null=True, verbose_name="Зэргийн уйгаржин нэр")
@@ -38,7 +41,7 @@ class Learning(models.Model):
     """ Суралцах хэлбэр """
 
     org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
-    learn_code = models.IntegerField(unique=True)
+    learn_code = models.IntegerField()
     learn_name = models.CharField(max_length=255, verbose_name="Суралцах хэлбэрийн нэр")
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -49,7 +52,7 @@ class StudentRegister(models.Model):
     """ Оюутны бүртгэлийн хэлбэр """
 
     org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
-    code  = models.IntegerField(unique=True)
+    code  = models.IntegerField()
     name = models.CharField(max_length=255, verbose_name="Бүртгэлийн хэлбэрийн нэр")
     status_name_eng = models.CharField(max_length=255, verbose_name="Бүртгэлийн англи хэлбэрийн нэр", null=True)
 
@@ -61,7 +64,7 @@ class LessonCategory(models.Model):
     """ Хичээлийн ангилал """
 
     org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
-    category_code = models.IntegerField(unique=True)
+    category_code = models.IntegerField()
     category_name = models.CharField(max_length=255, verbose_name="Хичээлийн ангиллын нэр")
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -72,7 +75,7 @@ class LessonType(models.Model):
     """ Хичээлийн төрөл """
 
     org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
-    type_code = models.IntegerField(unique=True)
+    type_code = models.IntegerField()
     type_name = models.CharField(max_length=255, verbose_name="Хичээлийн төрлийн нэр")
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -83,7 +86,7 @@ class LessonLevel(models.Model):
     """  Хичээлийн түвшин """
 
     org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
-    level_code = models.IntegerField(unique=True)
+    level_code = models.IntegerField()
     level_name = models.CharField(max_length=255, verbose_name=" Хичээлийн түвшний нэр")
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -94,7 +97,7 @@ class LessonGroup(models.Model):
     """ Хичээлийн бүлэг """
 
     org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
-    group_code = models.IntegerField(unique=True)
+    group_code = models.IntegerField()
     group_name = models.CharField(max_length=255, verbose_name="Хичээлийн бүлгийн нэр")
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -105,7 +108,7 @@ class Season(models.Model):
     """ Улирал """
 
     org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
-    season_code = models.IntegerField(unique=True)
+    season_code = models.IntegerField()
     season_name = models.CharField(max_length=255, verbose_name="Улирлын нэр")
     season_name_eng = models.CharField(max_length=255, verbose_name="Улирлын англи нэр", null=True)
 
@@ -117,7 +120,7 @@ class Score(models.Model):
     """ Дүнгийн бүртгэл """
 
     org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
-    score_code = models.IntegerField(unique=True)
+    score_code = models.IntegerField()
     score_max = models.FloatField(verbose_name="Дүнгийн доод оноо")
     score_min = models.FloatField(verbose_name="Дүнгийн дээд оноо")
     gpa = models.FloatField(verbose_name="Голч дүн")
@@ -574,8 +577,10 @@ class SystemSettings(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    objects = SystemSettingsManager()
+
     class Meta:
-        unique_together = ('active_lesson_year', 'active_lesson_season')
+        unique_together = ('active_lesson_year', 'active_lesson_season', 'org')
 
 
 # -------------------------------- Оюутны бүртгэл --------------------

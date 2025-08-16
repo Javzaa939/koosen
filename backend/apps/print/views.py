@@ -239,6 +239,10 @@ class GroupListAPIView(
 
         is_season = self.request.query_params.get('is_season')
         school = self.request.query_params.get('school')
+        org = getattr(self.request, 'org_filter', {}).get('org')
+
+        if org:
+            queryset = queryset.filter(school__org=org)
 
         if school:
             queryset = queryset.filter(school=school)
@@ -295,6 +299,7 @@ class GroupListNoLimitAPIView(
         chosen_season = request.GET.getlist('chosen_season')
         is_season = request.query_params.get('is_season')
         student_qs = Student.objects.all()
+        org = getattr(self.request, 'org_filter', {}).get('org')
 
         if is_season and str2bool(is_season):
             # улиралаар хайлт хийнэ
@@ -306,6 +311,10 @@ class GroupListNoLimitAPIView(
 
         group = request.query_params.get('group') # 45
         lesson_qs = LessonStandart.objects.all().values("id", "code", "name", "kredit")
+
+        if org:
+            self.queryset = self.queryset.filter(student__group__org=org)
+            lesson_qs = lesson_qs.filter(school__org=org)
 
         if group:
             student_qs = student_qs.filter(group=group, status__name__icontains='Суралцаж буй')

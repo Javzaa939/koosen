@@ -457,8 +457,13 @@ class SurveyRangeAPIView(
 
     def get(self, request, pk=None):
 
+        filters = dict()
+        school_filters = dict()
+        group_filters = dict()
+        student_filters = dict()
         types = request.query_params.get('types')
         selected_value = request.query_params.get('selected_value')
+        org = getattr(request, 'org_filter', {}).get('org')
 
         if not types or not selected_value:
 
@@ -467,21 +472,26 @@ class SurveyRangeAPIView(
         c_queryset = None
         c_serializer = None
 
+        if org:
+            filters["org"] = org.id
+            group_filters["school__org"] = org.id
+            student_filters["group__school__org"] = org.id
+
         # Багш үед
         if types == 'teacher':
             # Салбарын жагсаалт
             if selected_value == 'is_org':
-                c_queryset = SubOrgs.objects.filter(is_school=True)
+                c_queryset = SubOrgs.objects.filter(is_school=True, **filters)
                 c_serializer = SurveySchoolSerializer
 
             # Тэнхимийн жагсаалт
             if selected_value == 'is_dep':
-                c_queryset = Salbars.objects.all()
+                c_queryset = Salbars.objects.filter(**filters)
                 c_serializer = DepartmentSerializer
 
             # Багш нарын жагсаалт
             if selected_value == 'is_teacher':
-                c_queryset = Teachers.objects.all()
+                c_queryset = Teachers.objects.filter(**filters)
                 c_serializer = TeacherSerializer
 
         # Оюутан үед
@@ -489,27 +499,27 @@ class SurveyRangeAPIView(
 
             # Салбарын жагсаалт
             if selected_value == 'is_org':
-                c_queryset = SubOrgs.objects.filter(is_school=True)
+                c_queryset = SubOrgs.objects.filter(is_school=True, **filters)
                 c_serializer = SurveySchoolStudentSerializer
 
             # Тэнхимийн жагсаалт
             if selected_value == 'is_dep':
-                c_queryset = Salbars.objects.all()
+                c_queryset = Salbars.objects.filter(**filters)
                 c_serializer = DepartmentStudentSerializer
 
             # Мэргэжлүүдийн жагсаалт
             if selected_value == 'is_pro':
-                c_queryset = ProfessionDefinition.objects.all()
+                c_queryset = ProfessionDefinition.objects.filter(**group_filters)
                 c_serializer = ProfessionDefinitionStudentSerializer
 
             # Ангиудын жагсаалт
             if selected_value == 'is_group':
-                c_queryset = Group.objects.all().filter(is_finish=False)
+                c_queryset = Group.objects.all().filter(is_finish=False, **group_filters)
                 c_serializer = GroupStudentSerializer
 
             # Оюутнуудын жагсаалт
             if selected_value == 'is_student':
-                c_queryset = Student.objects.all().filter(status__code=1)
+                c_queryset = Student.objects.all().filter(status__code=1, **student_filters)
                 c_serializer = StudentSurveySerializer
 
         self.queryset = c_queryset
@@ -559,11 +569,14 @@ class SurveyAPIView(
         return request.send_data(all_list)
 
     def post(self, request):
-        datas = request.data.dict()
-
+        datas = request.data
         user = request.user
         array_key = 'oyutans'
         surveyType = datas.get('surveyType')
+        org = getattr(request, 'org_filter', {}).get('org')
+
+        if not org:
+            return request.send_error("ERR_002", "Судалгаа нэмэх эрхгүй байна")
 
         worker = Employee.objects.filter(user=user).first()
 
@@ -595,12 +608,19 @@ class SurveyAPIView(
         # Бүх суралцаж буй оюутнууд
         if isAllStudent and str2bool(isAllStudent):
             qs_student = get_active_student()
+            if org:
+                qs_student = qs_student.filter(group__org=org)
             selected_ids = qs_student.values_list('id', flat=True)
 
         if isAllTeacher and str2bool(isAllTeacher):
             array_key = 'teachers'
-            worker_user_ids = Employee.objects.filter(state=Employee.STATE_WORKING, org_position__is_teacher=True).values_list('user', flat=True)
-            selected_ids = Teachers.objects.filter(user__in=worker_user_ids).values_list('id', flat=True)
+            employee_qs = Employee.objects.filter(state=Employee.STATE_WORKING, org_position__is_teacher=True)
+            teacher_qs = Teachers.objects.filter(user__in=worker_user_ids)
+            if org:
+                teacher_qs = teacher_qs.filter(org=org)
+                employee_qs = employee_qs.filter(org=org)
+            worker_user_ids = employee_qs.values_list('user', flat=True)
+            selected_ids = teacher_qs.values_list('id', flat=True)
 
         # Асуултын хэсэг хадгалах хэсэг
         quesion_imgs = request.FILES.getlist('questionImg')
@@ -778,8 +798,14 @@ class SurveyAPIView(
                 if scope_kind == Notification.SCOPE_KIND_OYUTAN:
                     scope_ids = [int(item) for item in selected_ids if isinstance(item, str) and item.isnumeric()]
                 elif scope_kind == Notification.SCOPE_KIND_EMPLOYEE:
-                    user_ids = Teachers.objects.filter(id__in=selected_ids).values_list('user', flat=True)
-                    employees_ids = Employee.objects.filter(user__in=user_ids).values_list('id', flat=True)
+                    teacher_qs = Teachers.objects.filter(id__in=selected_ids)
+                    employee_qs = Employee.objects.all()
+                    if org:
+                        teacher_qs = teacher_qs.filter(org=org)
+                        employee_qs = employee_qs.filter(org=org)
+
+                    user_ids = teacher_qs.values_list('user', flat=True)
+                    employees_ids = employee_qs.filter(user__in=user_ids).values_list('id', flat=True)
                     scope_ids = employees_ids
                 else:
                     scope_ids = []
@@ -788,8 +814,12 @@ class SurveyAPIView(
                 if surveyType == 'satisfaction' and soul_type == Survey.SOUL_TYPE_TEACHERS_LESSONS:
                     lesson_year, lesson_season_id = get_active_year_season()
 
+                    filters = dict()
+                    if org:
+                        filters["school__org"] = org
+
                     lessons_teachers = (
-                        TimeTable.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season_id)
+                        TimeTable.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season_id, **filters)
                         .order_by('lesson', 'teacher')
                         .distinct('lesson', 'teacher')
                         .values_list('lesson', 'teacher')

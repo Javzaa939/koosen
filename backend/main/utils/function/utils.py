@@ -16,6 +16,8 @@ from rest_framework import serializers
 from io import BytesIO
 import PIL.Image as Image
 
+from main.middleware.request_utiles import get_current_request
+
 from django.apps import apps
 from django.conf import settings
 from django.core.mail import get_connection
@@ -738,12 +740,20 @@ def get_16week_start_date():
     '''
     week_list = []
 
+    request = get_current_request()
+    org = getattr(request, 'org_filter', {}).get('org')
+
     SystemSettings = apps.get_model('lms', 'SystemSettings')
+
+    qs_activeyear = SystemSettings.objects.filter(season_type=SystemSettings.ACTIVE)
+
+    if org:
+        qs_activeyear = qs_activeyear.filter(org=org)
+
     qs_activeyear = SystemSettings.objects.filter(season_type=SystemSettings.ACTIVE).first()
 
     if qs_activeyear:
         end_date = qs_activeyear.start_date
-
 
         for x in range(30):
             obj_datas = {}
@@ -796,8 +806,17 @@ def get_dates_from_week():
 def get_active_year_season():
     """ Идэвхтэй хичээлийн жил """
 
+    request = get_current_request()
+    org = getattr(request, 'org_filter', {}).get('org')
+
     SystemSettings = apps.get_model('lms', 'SystemSettings')
-    qs_activeyear = SystemSettings.objects.filter(season_type=SystemSettings.ACTIVE).first()
+
+    qs_activeyear = SystemSettings.objects.filter(season_type=SystemSettings.ACTIVE)
+
+    if org:
+        qs_activeyear = qs_activeyear.filter(org=org)
+
+    qs_activeyear = qs_activeyear.first()
 
     year = qs_activeyear.active_lesson_year.strip() if qs_activeyear else None
     season = qs_activeyear.active_lesson_season.id

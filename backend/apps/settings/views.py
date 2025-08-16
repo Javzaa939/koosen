@@ -92,6 +92,11 @@ class ProfessionalDegreeAPIView(
     def get(self, request, pk=None):
         " Мэргэжлийн зэргийн жагсаалт "
 
+        org = getattr(request, 'org_filter', {}).get('org')
+
+        if org:
+            self.queryset = self.queryset.filter(org=org)
+
         if pk:
             degree_info = self.retrieve(request, pk).data
             return request.send_data(degree_info)
@@ -99,13 +104,16 @@ class ProfessionalDegreeAPIView(
         degree_list = self.list(request).data
         return request.send_data(degree_list)
 
-
     @has_permission(must_permissions=['lms-settings-degree-create'])
     def post(self, request):
         " Мэргэжлийн зэргийн мэдээлэл шинээр үүсгэх "
 
-        data = request.data
+        org = getattr(request, 'org_filter', {}).get('org')
 
+        if not org:
+            return request.send_error("ERR_002", "Таньд боловсролын зэрэг нэмэх эрх байхгүй байна")
+
+        request.data["org"] = org.id
         serializer = self.get_serializer(data=request.data)
 
         if serializer.is_valid(raise_exception=False):
@@ -128,8 +136,6 @@ class ProfessionalDegreeAPIView(
                 }
 
             return request.send_error_valid(return_error)
-
-
 
     @has_permission(must_permissions=['lms-settings-degree-update'])
     def put(self, request, pk=None):
@@ -196,6 +202,11 @@ class LearningAPIView(
     def get(self, request, pk=None):
         " Суралцах хэлбэр жагсаалт "
 
+        org = getattr(request, 'org_filter', {}).get('org')
+
+        if org:
+            self.queryset = self.queryset.filter(org=org)
+
         if pk:
             learning_info = self.retrieve(request, pk).data
             return request.send_data(learning_info)
@@ -207,8 +218,12 @@ class LearningAPIView(
     def post(self, request):
         " Суралцах хэлбэр мэдээлэл шинээр үүсгэх "
 
-        data = request.data
-        learn_code = data.get("learn_code")
+        org = getattr(request, 'org_filter', {}).get('org')
+
+        if not org:
+            return request.send_error("ERR_002", "Таньд суралцах хэлбэр нэмэх эрх байхгүй байна")
+
+        request.data["org"] = org.id
 
         serializer = self.get_serializer(data=request.data)
 
@@ -299,6 +314,11 @@ class StudentRegisterAPIView(
     def get(self, request, pk=None):
         " Оюутны бүртгэл жагсаалт "
 
+        org = getattr(request, 'org_filter', {}).get('org')
+
+        if org:
+            self.queryset = self.queryset.filter(org=org)
+
         if pk:
             register = self.retrieve(request, pk).data
             return request.send_data(register)
@@ -310,7 +330,13 @@ class StudentRegisterAPIView(
     def post(self, request):
         " Оюутны бүртгэл хэлбэр шинээр үүсгэх "
 
+        org = getattr(request, 'org_filter', {}).get('org')
+
+        if not org:
+            return request.send_error("ERR_002", "Оюутны бүртгэлийн хэлбэр нэмэх эрх байхгүй байна")
+
         data = request.data
+        data["org"] = org.id
         serializer = self.get_serializer(data=data)
 
         if serializer.is_valid(raise_exception=False):
@@ -393,6 +419,11 @@ class LessonCategoryAPIView(
     def get(self, request, pk=None):
         " Хичээлийн ангиллын жагсаалт "
 
+        org = getattr(request, 'org_filter', {}).get('org')
+
+        if org:
+            self.queryset = self.queryset.filter(org=org)
+
         if pk:
             category = self.retrieve(request, pk).data
             return request.send_data(category)
@@ -404,6 +435,12 @@ class LessonCategoryAPIView(
     def post(self, request):
         " Хичээлийн ангиллыг шинээр үүсгэх "
 
+        org = getattr(request, 'org_filter', {}).get('org')
+
+        if not org:
+            return request.send_error("ERR_002", "Таньд хичээлийн ангилал нэмэх эрх байхгүй байна")
+
+        request.data["org"] = org.id
         serializer = self.get_serializer(data=request.data)
 
         if serializer.is_valid(raise_exception=False):
@@ -679,6 +716,11 @@ class LessonGroupAPIView(
     @has_permission(must_permissions=['lms-settings-lessongroup-read'])
     def get(self, request, pk=None):
         " Хичээлийн бүлэг жагсаалт "
+        org = getattr(request, 'org_filter', {}).get('org')
+
+        if org:
+            self.queryset = self.queryset.filter(org=org)
+
         if pk:
             lesson_group = self.retrieve(request, pk).data
             return request.send_data(lesson_group)
@@ -690,6 +732,12 @@ class LessonGroupAPIView(
     def post(self, request):
         " Хичээлийн бүлэг шинээр үүсгэх "
 
+        org = getattr(request, 'org_filter', {}).get('org')
+
+        if not org:
+            return request.send_error("ERR_002", "Таньд хичээлийн бүлэг нэмэх эрх байхгүй байна")
+
+        request.data["org"] = org.id
         serializer = self.get_serializer(data=request.data)
 
         if serializer.is_valid(raise_exception=False):
@@ -766,6 +814,11 @@ class SeasonAPIView(
     def get(self, request, pk=None):
         " улирлын жагсаалт "
 
+        org = getattr(request, 'org_filter', {}).get('org')
+
+        if org:
+            self.queryset = self.queryset.filter(org=org)
+
         if pk:
             season = self.retrieve(request, pk).data
             return request.send_data(season)
@@ -778,8 +831,15 @@ class SeasonAPIView(
         " улирал шинээр үүсгэх "
 
         data = request.data
+        org = getattr(request, 'org_filter', {}).get('org')
+
+        if not org:
+            return request.send_error("ERR_002", "Таньд улирал нэмэх эрх байхгүй байна")
+
+        data["org"] = org.id
+
         season_code = data.get("season_code")
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(data=data)
 
         if serializer.is_valid(raise_exception=False):
             with transaction.atomic():
@@ -841,6 +901,7 @@ class SeasonAPIView(
         self.destroy(request, pk)
         return request.send_info("INF_003")
 
+
 @permission_classes([IsAuthenticated])
 class ScoreAPIView(
     mixins.CreateModelMixin,
@@ -860,6 +921,11 @@ class ScoreAPIView(
     def get(self, request, pk=None):
         " Үнэлгээний жагсаалт "
 
+        org = getattr(request, 'org_filter', {}).get('org')
+
+        if org:
+            self.queryset = self.queryset.filter(org=org)
+
         if pk:
             score = self.retrieve(request, pk).data
             return request.send_data(score)
@@ -871,6 +937,12 @@ class ScoreAPIView(
     def post(self, request):
         " Үнэлгээ шинээр үүсгэх "
 
+        org = getattr(request, 'org_filter', {}).get('org')
+
+        if not org:
+            return request.send_error("ERR_002", "Таньд үнэлгээний бүртгэл нэмэх эрх байхгүй байна")
+
+        request.data["org"] = org.id
         serializer = self.get_serializer(data=request.data)
 
         if serializer.is_valid(raise_exception=False):
@@ -951,6 +1023,11 @@ class SystemSettingsAPIView(
     def get(self, request, pk=None):
         " ажиллах жилийн жагсаалт "
 
+        org = getattr(request, 'org_filter', {}).get('org')
+
+        if org:
+            self.queryset = self.queryset.filter(org=org)
+
         if pk:
             main = self.retrieve(request, pk).data
             return request.send_data(main)
@@ -961,6 +1038,12 @@ class SystemSettingsAPIView(
     @has_permission(must_permissions=['lms-settings-аctiveyear-create'])
     def post(self, request):
         with transaction.atomic():
+            org = getattr(request, 'org_filter', {}).get('org')
+
+            if not org:
+                return request.send_error("ERR_002", "Таньд ажиллах жил нэмэх эрх байхгүй байна")
+            request.data["org"] = org.id
+
             data = request.data.copy()
             sid = transaction.savepoint()       # transaction savepoint зарлах нь хэрэв алдаа гарвад roll back хийнэ
 
@@ -1127,6 +1210,11 @@ class AdmissionLessonAPIView(
     def get(self, request, pk=None):
         " ЭЕШ-ын хичээлийн жагсаалт "
 
+        org = getattr(request, 'org_filter', {}).get('org')
+
+        if org:
+            self.queryset = self.queryset.filter(org=org)
+
         self.serializer_class = AdmissionLessonListSerializer
 
         if pk:
@@ -1139,6 +1227,12 @@ class AdmissionLessonAPIView(
     def post(self, request):
         " ЭЕШ-ын хичээл шинээр үүсгэх "
 
+        org = getattr(request, 'org_filter', {}).get('org')
+
+        if not org:
+            return request.send_error("ERR_002", "Таньд эеш-н хичээл нэмэх эрх байхгүй байна")
+
+        request.data["org"] = org.id
         serializer = self.get_serializer(data=request.data)
 
         if serializer.is_valid(raise_exception=False):
@@ -1216,6 +1310,11 @@ class SystemSettingsActiveYearAPIView(
     def get(self, request):
         " Идэвхитэй хичээлийн жилийн жагсаалт "
 
+        org = getattr(request, 'org_filter', {}).get('org')
+
+        if org:
+            self.queryset = self.queryset.filter(org=org)
+
         instance = self.queryset.filter(season_type=SystemSettings.ACTIVE).first()
 
         all_data =  self.get_serializer(instance).data
@@ -1240,6 +1339,11 @@ class DiscountTypeAPIView(
     def get(self, request, pk=None):
         " Төлбөрийн хөнгөлөлтийн төрөлийн жагсаалт "
 
+        org = getattr(request, 'org_filter', {}).get('org')
+
+        if org:
+            self.queryset = self.queryset.filter(org=org)
+
         self.serializer_class = DiscountTypeListSerializer
 
         if pk:
@@ -1253,6 +1357,12 @@ class DiscountTypeAPIView(
     def post(self, request):
         " Төлбөрийн хөнгөлөлтийн төрөл шинээр үүсгэх "
 
+        org = getattr(request, 'org_filter', {}).get('org')
+
+        if not org:
+            return request.send_error("ERR_002", "Таньд төлбөрийн хөнгөлөлт нэмэх эрх байхгүй байна")
+
+        request.data["org"] = org.id
         serializer = self.get_serializer(data=request.data)
 
         if serializer.is_valid(raise_exception=False):
@@ -1908,8 +2018,14 @@ class YearSeasonListAPIView(
         """ жил улирлын жагсаалт
         """
 
-        year_list = list(SystemSettings.objects.order_by('active_lesson_year').values_list('active_lesson_year', flat=True).distinct())
-        season_list = SeasonSerailizer(Season.objects.order_by("-created_at"), many=True).data
+        filters = dict()
+        org = getattr(request, 'org_filter', {}).get('org')
+
+        if org:
+            filters["org"] = org.id
+
+        year_list = list(SystemSettings.objects.filter(**filters).order_by('active_lesson_year').values_list('active_lesson_year', flat=True).distinct())
+        season_list = SeasonSerailizer(Season.objects.filter(**filters).order_by("-created_at"), many=True).data
 
         return request.send_data({
             'year_list': year_list,
@@ -2041,11 +2157,17 @@ class GradeLetterAPIView(
 
     def get(self, request, pk=None):
         """ Дүнгийн үсгэн үнэлгээ жагсаалт """
+
+        org = getattr(request, 'org_filter', {}).get('org')
+
+        if org:
+            self.queryset = self.queryset.filter(org=org)
+
         if pk:
             data = self.retrieve(request, pk).data
             return request.send_data(data)
 
-        grade_list = list(GradeLetter.objects.order_by('-created_at').values('id', 'letter', 'description', 'tovch'))
+        grade_list = list(self.queryset.order_by('-created_at').values('id', 'letter', 'description', 'tovch'))
         return request.send_data(grade_list)
 
     @login_required()
@@ -2053,14 +2175,18 @@ class GradeLetterAPIView(
     def post(self, request):
         """ Дүнгийн үсгэн үнэлгээ шинээр үүсгэх """
 
+        org = getattr(request, 'org_filter', {}).get('org')
+
+        if not org:
+            return request.send_error("ERR_002", "Таньд үсгэн үнэлгээ нэмэх эрх байхгүй байна")
+
+        request.data["org"] = org.id
         return post_put_action(self, request, 'post', request.data)
 
     @login_required()
     @transaction.atomic
     def put(self, request, pk=None):
         "Дүнгийн үсгэн үнэлгээ засах"
-
-
         return post_put_action(self, request, 'put', request.data, pk)
 
     def delete(self, request, pk=None):

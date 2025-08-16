@@ -13,7 +13,7 @@ import ActiveYearContext from '@context/ActiveYearContext';
 
 import { get_event_people_type } from '@utils';
 
-// import "react-datepicker/dist/react-datepicker.css";
+import "react-datepicker/dist/react-datepicker.css";
 
 import './style.scss';
 

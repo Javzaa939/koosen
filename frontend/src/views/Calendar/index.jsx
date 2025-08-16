@@ -11,12 +11,12 @@ import { useRTL } from '@hooks/useRTL';
 
 // ** Calendar App Component Imports
 import Calendar from './Calendar';
-// import SidebarLeft from './SidebarLeft'
+import SidebarLeft from './SidebarLeft'
 import AddEventSidebar from './Add';
 // import SwiperFade from './SwiperFade';
 // import AccessHistory from './AccessHistory';
 
-// import '@styles/react/apps/app-calendar.scss';
+import '@styles/react/apps/app-calendar.scss';
 
 import { VOLUNTEER_ACTION_TYPE } from '@utility/consts';
 
@@ -274,13 +274,13 @@ const CalendarComponent = () => {
                             },
                         )}
                     >
-                        {/* <SidebarLeft */}
-                        {/*     toggleSidebar={toggleSidebar} */}
-                        {/*     handleAddEventSidebar={handleAddEventSidebar} */}
-                        {/*     searchValue={setSearchChecked} */}
-                        {/*     setNew={setNew} */}
-                        {/*     active_week={active_week} */}
-                        {/* /> */}
+                        <SidebarLeft
+                            toggleSidebar={toggleSidebar}
+                            handleAddEventSidebar={handleAddEventSidebar}
+                            searchValue={setSearchChecked}
+                            setNew={setNew}
+                            active_week={active_week}
+                        />
                     </Col>
                     <Col className="position-relative">
                         <Calendar
