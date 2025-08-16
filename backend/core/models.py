@@ -212,6 +212,9 @@ class Salbars(models.Model):
     is_hotolboriin_bag = models.BooleanField(default=False, null=True, verbose_name="Хөтөлбөрийн баг эсэх")
     leader = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE, verbose_name="Хөтөлбөрийн багийн ахлагч")
 
+    created_user = models.ForeignKey(User, related_name='salbar_cr_user', on_delete=models.SET_NULL, null=True, verbose_name="Бүртгэсэн хэрэглэгч")
+    updated_user = models.ForeignKey(User, related_name='salbar_up_user', on_delete=models.SET_NULL, null=True, verbose_name="Зассан хэрэглэгч")
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -355,6 +358,9 @@ class Teachers(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Системд өгөгдөл шинээр оруулсан огноо")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Үүсгэсэн огноо")
 
+    created_user = models.ForeignKey(User, related_name='teachers_cr_user', on_delete=models.SET_NULL, null=True, verbose_name="Бүртгэсэн хэрэглэгч")
+    updated_user = models.ForeignKey(User, related_name='teachers_up_user', on_delete=models.SET_NULL, null=True, verbose_name="Зассан хэрэглэгч")
+
     @property
     def full_name(self):
         name = None
@@ -457,6 +463,9 @@ class Employee(models.Model):
     education_level = models.PositiveIntegerField(choices=EDUCATION_LEVEL, db_index=True, null=True, blank=True, default=None, verbose_name="Боловсролын түвшин")
     degree_type = models.PositiveIntegerField(choices=DEGREE_TYPE, db_index=True, null=True, blank=True, default=None, verbose_name="Эрдмийн зэрэг")
     updated_at = models.DateTimeField(auto_now=True)
+
+    created_user = models.ForeignKey(User, related_name='employee_cr_user', on_delete=models.SET_NULL, null=True, verbose_name="Бүртгэсэн хэрэглэгч")
+    updated_user = models.ForeignKey(User, related_name='employee_up_user', on_delete=models.SET_NULL, null=True, verbose_name="Зассан хэрэглэгч")
 
     objects = EmployeeManager()
 

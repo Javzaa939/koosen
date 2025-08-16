@@ -2,22 +2,22 @@ default_roles = [
     {
         'name' : 'нарийн бичиг',
         'description' : 'нарийн бичиг',
-        'permissions': 'read, update, edit'
+        'permissions': 'read, update, edit, lms-login'
     },
     {
         'name' : 'удирдах ажилтан',
         'description' : 'удирдах ажилтан',
-        'permissions': 'read'
+        'permissions': 'read, lms-login',
     },
     {
         'name' : 'дэд захирлууд',
         'description' : 'удирдах ажилтан',
-        'permissions': 'read'
+        'permissions': 'read, lms-login',
     },
     {
         'name' : 'захирал',
         'description' : 'удирдах ажилтан',
-        'permissions': 'read'
+        'permissions': 'read, lms-login',
     },
     {
         'name' : 'хүний нөөц',

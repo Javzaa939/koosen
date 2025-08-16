@@ -4,7 +4,7 @@ import { Badge, UncontrolledTooltip} from 'reactstrap'
 import { Edit, X } from 'react-feather'
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, handleDelete) {
+export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, handleDelete, is_hr) {
     const { showWarning } = useModal()
 
     const page_count = Math.ceil(datas.length / rowsPerPage)
@@ -75,7 +75,10 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 		// 	maxWidth: "250px",
 		// 	center: true
 		// },
-		{
+	]
+
+	if(is_hr) {
+		var add_column = {
             name: `${t('үйлдэл')}`,
             selector:  (row) => (
                 <div className="text-center" style={{ width: "auto" }}>
@@ -114,9 +117,9 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
             Width: "50px",
             // minWidth: "350px",
             center: true,
-        },
-	]
-
+        }
+		columns.push(add_column)
+	}
 
     return columns
 
