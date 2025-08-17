@@ -1902,3 +1902,20 @@ def remove_from_cdn_ignore_not_found_error(file_path):
             # TODO maybe need to make "impossible to remove file" log to clean garbage files from CDN later
             raise
 
+
+def is_access_for_case_1(**kwargs):
+    """
+    to control similar access case in one place
+
+    Case1:
+    - e.g. to deny access to all data if org is falsy for all users except superuser
+    """
+
+    request = kwargs.get('request')
+    org = getattr(request, 'org_filter', {}).get('org')
+
+    if not org and not request.user.is_superuser:
+        return False
+
+    return True
+

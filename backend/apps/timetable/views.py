@@ -13,7 +13,7 @@ from rest_framework.decorators import permission_classes
 
 from main.utils.function.pagination import CustomPagination
 from main.utils.file import save_file, remove_folder
-from main.utils.function.utils import str2bool, remove_key_from_dict, isLightOrDark, get_active_year_season, magicFunction, get_dates_from_week, get_lesson_choice_student
+from main.utils.function.utils import is_access_for_case_1, str2bool, remove_key_from_dict, isLightOrDark, get_active_year_season, magicFunction, get_dates_from_week, get_lesson_choice_student
 from main.utils.function.utils import has_permission, get_error_obj, get_fullName, get_teacher_queryset, get_weekday_kurats_date, start_time, end_time, dict_fetchall
 
 from django.db import transaction
@@ -85,6 +85,12 @@ class BuildingAPIView(
     @has_permission(must_permissions=['lms-timetable-building-read'])
     def get(self, request, pk=None):
         " хичээлийн байр жагсаалт "
+
+        if not is_access_for_case_1(request=request):
+            return request.send_data(None)
+
+        org = getattr(request, 'org_filter', {}).get('org')
+        self.queryset = self.queryset.filter(org=org)
 
         if pk:
             standart = self.retrieve(request, pk).data
@@ -188,6 +194,13 @@ class RoomAPIView(
     @has_permission(must_permissions=['lms-timetable-room-read'])
     def get(self, request, pk=None):
         " Өрөө жагсаалт "
+
+        if not is_access_for_case_1(request=request):
+            return request.send_data(None)
+
+        org = getattr(request, 'org_filter', {}).get('org')
+        self.queryset = self.queryset.filter(org=org)
+
         self.serializer_class = RoomInfoSerializer
 
         if pk:

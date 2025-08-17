@@ -68,7 +68,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 
 from main.utils.function.pagination import CustomPagination
-from main.utils.function.utils import create_file_in_cdn_silently, delete_objects_with_signals, has_permission, save_data_with_signals
+from main.utils.function.utils import create_file_in_cdn_silently, delete_objects_with_signals, has_permission, is_access_for_case_1, save_data_with_signals
 from main.decorators import login_required
 from main.utils.function.serializer import post_put_action
 
@@ -814,10 +814,11 @@ class SeasonAPIView(
     def get(self, request, pk=None):
         " улирлын жагсаалт "
 
-        org = getattr(request, 'org_filter', {}).get('org')
+        if not is_access_for_case_1(request=request):
+            return request.send_data(None)
 
-        if org:
-            self.queryset = self.queryset.filter(org=org)
+        org = getattr(request, 'org_filter', {}).get('org')
+        self.queryset = self.queryset.filter(org=org)
 
         if pk:
             season = self.retrieve(request, pk).data
@@ -1023,10 +1024,11 @@ class SystemSettingsAPIView(
     def get(self, request, pk=None):
         " ажиллах жилийн жагсаалт "
 
-        org = getattr(request, 'org_filter', {}).get('org')
+        if not is_access_for_case_1(request=request):
+            return request.send_data(None)
 
-        if org:
-            self.queryset = self.queryset.filter(org=org)
+        org = getattr(request, 'org_filter', {}).get('org')
+        self.queryset = self.queryset.filter(org=org)
 
         if pk:
             main = self.retrieve(request, pk).data
@@ -1439,6 +1441,9 @@ class CountryAPIView(
     def get(self, request, pk=None):
         " Улсын нэрийн жагсаалт "
 
+        if not request.user.is_superuser:
+            return request.send_data(None)
+
         # self.serializer_class = CountryListSerializer
 
         if pk:
@@ -1633,9 +1638,15 @@ class SignatureTableAPIView(APIView):
         ''' Гарын үсэг зурах хүмүүсийн жагсаалт
         '''
 
+        if not is_access_for_case_1(request=request):
+            return request.send_data(None)
+
+        org = getattr(request, 'org_filter', {}).get('org')
+        filter_access_case1 = { 'school': org }
+
         type_id = self.request.query_params.get('typeId')
 
-        qs_values = DefinitionSignature.objects.filter(dedication_type=type_id).order_by('order').values("position_name", "name", "order", "id")
+        qs_values = DefinitionSignature.objects.filter(**filter_access_case1, dedication_type=type_id).order_by('order').values("position_name", "name", "order", "id")
 
         return request.send_data(list(qs_values))
 
@@ -1938,6 +1949,12 @@ class PrintAPIView(
     @has_permission(must_permissions=['lms-settings-print-read'])
     def get(self, request, pk=None):
         " Хэвлэх тохиргоо жагсаалт "
+
+        if not is_access_for_case_1(request=request):
+            return request.send_data(None)
+
+        org = getattr(request, 'org_filter', {}).get('org')
+        self.queryset = self.queryset.filter(org=org)
 
         self.serializer_class = PrintSettingsListSerializer
 
