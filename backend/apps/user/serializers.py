@@ -42,7 +42,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
     def get_is_hr(self, obj):
         employee_qs = Employee.objects.filter(user=obj, state=Employee.STATE_WORKING).first()
 
-        return obj.is_superuser or (employee_qs.org_position.is_hr if employee_qs.org_position else False)
+        return obj.is_superuser or (employee_qs.org_position.is_hr if employee_qs and employee_qs.org_position else False)
 
     def get_full_name(self, obj):
 

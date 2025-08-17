@@ -247,8 +247,8 @@ class UserAPILoginView(
             email = user_detail['email']
             auth_user = auth.authenticate(request, username=email, password=password)
 
-        except Exception as e:
-            print('e', e)
+        except Exception:
+            traceback.print_exc()
             access_history_body.update({"user": user_id, "is_logged": is_logged})
             access_history_serilaizer = AccessHistoryLmsSerializer(data=access_history_body)
             if not access_history_serilaizer.is_valid():
