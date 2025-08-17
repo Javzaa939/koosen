@@ -199,7 +199,7 @@ class RoomAPIView(
             return request.send_data(None)
 
         org = getattr(request, 'org_filter', {}).get('org')
-        self.queryset = self.queryset.filter(org=org)
+        self.queryset = self.queryset.filter(school=org)
 
         self.serializer_class = RoomInfoSerializer
 
