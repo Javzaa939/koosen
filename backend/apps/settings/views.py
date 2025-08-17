@@ -814,7 +814,7 @@ class SeasonAPIView(
     def get(self, request, pk=None):
         " улирлын жагсаалт "
 
-        if not is_access_for_case_1(request=request):
+        if not is_access_for_case_1(request):
             return request.send_data([])
 
         if not request.user.is_superuser:
@@ -831,7 +831,7 @@ class SeasonAPIView(
     def post(self, request):
         " улирал шинээр үүсгэх "
 
-        if not is_access_for_case_1(request=request):
+        if not is_access_for_case_1(request):
             return request.send_error("ERR_002", "Таньд улирал нэмэх эрх байхгүй байна")
 
         if not request.user.is_superuser:
@@ -867,7 +867,7 @@ class SeasonAPIView(
     def put(self, request, pk=None):
         " Улирал засах"
 
-        if not is_access_for_case_2(request=request, request_org_id=pk):
+        if not is_access_for_case_2(request, pk):
             return request.send_error("ERR_002", "Эрх байхгүй байна")
 
         datas = request.data
@@ -897,7 +897,7 @@ class SeasonAPIView(
     def delete(self, request, pk=None):
         " Улирал устгах "
 
-        if not is_access_for_case_2(request=request, request_org_id=pk):
+        if not is_access_for_case_2(request, pk):
             return request.send_error("ERR_002", "Эрх байхгүй байна")
 
         timetable_qs = TimeTable.objects.filter(lesson_season=pk)
@@ -1029,7 +1029,7 @@ class SystemSettingsAPIView(
     def get(self, request, pk=None):
         " ажиллах жилийн жагсаалт "
 
-        if not is_access_for_case_1(request=request):
+        if not is_access_for_case_1(request):
             return request.send_data([])
 
         if not request.user.is_superuser:
@@ -1045,7 +1045,7 @@ class SystemSettingsAPIView(
     @has_permission(must_permissions=['lms-settings-аctiveyear-create'])
     def post(self, request):
         with transaction.atomic():
-            if not is_access_for_case_1(request=request):
+            if not is_access_for_case_1(request):
                 return request.send_error("ERR_002", "Таньд ажиллах жил нэмэх эрх байхгүй байна")
 
             if not request.user.is_superuser:
@@ -1076,7 +1076,7 @@ class SystemSettingsAPIView(
     def put(self, request, pk=None):
         " ажиллах жилийн тохиргоо засах "
 
-        if not is_access_for_case_2(request=request, request_org_id=pk):
+        if not is_access_for_case_2(request, pk):
             return request.send_error("ERR_002", "Эрх байхгүй байна")
 
         data = request.data
@@ -1200,7 +1200,7 @@ class SystemSettingsAPIView(
     def delete(self, request, pk=None):
         "Идэвхитэй жил, улирал устгах "
 
-        if not is_access_for_case_2(request=request, request_org_id=pk):
+        if not is_access_for_case_2(request, pk):
             return request.send_error("ERR_002", "Эрх байхгүй байна")
 
         self.destroy(request, pk)
@@ -1657,7 +1657,7 @@ class SignatureTableAPIView(APIView):
         ''' Гарын үсэг зурах хүмүүсийн жагсаалт
         '''
 
-        if not is_access_for_case_1(request=request):
+        if not is_access_for_case_1(request):
             return request.send_data([])
 
         filter_access_case1 = {}
@@ -1971,7 +1971,7 @@ class PrintAPIView(
     def get(self, request, pk=None):
         " Хэвлэх тохиргоо жагсаалт "
 
-        if not is_access_for_case_1(request=request):
+        if not is_access_for_case_1(request):
             return request.send_data([])
 
         if not request.user.is_superuser:
@@ -1990,7 +1990,7 @@ class PrintAPIView(
     def post(self, request):
         " Хэвлэх тохиргоо шинээр үүсгэх "
 
-        if not is_access_for_case_1(request=request):
+        if not is_access_for_case_1(request):
             return request.send_error("ERR_002", "Эрх байхгүй байна")
 
         if not request.user.is_superuser:
@@ -2024,7 +2024,7 @@ class PrintAPIView(
     def put(self, request, pk=None):
         "Хэвлэх тохиргоо засах"
 
-        if not is_access_for_case_2(request=request, request_org_id=request.data.get('org')):
+        if not is_access_for_case_2(request, request.data.get('org')):
             return request.send_error("ERR_002", "Эрх байхгүй байна")
 
         datas = request.data
@@ -2052,7 +2052,7 @@ class PrintAPIView(
     def delete(self, request, pk=None):
         "Хэвлэх устгах "
 
-        if not is_access_for_case_2(request=request, request_org_id=pk):
+        if not is_access_for_case_2(request, pk):
             return request.send_error("ERR_002", "Эрх байхгүй байна")
 
         self.destroy(request, pk)

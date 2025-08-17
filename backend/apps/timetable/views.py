@@ -86,7 +86,7 @@ class BuildingAPIView(
     def get(self, request, pk=None):
         " хичээлийн байр жагсаалт "
 
-        if not is_access_for_case_1(request=request):
+        if not is_access_for_case_1(request):
             return request.send_data([])
 
         if not request.user.is_superuser:
@@ -103,7 +103,7 @@ class BuildingAPIView(
     def post(self, request):
         " хичээлийн байр шинээр үүсгэх "
 
-        if not is_access_for_case_1(request=request):
+        if not is_access_for_case_1(request):
             return request.send_error("ERR_002", "Эрх байхгүй байна")
 
         if not request.user.is_superuser:
@@ -143,7 +143,7 @@ class BuildingAPIView(
     def put(self, request, pk=None):
         " хичээлийн байр засах "
 
-        if not is_access_for_case_2(request=request, request_org_id=request.data.get('org')):
+        if not is_access_for_case_2(request, request.data.get('org')):
             return request.send_error("ERR_002", "Эрх байхгүй байна")
 
         request_data = request.data
@@ -182,7 +182,7 @@ class BuildingAPIView(
     def delete(self, request, pk=None):
         " хичээлийн байр устгах "
 
-        if not is_access_for_case_2(request=request, request_org_id=pk):
+        if not is_access_for_case_2(request, pk):
             return request.send_error("ERR_002", "Эрх байхгүй байна")
 
         self.destroy(request, pk)
@@ -207,7 +207,7 @@ class RoomAPIView(
     def get(self, request, pk=None):
         " Өрөө жагсаалт "
 
-        if not is_access_for_case_1(request=request):
+        if not is_access_for_case_1(request):
             return request.send_data([])
 
         if not request.user.is_superuser:
@@ -226,7 +226,7 @@ class RoomAPIView(
     def post(self, request):
         " Өрөө шинээр үүсгэх "
 
-        if not is_access_for_case_1(request=request):
+        if not is_access_for_case_1(request):
             return request.send_error("ERR_002", "Эрх байхгүй байна")
 
         if not request.user.is_superuser:
@@ -260,7 +260,7 @@ class RoomAPIView(
     def put(self, request, pk=None):
         " Өрөө засах "
 
-        if not is_access_for_case_2(request=request, request_org_id=request.data.get('school')):
+        if not is_access_for_case_2(request, request.data.get('school')):
             return request.send_error("ERR_002", "Эрх байхгүй байна")
 
         request_data = request.data
@@ -298,7 +298,7 @@ class RoomAPIView(
     def delete(self, request, pk=None):
         " Өрөө устгах "
 
-        if not is_access_for_case_2(request=request, request_org_id=pk):
+        if not is_access_for_case_2(request, pk):
             return request.send_error("ERR_002", "Эрх байхгүй байна")
 
         self.destroy(request, pk)

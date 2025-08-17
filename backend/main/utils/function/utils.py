@@ -1903,7 +1903,7 @@ def remove_from_cdn_ignore_not_found_error(file_path):
             raise
 
 
-def is_access_for_case_1(**kwargs):
+def is_access_for_case_1(request):
     """
     to control similar access case in one place
 
@@ -1911,7 +1911,6 @@ def is_access_for_case_1(**kwargs):
     - e.g. to deny access to all data if org is falsy for all users except superuser
     """
 
-    request = kwargs.get('request')
     org = getattr(request, 'org_filter', {}).get('org')
 
     if not org and not request.user.is_superuser:
@@ -1920,7 +1919,7 @@ def is_access_for_case_1(**kwargs):
     return True
 
 
-def is_access_for_case_2(**kwargs):
+def is_access_for_case_2(request, request_org_id):
     """
     to control similar access case in one place
 
@@ -1928,20 +1927,14 @@ def is_access_for_case_2(**kwargs):
     - e.g. to deny by case1 and by org for not superusers
     """
 
-    request = kwargs.get('request')
-
-    if not is_access_for_case_1(request=request):
+    if not is_access_for_case_1(request):
         return False
 
     if not request.user.is_superuser:
-        request_org_id = kwargs.get('request_org_id')
-
         if not request_org_id:
             return False
 
-        org = request.org_filter['org']
-
-        if request_org_id != org.id:
+        if request_org_id != request.org_filter['org'].id:
             return False
 
     return True
