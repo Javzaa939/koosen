@@ -1919,3 +1919,31 @@ def is_access_for_case_1(**kwargs):
 
     return True
 
+
+def is_access_for_case_2(**kwargs):
+    """
+    to control similar access case in one place
+
+    Case2:
+    - e.g. to deny by case1 and by org for not superusers
+    """
+
+    request = kwargs.get('request')
+
+    if not is_access_for_case_1(request=request):
+        return False
+
+    if not request.user.is_superuser:
+        request_org_id = kwargs.get('request_org_id')
+
+        if not request_org_id:
+            return False
+
+        org = request.org_filter['org']
+
+        if request_org_id != org.id:
+            return False
+
+    return True
+
+
