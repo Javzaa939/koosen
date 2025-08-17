@@ -815,7 +815,7 @@ class SeasonAPIView(
         " улирлын жагсаалт "
 
         if not is_access_for_case_1(request=request):
-            return request.send_data(None)
+            return request.send_data([])
 
         org = getattr(request, 'org_filter', {}).get('org')
         self.queryset = self.queryset.filter(org=org)
@@ -1025,7 +1025,7 @@ class SystemSettingsAPIView(
         " ажиллах жилийн жагсаалт "
 
         if not is_access_for_case_1(request=request):
-            return request.send_data(None)
+            return request.send_data([])
 
         org = getattr(request, 'org_filter', {}).get('org')
         self.queryset = self.queryset.filter(org=org)
@@ -1442,7 +1442,7 @@ class CountryAPIView(
         " Улсын нэрийн жагсаалт "
 
         if not request.user.is_superuser:
-            return request.send_data(None)
+            return request.send_data([])
 
         # self.serializer_class = CountryListSerializer
 
@@ -1639,7 +1639,7 @@ class SignatureTableAPIView(APIView):
         '''
 
         if not is_access_for_case_1(request=request):
-            return request.send_data(None)
+            return request.send_data([])
 
         org = getattr(request, 'org_filter', {}).get('org')
         filter_access_case1 = { 'school': org }
@@ -1951,7 +1951,7 @@ class PrintAPIView(
         " Хэвлэх тохиргоо жагсаалт "
 
         if not is_access_for_case_1(request=request):
-            return request.send_data(None)
+            return request.send_data([])
 
         org = getattr(request, 'org_filter', {}).get('org')
         self.queryset = self.queryset.filter(org=org)

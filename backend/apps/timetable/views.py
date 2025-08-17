@@ -87,7 +87,7 @@ class BuildingAPIView(
         " хичээлийн байр жагсаалт "
 
         if not is_access_for_case_1(request=request):
-            return request.send_data(None)
+            return request.send_data([])
 
         org = getattr(request, 'org_filter', {}).get('org')
         self.queryset = self.queryset.filter(org=org)
@@ -196,7 +196,7 @@ class RoomAPIView(
         " Өрөө жагсаалт "
 
         if not is_access_for_case_1(request=request):
-            return request.send_data(None)
+            return request.send_data([])
 
         org = getattr(request, 'org_filter', {}).get('org')
         self.queryset = self.queryset.filter(school=org)
