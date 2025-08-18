@@ -13,7 +13,7 @@ from rest_framework.decorators import permission_classes
 
 from main.utils.function.pagination import CustomPagination
 from main.utils.file import save_file, remove_folder
-from main.utils.function.utils import str2bool, remove_key_from_dict, isLightOrDark, get_active_year_season, magicFunction, get_dates_from_week, get_lesson_choice_student
+from main.utils.function.utils import is_access_for_case_1, is_access_for_case_2, str2bool, remove_key_from_dict, isLightOrDark, get_active_year_season, magicFunction, get_dates_from_week, get_lesson_choice_student
 from main.utils.function.utils import has_permission, get_error_obj, get_fullName, get_teacher_queryset, get_weekday_kurats_date, start_time, end_time, dict_fetchall
 
 from django.db import transaction
@@ -86,6 +86,12 @@ class BuildingAPIView(
     def get(self, request, pk=None):
         " хичээлийн байр жагсаалт "
 
+        if not is_access_for_case_1(request):
+            return request.send_data([])
+
+        if not request.user.is_superuser:
+            self.queryset = self.queryset.filter(org=request.org_filter['org'])
+
         if pk:
             standart = self.retrieve(request, pk).data
             return request.send_data(standart)
@@ -96,6 +102,12 @@ class BuildingAPIView(
     @has_permission(must_permissions=['lms-timetable-building-create'])
     def post(self, request):
         " хичээлийн байр шинээр үүсгэх "
+
+        if not is_access_for_case_1(request):
+            return request.send_error("ERR_002", "Эрх байхгүй байна")
+
+        if not request.user.is_superuser:
+            request.data['org'] = request.org_filter['org'].id
 
         request_data = request.data
         serializer = self.get_serializer(data=request_data)
@@ -130,6 +142,9 @@ class BuildingAPIView(
     @has_permission(must_permissions=['lms-timetable-building-update'])
     def put(self, request, pk=None):
         " хичээлийн байр засах "
+
+        if not is_access_for_case_2(request, request.data.get('org')):
+            return request.send_error("ERR_002", "Эрх байхгүй байна")
 
         request_data = request.data
         instance = self.get_object()
@@ -167,6 +182,9 @@ class BuildingAPIView(
     def delete(self, request, pk=None):
         " хичээлийн байр устгах "
 
+        if not is_access_for_case_2(request, pk):
+            return request.send_error("ERR_002", "Эрх байхгүй байна")
+
         self.destroy(request, pk)
         return request.send_info("INF_003")
 
@@ -188,6 +206,13 @@ class RoomAPIView(
     @has_permission(must_permissions=['lms-timetable-room-read'])
     def get(self, request, pk=None):
         " Өрөө жагсаалт "
+
+        if not is_access_for_case_1(request):
+            return request.send_data([])
+
+        if not request.user.is_superuser:
+            self.queryset = self.queryset.filter(building__org=request.org_filter['org'])
+
         self.serializer_class = RoomInfoSerializer
 
         if pk:
@@ -200,6 +225,12 @@ class RoomAPIView(
     @has_permission(must_permissions=['lms-timetable-room-create'])
     def post(self, request):
         " Өрөө шинээр үүсгэх "
+
+        if not is_access_for_case_1(request):
+            return request.send_error("ERR_002", "Эрх байхгүй байна")
+
+        # if not request.data['school']:
+        #     return request.send_error("ERR_002", "Сургууль сонгоно уу")
 
         request_data = request.data
         serializer = self.get_serializer(data=request_data)
@@ -257,12 +288,14 @@ class RoomAPIView(
             if len(errors) > 0:
                 return request.send_error("ERR_003", errors)
 
-
         return request.send_info("INF_001")
 
     @has_permission(must_permissions=['lms-timetable-room-delete'])
     def delete(self, request, pk=None):
         " Өрөө устгах "
+
+        if not is_access_for_case_2(request, pk):
+            return request.send_error("ERR_002", "Эрх байхгүй байна")
 
         self.destroy(request, pk)
         return request.send_info("INF_003")

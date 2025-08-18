@@ -22,6 +22,7 @@ import EditModal from './Edit'
 
 import Select from 'react-select'
 import {  ReactSelectStyles } from "@utils"
+import SchoolContext from '@src/utility/context/SchoolContext';
 
 const buildOption = [
 	{ value: 'chocolate', label: 'Chocolate' },
@@ -33,6 +34,7 @@ const Learning = () => {
 
 	const { t } = useTranslation()
 	const { user } = useContext(AuthContext)
+	const { school_id: schoolId } = useContext(SchoolContext)
 
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10)
@@ -194,7 +196,7 @@ const Learning = () => {
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
 					<CardTitle tag="h4">{t('Өрөөний бүртгэл')}</CardTitle>
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
-                        <Button color='primary' disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-timetable-room-create')  ? false : true} onClick={() => handleModal()}>
+                        <Button color='primary' disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-timetable-room-create') && schoolId  ? false : true} onClick={() => handleModal()}>
                             <Plus size={15} />
                             <span className='align-middle ms-50'>{t('Нэмэх')}</span>
                         </Button>
@@ -290,7 +292,7 @@ const Learning = () => {
                             fixedHeaderScrollHeight='62vh'
                         />
 					</div>
-				{modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas}/>}
+				{modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} schoolId={schoolId} />}
 			    {edit_modal && <EditModal open={edit_modal} handleModal={editModal} room_id={room_id} refreshDatas={getDatas} />}
         	</Card>
         </Fragment>

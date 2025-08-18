@@ -16,7 +16,7 @@ import { validate, get_room_type, convertDefaultValue } from "@utils"
 
 import { validateSchema } from '../validateSchema';
 
-const Addmodal = ({ open, handleModal, refreshDatas }) => {
+const Addmodal = ({ open, handleModal, refreshDatas, schoolId }) => {
 
     const { t } = useTranslation()
 
@@ -42,6 +42,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
 
 	async function onSubmit(cdata) {
         cdata = convertDefaultValue(cdata)
+        cdata["school"] = schoolId
         const { success, error } = await postFetch(roomApi.post(cdata))
         if(success) {
             reset()

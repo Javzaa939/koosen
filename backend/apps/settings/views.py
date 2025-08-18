@@ -68,7 +68,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 
 from main.utils.function.pagination import CustomPagination
-from main.utils.function.utils import create_file_in_cdn_silently, delete_objects_with_signals, has_permission, save_data_with_signals
+from main.utils.function.utils import create_file_in_cdn_silently, delete_objects_with_signals, has_permission, is_access_for_case_1, is_access_for_case_2, save_data_with_signals
 from main.decorators import login_required
 from main.utils.function.serializer import post_put_action
 
@@ -814,10 +814,11 @@ class SeasonAPIView(
     def get(self, request, pk=None):
         " улирлын жагсаалт "
 
-        org = getattr(request, 'org_filter', {}).get('org')
+        if not is_access_for_case_1(request):
+            return request.send_data([])
 
-        if org:
-            self.queryset = self.queryset.filter(org=org)
+        if not request.user.is_superuser:
+            self.queryset = self.queryset.filter(org=request.org_filter['org'])
 
         if pk:
             season = self.retrieve(request, pk).data
@@ -830,14 +831,13 @@ class SeasonAPIView(
     def post(self, request):
         " улирал шинээр үүсгэх "
 
-        data = request.data
-        org = getattr(request, 'org_filter', {}).get('org')
-
-        if not org:
+        if not is_access_for_case_1(request):
             return request.send_error("ERR_002", "Таньд улирал нэмэх эрх байхгүй байна")
 
-        data["org"] = org.id
+        if not request.user.is_superuser:
+            request.data['org'] = request.org_filter['org'].id
 
+        data = request.data
         season_code = data.get("season_code")
         serializer = self.get_serializer(data=data)
 
@@ -867,6 +867,9 @@ class SeasonAPIView(
     def put(self, request, pk=None):
         " Улирал засах"
 
+        if not is_access_for_case_2(request, pk):
+            return request.send_error("ERR_002", "Эрх байхгүй байна")
+
         datas = request.data
         season_code = datas.get("season_code")
         instance = self.queryset.filter(id=pk).first()
@@ -893,6 +896,9 @@ class SeasonAPIView(
     @has_permission(must_permissions=['lms-settings-season-delete'])
     def delete(self, request, pk=None):
         " Улирал устгах "
+
+        if not is_access_for_case_2(request, pk):
+            return request.send_error("ERR_002", "Эрх байхгүй байна")
 
         timetable_qs = TimeTable.objects.filter(lesson_season=pk)
         if len(timetable_qs) > 0:
@@ -1023,10 +1029,11 @@ class SystemSettingsAPIView(
     def get(self, request, pk=None):
         " ажиллах жилийн жагсаалт "
 
-        org = getattr(request, 'org_filter', {}).get('org')
+        if not is_access_for_case_1(request):
+            return request.send_data([])
 
-        if org:
-            self.queryset = self.queryset.filter(org=org)
+        if not request.user.is_superuser:
+            self.queryset = self.queryset.filter(org=request.org_filter['org'])
 
         if pk:
             main = self.retrieve(request, pk).data
@@ -1038,11 +1045,11 @@ class SystemSettingsAPIView(
     @has_permission(must_permissions=['lms-settings-аctiveyear-create'])
     def post(self, request):
         with transaction.atomic():
-            org = getattr(request, 'org_filter', {}).get('org')
-
-            if not org:
+            if not is_access_for_case_1(request):
                 return request.send_error("ERR_002", "Таньд ажиллах жил нэмэх эрх байхгүй байна")
-            request.data["org"] = org.id
+
+            if not request.user.is_superuser:
+                request.data["org"] = request.org_filter['org'].id
 
             data = request.data.copy()
             sid = transaction.savepoint()       # transaction savepoint зарлах нь хэрэв алдаа гарвад roll back хийнэ
@@ -1068,6 +1075,9 @@ class SystemSettingsAPIView(
     @transaction.atomic()
     def put(self, request, pk=None):
         " ажиллах жилийн тохиргоо засах "
+
+        if not is_access_for_case_1(request):
+            return request.send_error("ERR_002", "Эрх байхгүй байна")
 
         data = request.data
 
@@ -1189,6 +1199,9 @@ class SystemSettingsAPIView(
 
     def delete(self, request, pk=None):
         "Идэвхитэй жил, улирал устгах "
+
+        if not is_access_for_case_2(request, pk):
+            return request.send_error("ERR_002", "Эрх байхгүй байна")
 
         self.destroy(request, pk)
         return request.send_info("INF_003")
@@ -1421,6 +1434,7 @@ class DiscountTypeAPIView(
         self.destroy(request, pk)
         return request.send_info("INF_003")
 
+
 @permission_classes([IsAuthenticated])
 class CountryAPIView(
     mixins.CreateModelMixin,
@@ -1475,11 +1489,9 @@ class CountryAPIView(
 
             return request.send_error_valid(return_error)
 
-
     @has_permission(must_permissions=['lms-settings-country-update'])
     def put(self, request, pk=None):
         "Улсын нэр засах"
-
 
         datas = request.data
         instance = self.get_object()
@@ -1506,8 +1518,12 @@ class CountryAPIView(
     def delete(self, request, pk=None):
         "Улс устгах "
 
+        if not request.user.is_superuser:
+            return request.send_error("ERR_002", "Эрх байхгүй байна")
+
         self.destroy(request, pk)
         return request.send_info("INF_003")
+
 
 @permission_classes([IsAuthenticated])
 class SignatureAPIView(
@@ -1613,10 +1629,7 @@ class SignatureDataTableAPIView(APIView):
         '''
         data = list()
 
-
         for ded_type in DefinitionSignature.DEDICATION_TYPE:
-
-
             data.append(
             {
                 'id': ded_type[0],
@@ -1633,9 +1646,17 @@ class SignatureTableAPIView(APIView):
         ''' Гарын үсэг зурах хүмүүсийн жагсаалт
         '''
 
+        if not is_access_for_case_1(request):
+            return request.send_data([])
+
+        filter_access_case1 = {}
+
+        if not request.user.is_superuser:
+            filter_access_case1 = { 'school': request.org_filter['org'] }
+
         type_id = self.request.query_params.get('typeId')
 
-        qs_values = DefinitionSignature.objects.filter(dedication_type=type_id).order_by('order').values("position_name", "name", "order", "id")
+        qs_values = DefinitionSignature.objects.filter(**filter_access_case1, dedication_type=type_id).order_by('order').values("position_name", "name", "order", "id")
 
         return request.send_data(list(qs_values))
 
@@ -1939,6 +1960,12 @@ class PrintAPIView(
     def get(self, request, pk=None):
         " Хэвлэх тохиргоо жагсаалт "
 
+        if not is_access_for_case_1(request):
+            return request.send_data([])
+
+        if not request.user.is_superuser:
+            self.queryset = self.queryset.filter(org=request.org_filter['org'])
+
         self.serializer_class = PrintSettingsListSerializer
 
         if pk:
@@ -1951,6 +1978,12 @@ class PrintAPIView(
     @has_permission(must_permissions=['lms-settings-print-create'])
     def post(self, request):
         " Хэвлэх тохиргоо шинээр үүсгэх "
+
+        if not is_access_for_case_1(request):
+            return request.send_error("ERR_002", "Эрх байхгүй байна")
+
+        if not request.user.is_superuser:
+            request.data['org'] = request.org_filter['org'].id
 
         data = request.data
 
@@ -1975,11 +2008,12 @@ class PrintAPIView(
 
                 return request.send_error_valid(return_error)
 
-
     @has_permission(must_permissions=['lms-settings-print-update'])
     def put(self, request, pk=None):
         "Хэвлэх тохиргоо засах"
 
+        if not is_access_for_case_2(request, request.data.get('org')):
+            return request.send_error("ERR_002", "Эрх байхгүй байна")
 
         datas = request.data
         instance = self.get_object()
@@ -2005,6 +2039,9 @@ class PrintAPIView(
     @has_permission(must_permissions=['lms-settings-print-delete'])
     def delete(self, request, pk=None):
         "Хэвлэх устгах "
+
+        if not is_access_for_case_2(request, pk):
+            return request.send_error("ERR_002", "Эрх байхгүй байна")
 
         self.destroy(request, pk)
         return request.send_info("INF_003")
