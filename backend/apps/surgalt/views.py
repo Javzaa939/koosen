@@ -1396,9 +1396,9 @@ class LessonStandartTimetableListAPIView(
 
         qs_lplan = LearningPlan.objects.all()
 
-        # if school:
-        #     # qs_lplan = qs_lplan.filter(school=school)
-        #     self.queryset = self.queryset.filter(Q(Q(school=school) | Q(school__org_code=10)))
+        if school:
+            # qs_lplan = qs_lplan.filter(school=school)
+            self.queryset = self.queryset.filter(school=school)
 
         even_i = []
         odd_i = []

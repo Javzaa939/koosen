@@ -1930,12 +1930,13 @@ def is_access_for_case_2(request, request_org_id):
     if not is_access_for_case_1(request):
         return False
 
-    if not request.user.is_superuser:
-        if not request_org_id:
-            return False
+    # Note: Энэ нөхцөл буруу шалгах шаардлагатай
+    # if not request.user.is_superuser:
+    #     if not request_org_id:
+    #         return False
 
-        if request_org_id != request.org_filter['org'].id:
-            return False
+    #     if request_org_id != request.org_filter['org'].id:
+    #         return False
 
     return True
 

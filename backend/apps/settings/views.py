@@ -1076,7 +1076,7 @@ class SystemSettingsAPIView(
     def put(self, request, pk=None):
         " ажиллах жилийн тохиргоо засах "
 
-        if not is_access_for_case_2(request, pk):
+        if not is_access_for_case_1(request):
             return request.send_error("ERR_002", "Эрх байхгүй байна")
 
         data = request.data
@@ -1434,6 +1434,7 @@ class DiscountTypeAPIView(
         self.destroy(request, pk)
         return request.send_info("INF_003")
 
+
 @permission_classes([IsAuthenticated])
 class CountryAPIView(
     mixins.CreateModelMixin,
@@ -1452,9 +1453,6 @@ class CountryAPIView(
     def get(self, request, pk=None):
         " Улсын нэрийн жагсаалт "
 
-        if not request.user.is_superuser:
-            return request.send_data([])
-
         # self.serializer_class = CountryListSerializer
 
         if pk:
@@ -1467,9 +1465,6 @@ class CountryAPIView(
     @has_permission(must_permissions=['lms-settings-country-create'])
     def post(self, request):
         " Улсын нэр шинээр үүсгэх "
-
-        if not request.user.is_superuser:
-            return request.send_error("ERR_002", "Эрх байхгүй байна")
 
         data = request.data
 
@@ -1494,13 +1489,9 @@ class CountryAPIView(
 
             return request.send_error_valid(return_error)
 
-
     @has_permission(must_permissions=['lms-settings-country-update'])
     def put(self, request, pk=None):
         "Улсын нэр засах"
-
-        if not request.user.is_superuser:
-            return request.send_error("ERR_002", "Эрх байхгүй байна")
 
         datas = request.data
         instance = self.get_object()
@@ -1532,6 +1523,7 @@ class CountryAPIView(
 
         self.destroy(request, pk)
         return request.send_info("INF_003")
+
 
 @permission_classes([IsAuthenticated])
 class SignatureAPIView(
@@ -2018,7 +2010,6 @@ class PrintAPIView(
                 }
 
                 return request.send_error_valid(return_error)
-
 
     @has_permission(must_permissions=['lms-settings-print-update'])
     def put(self, request, pk=None):

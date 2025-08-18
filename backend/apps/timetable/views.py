@@ -211,7 +211,7 @@ class RoomAPIView(
             return request.send_data([])
 
         if not request.user.is_superuser:
-            self.queryset = self.queryset.filter(school=request.org_filter['org'])
+            self.queryset = self.queryset.filter(building__org=request.org_filter['org'])
 
         self.serializer_class = RoomInfoSerializer
 
@@ -229,8 +229,8 @@ class RoomAPIView(
         if not is_access_for_case_1(request):
             return request.send_error("ERR_002", "Эрх байхгүй байна")
 
-        if not request.user.is_superuser:
-            request.data['school'] = request.org_filter['org'].id
+        # if not request.data['school']:
+        #     return request.send_error("ERR_002", "Сургууль сонгоно уу")
 
         request_data = request.data
         serializer = self.get_serializer(data=request_data)
@@ -259,9 +259,6 @@ class RoomAPIView(
     @has_permission(must_permissions=['lms-timetable-room-update'])
     def put(self, request, pk=None):
         " Өрөө засах "
-
-        if not is_access_for_case_2(request, request.data.get('school')):
-            return request.send_error("ERR_002", "Эрх байхгүй байна")
 
         request_data = request.data
         instance = self.get_object()
