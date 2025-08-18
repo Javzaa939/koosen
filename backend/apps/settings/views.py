@@ -1629,10 +1629,7 @@ class SignatureDataTableAPIView(APIView):
         '''
         data = list()
 
-
         for ded_type in DefinitionSignature.DEDICATION_TYPE:
-
-
             data.append(
             {
                 'id': ded_type[0],

@@ -288,7 +288,6 @@ class RoomAPIView(
             if len(errors) > 0:
                 return request.send_error("ERR_003", errors)
 
-
         return request.send_info("INF_001")
 
     @has_permission(must_permissions=['lms-timetable-room-delete'])
