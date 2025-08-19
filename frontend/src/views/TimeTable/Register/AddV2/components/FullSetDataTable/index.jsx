@@ -62,7 +62,7 @@ export default function FullSetDataTable({
 				progressPending={isLoading}
 				progressComponent={
 					<div className='my-2 d-flex align-items-center justify-content-center'>
-						<Spinner className='me-1' color="" size='sm' /><h5>{t('Түр хүлээнэ үү')}...</h5>
+						<Spinner className='me-1' size='sm' /><h5>{t('Түр хүлээнэ үү')}...</h5>
 					</div>
 				}
 				// #endregion
