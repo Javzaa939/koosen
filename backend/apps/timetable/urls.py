@@ -19,6 +19,11 @@ urlpatterns = [
     # Цагийн хуваарь File excel файл оруулсан датаг бааз руу хадгалах
     path('register/excel-import/', TimeTableExcelImportAPIView.as_view()),
 
+    # Timetable multi delete modal
+    path('list/teacher/', TimeTableListAPIView.as_view()),
+    path('list/select-groups/', TimeTableSelectGroupsAPIView.as_view()),
+    path('list/select-lessons/', TimeTableSelectLessonsAPIView.as_view()),
+
     # Цагийн ачааллаас
     path('register/new/<int:pk>/', TimeTableNewAPIView.as_view()),
 

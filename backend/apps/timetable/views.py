@@ -22,7 +22,7 @@ from main.utils.function.utils import has_permission, get_error_obj, get_fullNam
 from django.db import transaction
 from django.conf import settings
 from django.db import connection
-from django.db.models import Q, Count, Case, When,F, Max, FloatField, Value, IntegerField, Exists, OuterRef
+from django.db.models import Q, Count, Case, When,F, Max, FloatField, Value, IntegerField, Exists, OuterRef, Subquery, ExpressionWrapper, DateField
 from django.db.models.functions import Lower
 
 from core.models import Employee, Salbars, Teachers, SubOrgs
@@ -53,7 +53,7 @@ from lms.models import (
     Lesson_teacher_scoretype,
 )
 
-from .serializers import Exam_repeatLiseSerializer, Exam_repeatSerializer, TimeTableListKuratsSerializer, TimeTablePutCreateSerializer
+from .serializers import Exam_repeatLiseSerializer, Exam_repeatSerializer, GroupSerializer, LessonStandartSerializer, TimeTableListKuratsSerializer, TimeTablePutCreateSerializer, TimeTablePutSerializer
 from .serializers import RoomSerializer
 from .serializers import BuildingSerializer
 from .serializers import TimeTableSerializer
@@ -1412,8 +1412,23 @@ class TimeTableAPIView(
     def delete(self, request, pk=None):
         "  Цагийн хуваарь устгах "
 
-        self.destroy(request, pk)
+        try:
+            with transaction.atomic():
+                if pk:
+                    instance = self.get_object()
+                    instance.delete()
+                else:
+                    ids = request.GET.get('ids')
 
+                    if not ids:
+                        return request.send_data(None)
+                    ids = ids.split(',')
+
+                    # NOTE mass deleting does not emit delete signals
+                    TimeTable.objects.filter(id__in=ids).delete()
+        except Exception:
+            traceback.print_exc()
+            return request.send_error("ERR_002")
         return request.send_info("INF_003")
 
 
@@ -4575,3 +4590,239 @@ class ExamrepeatAddStudentAPIView(
         )
         obj.save()
         return request.send_info("INF_022")
+
+
+# region Timetable multi delete modal
+@permission_classes([IsAuthenticated])
+class TimeTableListAPIView(
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    generics.GenericAPIView
+):
+    """  Цагийн хуваарь """
+
+    queryset = TimeTable.objects
+    serializer_class = TimeTableSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['room__code', 'room__name', 'day', 'time', 'lesson__name', 'teacher__first_name']
+
+    def get(self, request):
+        "  Цагийн хуваарь жагсаалт "
+
+        lesson_year = request.query_params.get('lesson_year')
+        lesson_season = request.query_params.get('lesson_season')
+        is_delete = request.query_params.get('is_delete')
+
+        queryset = self.queryset.filter(lesson_year=lesson_year, lesson_season=lesson_season)
+
+        self.serializer_class = TimeTablePutSerializer
+        user_permissions = get_user_permissions(request.user)
+
+        department = request.query_params.get('department')
+        school = request.query_params.get('school')
+        teacher = request.query_params.get('teacher')
+        lesson = request.query_params.get('lesson')
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+        group = request.query_params.get('group')
+        day = request.query_params.get('day')
+        time = request.query_params.get('time')
+        ctype = request.query_params.get('type')
+
+        # if is_delete == 'true':
+        #     if not request.user.is_superuser:
+        #         queryset = queryset.filter(created_user=request.user)
+
+        if ctype:
+            queryset = queryset.filter(type=ctype)
+
+        if day:
+            queryset = queryset.filter(day__in=day.split(','))
+
+        if time:
+            queryset = queryset.filter(time__in=time.split(','))
+
+        # Арга зүйч болон салбарын арга зүйч үед
+        if school and ('lms-timetable-register-teacher-update' not in user_permissions and 'lms-salbar-school-read' in user_permissions):
+            time_ids = TimeTable_to_group.objects.filter(timetable__lesson_year=lesson_year, timetable__lesson_season=lesson_season, group__school=school).values_list('timetable', flat=True)
+            queryset = queryset.filter(id__in=time_ids)
+
+        if department:
+            queryset = queryset.filter(Q(Q(choosing_deps__contains=[department])))
+
+        if lesson:
+            queryset = queryset.filter(lesson__in=lesson.split(','))
+
+        if teacher:
+            queryset = queryset.filter(teacher=teacher)
+
+        if start_date:
+            start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
+
+        if end_date:
+            end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
+
+        if group:
+            queryset = queryset.filter(timetable_to_group__group__in=group.split(','))
+
+        system_settings_q = SystemSettings.objects.filter(start_date__isnull=False, active_lesson_year=lesson_year, active_lesson_season=lesson_season).values('start_date')[:1]
+
+        # any kurats хуваарь
+        queryset = (
+            queryset
+            .annotate(
+                week=Case(
+                    When(week_number__isnull=True, then=Value(1)),
+                    default=F('week_number'),
+                    output_field=IntegerField()
+                )
+            )
+            .filter(
+                week__range=(1, 25)
+            ).select_related(
+                'lesson', 'teacher', 'room'
+            ).annotate(
+                week_start_date = Case(
+                    When(week=1, then=Subquery(system_settings_q)),
+                    default=ExpressionWrapper(
+                        Subquery(system_settings_q) + Value(7) * F('week'),
+                        output_field=DateField()
+                    ),
+                    output_field=DateField()
+                )
+            ).order_by('week', 'lesson__name', 'day', 'time')
+        )
+
+        if start_date:
+            queryset = queryset.filter(week_start_date__gte=start_date)
+
+        if end_date:
+            queryset = queryset.filter(week_start_date__lte=end_date)
+
+        # TODO Хэрвээ цаг хугацаагаар хайж байгаа бол курац хуваариасаа хайгаад тэгээд харуулвал
+        self.queryset = queryset
+        get_result = self.list(request).data
+
+        return request.send_data(get_result)
+
+
+@permission_classes([IsAuthenticated])
+class TimeTableSelectLessonsAPIView(
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    generics.GenericAPIView
+):
+    '''To get lessons'''
+
+    queryset = LessonStandart.objects.all()
+    serializer_class = LessonStandartSerializer
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['name','code']
+
+    @staticmethod
+    def custom_back_end_filters(queryset, request):
+        validated_filters = {}
+        lesson_year = request.query_params.get('lesson_year')
+        lesson_season = request.query_params.get('lesson_season')
+
+        lesson_ids = TimeTable.objects.filter(
+            lesson_year=lesson_year,
+            lesson_season=lesson_season,
+        ).values_list('lesson',flat=True).distinct()
+        validated_filters['id__in'] = lesson_ids
+        queryset = queryset.filter(**validated_filters)
+        return queryset
+
+    @has_permission(must_permissions=['"lms-timetable-register-read"'])
+    def get(self,request,pk=None):
+        result = request.send_data(None)
+
+        try:
+            # to apply filters
+            if pk:
+                self.queryset = self.queryset.filter(id=pk)
+            else:
+                self.queryset = self.filter_queryset(self.queryset)
+                self.queryset = self.custom_back_end_filters(self.queryset, request)
+            page = self.paginate_queryset(self.queryset)
+
+            if page == None:
+                raise Exception('GET parameter "page" is not found')
+            self.queryset = page
+            serializer = self.get_serializer(self.queryset, many=True)
+            result = serializer.data
+            result = self.get_paginated_response(serializer.data).data
+            result = request.send_data(result)
+        except Exception:
+            traceback.print_exc()
+            result = request.send_error("ERR_002")
+        return result
+
+
+@permission_classes([IsAuthenticated])
+class TimeTableSelectGroupsAPIView(
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    generics.GenericAPIView
+):
+    '''To get groups by filters'''
+
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['name']
+
+    @staticmethod
+    def front_end_filters(queryset,filters_dict):
+        validated_filters = {}
+
+        if filters_dict['lesson']:
+            selected_lesson_ids = filters_dict['lesson'].split(',')
+
+            timetable_ids = TimeTable.objects.filter(
+                lesson__in=selected_lesson_ids
+            ).values_list('id',flat=True).distinct()
+
+            group_ids = TimeTable_to_group.objects.filter(
+                timetable__in=timetable_ids,
+            ).values_list('group',flat=True).distinct()
+
+            validated_filters['id__in'] = group_ids
+        queryset = queryset.filter(**validated_filters)
+        return queryset
+
+    @has_permission(must_permissions=['"lms-timetable-register-read"'])
+    def get(self,request,pk=None):
+        result = request.send_data(None)
+
+        try:
+            # to apply filters
+            if pk:
+                self.queryset = self.queryset.filter(id=pk)
+            else:
+                self.queryset = self.filter_queryset(self.queryset)
+                self.queryset = self.front_end_filters(self.queryset,request.GET)
+            page = self.paginate_queryset(self.queryset)
+
+            if page == None:
+                raise Exception('GET parameter "page" is not found')
+            self.queryset = page
+            serializer = self.get_serializer(self.queryset, many=True)
+            result = serializer.data
+            result = self.get_paginated_response(serializer.data).data
+            result = request.send_data(result)
+        except Exception:
+            traceback.print_exc()
+            result = request.send_error("ERR_002")
+        return result
+# endregion Timetable multi delete modal

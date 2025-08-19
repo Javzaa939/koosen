@@ -3,7 +3,7 @@ from datetime import datetime
 
 from rest_framework import serializers
 from django.db.models import F, Sum
-from lms.models import Room
+from lms.models import ProfessionDefinition, Room
 from lms.models import Building
 from lms.models import TimeTable
 from lms.models import TimeTable_to_group, TimeTable_to_student
@@ -1015,3 +1015,90 @@ class TimeTablePutCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = TimeTable
         fields = "__all__"
+
+
+# region Timetable multi delete modal
+class ProfessionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProfessionDefinition
+        fields = "__all__"
+
+
+class GroupSerializer(serializers.ModelSerializer):
+    profession=ProfessionSerializer(many=False)
+    class Meta:
+        model = Group
+        fields = "__all__"
+
+
+class LessonTeacherListSerializer(serializers.ModelSerializer):
+    """ Багшийн жагсаалтыг харуулах serializer """
+
+
+    full_name = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Teachers
+        fields = ["id", "last_name", "first_name", 'full_name']
+
+    def get_full_name(self, obj):
+        """ Багшийн бүтэн нэр авах """
+        full_name = ''
+        register_code = obj.user.employee.register_code if  obj.user.employee else ''
+        full_name = full_name +  obj.full_name
+        if register_code:
+            full_name = full_name + '(' + register_code + ')'
+        return full_name
+
+
+class TimeTablePutSerializer(serializers.ModelSerializer):
+    lesson = LessonStandartSerialzier(many=False, read_only=True)
+    teacher = LessonTeacherListSerializer(many=False, read_only=True)
+    day_name = serializers.SerializerMethodField(read_only=True)
+    time_name = serializers.SerializerMethodField(read_only=True)
+    type_name = serializers.SerializerMethodField(read_only=True)
+    room_name = serializers.SerializerMethodField()
+    group_names = serializers.SerializerMethodField()
+    week_start_date = serializers.DateField(format=("%Y-%m-%d"), read_only=True)
+
+    class Meta:
+        model = TimeTable
+        fields = "__all__"
+
+    def get_day_name(seld, obj):
+
+        return obj.get_day_display()
+
+    def get_type_name(self, obj):
+        return obj.get_type_display()
+
+    def get_time_name(self, obj):
+        """ Хичээлийн хуваарийн төрлийн нэр авах """
+
+        type_name = obj.get_time_display()
+        return type_name
+
+    def get_room_name(self, obj):
+        return obj.room.full_name if obj.room else ''
+
+    def get_group_names(self, obj):
+        group_names = ''
+        group_list = TimeTable_to_group.objects.filter(timetable_id=obj.id).values_list('group__name', flat=True)
+
+        if group_list:
+            group_names = ', '.join(group_list)
+
+        return group_names
+
+
+class LessonStandartSerializer(serializers.ModelSerializer):
+
+    full_name = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = LessonStandart
+        fields = "__all__"
+
+    def get_full_name(self, obj):
+        return obj.code_name
+# endregion Timetable multi delete modal

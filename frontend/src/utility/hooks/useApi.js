@@ -886,6 +886,29 @@ function useApi(isDisplay=false) {
 
 		/** Цагийн хуваарь */
 		timetable: {
+			getList: (limit = 'Бүгд', page = 1, sort = '', search = '', department_id, lesson, teacher, start_date, end_date, group = '', day = '', time = '', type = '', is_delete = false) => instance.get(`/timetable/list/teacher/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&school=${school_id}&department=${department_id}&lesson=${lesson}&teacher=${teacher}&start_date=${start_date}&end_date=${end_date}&group=${group}&day=${day}&time=${time}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&type=${type}&is_delete=${is_delete}`),
+
+			getSelectGroups: (args) => {
+				const blankParams = {
+					limit: 'Бүгд', page: 1, sorting: '', search: '',
+					lesson: '',
+					...args
+				}
+
+				const params = new URLSearchParams(blankParams)
+				return instance.get(`/timetable/list/select-groups/?${params}`)
+			},
+
+			getSelectLessons: (args) => {
+				const blankParams = {
+					limit: 'Бүгд', page: 1, sorting: '', search: '',
+					...args
+				}
+
+				const params = new URLSearchParams(blankParams)
+				return instance.get(`/timetable/list/select-lessons/?${params}&lesson_year=${cyear_name}&lesson_season=${cseason_id}`)
+			},
+
 
 			/* Хичээлийн хуваарь экселд зориулсан нь */
 			excel:{
@@ -921,6 +944,7 @@ function useApi(isDisplay=false) {
 				getPotok: (lesson, potok) => instance.get(`/timetable/list/?lesson=${lesson}&potok=${potok}&school=${school_id}&year=${cyear_name}&season=${cseason_id}`),
 				put: (data, pk) => instance.put(`/timetable/register/${pk}/`, data),
 				delete: (pk) => instance.delete(`/timetable/register/${pk}/`),
+				deleteByList: (ids='') => instance.delete(`/timetable/register/?ids=${ids}`),
 				selectionDatas: (selectType, selectedValue, optionFilter, isVolume) => instance.get(`/timetable/resource1/?school=${school_id}&year=${cyear_name}&season=${cseason_id}&stype=${selectType}&selectedValue=${selectedValue}&option=${optionFilter}&is_volume=${isVolume}`),
 				setEvent: (data, id) => instance.put(`/timetable/event/${id}/`, data),
 				moveEvent: (data, id) => instance.put(`/timetable/register/new/${id}/`, data),
