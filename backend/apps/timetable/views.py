@@ -4163,7 +4163,7 @@ class TimeTablePrint(
         user = request.user
 
         employee = Employee.objects.filter(user=user, state=Employee.STATE_WORKING).first()
-        position_name = employee.org_position.name if employee.org_position else ''
+        position_name = employee.org_position.name if employee and employee.org_position else ''
 
         user_info = Teachers.objects.filter(user=user, action_status=Teachers.APPROVED).first()
 
