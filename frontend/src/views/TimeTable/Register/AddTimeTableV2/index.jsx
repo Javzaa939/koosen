@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import Simple from './Simple';
 import Block from './Block';
 import Kurats from './Kurats';
+import DateTimeTable from './Date';
 
 import { RoomAdd } from './roomAdd';
 
@@ -52,6 +53,11 @@ const AddModalV2 = ({ open, handleModal, refreshDatas, editValues }) => {
             name: 'Кураци',
             component: <Kurats handleRoomModal={handleRoomModal}  handleModal={handleModal} editValues={editValues} refreshDatas={refreshDatas} roomModal={roomModal} setLoader={setLoader} is_loading={is_loading}/>
         },
+        {
+            active_id: 4,
+            name: 'Огноогоор',
+            component: <DateTimeTable handleRoomModal={handleRoomModal}  handleModal={handleModal} editValues={editValues} refreshDatas={refreshDatas} roomModal={roomModal} setLoader={setLoader} is_loading={is_loading}/>
+        },
     ]
 
     const [active, setActive] = useState('1')
@@ -87,8 +93,6 @@ const AddModalV2 = ({ open, handleModal, refreshDatas, editValues }) => {
             >
                 <ModalHeader
                     className="mb-1"
-                    toggle={handleModal}
-                    close={CloseBtn}
                     tag="div"
                 >
                     <h5 className="modal-title">{t("Хичээлийн хуваарь нэмэх")}</h5>

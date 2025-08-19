@@ -19,10 +19,4 @@ export const validateSchema = Yup.object().shape({
 	// teacher: Yup.string()
 	// 	.trim()
 	// 	.required('Хоосон байна'),
-	end_date: Yup.string()
-		.trim()
-		.required('Хоосон байна'),
-	begin_date: Yup.string()
-		.trim()
-		.required('Хоосон байна'),
 });
