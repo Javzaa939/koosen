@@ -8,6 +8,7 @@ const ExamReport = lazy (() => import("@views/TimeTable/ExamTimeTable/ExamReport
 const ExamRepeat = lazy (() => import("@views/TimeTable/ExamRepeat"))
 const EditPage = lazy (() => import("@views/TimeTable/ExamTimeTable/EditPage"))
 const PrintRoom = lazy (() => import("@views/TimeTable/Register/AddV2/PrintRoom"))
+const TimeTable  = lazy(()=>import("@views/TimeTable/TimeTableTeacher"))
 
 const TimetableRoutes = [
     {
@@ -50,6 +51,10 @@ const TimetableRoutes = [
         meta: {
             layout: 'blank',
         }
+    },
+    {
+        path: 'timetable/teacher/',
+        element: <TimeTable />
     },
 ]
 

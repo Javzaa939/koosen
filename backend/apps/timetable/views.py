@@ -4776,6 +4776,793 @@ class TimeTableListAPIView(
 
         return request.send_data(get_result)
 
+    @has_permission(must_permissions=['lms-timetable-register-create'])
+    def post(self, request, pk=None):
+        """
+        Багш сонгох
+        Button: "Хуваарь жагсаалтаар харах". Page: /timetable/teacher/
+        """
+
+        kweek_days = []
+        kweek_nums = []
+        kweek_list = []
+
+        self.queryset = TimeTable.objects.all()
+        request_data = request.data
+        lesson_year = request.query_params.get('lesson_year')
+        lesson_season = request.query_params.get('lesson_season')
+
+        teacher_id = request_data.get('teacher')
+        if teacher_id:
+            teacher = Teachers.objects.get(id=teacher_id)
+        else:
+            teacher = None
+
+        teacher_group = request_data.get('teacher_group')
+        week_number = request_data.get('week_number')
+        tt_type = request_data.get('type')
+        group_teachers = request_data.get('group_teachers')
+        support_teacher = request_data.get('support_teacher', [])
+        all_support_teacher = support_teacher.copy()
+        instance = TimeTable.objects.get(pk=pk)
+        is_kurats = instance.is_kurats
+        old_potok = instance.potok
+        time = instance.time
+        day = instance.day
+        old_lesson = instance.lesson
+        odd_even = instance.odd_even
+        begin_date = str(instance.begin_date)
+        end_date = str(instance.end_date)
+        odd_even = instance.odd_even
+        old_teacher = instance.teacher
+        parent_kurats = instance.parent_kurats
+
+        print('request_data', request_data)
+
+        # Хуучин курац хуваарийн ids
+        old_timetable_ids = TimeTable.objects.filter(is_kurats=True, potok=old_potok, lesson=old_lesson).values_list('id', flat=True)
+
+        # Яг тухайн засах гэж буй хуваарийн id kurats үед яг адил нэг parent тай хуваарийн id
+        if is_kurats:
+            old_ids = TimeTable.objects.filter(id__in=old_timetable_ids, parent_kurats=parent_kurats).values_list('id',flat=True)
+            # Бүх хуваарь дээр хуваарьлах
+            update_ids = TimeTable.objects.filter(parent_kurats=parent_kurats).values_list('id',flat=True)
+            kurats_times= TimeTable.objects.filter(id__in=old_ids).values_list('time',flat=True).distinct()
+        else:
+            queryset = TimeTable.objects.exclude(id=pk)
+            old_ids = queryset.filter(lesson_year=lesson_year, lesson_season_id=lesson_season, day=day, time=time, odd_even=odd_even).values_list('id',flat=True)
+
+        # Курац байх үед сонгосон өдрүүдийн гаригууд, цагуудтай ижил хуваариудыг авна.
+        if is_kurats:
+            queryset = self.queryset.exclude(id__in=old_ids)
+
+            kweek_list = get_weekday_kurats_date(begin_date, end_date, lesson_year, lesson_season)
+            for kweek in kweek_list:
+                kweek_days.append(kweek.get('weekday'))
+                kweek_nums.append(kweek.get('weekNum'))
+
+            # Хэд дүгээр 7 хоногт орохыг нь давхар шалгах хэрэгтэй юм шиг байна
+            # qs_timetable = queryset.filter(lesson_year=lesson_year, lesson_season_id=lesson_season, day__in=kweek_days, week_number__in=kweek_nums, odd_even=odd_even, begin_date=instance.begin_date, time__in=kurats_times)
+
+        else:
+            queryset = self.queryset.exclude(id=pk)
+
+            # qs_timetable = queryset.filter(lesson_year=lesson_year, lesson_season_id=lesson_season, day=day, time=time, odd_even=odd_even)
+
+        if is_kurats:
+            current_group = TimeTable_to_group.objects.filter(timetable_id__in=old_ids).values_list('group_id',flat=True)
+        else:
+            current_group = TimeTable_to_group.objects.filter(timetable_id=pk).values_list('group_id',flat=True)
+
+        # Тухайн хуваарь дээр тавигдсан ангиуд
+        current_group = set(current_group)
+
+        # Бүх байгаа анги дээр багш зоох
+        if teacher_group=='all':
+
+            # Багш олноор ирэх нөхцөл (эхний багшаар хувиараа шинэчилнэ)
+            teacher = None
+
+            if support_teacher and len(support_teacher) > 0:
+                teacher = support_teacher[0]
+                support_teacher.remove(teacher)
+
+            # Тухайн багшийн давхцлыг шалгах
+            if teacher:
+                qs_lesson_teacher = Lesson_to_teacher.objects.filter(lesson=old_lesson, teacher=teacher)
+                if not qs_lesson_teacher.exists():
+                    Lesson_to_teacher.objects.create(
+                        lesson=old_lesson,
+                        teacher_id=teacher
+                    )
+
+                for s_teacher in support_teacher:
+                    qs_lesson_teacher = Lesson_to_teacher.objects.filter(lesson=old_lesson, teacher=s_teacher)
+                    if not qs_lesson_teacher.exists():
+                        Lesson_to_teacher.objects.create(
+                            lesson=old_lesson,
+                            teacher_id=s_teacher
+                        )
+
+            # Энгийн хуваарь бол шууд тухайн багшийг зооно (Бүх анги дээр)
+            if not is_kurats:
+                create_timetable_datas = list()
+                create_timetable_group_datas = list()
+                old_groups = TimeTable_to_group.objects.filter(timetable=instance)
+
+                # Өмнө нь байсан эхлэх болон дуусах 7 хоног
+                old_begin_week = instance.begin_week
+                old_end_week = instance.end_week
+                _old_teacher = instance.teacher
+                new_teacher = Teachers.objects.get(pk=teacher) if teacher else None
+                new_week_number = week_number
+
+                if _old_teacher and (new_teacher != _old_teacher or len(support_teacher) > 0):
+
+                    # Эхлэх 7 хоногоос хойших долоо хоногийн хуваарь засаж байгаа бол
+                    if old_begin_week < new_week_number:
+                        new_end_week = new_week_number - 1
+
+                        row_data = {
+                            "teacher": instance.teacher,
+                            "potok": instance.potok,
+                            "lesson": instance.lesson,
+                            "study_type": instance.study_type,
+                            "odd_even": instance.odd_even,
+                            "st_count": instance.st_count,
+                            "room": instance.room,
+                            "type": instance.type,
+                            "day": instance.day,
+                            "time": instance.time,
+                            "school": instance.school,
+                            "is_block": instance.is_block,
+                            "department": instance.department,
+                            "choosing_deps": instance.choosing_deps,
+                            "lesson_year": instance.lesson_year,
+                            "lesson_season": instance.lesson_season,
+                            "color": instance.color,
+                            "created_user": request.user,
+                            "is_optional": instance.is_optional,
+                            "week_number": instance.week_number,
+                            "begin_week": old_begin_week,
+                            "end_week": new_end_week,
+                            "choosing_times": instance.choosing_times,
+                            "support_teacher": instance.support_teacher,
+                        }
+
+                        # Яг засаж байгаа 7 хоногийн өмнөх хуваарийг үүсгэх
+                        new_timetable = TimeTable(**row_data)
+                        create_timetable_datas.append(
+                            new_timetable
+                        )
+
+                        for old_group in old_groups:
+                            create_timetable_group_datas.append(
+                                TimeTable_to_group(
+                                    timetable=new_timetable,
+                                    group=old_group.group
+                                )
+                            )
+
+                        if new_week_number + 1 <= old_end_week:
+
+                            row_data["week_number"] = new_week_number + 1
+                            row_data["begin_week"] = new_week_number + 1
+                            row_data["end_week"] = old_end_week
+
+                            new_timetable = TimeTable(**row_data)
+
+                            # Яг засаж байгаа 7 хоногийн дараагийн хуваарийг үүсгэх
+                            create_timetable_datas.append(
+                                new_timetable
+                            )
+
+                            for old_group in old_groups:
+                                create_timetable_group_datas.append(
+                                    TimeTable_to_group(
+                                        timetable=new_timetable,
+                                        group=old_group.group
+                                    )
+                                )
+
+                        row_data["teacher"] = new_teacher
+                        row_data["week_number"] = new_week_number
+                        row_data["begin_week"] = new_week_number
+                        row_data["end_week"] = new_week_number
+                        row_data["support_teacher"] = all_support_teacher
+
+                        new_timetable = TimeTable(**row_data)
+
+                        # Яг засаж байгаа 7 хоногт багшийн хуваарийг шинээр үүсгэж буй
+                        create_timetable_datas.append(new_timetable)
+                        for old_group in old_groups:
+                            create_timetable_group_datas.append(
+                                TimeTable_to_group(
+                                    timetable=new_timetable,
+                                    group=old_group.group
+                                )
+                            )
+
+                        # Үлдсэн багш нартаа хувиараа шинээр үүсгэнэ
+                        for s_teacher in support_teacher:
+                            new_teacher_qs = Teachers.objects.get(pk=s_teacher)
+                            row_data["teacher"] = new_teacher_qs
+                            row_data["support_teacher"] = all_support_teacher
+                            new_ttable = TimeTable(**row_data)
+                            create_timetable_datas.append(new_ttable)
+
+                            for timetable_group in old_groups:
+                                create_timetable_group_datas.append(
+                                    TimeTable_to_group(
+                                        timetable=new_ttable,
+                                        group=timetable_group.group,
+                                    )
+                                )
+
+                    # Эхлэх 7 хоногийг засаж байгаа бол
+                    elif old_begin_week == new_week_number:
+                        # Яг засаж байгаа 7 хоногт багшийн хуваарийг шинээр үүсгэж буй
+                        row_data = {
+                            "teacher": new_teacher,
+                            "potok": instance.potok,
+                            "lesson": instance.lesson,
+                            "study_type": instance.study_type,
+                            "odd_even": instance.odd_even,
+                            "st_count": instance.st_count,
+                            "room": instance.room,
+                            "type": instance.type,
+                            "day": instance.day,
+                            "time": instance.time,
+                            "school": instance.school,
+                            "is_block": instance.is_block,
+                            "choosing_deps": instance.choosing_deps,
+                            "choosing_times": instance.choosing_times,
+                            "lesson_year": instance.lesson_year,
+                            "lesson_season": instance.lesson_season,
+                            "color": instance.color,
+                            "created_user": request.user,
+                            "is_optional": instance.is_optional,
+                            "week_number": new_week_number,
+                            "begin_week": new_week_number,
+                            "end_week": new_week_number,
+                            "support_teacher": instance.support_teacher,
+                        }
+
+                        new_timetable = TimeTable(**row_data)
+                        create_timetable_datas.append(new_timetable)
+                        for old_group in old_groups:
+                            create_timetable_group_datas.append(
+                                TimeTable_to_group(
+                                    timetable=new_timetable,
+                                    group=old_group.group
+                                )
+                            )
+
+                        # Үлдсэн багш нартаа хувиараа шинээр үүсгэнэ
+                        for s_teacher in support_teacher:
+                            new_teacher_qs = Teachers.objects.get(pk=s_teacher)
+                            row_data["teacher"] = new_teacher_qs
+                            row_data["support_teacher"] = all_support_teacher
+                            new_ttable = TimeTable(**row_data)
+                            create_timetable_datas.append(new_ttable)
+
+                            for timetable_group in old_groups:
+                                create_timetable_group_datas.append(
+                                    TimeTable_to_group(
+                                        timetable=new_ttable,
+                                        group=timetable_group.group,
+                                    )
+                                )
+
+                        if new_week_number + 1 <= old_end_week:
+                            row_data["teacher"] = instance.teacher
+                            row_data["support_teacher"] = instance.support_teacher
+                            row_data["week_number"] = new_week_number + 1
+                            row_data["begin_week"] = new_week_number + 1
+                            row_data["end_week"] = old_end_week
+
+                            new_timetable = TimeTable(**row_data)
+
+                            # Яг засаж байгаа 7 хоногийн дараагийн хуваарийг үүсгэх
+                            create_timetable_datas.append(new_timetable)
+                            for old_group in old_groups:
+                                create_timetable_group_datas.append(
+                                    TimeTable_to_group(
+                                        timetable=new_timetable,
+                                        group=old_group.group
+                                    )
+                                )
+
+                    print('Шинээр үүсэж байгаа хичээлийн хувааарь', len(create_timetable_datas))
+                    print('Шинээр үүсэж байгаа анги', len(create_timetable_group_datas))
+
+                    if len(create_timetable_datas) > 0:
+                        TimeTable.objects.bulk_create(create_timetable_datas)
+
+                    if len(create_timetable_group_datas) > 0:
+                        TimeTable_to_group.objects.bulk_create(create_timetable_group_datas)
+
+                    old_groups.delete()
+                    instance.delete()
+
+                # Өмнө нь багш байхгүй байсан бол
+                elif not _old_teacher:
+                    instance.teacher = new_teacher
+                    instance.support_teacher = all_support_teacher
+                    instance.save()
+
+                    timetable_group_qs = TimeTable_to_group.objects.filter(timetable=instance)
+
+                    new_instance = instance
+
+                    # Үлдсэн багш нартаа хувиараа шинээр үүсгэнэ
+                    for s_teacher in support_teacher:
+                        new_instance.pk = None
+                        new_instance.support_teacher = all_support_teacher
+                        new_instance.teacher_id = s_teacher
+                        create_timetable_datas_kurats.append(new_instance)
+
+                        for timetable_group in timetable_group_qs:
+                            create_timetable_group_datas_kurats.append(
+                                TimeTable_to_group(
+                                    timetable=new_instance,
+                                    group=timetable_group.group,
+                                )
+                            )
+
+            # Kurats үед
+            if is_kurats:
+                create_timetable_datas_kurats = list()
+                create_timetable_group_datas_kurats = list()
+
+                # Бүх хуваарийн багшийг солих үед
+                if tt_type == "all_timetable":
+                    # Огноо хуваарийн үед хичээл, ангиар нь шүүж update хийх
+                    if instance.begin_date == instance.end_date:
+                        timetable_group_qs = TimeTable_to_group.objects.filter(timetable__lesson=instance.lesson, group__in=current_group, timetable__type=instance.type)
+                        update_group_time_ids = timetable_group_qs.values_list('timetable', flat=True)
+
+                        all_timetable_qs = TimeTable.objects.filter(id__in=update_group_time_ids)
+                        all_timetable_qs.update(teacher=teacher, support_teacher=all_support_teacher)
+
+                        for timetable_qs in all_timetable_qs:
+                            # Үлдсэн багш нартаа хувиараа шинээр үүсгэнэ
+                            for s_teacher in support_teacher:
+                                timetable_qs.pk = None
+                                timetable_qs.support_teacher = all_support_teacher
+                                timetable_qs.teacher_id = s_teacher
+                                create_timetable_datas_kurats.append(timetable_qs)
+
+                                for timetable_group in timetable_group_qs:
+                                    create_timetable_group_datas_kurats.append(
+                                        TimeTable_to_group(
+                                            timetable=timetable_qs,
+                                            group=timetable_group.group,
+                                        )
+                                    )
+                    else:
+                        TimeTable.objects.filter(id__in=update_ids).update(teacher=teacher, support_teacher=all_support_teacher)
+
+                        all_timetable_qs = TimeTable.objects.filter(id__in=update_ids)
+                        timetable_group_qs = TimeTable_to_group.objects.filter(timetable__in=all_timetable_qs)
+
+                        for timetable_qs in all_timetable_qs:
+                            # Үлдсэн багш нартаа хувиараа шинээр үүсгэнэ
+                            for s_teacher in support_teacher:
+                                timetable_qs.pk = None
+                                timetable_qs.support_teacher = all_support_teacher
+                                timetable_qs.teacher_id = s_teacher
+                                create_timetable_datas_kurats.append(timetable_qs)
+
+                                for timetable_group in timetable_group_qs:
+                                    create_timetable_group_datas_kurats.append(
+                                        TimeTable_to_group(
+                                            timetable=timetable_qs,
+                                            group=timetable_group.group,
+                                        )
+                                    )
+
+                # Ганцхан тухайн хуваарийн багшийг солих үед
+                if tt_type == "single_timetable":
+                    timetable_qs = TimeTable.objects.filter(id=pk).first()
+
+                    TimeTable.objects.filter(id=pk).update(teacher_id=teacher, support_teacher=all_support_teacher)
+                    timetable_group_qs = TimeTable_to_group.objects.filter(timetable=pk)
+
+                    # Үлдсэн багш нартаа хувиараа шинээр үүсгэнэ
+                    for s_teacher in support_teacher:
+                        timetable_qs.pk = None
+                        timetable_qs.support_teacher = all_support_teacher
+                        timetable_qs.teacher_id = s_teacher
+                        create_timetable_datas_kurats.append(timetable_qs)
+
+                        for timetable_group in timetable_group_qs:
+                            create_timetable_group_datas_kurats.append(
+                                TimeTable_to_group(
+                                    timetable=timetable_qs,
+                                    group=timetable_group.group,
+                                )
+                            )
+
+                print('Шинээр үүсэж байгаа хичээлийн хувааарь', len(create_timetable_datas_kurats))
+                print('Шинээр үүсэж байгаа анги', len(create_timetable_group_datas_kurats))
+
+                if len(create_timetable_datas_kurats) > 0:
+                    TimeTable.objects.bulk_create(create_timetable_datas_kurats)
+
+                if len(create_timetable_group_datas_kurats) > 0:
+                    TimeTable_to_group.objects.bulk_create(create_timetable_group_datas_kurats)
+
+            return request.send_info("INF_001")
+
+        # Анги ангиар нь багш зоох (Нэг нэг ангиар)
+        if teacher_group == 'one':
+            kurats_ids = []
+            delete_group_datas = list()
+            create_timetable_datas = list()
+            create_timetable_group_datas = list()
+            old_groups = TimeTable_to_group.objects.filter(timetable=instance)
+
+            for group_id, teacher in group_teachers.items():
+                group_id = int(group_id)
+                new_teacher = Teachers.objects.get(pk=teacher)
+
+                # Kurats Үед
+                if is_kurats:
+
+                    # Бүх хуваарийн багшийг солих үед
+                    if tt_type == "all_timetable":
+
+                        # Хэрэв анги болон багш солигдоогүй үед continue
+                        if old_teacher == new_teacher and old_teacher is not None and group_id in current_group:
+                            continue
+
+                        # Тухайн багшийн давхцлыг шалгах
+                        # if new_teacher:
+                        #     qs_teacher = qs_timetable.filter(teacher_id=new_teacher).first()
+                        #     if qs_teacher != None:
+                        #         name = qs_teacher.teacher.full_name
+                        #         lesson = qs_teacher.lesson.name
+                        #         time = qs_teacher.time
+                        #         day = qs_teacher.day
+
+                        #         msg = "{name} багш  нь {lesson} хичээлийн {day}-{time} дээр хуваарьтай байна.".format(name=name,lesson=lesson, day=day, time=time)
+
+                        #         error_obj = get_error_obj(msg, 'teacher')
+                        #         if len(error_obj) > 0:
+                        #             return request.send_error("ERR_003", error_obj)
+
+                        # Өмнө нь багш тавигдаагүй үед
+                        if old_teacher is None:
+                            # old_ids: Нэг parent тай курац хуваарь
+                            # Хуучин байсан анги дээр багш оруулах үед
+                            TimeTable.objects.filter(id__in=old_ids).update(teacher_id=new_teacher)
+                            old_teacher = new_teacher
+                            continue
+
+                        # Хуучин багш байгаа шинэ багшаар солих үед тухайн шинэ багш дээр тухайн хичээлийн copy-г үүсгэх
+                        if new_teacher != old_teacher and old_teacher is not None:
+                            qs_lesson_teacher = Lesson_to_teacher.objects.filter(lesson=old_lesson, teacher=new_teacher )
+                            if not qs_lesson_teacher.exists():
+                                Lesson_to_teacher.objects.create(
+                                    lesson=old_lesson,
+                                    teacher_id=teacher
+                                )
+                            teacher_instance = Teachers.objects.get(id=new_teacher)
+                            # Хуучин байгаа хуваариас нь устгах
+                            if group_id in current_group:
+                                TimeTable_to_group.objects.filter(
+                                    timetable_id__in=old_ids,
+                                    group_id=group_id
+                                ).delete()
+
+                            group_add_datas = []
+
+                            for old_id in old_ids:
+                                copy_instance = TimeTable.objects.get(id=old_id)
+                                copy_instance.pk = None
+                                copy_instance.teacher = teacher_instance
+                                copy_instance.save()
+
+                                # Цагийн хуваарийн хүснэгтийн id
+                                table_id = copy_instance.id
+                                kurats_ids.append(table_id)
+
+                                group_add_datas.append(
+                                    TimeTable_to_group(
+                                        timetable_id=table_id,
+                                        group_id=group_id
+                                    )
+                                )
+                                parent_id = kurats_ids[0]
+
+                            qs_timetable = TimeTable.objects.filter(id__in=kurats_ids).update(
+                                parent_kurats=parent_id
+                            )
+
+                            TimeTable_to_group.objects.bulk_create(group_add_datas)
+
+                    # Ганцхан тухайн хуваарийн багшийг солих үед
+                    if tt_type == "single_timetable":
+                        # Хэрэв анги болон багш солигдоогүй үед continue
+                        if old_teacher == new_teacher and old_teacher is not None and group_id in current_group:
+                            continue
+
+                        # Тухайн багшийн давхцлыг шалгах
+                        # if new_teacher:
+                        #     qs_teacher = qs_timetable.filter(teacher_id=new_teacher).first()
+                        #     if qs_teacher != None:
+                        #         name = qs_teacher.teacher.full_name
+                        #         lesson = qs_teacher.lesson.name
+                        #         time = qs_teacher.time
+                        #         day = qs_teacher.day
+
+                        #         msg = "{name} багш  нь {lesson} хичээлийн {day}-{time} дээр хуваарьтай байна.".format(name=name,lesson=lesson, day=day, time=time)
+
+                        #         error_obj = get_error_obj(msg, 'teacher')
+                        #         if len(error_obj) > 0:
+                        #             return request.send_error("ERR_003", error_obj)
+
+                        # Өмнө нь багш тавигдаагүй үед
+                        if old_teacher is None:
+                            # old_ids: Нэг parent тай курац хуваарь
+                            # Хуучин байсан анги дээр багш оруулах үед
+                            TimeTable.objects.filter(id=pk).update(teacher_id=new_teacher)
+                            old_teacher = new_teacher
+                            continue
+
+                        # Хуучин багш байгаа шинэ багшаар солих үед тухайн шинэ багш дээр тухайн хичээлийн copy-г үүсгэх
+                        if new_teacher != old_teacher and old_teacher is not None:
+                            qs_lesson_teacher = Lesson_to_teacher.objects.filter(lesson=old_lesson, teacher=new_teacher )
+                            if not qs_lesson_teacher.exists():
+                                Lesson_to_teacher.objects.create(
+                                    lesson=old_lesson,
+                                    teacher_id=new_teacher
+                                )
+                            teacher_instance = Teachers.objects.get(id=new_teacher)
+                            # Хуучин байгаа хуваариас нь устгах
+                            if group_id in current_group:
+                                TimeTable_to_group.objects.filter(
+                                    timetable_id=pk,
+                                    group_id=group_id
+                                ).delete()
+
+                            group_add_datas = []
+
+                            copy_instance = TimeTable.objects.get(id=pk)
+                            copy_instance.pk = None
+                            copy_instance.teacher = teacher_instance
+                            copy_instance.save()
+
+                            # Цагийн хуваарийн хүснэгтийн id
+                            table_id = copy_instance.id
+                            kurats_ids.append(table_id)
+                            print("kurats_ids", kurats_ids)
+
+                            group_add=TimeTable_to_group(
+                                    timetable_id=table_id,
+                                    group_id=group_id
+                                )
+                            parent_id = kurats_ids[0]
+                            group_add.save()
+                            qs_timetable = TimeTable.objects.filter(id__in=kurats_ids).update(
+                                parent_kurats=parent_id
+                            )
+
+                # Энгийн хуваарь үед
+                else:
+                    print('this')
+                    # Хэрэв анги болон багш солигдоогүй үед continue
+                    if old_teacher == new_teacher and old_teacher is not None and group_id in current_group:
+                        continue
+
+                    # Тухайн багшийн давхцлыг шалгах
+                    # if new_teacher:
+                    #     qs_teacher = qs_timetable.filter(teacher_id=new_teacher).first()
+                    #     if qs_teacher != None:
+                    #         name = qs_teacher.teacher.full_name
+                    #         lesson = qs_teacher.lesson.name
+                    #         time = qs_teacher.time
+                    #         day = qs_teacher.day
+
+                    #         msg = "{name} багш  нь {lesson} хичээлийн {day}-{time} дээр хуваарьтай байна.".format(name=name,lesson=lesson, day=day, time=time)
+
+                    #         error_obj = get_error_obj(msg, 'teacher')
+                    #         if len(error_obj) > 0:
+                    #             return request.send_error("ERR_003", error_obj)
+
+                    # Байгаа хуваарь дээрээ багш холбох багш байхгүй
+                    if not old_teacher:
+                        # Хуучин байсан анги дээр багш оруулах үед
+                        # Энгийн хуваарь дээр эхний 7 хоногоос ялгаатай бол заавал өөр хуваарь үүсгэх
+                        TimeTable.objects.filter(id=pk).update(teacher_id=new_teacher)
+                        old_teacher = new_teacher
+                        continue
+
+                    # Багш сонгогдчихсон хэрнээ багшаа засаж байх үед
+                    if new_teacher and new_teacher != old_teacher and old_teacher is not None:
+                        qs_lesson_teacher = Lesson_to_teacher.objects.filter(lesson=old_lesson, teacher=new_teacher)
+                        if not qs_lesson_teacher.exists():
+                            Lesson_to_teacher.objects.create(
+                                lesson=old_lesson,
+                                teacher=new_teacher
+                            )
+
+                        end_week = instance.end_week
+
+                        # Өмнө нь байсан эхлэх болон дуусах 7 хоног
+                        old_begin_week = instance.begin_week
+                        old_end_week = instance.end_week
+                        new_week_number = week_number
+
+                        if old_teacher and new_teacher != old_teacher:
+
+                            # Эхлэх 7 хоногоос хойших долоо хоногийн хуваарь засаж байгаа бол
+                            if old_begin_week < new_week_number:
+                                new_end_week = new_week_number - 1
+
+                                row_data = {
+                                    "teacher": instance.teacher,
+                                    "potok": instance.potok,
+                                    "lesson": instance.lesson,
+                                    "study_type": instance.study_type,
+                                    "odd_even": instance.odd_even,
+                                    "st_count": instance.st_count,
+                                    "room": instance.room,
+                                    "type": instance.type,
+                                    "day": instance.day,
+                                    "time": instance.time,
+                                    "school": instance.school,
+                                    "is_block": instance.is_block,
+                                    "choosing_deps": instance.choosing_deps,
+                                    "lesson_year": instance.lesson_year,
+                                    "lesson_season": instance.lesson_season,
+                                    "color": instance.color,
+                                    "created_user": request.user,
+                                    "is_optional": instance.is_optional,
+                                    "week_number": instance.week_number,
+                                    "begin_week": old_begin_week,
+                                    "end_week": new_end_week,
+                                }
+
+                                # Яг засаж байгаа 7 хоногийн өмнөх хуваарийг үүсгэх
+                                new_timetable = TimeTable(**row_data)
+                                create_timetable_datas.append(
+                                    new_timetable
+                                )
+
+                                for old_group in old_groups:
+                                    create_timetable_group_datas.append(
+                                        TimeTable_to_group(
+                                            timetable=new_timetable,
+                                            group=old_group.group
+                                        )
+                                    )
+
+                                if new_week_number + 1 <= old_end_week:
+
+                                    row_data["week_number"] = new_week_number + 1
+                                    row_data["begin_week"] = new_week_number + 1
+                                    row_data["end_week"] = old_end_week
+
+                                    new_timetable = TimeTable(**row_data)
+                                    # new_timetable = {**row_data}
+
+                                    # Яг засаж байгаа 7 хоногийн дараагийн хуваарийг үүсгэх
+                                    create_timetable_datas.append(
+                                        new_timetable
+                                    )
+
+                                    for old_group in old_groups:
+                                        create_timetable_group_datas.append(
+                                            TimeTable_to_group(
+                                                timetable=new_timetable,
+                                                group=old_group.group
+                                            )
+                                        )
+
+                                row_data["teacher"] = new_teacher
+                                row_data["week_number"] = new_week_number
+                                row_data["begin_week"] = new_week_number
+                                row_data["end_week"] = new_week_number
+
+                                new_timetable = TimeTable(**row_data)
+                                # new_timetable = {**row_data}
+
+                                # Яг засаж байгаа 7 хоногт багшийн хуваарийг шинээр үүсгэж буй
+                                create_timetable_datas.append(new_timetable)
+                                create_timetable_group_datas.append(
+                                    TimeTable_to_group(
+                                        timetable=new_timetable,
+                                        group_id=group_id
+                                    )
+                                )
+
+                            # Эхлэх 7 хоногийг засаж байгаа бол
+                            elif old_begin_week == new_week_number:
+                                # Яг засаж байгаа 7 хоногт багшийн хуваарийг шинээр үүсгэж буй
+                                row_data = {
+                                    "teacher": new_teacher,
+                                    "potok": instance.potok,
+                                    "lesson": instance.lesson,
+                                    "study_type": instance.study_type,
+                                    "odd_even": instance.odd_even,
+                                    "st_count": instance.st_count,
+                                    "room": instance.room,
+                                    "type": instance.type,
+                                    "day": instance.day,
+                                    "time": instance.time,
+                                    "school": instance.school,
+                                    "is_block": instance.is_block,
+                                    "choosing_deps": instance.choosing_deps,
+                                    "lesson_year": instance.lesson_year,
+                                    "lesson_season": instance.lesson_season,
+                                    "color": instance.color,
+                                    "created_user": request.user,
+                                    "is_optional": instance.is_optional,
+                                    "week_number": new_week_number,
+                                    "begin_week": new_week_number,
+                                    "end_week": new_week_number,
+                                }
+
+                                new_timetable = TimeTable(**row_data)
+                                # new_timetable = {**row_data}
+                                create_timetable_datas.append(new_timetable)
+                                create_timetable_group_datas.append(
+                                    TimeTable_to_group(
+                                        timetable=new_timetable,
+                                        group_id=group_id
+                                    )
+                                )
+
+                                if new_week_number + 1 <= old_end_week:
+                                    row_data["teacher"] = instance.teacher
+                                    row_data["week_number"] = new_week_number + 1
+                                    row_data["begin_week"] = new_week_number + 1
+                                    row_data["end_week"] = old_end_week
+
+                                    new_timetable = TimeTable(**row_data)
+                                    # new_timetable = {**row_data}
+
+                                    # Яг засаж байгаа 7 хоногийн дараагийн хуваарийг үүсгэх
+                                    create_timetable_datas.append(new_timetable)
+                                    for old_group in old_groups:
+                                        create_timetable_group_datas.append(
+                                            TimeTable_to_group(
+                                                timetable=new_timetable,
+                                                group=old_group.group
+                                            )
+                                        )
+
+                            # Өөрийн жагсаалтаас хасагдаж байгаа ангийг авах (Энд байгаа ангийг устгана)
+                            if not group_id in delete_group_datas:
+                                delete_group_datas.append(group_id)
+
+            if not is_kurats:
+                old_groups = TimeTable_to_group.objects.filter(timetable=instance)
+
+                if len(create_timetable_datas) > 0:
+                    TimeTable.objects.bulk_create(create_timetable_datas)
+
+                if len(create_timetable_group_datas) > 0:
+                    TimeTable_to_group.objects.bulk_create(create_timetable_group_datas)
+
+                if len(delete_group_datas) > 0:
+                    # Зөвхөн тухайн хувиараас ангийг л хасаж өгнө
+                    check_timetable_Qs = TimeTable_to_group.objects.filter(
+                        timetable=instance,
+                        group_id__in=delete_group_datas
+                    )
+
+                    if check_timetable_Qs.exists():
+                        check_timetable_Qs.delete()
+
+                    # Хэрвээ тухайн хуваарьт анги байхгүй гэж үзвэл өмнөх хуваарийг устгана
+                    if not TimeTable_to_group.objects.filter(timetable=instance).exists():
+                        instance.delete()
+
+        return request.send_info("INF_001")
+
 
 @permission_classes([IsAuthenticated])
 class TimeTableSelectLessonsAPIView(
@@ -5573,3 +6360,61 @@ class TimeTableSimpleAPIView(
         TimeTable_to_group.objects.bulk_create(group_datas)
 
         return request.send_info("INF_001")
+
+
+@permission_classes([IsAuthenticated])
+class TimeTableGroupsAPIView(
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    generics.GenericAPIView
+):
+    """  Тухайн тэнхимийн анги """
+    queryset = TimeTable.objects.all()
+    serializer_class = GroupSerializer
+
+    def get_queryset(self):
+        queryset = self.queryset
+        school = self.request.query_params.get('school')
+
+        if school:
+            queryset = queryset.filter(choosing_deps__overlap=school)
+
+        return queryset
+
+    def get(self, request, pk=None):
+        """  анги жагсаалт """
+        group_ids = TimeTable_to_group.objects.filter(
+            timetable_id__in=self.queryset.values_list('id', flat=True)
+        ).values_list('group', flat=True)
+
+        groups = Group.objects.filter(id__in=group_ids)
+        serializer = self.serializer_class(groups, many=True)
+
+        return request.send_data(serializer.data)
+
+
+@permission_classes([IsAuthenticated])
+class TimeTableListGroupAPIView(
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    generics.GenericAPIView
+):
+    """  Тухайн хуваарийн анги """
+
+    serializer_class = GroupSerializer
+
+    def get(self, request, pk=None):
+        "  анги жагсаалт "
+        if pk:
+            instance = TimeTable.objects.get(id=pk)
+            group = TimeTable_to_group.objects.filter(timetable=instance).values_list('group',flat=True)
+            groups = Group.objects.filter(id__in=group)
+            serializer = self.serializer_class(groups, many=True).data
+
+        return request.send_data(serializer)

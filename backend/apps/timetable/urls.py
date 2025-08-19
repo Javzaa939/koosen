@@ -24,6 +24,11 @@ urlpatterns = [
     path('list/select-groups/', TimeTableSelectGroupsAPIView.as_view()),
     path('list/select-lessons/', TimeTableSelectLessonsAPIView.as_view()),
 
+    # Button: "Хуваарь жагсаалтаар харах". Page: /timetable/teacher/
+    path('list/teacher/groups/', TimeTableGroupsAPIView.as_view()),
+    path('list/teacher/groups/<int:pk>/', TimeTableListGroupAPIView.as_view()),
+    path('list/teacher/<int:pk>/', TimeTableListAPIView.as_view()),
+
     # Цагийн ачааллаас
     path('register/new/<int:pk>/', TimeTableNewAPIView.as_view()),
 
