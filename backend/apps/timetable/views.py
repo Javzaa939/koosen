@@ -3329,7 +3329,7 @@ class TimeTableExcelImportAPIView(
                     # endregion
 
                     # region to expand dates range and to get parent_kurats and to check overlapping
-                    kweek_list = get_weekday_kurats_date(begin_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'), lesson_year, lesson_season)
+                    kweek_list = get_weekday_kurats_date(begin_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
                     kweek_days = []
                     kweek_nums = []
 
