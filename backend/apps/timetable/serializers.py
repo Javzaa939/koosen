@@ -1111,3 +1111,13 @@ class TimeKuratsSerializer(serializers.ModelSerializer):
     class Meta:
         model = TimeTable
         fields = "__all__"
+
+
+class TimeTableSimpleSerializer(serializers.ModelSerializer):
+    time = serializers.ListField(
+        child=serializers.JSONField(),
+        allow_empty=True
+    )
+    class Meta:
+        model = TimeTable
+        fields = "__all__"

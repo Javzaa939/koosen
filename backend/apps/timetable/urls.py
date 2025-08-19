@@ -33,6 +33,7 @@ urlpatterns = [
     # Цагийн хуваарь үүссэний дараа
     path('register/', TimeTableAPIView.as_view()),
     path('register/<int:pk>/', TimeTableAPIView.as_view()),
+    path('register/simple/', TimeTableSimpleAPIView.as_view()),
 
     # Цагийн хуваариас event зөөх үед үүссэний дараа
     path('event/<int:pk>/', TimeTableEvent.as_view()),
@@ -46,8 +47,6 @@ urlpatterns = [
 
     # Хичээлийн хуваарийн хайлтын select option авах
     path('resource/select/', TimeTableSelectOption.as_view()),
-
-    path('register/<int:pk>/', TimeTableAPIView.as_view()),
 
     # Поток хайлт
     path('list/', TimeTablePotok.as_view()),

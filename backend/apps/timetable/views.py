@@ -53,7 +53,7 @@ from lms.models import (
     Lesson_teacher_scoretype,
 )
 
-from .serializers import Exam_repeatLiseSerializer, Exam_repeatSerializer, GroupSerializer, LessonStandartSerializer, TimeKuratsSerializer, TimeTableListKuratsSerializer, TimeTablePutCreateSerializer, TimeTablePutSerializer
+from .serializers import Exam_repeatLiseSerializer, Exam_repeatSerializer, GroupSerializer, LessonStandartSerializer, TimeKuratsSerializer, TimeTableListKuratsSerializer, TimeTablePutCreateSerializer, TimeTablePutSerializer, TimeTableSimpleSerializer
 from .serializers import RoomSerializer
 from .serializers import BuildingSerializer
 from .serializers import TimeTableSerializer
@@ -332,6 +332,7 @@ class RoomListAPIView(
         all_list = self.list(request).data
         return request.send_data(all_list)
 
+
 @permission_classes([IsAuthenticated])
 class TimeTableAPIView(
     mixins.CreateModelMixin,
@@ -384,17 +385,21 @@ class TimeTableAPIView(
         group_data = request_data.get('group')
         lesson = request_data.get('lesson')
 
+        for group in group_data:
+            if isinstance(group, dict):
+                group_data = [group.get('id') for group in group_data]
+                break
+
         # Хичээлийн жил улирал ирэхгүй бол
-        lesson_year, lesson_season = get_active_year_season()
+        lesson_year = request.query_params.get('lesson_year')
+        lesson_season = request.query_params.get('lesson_season')
 
         teacher = request_data.get('teacher')
-        time = request_data.get('time')
         day = request_data.get('day')
+        time =request_data.get('time')
         room = request_data.get('room')
         odd_even = request_data.get('odd_even_list')
-        st_count = request_data.get('st_count')
         support_teacher = request_data.get('support_teacher')
-
         if 'support_teacher' in request_data:
             del request_data['support_teacher']
 
@@ -404,10 +409,14 @@ class TimeTableAPIView(
 
         # Энгийн хичээлийн хуваарь
         is_simple = request_data.get('is_simple')
+        if is_simple:
+            request_data['week_number'] = 1
 
         # block хичээлийн хуваарь
         is_block = request_data.get('is_block')
         begin_week = request_data.get('begin_week')
+        if is_block:
+            request_data['week_number'] = begin_week
         end_week = request_data.get('end_week')
 
         # kurats хичээлийн хуваарь
@@ -415,10 +424,15 @@ class TimeTableAPIView(
         begin_date = request_data.get('begin_date')
         end_date = request_data.get('end_date')
 
+        if is_kurats:
+            self.serializer_class = TimeKuratsSerializer
+
         # Курац хуваарийн өдрүүдийн хэддүгээр 7 хоног вэ гэдгийн жагсаалт
         kweek_ids = []
 
         kurats_times = request_data.get('kurats_time')
+
+        request_data['choosing_times'] = kurats_times
 
         add_students = request_data.get('students')
         remove_students = request_data.get('remove_students')
@@ -445,7 +459,8 @@ class TimeTableAPIView(
                 return request.send_error("ERR_003", errors)
 
         if not is_kurats:
-            qs_timetable = self.queryset.filter(lesson_year=lesson_year, lesson_season_id=lesson_season, day=day, time=time, odd_even__in=odd_even)
+            qs_timetable = self.queryset.filter(lesson_year=lesson_year, lesson_season_id=lesson_season, day__in=day, time__in=time, odd_even__in=odd_even)
+
 
         # Курац байх үед сонгосон өдрүүдийн гаригууд, цагуудтай ижил хуваариудыг авна.
         if is_kurats:
@@ -454,7 +469,7 @@ class TimeTableAPIView(
                 kweek_days.append(kweek.get('weekday'))
                 kweek_ids.append(kweek.get('weekNum'))
 
-            qs_timetable = self.queryset.filter(lesson_year=lesson_year, lesson_season_id=lesson_season, day__in=kweek_days, time__in=kurats_times, odd_even__in=odd_even, end_date__gt=begin_date, end_date__lt=end_date)
+            qs_timetable = self.queryset.filter(lesson_year=lesson_year, lesson_season_id=lesson_season, day__in=kweek_days, week_number__in=kweek_ids, time__in=kurats_times, odd_even__in=odd_even).filter(Q(Q(begin_date__range=[begin_date, end_date]) | Q(end_date__range=[begin_date, end_date])))
 
         timetable_ids = qs_timetable.values_list('id', flat=True)
 
@@ -477,83 +492,83 @@ class TimeTableAPIView(
         serializer = self.get_serializer(data=request_data)
         if serializer.is_valid(raise_exception=False):
 
-            group_ids = [item.get('id') for item in group_data]
-
-            # Сонгосон ангийн тоог авах хэсэг
-            group_student_count = Student.objects.filter(group_id__in=group_ids).count()
-            all_group_student_count += group_student_count
-
-            # Онлайнаар хичээл үзэх анги
-            if len(add_online_group) > 0:
-                add_online_group_ids = [item.get('id') for item in add_online_group]
-                group_student_count = Student.objects.filter(group_id_in=add_online_group_ids).count()
-                all_group_student_count += group_student_count
-
-            if len(remove_students) > 0:
-                all_group_student_count -= len(remove_students)
-
-            if len(add_students) > 0:
-                all_group_student_count += len(add_students)
-
-            # Хуваарийн суралцагчдын тоо хуваарьд шивэгдсэн ангиудын хүүхдийн тооноос бага байгаа эсэх
-            if all_group_student_count > int(st_count):
-                msg = "Сонгосон ангиудын нийт оюутны тоо хуваарийн суралцагчийн тооноос хэтэрсэн байна."
+            # Зөвхөн сонгон хуваарь
+            if is_optional and not request_data.get('st_count'):
+                msg = "Суралцагчийн тоо оруулна уу."
                 errors = get_error_obj(msg, 'st_count')
                 if len(errors) > 0:
                     return request.send_error("ERR_003", errors)
 
-            qs_teacher = qs_timetable.filter(teacher_id=teacher)
+            if len(group_data) > 0:
+                # Сонгосон ангийн тоог авах хэсэг
+                group_student_count = Student.objects.filter(group_id__in=group_data).count()
+                all_group_student_count += group_student_count
 
-            # Багшийн давхцал
-            if len(qs_teacher) > 0:
-                teacher_obj = qs_teacher.last()
-                lesson = teacher_obj.lesson.name
-                time = teacher_obj.time
-                day = teacher_obj.day
+                # Онлайнаар хичээл үзэх анги
+                if len(add_online_group) > 0:
+                    add_online_group_ids = [item.get('id') for item in add_online_group]
+                    group_student_count = Student.objects.filter(group_id_in=add_online_group_ids).count()
+                    all_group_student_count += group_student_count
 
-                msg = "Энэ багш нь {lesson} хичээлийн {day}-{time} дээр хуваарьтай байна.".format(lesson=lesson, day=day, time=time)
+                if len(remove_students) > 0:
+                    all_group_student_count -= len(remove_students)
 
-                errors = get_error_obj(msg, 'teacher')
-                if len(errors) > 0:
-                    return request.send_error("ERR_003", errors)
+                if len(add_students) > 0:
+                    all_group_student_count += len(add_students)
+
+                request_data['st_count'] = all_group_student_count
+
+            # if teacher:
+            #     qs_teacher = qs_timetable.filter(teacher_id=teacher)
+
+                # Багшийн давхцал
+                # if len(qs_teacher) > 0:
+                #     teacher_obj = qs_teacher.last()
+                #     lesson = teacher_obj.lesson.name
+                #     time = teacher_obj.time
+                #     day = teacher_obj.day
+
+                #     msg = "Энэ багш нь {lesson} хичээлийн {day}-{time} дээр хуваарьтай байна.".format(lesson=lesson, day=day, time=time)
+
+                #     errors = get_error_obj(msg, 'teacher')
+                #     if len(errors) > 0:
+                #         return request.send_error("ERR_003", errors)
 
             # Өрөөний давхцал
-            if study_type != TimeTable.ONLINE and room:
-                qs_room = qs_timetable.filter(room_id=room)
-                if len(qs_room) > 0:
-                    room_obj = qs_room.last()
-                    lesson = room_obj.lesson.name
-                    msg = "Энэ өрөө нь {day}-{time} дээр {lesson} хичээлийн хуваарьтай байна.".format(lesson=lesson, day=day, time=time)
+            # if study_type != TimeTable.ONLINE and room:
+            #     qs_room = qs_timetable.filter(room_id=room)
+            #     if len(qs_room) > 0:
+            #         room_obj = qs_room.first()
+            #         lesson = room_obj.lesson.name
+            #         msg = "Энэ өрөө нь {day}-{time} дээр {lesson} хичээлийн хуваарьтай байна.".format(lesson=lesson, day=room_obj.day, time=room_obj.time)
 
-                    errors = get_error_obj(msg, 'room')
-                    if len(errors) > 0:
-                        return request.send_error("ERR_003", errors)
+            #         errors = get_error_obj(msg, 'room')
+            #         if len(errors) > 0:
+            #             return request.send_error("ERR_003", errors)
 
             # Block болон курац хуваарь үед тухайн сонгогдсон ангийн энгийн хичээлийн хуваарийн өдөр цагтай давхцаж байгааг шалгах
             if not is_simple:
                 timetable_simple_ids = qs_timetable.filter(is_kurats=False, is_block=False).values_list('id', flat=True)
-                for group in group_data:
-                    group_id = group.get('id')
+                # for group in group_data:
+                #     for timetable_id in timetable_simple_ids:
+                #         qs_kurats = TimeTable_to_group.objects.filter(group_id=group, timetable_id=timetable_id)
+                #         timetable_simple = TimeTable.objects.get(id=timetable_id)
 
-                    for timetable_id in timetable_simple_ids:
-                        qs_kurats = TimeTable_to_group.objects.filter(group_id=group_id, timetable_id=timetable_id)
-                        timetable_simple = TimeTable.objects.get(id=timetable_id)
+                #         if qs_kurats:
+                #             lesson_name = timetable_simple.lesson.name
 
-                        if qs_kurats:
-                            lesson_name = timetable_simple.lesson.name
+                #             day = timetable_simple.day
+                #             time = timetable_simple.time
 
-                            day = timetable_simple.day
-                            time = timetable_simple.time
+                #             msg = "{day}-{time} дээр {lesson_name} хичээлийн хуваарьтай давхцаж байна.".format(lesson_name=lesson_name, day=day, time=time)
+                #             if is_kurats:
+                #                 key = 'begin_date'
+                #             else:
+                #                 key = 'begin_week'
 
-                            msg = "{day}-{time} дээр {lesson_name} хичээлийн хуваарьтай давхцаж байна.".format(lesson_name=lesson_name, day=day, time=time)
-                            if is_kurats:
-                                key = 'begin_date'
-                            else:
-                                key = 'begin_week'
+                #             errors = get_error_obj(msg, key)
 
-                            errors = get_error_obj(msg, key)
-
-                            return request.send_error("ERR_003", errors)
+                #             return request.send_error("ERR_003", errors)
 
             if not is_optional:
                 # Онлайнаар хичээл үзэх ангийн хичээлийг давхар шалгана
@@ -566,14 +581,12 @@ class TimeTableAPIView(
                     lesson = qs.lesson.name
 
                     for group in group_data:
-                        group_id = group.get('id')
-
                         # Тухайн сонгосон анги сонгогдсон өдөр цаг дээр хичээлтэй байж болохгүй
-                        qs_timetable_group = TimeTable_to_group.objects.filter(timetable_id=timetable_id, group_id=group_id)
+                        qs_timetable_group = TimeTable_to_group.objects.filter(timetable_id=timetable_id, group_id=group)
                         if qs_timetable_group:
-                            qs_groups = qs_timetable_group.last()
+                            qs_groups = qs_timetable_group.first()
                             group_name = qs_groups.group.name
-                            msg = "{group_name} анги нь {day}-{time} дээр {lesson} хичээлийн хуваарьтай байна.".format(group_name=group_name, lesson=lesson, day=day, time=time)
+                            msg = "{group_name} анги нь {day}-{time} дээр {lesson} хичээлийн хуваарьтай байна.".format(group_name=group_name, lesson=lesson, day=qs_groups.timetable.day, time=qs_groups.timetable.time)
                             errors = get_error_obj(msg, 'group')
                             if len(errors) > 0:
                                 return request.send_error("ERR_003", errors)
@@ -588,8 +601,7 @@ class TimeTableAPIView(
                         # Эхлэх 7 хоногоос дуусах 7 хоногуудын хоорондох 7 хоног бүрээр шалгах
                         for block_week in range(begin_week, end_week + 1):
                             for group in group_data:
-                                group_id = group.get('id')
-                                qs_timetable_group = TimeTable_to_group.objects.filter(timetable=btimetable, group_id=group_id).last()
+                                qs_timetable_group = TimeTable_to_group.objects.filter(timetable=btimetable, group_id=group).last()
 
                                 if qs_timetable_group:
                                     group_name = qs_timetable_group.group.name
@@ -630,7 +642,7 @@ class TimeTableAPIView(
                         # Сонгогдсон ангийн оюутан эсэхийг шалгах
                         if group_data:
                             for group in group_data:
-                                obj_group = Group.objects.filter(pk=group.get('id')).last()
+                                obj_group = Group.objects.filter(pk=group).first()
 
                                 if group.get('id') == student_group:
                                     msg = "{student_code}-той оюутан нь {group_name} анги учир давхар хуваарь сонгох боломжгүй.".format(student_code=student_code, group_name=obj_group.name)
@@ -678,30 +690,32 @@ class TimeTableAPIView(
                             student_rm_group = rm_students.get('group')
 
                             if len(group_data) > 0:
-                                group_ids = [item.get('id') for item in group_data]
-
-                                if student_rm_group not in group_ids:
+                                if student_rm_group not in group_data:
                                     msg = "{student_code}-той оюутан нь сонгогдсон ангийн оюутан биш учир хуваариас хасалт хийх боломжгүй.".format(student_code=student_rm_code)
                                     error_obj = get_error_obj(msg, 'exclude_student')
                                     if len(error_obj) > 0:
                                         return request.send_error("ERR_003", error_obj)
             end_time(st_time, 'Шалгалт хийж дуусах хугацаа')
+
             try:
                 with transaction.atomic():
-                    # Тухайн хичээлийн хуваарьт байгаа багш хичээл холбогдоогүй бол шинээр үүсгэх
-                    qs_lesson_teacher = Lesson_to_teacher.objects.filter(lesson=request_data.get('lesson'), teacher=request_data.get('teacher'))
-                    if len(qs_lesson_teacher) == 0:
+                    if teacher:
+                        # Тухайн хичээлийн хуваарьт байгаа багш хичээл холбогдоогүй бол шинээр үүсгэх
+                        qs_lesson_teacher = Lesson_to_teacher.objects.filter(lesson=request_data.get('lesson'), teacher=request_data.get('teacher'))
+                        if len(qs_lesson_teacher) == 0:
 
-                        Lesson_to_teacher.objects.create(
-                            lesson_id=request_data.get('lesson'),
-                            teacher_id=request_data.get('teacher')
-                        )
-
-                    if study_type == TimeTable.COMBINED and len(add_online_group) > 0:
-                        group_data = magicFunction(group_data, add_online_group)
+                            Lesson_to_teacher.objects.create(
+                                lesson_id=request_data.get('lesson'),
+                                teacher_id=request_data.get('teacher')
+                            )
 
                     if is_kurats:
                         kurats_ids = []
+                        group_datas = []
+                        add_online_group_datas = []
+                        add_students_datas = []
+                        remove_students_datas = []
+
                         for kweek in kweek_list:
                             kday = kweek.get('weekday')
                             weekNum = kweek.get('weekNum')
@@ -723,7 +737,118 @@ class TimeTableAPIView(
 
                                 # Хуваарь дээр ангиуд шивэх хэсэг
                                 if len(group_data) > 0:
+                                    for row in group_data:
+                                        group_datas.append(
+                                            TimeTable_to_group(
+                                                group_id=row,
+                                                timetable_id=table_id
+                                            )
+                                        )
+
+
+                                # Онлайнаар үзэж байгаа ангиудыг хадгалах
+                                if len(add_online_group) > 0:
+                                    for row in add_online_group:
+                                        add_online_group_datas.append(
+                                            TimeTable_to_group(
+                                                group_id=row.get("id"),
+                                                timetable_id=table_id,
+                                                is_online = True
+                                            )
+                                        )
+
+
+                                # Нэмэлтээр үзэж байгаа оюутан
+                                if len(add_students) > 0:
+                                    for student in add_students:
+                                        add_students_datas.append(
+                                            TimeTable_to_student(
+                                                timetable_id = table_id,
+                                                student_id = student,
+                                                add_flag = True
+                                            )
+                                        )
+
+
+                                # Хувиараас хасалт хийлгэж байгаа оюутан
+                                if len(remove_students) > 0:
+                                    for rstudent in remove_students:
+                                        remove_students_datas.append(
+                                            TimeTable_to_student(
+                                                timetable_id = table_id,
+                                                student_id = rstudent,
+                                                add_flag = False
+                                            )
+                                        )
+
+
+                        # Курац parent ids хадгалах
+                        parent_id = kurats_ids[0] if len(kurats_ids) else None
+
+                        qs_timetable = TimeTable.objects.filter(id__in=kurats_ids).update(
+                            parent_kurats=parent_id
+                        )
+
+                        TimeTable_to_group.objects.bulk_create(group_datas)
+                        TimeTable_to_student.objects.bulk_create(remove_students_datas)
+                        TimeTable_to_student.objects.bulk_create(add_students_datas)
+                        TimeTable_to_group.objects.bulk_create(add_online_group_datas)
+
+                    else:
+                        # Үүсгэх функц
+                        def create(validated_data):
+
+                            days = validated_data.pop('day', [])
+                            times = validated_data.pop('time', [])
+                            timetable_objects = []
+
+                            # Object-ууд авах
+                            lesson_season = Season.objects.get(id=validated_data['lesson_season'])
+                            lesson = LessonStandart.objects.get(id=validated_data['lesson'])
+                            teacher = Teachers.objects.get(id=validated_data['teacher'])
+                            room = Room.objects.get(id=validated_data['room'])
+                            school = SubOrgs.objects.get(id=validated_data['school'])
+
+                            # Тухайн өдөр цаг болгоноор авах
+                            for day, time in product(days, times):
+                                # Хослол бүрт шинэ TimeTable объект үүсгэх
+                                timetable_data = {
+                                    'teacher': teacher,
+                                    'potok': validated_data['potok'],
+                                    'lesson': lesson,
+                                    'study_type': validated_data['study_type'],
+                                    'odd_even': validated_data['odd_even'],
+                                    'st_count': validated_data['st_count'],
+                                    'room': room,
+                                    'type': validated_data['type'],
+                                    'day': day,
+                                    'time': time,
+                                    'school': school,
+                                    'lesson_year': validated_data['lesson_year'],
+                                    'lesson_season': lesson_season,
+                                    'color': validated_data['color'],
+                                    'created_user': request.user,
+                                    'is_optional': validated_data['is_optional'],
+                                    'week_number': validated_data['week_number']
+                                }
+
+                                timetable = TimeTable.objects.create(**timetable_data)
+                                timetable_objects.append(timetable)
+
+                            return timetable_objects
+
+                        table_data = create(request.data)
+
+                        if table_data:
+                            for table in table_data:
+
+                                # Цагийн хуваарийн хүснэгтийн id
+                                table_id = table.id
+
+                                # Хуваарь дээр ангиуд шивэх хэсэг
+                                if len(group_data) > 0:
                                     group_datas = []
+
                                     for row in group_data:
                                         group_id = row.get("id")
                                         group_datas.append(
@@ -777,75 +902,6 @@ class TimeTableAPIView(
 
                                     TimeTable_to_student.objects.bulk_create(remove_students_datas)
 
-                        # Курац parent ids хадгалах
-                        parent_id = kurats_ids[0]
-
-                        qs_timetable = TimeTable.objects.filter(id__in=kurats_ids).update(
-                            parent_kurats=parent_id
-                        )
-                    else:
-                        table_data = self.create(request).data
-
-                        # Цагийн хуваарийн хүснэгтийн id
-                        table_id=table_data.get('id')
-
-                        # Хуваарь дээр ангиуд шивэх хэсэг
-                        if len(group_data) > 0:
-                            group_datas = []
-
-                            for row in group_data:
-                                group_id = row.get("id")
-                                group_datas.append(
-                                    TimeTable_to_group(
-                                        group_id=row.get("id"),
-                                        timetable_id=table_id
-                                    )
-                                )
-
-                            TimeTable_to_group.objects.bulk_create(group_datas)
-
-                        # Онлайнаар үзэж байгаа ангиудыг хадгалах
-                        if len(add_online_group) > 0:
-                            add_online_group_datas = []
-                            for row in add_online_group:
-                                add_online_group_datas.append(
-                                    TimeTable_to_group(
-                                        group_id=row.get("id"),
-                                        timetable_id=table_id,
-                                        is_online = True
-                                    )
-                                )
-
-                            TimeTable_to_group.objects.bulk_create(add_online_group_datas)
-
-                        # Нэмэлтээр үзэж байгаа оюутан
-                        if len(add_students) > 0:
-                            add_students_datas = []
-                            for student in add_students:
-                                add_students_datas.append(
-                                    TimeTable_to_student(
-                                        timetable_id = table_id,
-                                        student_id = student,
-                                        add_flag = True
-                                    )
-                                )
-
-                            TimeTable_to_student.objects.bulk_create(add_students_datas)
-
-                        # Хувиараас хасалт хийлгэж байгаа оюутан
-                        if len(remove_students) > 0:
-                            remove_students_datas = []
-                            for rstudent in remove_students:
-                                remove_students_datas.append(
-                                    TimeTable_to_student(
-                                        timetable_id = table_id,
-                                        student_id = rstudent,
-                                        add_flag = False
-                                    )
-                                )
-
-                            TimeTable_to_student.objects.bulk_create(remove_students_datas)
-
                     end_time(st_time, 'Хадгалах хугацаа')
                     return request.send_info("INF_001")
             except Exception as e:
@@ -873,8 +929,11 @@ class TimeTableAPIView(
     def put(self, request, pk=None):
         "  Цагийн хуваарь засах "
 
+        self.serializer_class = TimeTablePutCreateSerializer
+
         errors = []
         kweek_days = []
+        kweek_nums = []
         kweek_list = []
         all_group_student_count = 0
         user = request.user
@@ -885,18 +944,20 @@ class TimeTableAPIView(
         request_data['updated_at'] = timezone.now()
 
         instance = TimeTable.objects.get(pk=pk)
+        qs_group = Group.objects.order_by('name')
 
         old_potok = instance.potok
         old_lesson = instance.lesson
+        parent_kurats = instance.parent_kurats
 
-        lesson = request_data.get('lesson')
+        # lesson = request_data.get('lesson')
+        # teacher = request_data.get('teacher')
+        # room = request_data.get('room')
 
-        teacher = request_data.get('teacher')
         time = request_data.get('time')
         day = request_data.get('day')
-        room = request_data.get('room')
         odd_even = request_data.get('odd_even_list')
-        st_count = request_data.get('st_count')
+        # st_count = request_data.get('st_count')
 
         support_teacher = request_data.get('support_teacher')
 
@@ -909,25 +970,28 @@ class TimeTableAPIView(
         elif instance.support_teacher and not support_teacher:
             request_data['support_teacher'] = []
 
-        lesson_year, lesson_season = get_active_year_season()
+        lesson_year = instance.lesson_year
+        lesson_season = instance.lesson_season.id
 
         # Энгийн хичээлийн хуваарь
         is_simple = request_data.get('is_simple')
 
         # block хичээлийн хуваарь
-        is_block = request_data.get('is_block')
-        begin_week = request_data.get('begin_week')
-        end_week = request_data.get('end_week')
-        study_type = request_data.get('study_type')
+        # is_block = request_data.get('is_block')
+        # begin_week = request_data.get('begin_week')
+        # end_week = request_data.get('end_week')
+        # study_type = request_data.get('study_type')
 
         # kurats хичээлийн хуваарь
         is_kurats = request_data.get('is_kurats')
         begin_date = request_data.get('begin_date')
         end_date = request_data.get('end_date')
         kurats_times = request_data.get('kurats_time')
+        if kurats_times:
+            request_data['choosing_times'] = kurats_times
 
         # Нэмэлтээр судлаж буй оюутнууд
-        add_students = request_data.get('add_students')
+        add_students = request_data.get('students')
         remove_students = request_data.get('remove_students')
 
         # Орж ирсэн group ids
@@ -940,13 +1004,13 @@ class TimeTableAPIView(
         is_optional = request_data.get('is_optional')
 
         # Хуучин курац хуваарийн ids
-        old_timetable_ids = TimeTable.objects.filter(is_kurats=True, potok=old_potok, lesson=old_lesson).values_list('id', flat=True)
+        old_timetable_ids = TimeTable.objects.filter(parent_kurats=instance.parent_kurats).values_list('id', flat=True)
 
-        if study_type != TimeTable.ONLINE and not room:
+        # if study_type != TimeTable.ONLINE and not room:
 
-            errors = get_error_obj("Хоосон байна.", 'room')
-            if len(errors) > 0:
-                return request.send_error("ERR_003", errors)
+        #     errors = get_error_obj("Хоосон байна.", 'room')
+        #     if len(errors) > 0:
+        #         return request.send_error("ERR_003", errors)
 
         # Курац байх үед сонгосон өдрүүдийн гаригууд, цагуудтай ижил хуваариудыг авна.
         if is_kurats:
@@ -955,8 +1019,10 @@ class TimeTableAPIView(
             kweek_list = get_weekday_kurats_date(begin_date, end_date)
             for kweek in kweek_list:
                 kweek_days.append(kweek.get('weekday'))
+                kweek_nums.append(kweek.get('weekNum'))
 
-                qs_timetable = queryset.filter(lesson_year=lesson_year, lesson_season_id=lesson_season, day__in=kweek_days, time__in=kurats_times, odd_even__in=odd_even)
+            # Хэд дүгээр 7 хоногт орохыг нь давхар шалгах хэрэгтэй юм шиг байна
+            qs_timetable = queryset.filter(lesson_year=lesson_year, lesson_season_id=lesson_season, day__in=kweek_days, week_number__in=kweek_nums, odd_even__in=odd_even, begin_date=instance.begin_date, time__in=kurats_times)
 
         else:
             queryset = self.queryset.exclude(id=pk)
@@ -975,219 +1041,221 @@ class TimeTableAPIView(
             if len(error_obj) > 0:
                 return request.send_error("ERR_003", error_obj)
 
-        serializer = self.get_serializer(instance, data=request_data)
+        # Сонгосон ангийн тоог авах хэсэг
+        group_ids = [item.get('id') for item in group_data]
+        group_student_count = Student.objects.filter(group_id__in=group_ids).count()
+        all_group_student_count += group_student_count
+
+        if remove_students:
+            all_group_student_count -= len(remove_students)
+
+        if add_students:
+            all_group_student_count += len(add_students)
+
+            # Хуваарийн суралцагчдын тоо хуваарьд шивэгдсэн ангиудын хүүхдийн тооноос бага байгаа эсэх
+            # if st_count and all_group_student_count > int(st_count):
+            #     msg = "Сонгосон ангиудын нийт оюутны тоо хуваарийн суралцагчийн тооноос хэтэрсэн байна."
+            #     errors = get_error_obj(msg, 'st_count')
+            #     if len(errors) > 0:
+            #         return request.send_error("ERR_003", errors)
+
+        serializer = self.get_serializer(instance, data=request_data, partial=True)
 
         if serializer.is_valid(raise_exception=False):
 
-            # Сонгосон ангийн тоог авах хэсэг
-            group_ids = [item.get('id') for item in group_data]
-            group_student_count = Student.objects.filter(group_id__in=group_ids).count()
-            all_group_student_count += group_student_count
-
-            if remove_students:
-                all_group_student_count -= len(remove_students)
-
-            if add_students:
-                all_group_student_count += len(add_students)
-
-            # Хуваарийн суралцагчдын тоо хуваарьд шивэгдсэн ангиудын хүүхдийн тооноос бага байгаа эсэх
-            if st_count and all_group_student_count > int(st_count):
-                msg = "Сонгосон ангиудын нийт оюутны тоо хуваарийн суралцагчийн тооноос хэтэрсэн байна."
-                errors = get_error_obj(msg, 'st_count')
-                if len(errors) > 0:
-                    return request.send_error("ERR_003", errors)
-
-            qs_teacher = qs_timetable.filter(teacher_id=teacher).first()
-            qs_room = queryset.filter(lesson_year=lesson_year, lesson_season_id=lesson_season, room_id=room, day=day, time=time).first()
+            # qs_room = queryset.filter(lesson_year=lesson_year, lesson_season_id=lesson_season, room_id=room, day=day).filter(Q(Q(choosing_times=[day]))).first()
 
             # Тухайн багшийн давхцлыг шалгах
-            if qs_teacher != None:
-                lesson = qs_teacher.lesson.name
-                time = qs_teacher.time
-                day = qs_teacher.day
+            # if teacher:
+            #     qs_teacher = qs_timetable.filter(teacher_id=teacher).first()
+            #     if qs_teacher != None:
+            #         lesson = qs_teacher.lesson.name
+            #         time = qs_teacher.time
+            #         day = qs_teacher.day
 
-                msg = "Энэ багш нь {lesson} хичээлийн {day}-{time} дээр хуваарьтай байна.".format(lesson=lesson, day=day, time=time)
+            #         msg = "Энэ багш нь {lesson} хичээлийн {day}-{time} дээр хуваарьтай байна.".format(lesson=lesson, day=day, time=time)
 
-                error_obj = get_error_obj(msg, 'teacher')
-                if len(error_obj) > 0:
-                    return request.send_error("ERR_003", error_obj)
+            #         error_obj = get_error_obj(msg, 'teacher')
+            #         if len(error_obj) > 0:
+            #             return request.send_error("ERR_003", error_obj)
 
             # Тухайн өрөөний давхцлыг шалгах
-            if not is_kurats and len(qs_timetable) > 0:
-                qs_room = qs_timetable.filter(room_id=room).first()
-                if qs_room:
-                    lesson = qs_room.lesson.name
-                    msg = "Энэ өрөө нь {day}-{time} дээр {lesson} хичээлийн хуваарьтай байна.".format(lesson=lesson, day=day, time=time)
+            # if not is_kurats and len(qs_timetable) > 0:
+            #     qs_room = qs_timetable.filter(room=room).first()
+            #     if qs_room:
+            #         lesson = qs_room.lesson.name
+            #         msg = "Энэ өрөө нь {day}-{time} дээр {lesson} хичээлийн хуваарьтай байна.".format(lesson=lesson, day=day, time=time)
 
-                    error_obj = get_error_obj(msg, 'room')
-                    if len(error_obj) > 0:
-                        return request.send_error("ERR_003", error_obj)
+            #         error_obj = get_error_obj(msg, 'room')
+            #         if len(error_obj) > 0:
+            #             return request.send_error("ERR_003", error_obj)
 
             # Block болон курац хуваарь үед тухайн сонгогдсон ангийн энгийн хичээлийн хуваарийн өдөр цагтай давхцаж байгааг шалгах
             if not is_simple:
                 timetable_simple_ids = qs_timetable.filter(is_kurats=False, is_block=False).values_list('id', flat=True)
-                for group in group_data:
+                # for group in group_data:
 
-                    qs_kurats_group = TimeTable_to_group.objects.filter(group_id=group.get('id'), timetable_id__in=timetable_simple_ids)
-                    timetable_simple = TimeTable.objects.exclude(id=pk).filter(id__in=timetable_simple_ids).last()
+                #     qs_kurats_group = TimeTable_to_group.objects.filter(group_id=group.get('id'), timetable_id__in=timetable_simple_ids)
+                #     timetable_simple = TimeTable.objects.exclude(id=pk).filter(id__in=timetable_simple_ids).last()
 
-                    if len(qs_kurats_group) > 0:
-                        lesson_name = timetable_simple.lesson.name
+                #     if len(qs_kurats_group) > 0:
+                #         lesson_name = timetable_simple.lesson.name
 
-                        day = timetable_simple.day
-                        time = timetable_simple.time
+                #         day = timetable_simple.day
+                #         time = timetable_simple.time
 
-                        msg = "{day}-{time} дээр {lesson_name} хичээлийн хуваарьтай давхцаж байна.".format(lesson_name=lesson_name, day=day, time=time)
-                        if is_kurats:
-                            key = 'begin_date'
-                        else:
-                            key = 'begin_week'
+                #         msg = "{day}-{time} дээр {lesson_name} хичээлийн хуваарьтай давхцаж байна.".format(lesson_name=lesson_name, day=day, time=time)
+                #         if is_kurats:
+                #             key = 'begin_date'
+                #         else:
+                #             key = 'begin_week'
 
-                        errors = get_error_obj(msg, key)
+                #         errors = get_error_obj(msg, key)
 
-                        return request.send_error("ERR_003", errors)
+                #         return request.send_error("ERR_003", errors)
 
             # Сонгон хичээл биш тухайн ангийн хичээлийн хуваарийн давхцалыг шалгах
-            if not is_optional and len(timetable_ids) > 0:
-                qs = queryset.filter(id__in=timetable_ids).first()
+            # if not is_optional and len(timetable_ids) > 0:
+            #     qs = queryset.filter(id__in=timetable_ids).first()
 
-                # Сонгосон өдөр цагтай хуваариудын хичээлийн нэр
-                lesson = qs.lesson.name
+            #     # Сонгосон өдөр цагтай хуваариудын хичээлийн нэр
+            #     lesson = qs.lesson.name
 
-                for group in group_data:
-                    group_id = group.get('id')
+                # for group in group_data:
+                #     group_id = group.get('id')
 
-                    # Тухайн сонгосон анги сонгогдсон өдөр цаг дээр хичээлтэй байж болохгүй
-                    qs_timetable_group = TimeTable_to_group.objects.filter(timetable_id=qs.id, group_id=group_id).first()
-                    if qs_timetable_group != None:
-                        group_name = qs_timetable_group.group.name
-                        msg = "{group_name} анги нь {day}-{time} дээр {lesson} хичээлийн хуваарьтай байна.".format(group_name=group_name, lesson=lesson, day=day, time=time)
-                        errors = get_error_obj(msg, 'group')
-                        if len(errors) > 0:
-                            return request.send_error("ERR_003", errors)
+                #     # Тухайн сонгосон анги сонгогдсон өдөр цаг дээр хичээлтэй байж болохгүй
+                #     qs_timetable_group = TimeTable_to_group.objects.filter(timetable_id=qs.id, group_id=group_id).first()
+                #     if qs_timetable_group != None:
+                #         group_name = qs_timetable_group.group.name
+                #         msg = "{group_name} анги нь {day}-{time} дээр {lesson} хичээлийн хуваарьтай байна.".format(group_name=group_name, lesson=lesson, day=day, time=time)
+                #         errors = get_error_obj(msg, 'group')
+                #         if len(errors) > 0:
+                #             return request.send_error("ERR_003", errors)
 
                 # Block хуваарь нь сонгогдсон 7 хоногууд дээр тухайн анги хичээлтэй эсэх
-                if is_block:
-                    block_timetables = queryset.filter(lesson_year=lesson_year, lesson_season_id=lesson_season, is_block=True)
+                # if is_block:
+                #     block_timetables = queryset.filter(lesson_year=lesson_year, lesson_season_id=lesson_season, is_block=True)
 
-                    for btimetable in block_timetables:
-                        lesson = btimetable.lesson.name
+                #     for btimetable in block_timetables:
+                #         lesson = btimetable.lesson.name
 
-                        # Эхлэх 7 хоногоос дуусах 7 хоногуудын хоорондох 7 хоног бүрээр шалгах
-                        for block_week in range(begin_week, end_week + 1):
-                            for group in group_data:
-                                group_id = group.get('id')
-                                qs_timetable_group = TimeTable_to_group.objects.filter(timetable=btimetable, group_id=group_id).first()
+                #         # Эхлэх 7 хоногоос дуусах 7 хоногуудын хоорондох 7 хоног бүрээр шалгах
+                #         for block_week in range(begin_week, end_week + 1):
+                #             for group in group_data:
+                #                 group_id = group.get('id')
+                #                 qs_timetable_group = TimeTable_to_group.objects.filter(timetable=btimetable, group_id=group_id).first()
 
-                                if len(qs_timetable_group) > 0:
-                                    group_name = qs_timetable_group.group.name
+                #                 if qs_timetable_group:
+                #                     group_name = qs_timetable_group.group.name
 
-                                    t_begin_week = btimetable.begin_week
-                                    t_end_week = btimetable.end_week
+                #                     t_begin_week = btimetable.begin_week
+                #                     t_end_week = btimetable.end_week
 
-                                    if t_begin_week == block_week or t_end_week == block_week:
-                                        key = 'begin_week'
-                                        if block_week == end_week:
-                                            key = 'end_week'
+                #                     if t_begin_week == block_week or t_end_week == block_week:
+                #                         key = 'begin_week'
+                #                         if block_week == end_week:
+                #                             key = 'end_week'
 
-                                        msg = '{group_name} анги нь {day}-{time} дээр {block_week}-р 7 хоногт {lesson} хичээлийн хуваарьтай байна'.format(
-                                            group_name=group_name,
-                                            day=day,
-                                            time=time,
-                                            block_week=block_week,
-                                            lesson=lesson
-                                        )
+                #                         msg = '{group_name} анги нь {day}-{time} дээр {block_week}-р 7 хоногт {lesson} хичээлийн хуваарьтай байна'.format(
+                #                             group_name=group_name,
+                #                             day=day,
+                #                             time=time,
+                #                             block_week=block_week,
+                #                             lesson=lesson
+                #                         )
 
-                                        errors = get_error_obj(msg, key)
-                                        if len(errors) > 0:
-                                            return request.send_error("ERR_003", errors)
+                #                         errors = get_error_obj(msg, key)
+                #                         if len(errors) > 0:
+                #                             return request.send_error("ERR_003", errors)
 
                 # Нэмэлтээр судлаж байгаа оюутны хуваарийг шалгах
-                if add_students:
-                    qs_students = Student.objects.filter(id__in=add_students).values('group', 'code', 'id')
+                # if add_students:
+                #     qs_students = Student.objects.filter(id__in=add_students).values('group', 'code', 'id')
 
-                    # Сонгосон ангийн оюутан нэмэлтээр элсэгч оюутнаар нэмэгдэж байгаа эсэх
-                    for student in qs_students:
-                        student_code = student.get('code')
-                        student_group = student.get('group')
-                        student_id = student.get('id')
+                #     # Сонгосон ангийн оюутан нэмэлтээр элсэгч оюутнаар нэмэгдэж байгаа эсэх
+                #     for student in qs_students:
+                #         student_code = student.get('code')
+                #         student_group = student.get('group')
+                #         student_id = student.get('id')
 
-                        # Нэмэлт элсэгчийн оюутны нэмэлт хуваарь болон хасалт хийлгэсэн байх queryset
-                        qs_student = TimeTable_to_student.objects.filter(student_id=student_id)
+                #         # Нэмэлт элсэгчийн оюутны нэмэлт хуваарь болон хасалт хийлгэсэн байх queryset
+                #         qs_student = TimeTable_to_student.objects.filter(student_id=student_id)
 
-                        # Сонгогдсон ангийн оюутан эсэхийг шалгах
-                        if group_data:
-                            for group in group_data:
-                                sgroup_id = group.get('id')
-                                obj_group = qs_group.filter(pk=group.get('id')).first()
+                #         # Сонгогдсон ангийн оюутан эсэхийг шалгах
+                #         if group_data:
+                #             for group in group_data:
+                #                 sgroup_id = group.get('id')
+                #                 obj_group = qs_group.filter(pk=group.get('id')).first()
 
-                                if sgroup_id == student_group:
-                                    msg = "{student_code}-той оюутан нь {group_name} анги учир давхар хуваарь сонгох боломжгүй.".format(student_code=student_code, group_name=obj_group.name)
+                #                 if sgroup_id == student_group:
+                #                     msg = "{student_code}-той оюутан нь {group_name} анги учир давхар хуваарь сонгох боломжгүй.".format(student_code=student_code, group_name=obj_group.name)
 
-                                    error_obj = get_error_obj(msg, 'student')
-                                    if len(error_obj) > 0:
-                                        return request.send_error("ERR_003", error_obj)
+                #                     error_obj = get_error_obj(msg, 'student')
+                #                     if len(error_obj) > 0:
+                #                         return request.send_error("ERR_003", error_obj)
 
-                        for timetable_id in timetable_ids:
-                            rm_timetable_id = ''
+                #         for timetable_id in timetable_ids:
+                #             rm_timetable_id = ''
 
-                            qs = TimeTable.objects.filter(pk=timetable_id).first()
-                            lesson = qs.lesson.name # Давхардаж байгаа хичээлийн нэр
+                #             qs = TimeTable.objects.filter(pk=timetable_id).first()
+                #             lesson = qs.lesson.name # Давхардаж байгаа хичээлийн нэр
 
-                            # Өөрөөсөө өөр нэмэлт хуваариуд
-                            qs_student_timetable = qs_student.exclude(timetable_id=pk).filter(add_flag=True, timetable_id=timetable_id)
+                #             # Өөрөөсөө өөр нэмэлт хуваариуд
+                #             qs_student_timetable = qs_student.exclude(timetable_id=pk).filter(add_flag=True, timetable_id=timetable_id)
 
-                            if len(qs_student_timetable) > 0:
-                                msg = "{student_code}-той оюутан нь {day}-{time} дээр {lesson} хичээлийн нэмэлт хуваарьтай байна.".format(student_code=student_code, lesson=lesson, day=day, time=time)
-                                error_obj = get_error_obj(msg, 'student')
-                                if len(error_obj) > 0:
-                                    return request.send_error("ERR_003", error_obj)
+                #             if len(qs_student_timetable) > 0:
+                #                 msg = "{student_code}-той оюутан нь {day}-{time} дээр {lesson} хичээлийн нэмэлт хуваарьтай байна.".format(student_code=student_code, lesson=lesson, day=day, time=time)
+                #                 error_obj = get_error_obj(msg, 'student')
+                #                 if len(error_obj) > 0:
+                #                     return request.send_error("ERR_003", error_obj)
 
-                            # Тухайн оюутан ангийн хувиараасаа хасалт хийлгэсэн эсэх
-                            qs_student_rm = qs_student.exclude(timetable_id=pk).filter(add_flag=False).first()
-                            if qs_student_rm != None:
-                                rm_timetable_id = qs_student_rm.timetable_id # Нэмэлтээр судлаж байгаа оюутны хасалт хийлгэсэн хуваарь
+                #             # Тухайн оюутан ангийн хувиараасаа хасалт хийлгэсэн эсэх
+                #             qs_student_rm = qs_student.exclude(timetable_id=pk).filter(add_flag=False).first()
+                #             if qs_student_rm != None:
+                #                 rm_timetable_id = qs_student_rm.timetable_id # Нэмэлтээр судлаж байгаа оюутны хасалт хийлгэсэн хуваарь
 
-                            # Хасалт хийлгээгүй үед л нэмэлтээр судалж байгаа оюутны ангийг тухайн хуваарь дээр хичээлтэйг шалгана
-                            if qs_student_rm != None and rm_timetable_id != timetable_id:
+                #             # Хасалт хийлгээгүй үед л нэмэлтээр судалж байгаа оюутны ангийг тухайн хуваарь дээр хичээлтэйг шалгана
+                #             if qs_student_rm != None and rm_timetable_id != timetable_id:
 
-                                qs_timetable = TimeTable_to_group.objects.filter(timetable_id=timetable_id, group_id=student_group).first()
-                                student_group_qs = qs_group.filter(id=student_group).first()
+                #                 qs_timetable = TimeTable_to_group.objects.filter(timetable_id=timetable_id, group_id=student_group).first()
+                #                 student_group_qs = qs_group.filter(id=student_group).first()
 
-                                if qs_timetable != None:
-                                    msg = "{student_code}-той оюутны {group_name} анги нь {day}-{time} дээр {lesson} хичээлийн хуваарьтай байна.".format(student_code=student_code, group_name=student_group_qs.name, lesson=lesson, day=day, time=time)
-                                    error_obj = get_error_obj(msg, 'student')
-                                    if len(error_obj) > 0:
-                                        return request.send_error("ERR_003", error_obj)
+                #                 if qs_timetable != None:
+                #                     msg = "{student_code}-той оюутны {group_name} анги нь {day}-{time} дээр {lesson} хичээлийн хуваарьтай байна.".format(student_code=student_code, group_name=student_group_qs.name, lesson=lesson, day=day, time=time)
+                #                     error_obj = get_error_obj(msg, 'student')
+                #                     if len(error_obj) > 0:
+                #                         return request.send_error("ERR_003", error_obj)
 
                 # Сонгоогүй ангийн оюутан хасалт хийлгэсэн  эсэхийг шалгах
-                if remove_students:
-                    qs_rm_students = Student.objects.filter(id__in=remove_students).values('group', 'code')
-                    for rm_students in qs_rm_students:
-                        student_rm_code = rm_students.get('code')
-                        student_rm_group = rm_students.get('group')
+                # if remove_students:
+                #     qs_rm_students = Student.objects.filter(id__in=remove_students).values('group', 'code')
+                #     for rm_students in qs_rm_students:
+                #         student_rm_code = rm_students.get('code')
+                #         student_rm_group = rm_students.get('group')
 
-                        if group_data:
-                            group_ids = []
-                            for group in group_data:
-                                group_ids.append(group.get('id'))
+                #         if group_data:
+                #             group_ids = []
+                #             for group in group_data:
+                #                 group_ids.append(group.get('id'))
 
-                            if student_rm_group not in group_ids:
-                                msg = "{student_code}-той оюутан нь сонгогдсон ангийн оюутан биш учир хуваариас хасалт хийх боломжгүй.".format(student_code=student_rm_code)
-                                error_obj = get_error_obj(msg, 'exclude_student')
-                                if len(error_obj) > 0:
-                                    return request.send_error("ERR_003", error_obj)
+                #             if student_rm_group not in group_ids:
+                #                 msg = "{student_code}-той оюутан нь сонгогдсон ангийн оюутан биш учир хуваариас хасалт хийх боломжгүй.".format(student_code=student_rm_code)
+                #                 error_obj = get_error_obj(msg, 'exclude_student')
+                #                 if len(error_obj) > 0:
+                #                     return request.send_error("ERR_003", error_obj)
 
             try:
                 with transaction.atomic():
-                    # Тухайн хичээлийн хуваарьт байгаа багш хичээл холбогдоогүй бол шинээр үүсгэх
-                    qs_lesson_teacher = Lesson_to_teacher.objects.filter(lesson=request_data.get('lesson'), teacher=request_data.get('teacher'))
+                    if request_data.get('teacher'):
+                        # Тухайн хичээлийн хуваарьт байгаа багш хичээл холбогдоогүй бол шинээр үүсгэх
+                        qs_lesson_teacher = Lesson_to_teacher.objects.filter(lesson=request_data.get('lesson'), teacher=request_data.get('teacher'))
 
-                    if len(qs_lesson_teacher) == 0:
-                        Lesson_to_teacher.objects.create(
-                            lesson_id=request_data.get('lesson'),
-                            teacher_id=request_data.get('teacher')
-                        )
+                        if len(qs_lesson_teacher) == 0:
+                            Lesson_to_teacher.objects.create(
+                                lesson_id=request_data.get('lesson'),
+                                teacher_id=request_data.get('teacher')
+                            )
 
                     # Цагийн хуваарийн хүснэгтийн id
                     qs = TimeTable_to_group.objects.filter(timetable_id=pk)
@@ -1198,83 +1266,80 @@ class TimeTableAPIView(
 
                     students_ids = qs_stu.filter(add_flag=False).values_list('student', flat=True)
                     student_group_ids = Student.objects.filter(id__in=students_ids).values('group', 'id')
-                    kurats_ids = []
                     if is_kurats:
-                        if len(old_timetable_ids) > 0:
-                            old_queysets = TimeTable.objects.filter(id__in=old_timetable_ids)
-                            if old_queysets:
-                                old_queysets.delete()
+                        create_group_data = []
+                        old_queysets = TimeTable.objects.filter(id__in=old_timetable_ids)
 
-                                request_data = remove_key_from_dict(request_data, ['event_id', 'parent_kurats'])
+                        request_data = remove_key_from_dict(request_data, ['event_id'])
 
+                        create_kurats_ids = []
                         for kweek in kweek_list:
                             kday = kweek.get('weekday')
+                            week_num = kweek.get('weekNum')
+                            request_data['week_number'] = week_num
+                            request_data['day'] = kday
 
                             for ktime in kurats_times:
-                                request_data['day'] = kday
                                 request_data['time'] = ktime
 
-                                kserializer = TimeTableSerializer(data=request_data)
-
-                                kserializer.is_valid(raise_exception=True)
+                                kserializer = TimeTablePutCreateSerializer(data=request_data)
+                                if not kserializer.is_valid():
+                                    return request.send_error_valid(kserializer.errors)
 
                                 self.perform_create(kserializer)
-
                                 table_data = kserializer.data
-
-                                # Цагийн хуваарийн хүснэгтийн id
                                 table_id = table_data.get('id')
-                                kurats_ids.append(table_id)
 
-                                # Хувиараас хасалт хийлгэж байгаа оюутан хадгалах хэсэг
-                                if remove_students:
-                                    add_remove_students = []
-                                    for rstudent in remove_students:
-                                        add_remove_students.append(
-                                            TimeTable_to_student(
-                                                timetable_id = table_id,
-                                                student_id = rstudent,
-                                                add_flag = False
-                                            )
-                                        )
-
-                                    TimeTable_to_student.objects.bulk_create(add_remove_students)
-
+                                create_kurats_ids.append(table_id)
                                 # Хуваарь дээр ангиуд шивэх хэсэг
-                                if group_data:
-                                    group_add_datas = []
+                                if len(group_data) > 0:
                                     for row in group_data:
-                                        group_add_datas.append(
+                                        create_group_data.append(
                                             TimeTable_to_group(
-                                                timetable_id = table_id,
-                                                group_id =  row.get("id")
+                                                group_id=row.get('id'),
+                                                timetable_id=table_id
                                             )
                                         )
 
-                                    TimeTable_to_group.objects.bulk_create(group_add_datas)
+                                        # # Нэмэлтээр үзэж байгаа оюутан хадгалах хэсэг
+                                        # if add_students:
+                                        #     old_student_ids = TimeTable_to_student.objects.filter(timetable=queryset).values_list('student', flat=True)
 
-                                # Нэмэлтээр үзэж байгаа оюутан хадгалах хэсэг
-                                if add_students:
-                                    add_students_datas = []
-                                    for student in add_students:
-                                        add_students_datas.append(
-                                            TimeTable_to_student(
-                                                timetable_id = table_id,
-                                                student_id = student,
-                                                add_flag = True
-                                            )
-                                        )
-                                    TimeTable_to_student.objects.bulk_create(add_students_datas)
+                                        #     # Шинээр нэмэгдсэн анги
+                                        #     add_student_ids = [item for item in add_students if item not in old_student_ids]
+
+                                        #     # Хуучин ангийг хасах
+                                        #     remove_student_ids = [item for item in old_student_ids if item not in add_students]
+
+                                        #     if len(remove_student_ids) > 0:
+                                        #         TimeTable_to_student.objects.filter(timetable=queryset, group__in=remove_student_ids).delete()
+
+                                        #     add_students_datas = []
+                                        #     if len(add_student_ids) > 0:
+                                        #         for student in add_student_ids:
+                                        #             add_students_datas.append(
+                                        #                 TimeTable_to_student(
+                                        #                     timetable = queryset,
+                                        #                     student_id = student,
+                                        #                     add_flag = True
+                                        #                 )
+                                        #             )
+                                        #     TimeTable_to_student.objects.bulk_create(add_students_datas)
 
                         # Курац parent ids хадгалах
-                        parent_id = kurats_ids[0]
+                        parent_id = create_kurats_ids[0] if len(create_kurats_ids) else None
 
-                        qs_timetable = TimeTable.objects.filter(id__in=kurats_ids).update(
+                        qs_timetable = TimeTable.objects.filter(id__in=create_kurats_ids).update(
                             parent_kurats=parent_id
                         )
 
+
+                        TimeTable_to_group.objects.bulk_create(create_group_data)
+                        if len(old_queysets):
+                            TimeTable_to_group.objects.filter(timetable__in=old_timetable_ids).delete()
+                            old_queysets.delete()
+
                     else:
-                        # self.update(request).data
                         self.perform_update(serializer)
 
                         # Цагийн хуваарийн хүснэгтийн id
@@ -1369,38 +1434,38 @@ class TimeTableAPIView(
                             # Хуучин оюутны ids
                             old_stu_ids = list(qs_add_stu.values_list('student', flat=True))
 
-                            # Нэмэлтээр хуваарь сонгож байгаа оюутныг хадгалах хэсэг
-                            for student in add_students:
-                                student_qs = qs_add_stu.filter(student_id=student).last()
-                                if student_qs != None:
-                                    obj = TimeTable_to_student.objects.create(
-                                        timetable_id = pk,
-                                        student_id = student,
-                                        add_flag = True
-                                    )
-
                             # Нэмэлтээр хуваарь сонгож байгаа өөрчлөгдсөн бол устгах хэсэг
                             for old_stu_id in old_stu_ids:
                                 if not (old_stu_id in add_students):
                                     obj_add_stu = qs_add_stu.filter(student_id=old_stu_id)
                                     if len(obj_add_stu) > 0:
                                         obj_add_stu.delete()
+
+                            # Нэмэлтээр хуваарь сонгож байгаа оюутныг хадгалах хэсэг
+                            for student in add_students:
+                                student_qs = qs_add_stu.filter(student_id=student).first()
+                                if student_qs == None:
+                                    obj = TimeTable_to_student.objects.create(
+                                        timetable_id = pk,
+                                        student_id = student,
+                                        add_flag = True
+                                    )
+
                         else:
                             qs_stu.filter(add_flag=True).delete()
 
                     return request.send_info("INF_002")
             except Exception as e:
-                print(e)
+                print('err3', e)
                 return request.send_error("ERR_002")
         else:
+            print(serializer.errors)
             error_obj = []
             for key in serializer.errors:
-                msg = "Хоосон байна"
                 return_error = {
                     "field": key,
-                    "msg": msg
+                    "msg": serializer.errors[key][0]
                 }
-
                 error_obj.append(return_error)
 
             if len(error_obj) > 0:
@@ -5199,3 +5264,312 @@ class TimeTableDate(
             return request.send_error("ERR_002", "Хичээлийн хуваарь давхцаж байна.")
 
         return request.send_info('INF_001')
+
+
+@permission_classes([IsAuthenticated])
+class TimeTableSimpleAPIView(
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    generics.GenericAPIView
+):
+    """  Цагийн хуваарь """
+
+    queryset = TimeTable.objects.all()
+    serializer_class = TimeTableSimpleSerializer
+
+    @has_permission(must_permissions=['lms-timetable-register-create'])
+    def post(self, request):
+        " Цагийн хуваарь шинээр үүсгэх "
+
+        st_time = start_time()
+        errors = []
+        user = request.user
+
+        all_group_student_count = 0
+
+        request_data = request.data
+
+        # Ангийн жагсаалт
+        group_data = request_data.get('group')
+        for group in group_data:
+            if isinstance(group, dict):
+                group_data = [group.get('id') for group in group_data]
+                break
+
+        lesson = request_data.get('lesson')
+
+        # Хичээлийн жил улирал ирэхгүй бол
+        lesson_year, lesson_season = get_active_year_season()
+
+        teacher = request_data.get('teacher')
+        days = request_data.get('day')
+        times =request_data.get('time')
+        rooms = request_data.get('room')
+        odd_even = request_data.get('odd_even_list')
+
+        # Сонгон хичээл эсэх
+        is_optional = request_data.get('is_optional')
+
+        # Онлайн хичээл эсэх
+        study_type = request_data.get('study_type')
+        request_data['week_number'] = 1
+
+        if request_data.get('is_block') == True:
+            request_data['week_number'] = request_data['begin_week']
+
+        # Онлайнаар хичээл үзэх анги
+        add_online_group = request_data.get('addgroup')
+
+        if 'lesson_year' in request_data and not request_data['lesson_year']:
+            request_data['lesson_year'] = lesson_year
+
+        if 'lesson_season' in request_data and not request_data['lesson_season']:
+            request_data['lesson_season'] = lesson_season
+
+        # Ангийн өгөгдлийг dataнаас устгах
+        if 'group' in request_data:
+            del request_data['group']
+
+        add_online_group_datas = []
+        group_datas = []
+        timetable_objects = []
+
+        if 'is_block' not in request_data:
+            request_data['is_block'] = False
+
+        if 'begin_week' not in request_data:
+            request_data['begin_week'] = None
+        if 'end_week' not in request_data:
+            request_data['end_week'] = None
+
+        # Олон өдөр сонгож болох боломжтой тул өдрөөр нь гүйлгэж хуваарь тавих
+        for day in days:
+            room = None
+            time_ids = []
+            for time in times:
+                if time.get('day') == day.get('id'):
+                    time_ids = [time.get('id') for time in time.get('times')]
+
+            if len(time_ids) == 0:
+                msg = "Орох цагаа сонгоно уу"
+                errors = get_error_obj(msg, 'time')
+                if len(errors) > 0:
+                    return request.send_error("ERR_003", errors)
+
+            # ТУХАЙН ӨДӨР ДЭЭР СОНГОГДСОН ӨРӨӨГ ОЛОХ
+            if len(rooms) > 0:
+                for croom in rooms:
+                    if croom.get('day') == day.get('id'):
+                        room = croom.get('room')
+            request_data['day'] = day.get('id')
+            request_data['room'] = room
+
+            qs_timetable = self.queryset.filter(lesson_year=lesson_year, lesson_season_id=lesson_season, day=day.get('id'), time__in=time_ids, odd_even__in=odd_even)
+
+            timetable_ids = qs_timetable.values_list('id', flat=True)
+
+            # Сонгон хичээл биш үед анги заавал бөглөх ёстой
+            if not is_optional and not group_data:
+                msg = "Хоосон байна"
+                errors = get_error_obj(msg, 'group')
+                if len(errors) > 0:
+                    return request.send_error("ERR_003", errors)
+
+            request_data['created_user'] = user.id
+
+            serializer = self.get_serializer(data=request_data)
+            if serializer.is_valid(raise_exception=False):
+                if group_data:
+                    # Сонгосон ангийн тоог авах хэсэг
+                    group_student_count = Student.objects.filter(group_id__in=group_data).count()
+                    all_group_student_count += group_student_count
+
+                    # Онлайнаар хичээл үзэх анги
+                    if len(add_online_group) > 0:
+                        add_online_group_ids = [item.get('id') for item in add_online_group]
+                        group_student_count = Student.objects.filter(group_id_in=add_online_group_ids).count()
+                        all_group_student_count += group_student_count
+
+                    # Зөвхөн сонгон хуваарь
+                    if is_optional and not request_data.get('st_count'):
+                        msg = "Суралцагчийн тоо оруулна уу."
+                        errors = get_error_obj(msg, 'st_count')
+                        if len(errors) > 0:
+                            return request.send_error("ERR_003", errors)
+
+                    request_data['st_count'] = all_group_student_count
+
+                # Багшийн давхцал
+                # if teacher:
+                #     qs_teacher = qs_timetable.filter(teacher_id=teacher)
+
+                #     if len(qs_teacher) > 0:
+                #         teacher_obj = qs_teacher.first()
+                #         lesson = teacher_obj.lesson.name
+                #         time = teacher_obj.time
+                #         day = teacher_obj.day
+                #         msg = "Энэ багш нь {lesson} хичээлийн {day}-{time} дээр хуваарьтай байна.".format(lesson=lesson, day=day, time=time)
+
+                #         errors = get_error_obj(msg, 'teacher')
+                #         if len(errors) > 0:
+                #             return request.send_error("ERR_003", errors)
+
+                # Өрөөний давхцал
+                # if study_type != TimeTable.ONLINE and room:
+                #     qs_room = qs_timetable.filter(room_id=room)
+                #     if len(qs_room) > 0:
+                #         room_obj = qs_room.first()
+                #         lesson = room_obj.lesson.name
+                #         msg = "Энэ өрөө нь {day}-{time} дээр {lesson} хичээлийн хуваарьтай байна.".format(lesson=lesson, day=room_obj.day, time=room_obj.time)
+
+                #         errors = get_error_obj(msg, 'room')
+                #         if len(errors) > 0:
+                #             return request.send_error("ERR_003", errors)
+
+                if not is_optional:
+                    # Онлайнаар хичээл үзэх ангийн хичээлийг давхар шалгана
+                    if len(add_online_group) > 0:
+                        group_data = group_data + add_online_group
+
+
+                    # for timetable_id in timetable_ids:
+                    #     qs = self.queryset.get(pk=timetable_id)
+                    #     # Сонгосон өдөр цагтай хуваариудын хичээлийн нэр
+                    #     lesson = qs.lesson.name
+                    # for group in group_data:
+                    #     # Тухайн сонгосон анги сонгогдсон өдөр цаг дээр хичээлтэй байж болохгүй
+                    #     qs_timetable_group = TimeTable_to_group.objects.filter(timetable__in=timetable_ids).filter(group=group)
+                    #     if len(qs_timetable_group) > 0:
+                    #         qs_groups = qs_timetable_group.first()
+                    #         group_name = qs_groups.group.name
+                    #         msg = "{group_name} анги нь {day}-{time} дээр {lesson} хичээлийн хуваарьтай байна.".format(group_name=group_name, lesson=qs_groups.timetable.lesson.name, day=qs_groups.timetable.day, time=qs_groups.timetable.time)
+                    #         errors = get_error_obj(msg, 'group')
+                    #         if len(errors) > 0:
+                    #             return request.send_error("ERR_003", errors)
+
+                end_time(st_time, 'Шалгалт хийж дуусах хугацаа')
+                # try:
+                # Үүсгэх функц
+                def create(validated_data):
+                    teacher = None
+                    room = None
+
+                    # Object-ууд авах
+                    lesson_season = Season.objects.get(id=validated_data['lesson_season'])
+                    lesson = LessonStandart.objects.get(id=validated_data['lesson'])
+                    # department = Salbars.objects.get(id=validated_data['department'])
+                    if teacher:
+                        teacher = Teachers.objects.get(id=validated_data['teacher'])
+
+                    if validated_data.get('room'):
+                        room = Room.objects.get(id=validated_data['room'])
+
+                    school = SubOrgs.objects.get(id=validated_data['school'])
+
+                    # Тухайн өдөр цаг болгоноор авах
+                    for time in time_ids:
+
+                        # Хослол бүрт шинэ TimeTable объект үүсгэх
+                        # timetable_data = {
+                        #     'teacher': teacher if teacher else None,
+                        #     'potok': validated_data['potok'],
+                        #     'lesson': lesson,
+                        #     'study_type': validated_data['study_type'],
+                        #     'odd_even': validated_data['odd_even'],
+                        #     'st_count': validated_data['st_count'],
+                        #     'room': room,
+                        #     'type': validated_data['type'],
+                        #     'day': day.get('id'),
+                        #     'time': time,
+                        #     'school': school,
+                        #     'department': department,
+                        #     'lesson_year': validated_data['lesson_year'],
+                        #     'lesson_season': lesson_season,
+                        #     'color': validated_data['color'],
+                        #     'created_user': request.user,
+                        #     'is_optional':validated_data['is_optional']
+                        # }
+
+                        timetable_objects.append(
+                            TimeTable(
+                                teacher=teacher if teacher else None,
+                                potok=validated_data['potok'],
+                                lesson=lesson,
+                                study_type=validated_data['study_type'],
+                                odd_even=validated_data['odd_even'],
+                                st_count=validated_data['st_count'],
+                                room=room,
+                                type=validated_data['type'],
+                                day=day.get('id'),
+                                time=time,
+                                school=school,
+                                is_block=validated_data.get('is_block'),
+                                choosing_deps=validated_data['choosing_deps'],
+                                lesson_year=validated_data['lesson_year'],
+                                begin_week=validated_data.get('begin_week'),
+                                end_week=validated_data.get('end_week'),
+                                lesson_season=lesson_season,
+                                color= validated_data['color'],
+                                created_user=request.user,
+                                is_optional=validated_data['is_optional'],
+                                week_number=validated_data['week_number']
+                            )
+                        )
+
+                    return timetable_objects
+
+                table_data = create(request_data)
+
+                if table_data:
+                    for table in table_data:
+                        # Хуваарь дээр ангиуд шивэх хэсэг
+                        if len(group_data) > 0:
+                            for row in group_data:
+                                group_datas.append(
+                                    TimeTable_to_group(
+                                        group_id=row,
+                                        timetable=table
+                                    )
+                                )
+
+                        # Онлайнаар үзэж байгаа ангиудыг хадгалах
+                        if len(add_online_group) > 0:
+                            for row in add_online_group:
+                                add_online_group_datas.append(
+                                    TimeTable_to_group(
+                                        group_id=row.get("id"),
+                                        timetable=table,
+                                        is_online = True
+                                    )
+                                )
+
+                end_time(st_time, 'Хадгалах хугацаа')
+                # except Exception as e:
+                #     print(e)
+                #     return request.send_error("ERR_002", "Хичээлийн хуваарь давхцаж байна.")
+            else:
+                # Олон алдааны мессэж буцаах бол үүнийг ашиглана
+                for key in serializer.errors:
+                    msg = "Хоосон байна"
+
+                    return_error = {
+                        "field": key,
+                        "msg": msg
+                    }
+
+                    errors.append(return_error)
+
+                if len(errors) > 0:
+                    return request.send_error("ERR_003", errors)
+
+                return request.send_error("ERR_002")
+
+        # Хамгийн сүүлд хадгална
+        TimeTable.objects.bulk_create(timetable_objects)
+        TimeTable_to_group.objects.bulk_create(add_online_group_datas)
+        TimeTable_to_group.objects.bulk_create(group_datas)
+
+        return request.send_info("INF_001")
