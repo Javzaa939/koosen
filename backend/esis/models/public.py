@@ -1,4 +1,3 @@
-
 from django.db import models
 
 from common.mixins.model_mixins import TimeAuditModel
@@ -58,7 +57,7 @@ class DisabilityCategory(TimeAuditModel):
     code = models.CharField(max_length=255, verbose_name="Код")
 
 
-class StudentLivinPlace(TimeAuditModel):
+class StudentLivingPalace(TimeAuditModel):
 
     class Meta:
         verbose_name = "Амьдарч буй газар"

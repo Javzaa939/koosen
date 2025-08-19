@@ -8,8 +8,8 @@ class Command(BaseCommand):
         from django.conf import settings
 
         from esis.conts import PUBLIC_INFO_KEY
-        from esis.services.public import public_service
+        from esis.services.public import sync_public_data
 
         token = settings.ESIS_TOKEN
         for val in PUBLIC_INFO_KEY:
-            public_service(val["code"], token)
+            sync_public_data(val["code"], token)

@@ -8,7 +8,7 @@ def sync_group_list(token=settings.ESIS_TOKEN) -> dict:
     Бүлгийн жагсаалт
     """
     ESIS_URL = "https://hub.esis.edu.mn/svc/api/hub/group/list"
-    result = service_template(ESIS_URL, "esis", "Group", token)
+    result = service_template(ESIS_URL, "esis", "Group", "student_group_id", token)
     return result
 
 
@@ -19,7 +19,8 @@ def sync_teacher_list(token=settings.ESIS_TOKEN) -> dict:
     esis_url = "https://hub.esis.edu.mn/svc/api/hub/teacher/list"
     app_name = "esis"
     model_name = "Teacher"
-    result = service_template(esis_url, app_name, model_name, token)
+    uniq_key = "person_id"
+    result = service_template(esis_url, app_name, model_name, uniq_key, token)
     return result
 
 
@@ -30,7 +31,8 @@ def sync_program_list(token=settings.ESIS_TOKEN) -> dict:
     esis_url = "https://hub.esis.edu.mn/svc/api/hub/program/list"
     app_name = "esis"
     model_name = "Program"
-    result = service_template(esis_url, app_name, model_name, token)
+    uniq_key = "program_of_study_id"
+    result = service_template(esis_url, app_name, model_name, uniq_key, token)
     return result
 
 
@@ -41,46 +43,45 @@ def sync_student_list(token=settings.ESIS_TOKEN) -> dict:
     esis_url = "https://hub.esis.edu.mn/svc/api/hub/student/list"
     app_name = "esis"
     model_name = "Student"
-    result = service_template(esis_url, app_name, model_name, token)
+    uniq_key = "person_id"
+    result = service_template(esis_url, app_name, model_name, uniq_key, token)
     return result
 
 
-def get_program_stage_list(program_of_study_id: int, token: str = settings.ESIS_TOKEN):
+def sync_program_stage(program_of_study_id: int, token: str = settings.ESIS_TOKEN):
     """
     Сургалтын хөтөлбөр түвшингийн жагсаалт
     """
 
-    url = "https://hub.esis.edu.mn/svc/api/hub/program/stage/list/:{PROGRAM_OF_STUDY_ID}".format(
+    url = "https://hub.esis.edu.mn/svc/api/hub/program/stage/list/{PROGRAM_OF_STUDY_ID}".format(
         PROGRAM_OF_STUDY_ID=program_of_study_id
     )
+    app_name = "esis"
+    model_name = "ProgramStage"
+    uniq_key = "program_stage_id"
+    result = service_template(url, app_name, model_name, uniq_key, token)
+    return result
 
-    result = get_service_template(url, token)
-    if result["status"] == "success":
-        return result["data"]
-    else:
-        return None
 
-
-def get_program_stage_plan_list(
+def sync_program_stage_plan(
     program_of_study_id: int, program_stage_id: int, token: str = settings.ESIS_TOKEN
 ):
     """
     Сургалтын хөтөлбөрийн төлөвлөгөөний жагсаалт
     """
 
-    url = "https://hub.esis.edu.mn/svc/api/hub/program/stage/plan/list/:{PROGRAM_OF_STUDY_ID}/:{PROGRAM_STATE_ID}".format(
+    url = "https://hub.esis.edu.mn/svc/api/hub/program/stage/plan/list/{PROGRAM_OF_STUDY_ID}/{PROGRAM_STATE_ID}".format(
         PROGRAM_OF_STUDY_ID=program_of_study_id,
         PROGRAM_STATE_ID=program_stage_id,
     )
+    app_name = "esis"
+    model_name = "ProgramStagePlan"
+    uniq_key = "program_plan_id"
+    result = service_template(url, app_name, model_name, uniq_key, token)
+    return result
 
-    result = get_service_template(url, token)
-    if result["status"] == "success":
-        return result["data"]
-    else:
-        return None
 
-
-def get_program_stage_plan_course_list(
+def sync_course(
     program_of_study_id: int,
     program_stage_id: int,
     program_plan_id: int,
@@ -90,17 +91,30 @@ def get_program_stage_plan_course_list(
     Сургалтын хөтөлбөрийн хичээлийн жагсаалт
     """
 
-    url = "https://hub.esis.edu.mn/svc/api/hub/program/stage/plan/course/list/:{PROGRAM_OF_STUDY_ID}/:{PROGRAM_STATE_ID}/:{PROGRAM_PLAN_ID}".format(
+    url = "https://hub.esis.edu.mn/svc/api/hub/program/stage/plan/course/list/{PROGRAM_OF_STUDY_ID}/{PROGRAM_STATE_ID}/{PROGRAM_PLAN_ID}".format(
         PROGRAM_OF_STUDY_ID=program_of_study_id,
         PROGRAM_STATE_ID=program_stage_id,
         PROGRAM_PLAN_ID=program_plan_id,
     )
+    app_name = "esis"
+    model_name = "Course"
+    uniq_key = "course_id"
+    result = service_template(url, app_name, model_name, uniq_key, token)
+    return result
 
-    result = get_service_template(url, token)
-    if result["status"] == "success":
-        return result["data"]
-    else:
-        return None
+
+def sync_teacher_profile(person_id: int, token: str = settings.ESIS_TOKEN):
+    """
+    Багшийн ерөнхий мэдээлэл
+    """
+    url = "https://hub.esis.edu.mn/svc/api/hub/teacher/profile/{person_id}".format(
+        person_id=person_id,
+    )
+    app_name = "esis"
+    model_name = "TeacherProfile"
+    uniq_key = "person_id"
+    result = service_template(url, app_name, model_name, uniq_key, token)
+    return result
 
 
 def get_student_movement_v2(
@@ -142,22 +156,6 @@ def get_teacher_movement_v2(
     )
 
     result = get_service_template(url, token)
-    if result["status"] == "success":
-        return result["data"]
-    else:
-        return None
-
-
-def get_teacher(person_id: int, token: str = settings.ESIS_TOKEN):
-    """
-    Багшийн ерөнхий мэдээлэл
-    """
-    url = "https://hub.esis.edu.mn/svc/api/hub/teacher/profile/:{person_id}".format(
-        person_id=person_id,
-    )
-    app_name = "esis"
-    model_name = "Teacher"
-    result = get_service_template(url, app_name, model_name, token)
     if result["status"] == "success":
         return result["data"]
     else:
