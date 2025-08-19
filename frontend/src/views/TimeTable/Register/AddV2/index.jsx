@@ -636,7 +636,7 @@ const AddTimetableComponent = ({ }) => {
                             radioName === "room" ?
                                 <div className='puff-in-center ms-1 my-50'>
                                     <AlertCircle size={16} id='fontSizeDetail' />
-                                    <UncontrolledTooltip placement='top' target='fontSizeDetail' >Үсгийн хэмжээ</UncontrolledTooltip>
+                                    <UncontrolledTooltip placement='top' target='fontSizeDetail'>Үсгийн хэмжээ</UncontrolledTooltip>
                                     <input
                                         type="number"
                                         defaultValue={6}
