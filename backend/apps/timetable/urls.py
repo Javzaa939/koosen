@@ -16,6 +16,9 @@ urlpatterns = [
     path('resource1/', TimeTableResource1.as_view()),
     path('register-new/', TimeTableNewAPIView.as_view()),
 
+    # Цагийн хуваарь File excel файл оруулсан датаг бааз руу хадгалах
+    path('register/excel-import/', TimeTableExcelImportAPIView.as_view()),
+
     # Цагийн ачааллаас
     path('register/new/<int:pk>/', TimeTableNewAPIView.as_view()),
 

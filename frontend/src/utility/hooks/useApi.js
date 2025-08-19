@@ -924,7 +924,14 @@ function useApi(isDisplay=false) {
 				selectionDatas: (selectType, selectedValue, optionFilter, isVolume) => instance.get(`/timetable/resource1/?school=${school_id}&year=${cyear_name}&season=${cseason_id}&stype=${selectType}&selectedValue=${selectedValue}&option=${optionFilter}&is_volume=${isVolume}`),
 				setEvent: (data, id) => instance.put(`/timetable/event/${id}/`, data),
 				moveEvent: (data, id) => instance.put(`/timetable/register/new/${id}/`, data),
-				saveFile: (data) => instance.post(`/timetable/file/`, data)
+				saveFile: (data) => instance.post(`/timetable/file/`, data),
+
+				// Файл оруулсан датаг бааз руу хадгалах
+				excelImport: ({ data, school=school_id || '' }) =>
+					instance.post(
+						`/timetable/register/excel-import/?school=${school}&lesson_year=${cyear_name}&lesson_season=${cseason_id}`,
+						data
+					),
 			},
 			// Шалгалтын хуваарь
 			exam:{

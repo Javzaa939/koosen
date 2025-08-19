@@ -1941,3 +1941,10 @@ def is_access_for_case_2(request, request_org_id):
     return True
 
 
+def strip_if_str(value):
+    """ to strip strings without raising error """
+    if isinstance(value, str):
+        value = value.strip()
+
+    return value
+

@@ -948,3 +948,9 @@ class TeacherScoreStudentsSerializer(serializers.ModelSerializer):
         data['student_code'] = instance.student.code
 
         return data
+
+
+class TimeTablePutCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TimeTable
+        fields = "__all__"

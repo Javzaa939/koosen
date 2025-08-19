@@ -1,5 +1,6 @@
 import os
 import traceback
+import openpyxl
 import pandas as pd
 from django.utils import timezone
 from datetime import datetime, timedelta
@@ -10,18 +11,20 @@ from rest_framework import generics
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
+from rest_framework.exceptions import ValidationError
 
 from main.utils.function.pagination import CustomPagination, RawQueryCustomPagination
 from main.utils.file import save_file, remove_folder
-from main.utils.function.utils import get_user_permissions, is_access_for_case_1, is_access_for_case_2, str2bool, remove_key_from_dict, isLightOrDark, get_active_year_season, magicFunction, get_dates_from_week, get_lesson_choice_student
+from main.utils.function.utils import get_user_permissions, is_access_for_case_1, is_access_for_case_2, str2bool, remove_key_from_dict, isLightOrDark, get_active_year_season, magicFunction, get_dates_from_week, get_lesson_choice_student, strip_if_str
 from main.utils.function.utils import has_permission, get_error_obj, get_fullName, get_teacher_queryset, get_weekday_kurats_date, start_time, end_time, dict_fetchall
 
 from django.db import transaction
 from django.conf import settings
 from django.db import connection
 from django.db.models import Q, Count, Case, When,F, Max, FloatField, Value, IntegerField, Exists, OuterRef
+from django.db.models.functions import Lower
 
-from core.models import Employee, Teachers, SubOrgs
+from core.models import Employee, Salbars, Teachers, SubOrgs
 from lms.models import Room
 from lms.models import Season
 from lms.models import Lesson_to_teacher
@@ -2856,6 +2859,597 @@ class TimeTableNewAPIView(
             traceback.print_exc()
 
             return request.send_error("ERR_002", "Хичээлийн хуваарь давхцаж байна.")
+
+
+@permission_classes([IsAuthenticated])
+class TimeTableExcelImportAPIView(
+    generics.GenericAPIView
+):
+    """  Цагийн хуваарь. Excel import data """
+
+    # to check overlapping (time conflict)
+    def check_timetable_time_conflicts(
+        self,
+        timetable_type,
+        year,
+        season_id,
+        days_ids,
+        week_nums,
+        time_ids,
+        odd_even_id,
+        begin_date,
+        end_date,
+        begin_week,
+        end_week,
+        groups,
+    ):
+        qs_timetables = TimeTable.objects.filter(
+            lesson_year=year,
+            lesson_season_id=season_id
+        )
+
+        if timetable_type == 'Блок':
+            qs_timetables = qs_timetables.filter(
+                Q(is_block=True)
+                & Q(
+                    Q(begin_week__range=[begin_week, end_week])
+                    | Q(end_week__range=[begin_week, end_week])
+                )
+            )
+
+        else:
+            qs_timetables = qs_timetables.filter(
+                day__in=days_ids,
+                time__in=time_ids,
+                odd_even=odd_even_id,
+            )
+
+        if timetable_type in ['Блок', 'Кураци', 'Огноогоор']:
+            qs_timetables = qs_timetables.filter(
+                week_number__in=week_nums
+            )
+
+        if timetable_type in ['Кураци', 'Огноогоор']:
+            qs_timetables = qs_timetables.filter(
+                Q(
+                    Q(begin_date__range=[begin_date, end_date])
+                    | Q(end_date__range=[begin_date, end_date])
+                )
+            )
+
+        for qs_timetable in qs_timetables:
+            # Сонгосон өдөр цагтай хуваариудын хичээлийн нэр
+            lesson = qs_timetable.lesson.name
+            lesson_code = qs_timetable.lesson.code
+
+            for group in groups:
+                # Тухайн сонгосон анги сонгогдсон өдөр цаг дээр хичээлтэй байж болохгүй
+                qs_timetable_group = TimeTable_to_group.objects.filter(
+                    timetable_id=qs_timetable.id, group_id=group
+                )[:1]
+
+                if qs_timetable_group:
+                    qs_groups = qs_timetable_group[0]
+                    group_name = qs_groups.group.name
+
+                    if timetable_type == 'Блок':
+                        msg = '{group_name} анги нь {day}-{time} дээр {block_week}-р 7 хоногт {lesson} хичээлийн хуваарьтай байна'.format(
+                            group_name=group_name,
+                            lesson=lesson,
+                            day=qs_timetable.get_day_display(),
+                            time=qs_timetable.get_time_display(),
+                            block_week=qs_timetable.week_number,
+                        )
+
+                    else:
+                        msg = "{group_name} анги нь {day}-{time} дээр {lesson} хичээлийн хуваарьтай байна.".format(
+                            group_name=group_name,
+                            lesson=lesson_code + ' ' + lesson,
+                            day=qs_timetable.get_day_display(),
+                            time=qs_timetable.get_time_display(),
+                        )
+
+                    return msg
+
+    def check_lesson_time_name(self, lesson_time_name):
+        time_id = None
+
+        for item in TimeTable.LESSON_TIME:
+            if item[1].lower() == lesson_time_name.lower():
+                time_id = item[0]
+
+                return time_id
+
+    # to check empty row because openpyxl iterates even empty rows (if they just cleaned but not removed from excel file)
+    def is_row_empty(self, ws, row_number):
+
+        return all(cell.value is None for cell in ws[row_number])
+
+    # to save validated data. save function moved to this apiview to avoid saving unvalidated data by using saving function directly (without validate function)
+    def save_validated_data(self, validated_data, validated_body_parent_kurats_indexes):
+        try:
+            data = validated_data
+
+            general_fields = {
+                'created_user_id': data.get('created_user'),
+                'lesson_year': data.get('lesson_year'),
+                'lesson_season_id': data.get('lesson_season'),
+            }
+
+            validated_body = data.get('validated_body')
+            timetable_type = data.get('timetable_type')
+            timetable_objects = []
+
+            group_datas = []
+            for row in validated_body:
+                row_fields = {
+                    'lesson_id': row['lesson'],
+                    'type': row['type'],
+                    'color': row['color'],
+                    'odd_even': row['odd_even'],
+                    'school_id': row['school'],
+                    'week_number': row['week_number'],
+                    'day': row['day'],
+                    'time': row['time'],
+                    'st_count': row.get('st_count'),
+                    'choosing_deps': row.get('choosing_deps'),
+                }
+
+                if timetable_type == 'Блок':
+                    row_fields['is_block'] = True
+                    row_fields['begin_week'] = row['begin_week']
+                    row_fields['end_week'] = row['end_week']
+
+                elif timetable_type in ['Кураци', 'Огноогоор']:
+                    row_fields['is_kurats'] = True
+                    row_fields['begin_date'] = row['begin_date']
+                    row_fields['end_date'] = row['end_date']
+                    row_fields['choosing_times'] = row['choosing_times']
+
+                timetable_obj = TimeTable(**general_fields, **row_fields)
+                timetable_objects.append(timetable_obj)
+                group_data = row.get('groups')
+
+                # Хуваарь дээр ангиуд шивэх хэсэг
+                for row in group_data:
+                    group_datas.append(
+                        TimeTable_to_group(
+                            group_id=row,
+                            timetable=timetable_obj
+                        )
+                    )
+
+            with transaction.atomic():
+                TimeTable.objects.bulk_create(timetable_objects)
+                TimeTable_to_group.objects.bulk_create(group_datas)
+
+                # region to set parent_kurats
+                for child_indexes in validated_body_parent_kurats_indexes:
+                    kurats_ids = []
+
+                    for child_index in child_indexes:
+                        kurats_ids.append(timetable_objects[child_index].id)
+
+                    TimeTable.objects.filter(id__in=kurats_ids).update(
+                        parent_kurats=kurats_ids[0]
+                    )
+                # endregion
+
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+
+            return 'Өөрчлөлтийг буцаах үйлдэл хийгдлээ'
+
+    @has_permission(must_permissions=['lms-timetable-register-create'])
+    def post(self, request):
+        # region to validate (full code scope)
+        try:
+            request_data = request.data.dict()
+            timetable_type = request_data.get('timetableType')
+            school = request_data.get('school')
+
+            validated_data = {}
+
+            # to open excel file
+            file = request_data.get('file')
+            path = save_file(file, '', settings.TIMETABLE)
+            path = os.path.join(settings.MEDIA_ROOT, path)
+            wb = openpyxl.load_workbook(path)
+            ws = wb.active
+
+            # region to validate
+            # region to get validated data not from excel
+            user = request.user
+            employee = Employee.objects.filter(user=user, state=Employee.STATE_WORKING).first()
+            if employee:
+                validated_data['school'] = employee.sub_org.id if employee.sub_org else school
+            else:
+                validated_data['school'] = school
+
+            validated_data['created_user'] = user.id
+
+            lesson_year = request.query_params.get('lesson_year')
+            lesson_season = request.query_params.get('lesson_season')
+
+            validated_data['lesson_year'] = lesson_year
+            validated_data['lesson_season'] = lesson_season
+
+            validated_data['timetable_type'] = timetable_type
+            # endregion
+
+            # region to get validated sheet body from excel
+            table_headers = next(ws.iter_rows(values_only=True, min_row=3))
+            validated_body = []
+            validated_body_index = 0
+            validated_body_parent_kurats_indexes = []
+            validated_body_parent_kurats_indexes_index = 0
+            data_starting_row_num = 4
+
+            for row_index, row in enumerate(ws.iter_rows(min_row=data_starting_row_num, values_only=True)):
+                validated_row = {}
+                if self.is_row_empty(ws, row_index + data_starting_row_num):
+                    continue
+
+                # region to extract cell values
+                lesson_code = strip_if_str(row[table_headers.index('Хичээлийн код')])
+                lesson_type = strip_if_str(row[table_headers.index('Хичээлийн төрөл')])
+                color = strip_if_str(row[table_headers.index('Өнгө')])
+                odd_even = strip_if_str(row[table_headers.index('Тэгш сондгой')])
+                departments = strip_if_str(row[table_headers.index('Тэнхим')])
+                groups = strip_if_str(row[table_headers.index('Анги хэсэг')])
+
+                # region to extract groups
+                # groups = strip_if_str(next(ws.iter_rows(values_only=True, min_row=2, max_col=2, min_col=2))[0])
+
+                if groups:
+                    groups = str(groups).split(',')
+                    groups = [item.strip() for item in groups]
+                else:
+                    groups = None
+                    return request.send_error('ERR_002', "Анги таарахгүй байна дахин шалгана уу")
+
+                # Сонгосон ангийн тоог авах хэсэг
+                groups = Group.objects.annotate(lower_name=Lower("name")).filter(lower_name__in=[n.lower() for n in groups])
+
+                # NOT NEED department filter from group
+                # if departments:
+                #     groups = groups.filter(profession__department__in=departments)
+
+                groups = groups.distinct('name').values_list('id', flat=True)
+                if not groups:
+                    return request.send_error('ERR_002', "Анги таарахгүй байна дахин шалгана уу")
+
+                group_student_count = Student.objects.filter(group_id__in=groups).count()
+                validated_row['st_count'] = group_student_count
+                validated_row['groups'] = list(groups)
+                # endregion
+
+                # region to extract departments
+                if departments:
+                    departments = str(departments).split(',')
+                    departments = [item.strip() for item in departments]
+
+                else:
+                    departments = None
+
+                # Сонгосон тэнхимийн ids авах хэсэг
+                if departments:
+                    departments = Salbars.objects.annotate(lower_name=Lower("name")).filter(lower_name__in=[n.lower() for n in departments]).distinct('name').values_list('id', flat=True)
+                    validated_row['choosing_deps'] = list(departments)
+                else:
+                    validated_row['choosing_deps'] = None
+                # endregion
+
+                day = None
+                time = None
+                begin_date = None
+                end_date = None
+                begin_week = None
+                end_week = None
+                choosing_times = None
+
+                if timetable_type in ['Энгийн', 'Блок']:
+                    day = strip_if_str(row[table_headers.index('Өдөр')])
+                    time = strip_if_str(row[table_headers.index('Цаг')])
+
+                    if timetable_type == 'Блок':
+                        begin_week = strip_if_str(row[table_headers.index('Эхлэх 7 хоног')])
+                        end_week = strip_if_str(row[table_headers.index('Дуусах 7 хоног')])
+
+                elif timetable_type in ['Кураци', 'Огноогоор']:
+                    begin_date = strip_if_str(row[table_headers.index('Эхлэх өдөр')])
+                    end_date = strip_if_str(row[table_headers.index('Дуусах өдөр')])
+
+                    # region to extract choosing_times
+                    choosing_times = strip_if_str(row[table_headers.index('Сонгогдох цаг')])
+
+                    if choosing_times:
+                        choosing_times = str(choosing_times).split(',')
+                        choosing_times = [item.strip() for item in choosing_times]
+
+                    else:
+                        choosing_times = None
+                    # endregion
+                # endregion to extract cell values
+
+                # to validate lesson_code column
+                lesson_obj = LessonStandart.objects.get(code__iexact=lesson_code)
+                validated_row['lesson'] = lesson_obj.id
+
+                # region to validate lesson_type column
+                lesson_type_id = None
+
+                for item in TimeTable.LESSON_TYPE:
+                    if item[1].lower() == lesson_type.lower():
+                        lesson_type_id = item[0]
+                        break
+
+                if not lesson_type_id:
+
+                    return request.send_error('ERR_002', "Хичээлийн төрөл таарахгүй байна дахин шалгана уу")
+
+                validated_row['type'] = lesson_type_id
+                # endregion
+
+                # region to validate color column
+                is_valid_hex_color = False
+
+                if isinstance(color, str):
+                    is_valid_hex_color = bool(re.match(r'^#[0-9a-fA-F]{6}$', color))
+
+                if is_valid_hex_color:
+                    validated_row['color'] = color
+                else:
+                    validated_row['color'] = None
+                # endregion
+
+                # region to validate odd_even column
+                odd_even_id = None
+
+                for item in TimeTable.ODD_EVEN_VALUE:
+                    if item[1].lower() == odd_even.lower():
+                        odd_even_id = item[0]
+
+                        break
+
+                if not odd_even_id:
+
+                    return request.send_error('ERR_002', '"Тэгш сондгой" таарахгүй байна дахин шалгана уу')
+
+                validated_row['odd_even'] = odd_even_id
+                # endregion
+
+                additional_rows = []
+
+                if timetable_type in ['Энгийн', 'Блок']:
+                    # region to validate day column
+                    day_id = None
+
+                    for item in TimeTable.LESSON_DAY:
+                        if item[1].lower() == day.lower():
+                            day_id = item[0]
+
+                            break
+
+                    if not day_id:
+
+                        return request.send_error('ERR_002', "Өдөр таарахгүй байна дахин шалгана уу")
+
+                    validated_row['day'] = day_id
+                    # endregion
+
+                    # region to validate time column
+                    time_id = self.check_lesson_time_name(time)
+
+                    if not time_id:
+
+                        return request.send_error('ERR_002', "Цаг таарахгүй байна дахин шалгана уу")
+
+                    validated_row['time'] = time_id
+                    # endregion
+
+                    if timetable_type == 'Энгийн':
+                        # to validate week_number column
+                        validated_row['week_number'] = 1
+
+                        # region to stop if overlapping (time conflict) exists
+                        msg = self.check_timetable_time_conflicts(
+                            timetable_type,
+                            lesson_year,
+                            lesson_season,
+                            [day_id],
+                            [1],
+                            [time_id],
+                            odd_even_id,
+                            None,
+                            None,
+                            None,
+                            None,
+                            groups,
+                        )
+
+                        if msg:
+
+                            return self.request.send_error("ERR_002", msg)
+                        # endregion
+
+                    elif timetable_type == 'Блок':
+                        # to validate begin_week column
+                        validated_row['begin_week'] = begin_week
+
+                        # to validate end_week column
+                        validated_row['end_week'] = end_week
+
+                        # to validate week_number column
+                        validated_row['week_number'] = begin_week
+
+                        # region to stop if overlapping (time conflict) exists
+                        msg = self.check_timetable_time_conflicts(
+                            timetable_type,
+                            lesson_year,
+                            lesson_season,
+                            None,#[day_id],
+                            [begin_week],
+                            None,#[time_id],
+                            None,#odd_even_id,
+                            None,
+                            None,
+                            begin_week,
+                            end_week,
+                            groups,
+                        )
+
+                        if msg:
+
+                            return self.request.send_error("ERR_002", msg)
+                        # endregion
+
+                elif timetable_type in ['Кураци', 'Огноогоор']:
+                    # to validate begin_date column
+                    begin_date = begin_date.date() if isinstance(begin_date, datetime) else begin_date
+                    validated_row['begin_date'] = begin_date
+
+                    # to validate end_date column
+                    end_date = end_date.date() if isinstance(end_date, datetime) else end_date
+                    validated_row['end_date'] = end_date
+
+                    # region to validate choosing_times column
+                    choosing_times_ids = []
+
+                    for choosing_time in choosing_times:
+                        choosing_time_id = self.check_lesson_time_name(choosing_time)
+
+                        if choosing_time_id:
+                            choosing_times_ids.append(choosing_time_id)
+                        else:
+
+                            return request.send_error('ERR_002', f"{choosing_time} - цаг таарахгүй байна дахин шалгана уу")
+                    # endregion
+
+                    # region to expand dates range and to get parent_kurats and to check overlapping
+                    kweek_list = get_weekday_kurats_date(begin_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'), lesson_year, lesson_season)
+                    kweek_days = []
+                    kweek_nums = []
+
+                    if not kweek_list:
+
+                        return request.send_error('ERR_002', 'Курац хуваарийн эхлэх өдрөөс 7 хоногийн хэд дэх өдөр болон хичээлийн хэд дэх 7 хоног болохыг тодорхойлох боломжгүй байна')
+
+                    for kweek in kweek_list:
+                        kday = kweek.get('weekday')
+                        weekNum = kweek.get('weekNum')
+                        kweek_days.append(kday)
+                        kweek_nums.append(weekNum)
+
+                        for ktime in choosing_times_ids:
+                            additional_row = {}
+
+                            # to validate day column
+                            additional_row['day'] = kday
+
+                            # to set time and choosing_times columns
+                            additional_row['time'] = ktime
+                            additional_row['choosing_times'] = choosing_times_ids
+
+                            # to validate week_number column
+                            additional_row['week_number'] = weekNum
+
+                            additional_rows.append(additional_row)
+                    # endregion
+
+                    # region to stop if overlapping (time conflict) exists
+                    msg = self.check_timetable_time_conflicts(
+                        timetable_type,
+                        lesson_year,
+                        lesson_season,
+                        kweek_days,
+                        kweek_nums,
+                        choosing_times_ids,
+                        odd_even_id,
+                        begin_date,
+                        end_date,
+                        None,
+                        None,
+                        groups,
+                    )
+
+                    if msg:
+                        return self.request.send_error("ERR_002", msg)
+                    # endregion
+
+                # to validate school column
+                if school:
+                    validated_row['school'] = school
+                else:
+                    validated_row['school'] = lesson_obj.school.id if lesson_obj.school else None
+
+                # region to validate all columns by serializer
+                # to get parent_kurats column using appropriate indexes
+                if additional_rows:
+                    validated_body_parent_kurats_indexes.append([])
+
+                    for additional_row in additional_rows:
+                        validated_nested_row = {
+                            **validated_row,
+                            **additional_row
+                        }
+
+                        serializer = TimeTablePutCreateSerializer(
+                            data={
+                                **validated_data, **validated_nested_row
+                            }
+                        )
+
+                        serializer.is_valid(raise_exception=True)
+                        validated_body.append(validated_nested_row)
+                        validated_body_parent_kurats_indexes[validated_body_parent_kurats_indexes_index].append(validated_body_index)
+                        validated_body_index += 1
+
+                    validated_body_parent_kurats_indexes_index += 1
+
+                else:
+                    serializer = TimeTablePutCreateSerializer(
+                        data={
+                            **validated_data, **validated_row
+                        }
+                    )
+
+                    serializer.is_valid(raise_exception=True)
+                    validated_body.append(validated_row)
+                # endregion
+
+            # Хадгалж дууссаны дараа файлаа устгах
+            remove_path = split_root_path(path)
+            remove_folder(remove_path)
+
+            validated_data['validated_body'] = validated_body
+            # endregion to get validated sheet body from excel
+            # endregion to validate
+
+        except ValidationError as e:
+            traceback.print_exc()
+            errors_text = []
+
+            for details_key, details in e.detail.items():
+                for detail in details:
+                    errors_text.append(f'{details_key}: {detail} (Error code: {detail.code})')
+
+            return request.send_error('ERR_002', '. \n'.join(errors_text))
+
+        except Exception:
+            traceback.print_exc()
+
+            return request.send_error('ERR_002')
+        # endregion to validate (full code scope)
+
+        msg = self.save_validated_data(validated_data, validated_body_parent_kurats_indexes)
+
+        if msg:
+
+            return request.send_error('ERR_002', msg)
+
+        return request.send_info("INF_001")
 
 
 @permission_classes([IsAuthenticated])
