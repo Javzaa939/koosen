@@ -1164,15 +1164,15 @@ class LessonStandartBagtsAPIView(
                     return_values.append(obj)
                     obj = {}
 
-                if lab:
-                    obj['id'] = TimeTable.LAB
-                    obj['name'] = 'Лаборатор'
-                    return_values.append(obj)
-                    obj = {}
+                # if lab:
+                #     obj['id'] = TimeTable.LAB
+                #     obj['name'] = 'Лаборатор'
+                #     return_values.append(obj)
+                #     obj = {}
 
                 if pr:
                     obj['id'] = TimeTable.PRACTIC
-                    obj['name'] = 'Практик'
+                    obj['name'] = 'Дадлага'
                     return_values.append(obj)
                     obj = {}
 

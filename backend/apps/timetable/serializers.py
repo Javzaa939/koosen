@@ -186,7 +186,10 @@ class TimeTableListKuratsSerializer(serializers.ModelSerializer):
 
     def get_title(self, obj):
         type_name = obj.get_type_display()
-        return obj.lesson.name + "," + type_name + "," + (obj.room.name if obj.room else "")
+        lesson_name = obj.lesson.name
+        room_name = obj.room.name if obj.room else None
+        result = ",".join(filter(None, [lesson_name, type_name, room_name]))
+        return result
 
     def get_hours(self, obj):
         start_time = ''
@@ -1102,3 +1105,9 @@ class LessonStandartSerializer(serializers.ModelSerializer):
     def get_full_name(self, obj):
         return obj.code_name
 # endregion Timetable multi delete modal
+
+
+class TimeKuratsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TimeTable
+        fields = "__all__"

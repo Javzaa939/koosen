@@ -28,6 +28,7 @@ urlpatterns = [
     path('register/new/<int:pk>/', TimeTableNewAPIView.as_view()),
 
     path('print/', TimeTablePrint.as_view()),
+    path('date/', TimeTableDate.as_view()),
 
     # Цагийн хуваарь үүссэний дараа
     path('register/', TimeTableAPIView.as_view()),

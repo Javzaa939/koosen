@@ -956,6 +956,8 @@ function useApi(isDisplay=false) {
 						`/timetable/register/excel-import/?school=${school}&lesson_year=${cyear_name}&lesson_season=${cseason_id}`,
 						data, multiPart
 					),
+
+				postDate: (data) => instance.post(`/timetable/date/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`, data),
 			},
 			// Шалгалтын хуваарь
 			exam:{
