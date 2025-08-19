@@ -930,7 +930,7 @@ function useApi(isDisplay=false) {
 				excelImport: ({ data, school=school_id || '' }) =>
 					instance.post(
 						`/timetable/register/excel-import/?school=${school}&lesson_year=${cyear_name}&lesson_season=${cseason_id}`,
-						data
+						data, multiPart
 					),
 			},
 			// Шалгалтын хуваарь
