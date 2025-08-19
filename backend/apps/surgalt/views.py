@@ -1378,6 +1378,7 @@ class AdmissionBottomScoreAPIView(
 
         return request.send_info("INF_003")
 
+
 @permission_classes([IsAuthenticated])
 class LessonStandartTimetableListAPIView(
     generics.GenericAPIView,
@@ -1388,29 +1389,34 @@ class LessonStandartTimetableListAPIView(
     queryset = LessonStandart.objects.all()
     serializer_class = LessonStandartSerialzier
 
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['name', 'code']
+
     def get(self, request):
 
-        year = self.request.query_params.get('lesson_year')
-        season = self.request.query_params.get('lesson_season')
-        school = self.request.query_params.get('school')
+        # year = self.request.query_params.get('lesson_year')
+        # season = self.request.query_params.get('lesson_season')
+        # school = self.request.query_params.get('school')
 
-        qs_lplan = LearningPlan.objects.all()
+        # qs_lplan = LearningPlan.objects.all()
 
-        if school:
-            # qs_lplan = qs_lplan.filter(school=school)
-            self.queryset = self.queryset.filter(school=school)
+        # if school:
+        #     # qs_lplan = qs_lplan.filter(school=school)
+        #     self.queryset = self.queryset.filter(Q(Q(school=school) | Q(is_general=True)))
 
-        even_i = []
-        odd_i = []
+        # even_i = []
+        # odd_i = []
 
-        for i in range(1,13):
-            if i % 2 == 0:
-                even_i.append(i)
-            else:
-                odd_i.append(i)
+        # for i in range(1,13):
+        #     if i % 2 == 0:
+        #         even_i.append(i)
+        #     else:
+        #         odd_i.append(i)
 
 
-        # Идэвхтэй улиралд байгаа хичээлүүдийг авах
+        # # # Идэвхтэй улиралд байгаа хичээлүүдийг авах
         # if season == '1':
         #     lookups = [Q(season__contains=str(value)) for value in odd_i]
 
@@ -1430,11 +1436,11 @@ class LessonStandartTimetableListAPIView(
 
         #     lesson_ids = qs_lplan.filter(filter_query).values_list('lesson', flat=True).distinct('lesson')
 
-        # self.queryset = self.queryset.filter(id__in=list(lesson_ids))
+        # self.queryset = self.queryset.filter(Q(Q(id__in=list(lesson_ids)) | Q(is_general=True)))
 
         all_list = self.list(request).data
 
-        return request.send_data(list(all_list))
+        return request.send_data(all_list)
 
 
 @permission_classes([IsAuthenticated])

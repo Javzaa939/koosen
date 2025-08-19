@@ -372,8 +372,8 @@ function useApi(isDisplay=false) {
 				},
 
 				// Хичээлийн хуваарьт зориулж хичээлийн лист авах
-				getTimetableList: () => {
-					return instance.get(`/learning/lessonstandart/timetable-list/?school=${school_id}&lesson_year=${cyear_name}&lesson_season=${cseason_id}`)
+				getTimeList: (limit='Бүгд', page=1, search='') => {
+					return instance.get(`/learning/lessonstandart/timetable-list/?page=${page}&limit=${limit}&search=${search}&school=${school_id}&lesson_year=${cyear_name}&lesson_season=${cseason_id}`)
 				},
 
 				getListAll: (profession='', search='') => instance.get(`/learning/lessonstandart/list/?profession=${profession}&search=${search}`),

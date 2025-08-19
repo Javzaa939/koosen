@@ -192,7 +192,7 @@ const Kurats = ({  handleRoomModal, editValues, handleModal, roomModal,  is_load
         ).then((values) => {
             const data = values[0]?.data
             const results = data?.results
-            if (page === 1) setLessonOption(results)
+            if (page === 1) setLessonOption(results ?? [])
             else setLessonOption((prev) => [...prev, ...results])
             setLessonPageCount(Math.ceil(data?.count / lessonRowsPerPage))
         })
