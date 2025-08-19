@@ -4,7 +4,7 @@ import traceback
 import openpyxl
 import pandas as pd
 from django.utils import timezone
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 import json
 
 from rest_framework import mixins
@@ -53,7 +53,7 @@ from lms.models import (
     Lesson_teacher_scoretype,
 )
 
-from .serializers import Exam_repeatLiseSerializer, Exam_repeatSerializer, TimeTablePutCreateSerializer
+from .serializers import Exam_repeatLiseSerializer, Exam_repeatSerializer, TimeTableListKuratsSerializer, TimeTablePutCreateSerializer
 from .serializers import RoomSerializer
 from .serializers import BuildingSerializer
 from .serializers import TimeTableSerializer
@@ -2284,79 +2284,185 @@ class TimeTableKuratsAPIView(
     mixins.ListModelMixin
 ):
 
-    queryset = TimeTable.objects.all()
+    queryset = TimeTable.objects.all().select_related('lesson','room__building')
     serializer_class = TimeTableSerializer
 
-    def get(self, request):
+    # region custom methods
+    @staticmethod
+    def list_context(self,context):
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
 
+        if page is not None:
+            serializer = self.get_serializer(page, many=True, context=context)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True, context=context)
+        return serializer
+
+    @staticmethod
+    def build_context(queryset):
+        # region to get times
+        parent_kurats = queryset.values_list('parent_kurats',flat=True).distinct()
+
+        # NOTE order by 'parent_kurats','time' is important to get correct hours in serializer method
+        data_list = TimeTable.objects.filter(
+            parent_kurats__in=parent_kurats
+        ).values_list(
+            'parent_kurats','time'
+        ).order_by(
+            'parent_kurats','time'
+        ).distinct()
+
+        times = {}
+
+        for parent_kurats, time in data_list:
+            if parent_kurats in times:
+                times[parent_kurats].append(time)
+            else:
+                times[parent_kurats] = [time]
+        # endregion
+
+        context = {'times': times}
+        return context
+    # endregion
+
+    def get(self, request):
         dep_id = self.request.query_params.get('selectedValue')
+        department = self.request.query_params.get('department')
+        school = self.request.query_params.get('school')
         start_date = request.query_params.get('start')
         end_date = request.query_params.get('end')
+        profession = request.query_params.get('profession')
+        group = request.query_params.get('group')
+        level = request.query_params.get('level')
+        is_month = request.query_params.get('by_month')
+        option = request.query_params.get('option')
+        type = request.query_params.get('type')
+        lesson_type = request.query_params.get('lesson_type')
 
-        year, season = get_active_year_season()
+        year = request.query_params.get('year')
+        season = request.query_params.get('season')
 
         start_month = datetime.strptime(start_date, '%Y-%m-%d')
         end_month = datetime.strptime(end_date, '%Y-%m-%d')
-        queryset = self.queryset.filter(is_kurats=True, lesson_year=year, begin_date__gte=start_month, end_date__lte=end_month)
 
-        timetables = queryset.values('end_date', 'begin_date', 'potok', 'lesson').distinct('end_date', 'begin_date', 'lesson', 'potok')
-        time_ids = []
+        queryset = (
+            self.queryset
+            .filter(
+                Q(
+                    is_kurats=True,
+                    lesson_year=year,
+                    lesson_season=season
+                ) &
+                Q(
+                    Q(begin_date__range=[start_month, end_month]) |
+                    Q(end_date__range=[start_month, end_month])
+                )
+            )
+        )
 
-        for timetable in timetables:
-            end_date = timetable.get('end_date')
-            begin_date = timetable.get('begin_date')
-            potok = timetable.get('potok')
-            lesson = timetable.get('lesson')
+        permissions = get_user_permissions(request.user)
+        if school and 'lms-timetable-register-teacher-update' not in permissions:
+            queryset = queryset.filter(school=school)
 
-            obj_time = TimeTable.objects.filter(is_kurats=True).filter(end_date=end_date, begin_date=begin_date, potok=potok, lesson=lesson).first()
-            time_id = obj_time.id
+        if department:
+            department_obj = Salbars.objects.get(id=department)
+            if department_obj.is_hotolboriin_bag:
+                queryset = queryset.filter(school=department_obj.sub_orgs)
+            else:
+                queryset = queryset.filter(choosing_deps__contains=[department])
 
-            time_ids.append(time_id)
+        if profession:
+            group_ids = Group.objects.filter(profession_id=profession).values_list('id', flat=True)
+            t_ids = TimeTable_to_group.objects.filter(group_id__in=group_ids).values_list('timetable', flat=True)
 
-        self.queryset = self.queryset.filter(id__in=time_ids)
+            queryset = queryset.filter(id__in=t_ids)
+
+        if group:
+            t_id = TimeTable_to_group.objects.filter(group_id=group).values_list('timetable', flat=True)
+            queryset = queryset.filter(id__in=t_id)
+
+        if level:
+            t_id = TimeTable_to_group.objects.filter(group__level=level).values_list('timetable', flat=True)
+            queryset = queryset.filter(id__in=t_id)
+
+        if type in ['lesson', 'group'] and option:
+            queryset = queryset.filter(lesson=option)
+
+        if lesson_type:
+            queryset = queryset.filter(type=lesson_type)
 
         # Хөтөлбөрийн багаар хайлт хийх
         if dep_id:
             group_ids = Group.objects.filter(department_id=dep_id).values_list('id', flat=True)
             t_ids = TimeTable_to_group.objects.filter(group_id__in=group_ids).values_list('timetable', flat=True)
 
-            self.queryset = self.queryset.filter(id__in=t_ids)
+            queryset = queryset.filter(id__in=t_ids)
 
-        self.serializer_class = TimeTableListSerializer
+        self.queryset = queryset.distinct('end_date', 'begin_date', 'lesson', 'potok','teacher')
+        self.serializer_class = TimeTableListKuratsSerializer
 
-        serializer = self.list(request)
+        context = self.build_context(self.queryset)
+        serializer = self.list_context(self,context)
 
         timetable_list = serializer.data
 
-        def check_score_lesson(lesson, teacher):
-            score = ScoreRegister.objects.filter(lesson_year=year, lesson_season=season, lesson=lesson, teacher=teacher, teach_score__isnull=False).first()
-            if score:
-                return True
+        # def check_score_lesson(lesson, teacher):
+        #     score = ScoreRegister.objects.filter(lesson_year=year, lesson_season=season, lesson=lesson, teacher=teacher, teach_score__isnull=False).first()
+        #     if score:
+        #         return True
 
-            return False
+        #     return False
 
         for clist in timetable_list:
-
             begin_date = clist.get('begin_date')
             end_date = clist.get('end_date')
+            title = clist.get('title')
+
             times = []
-            if begin_date and end_date:
-                times = TimeTable.objects.filter(is_kurats=True).filter(end_date=end_date, begin_date=begin_date).values_list('time', flat=True).distinct('time')
-                clist['times'] = list(times)
-
-            # Хичээлийн дүн орсон эсэхийг шалгах
-            teacher = clist.get('teacher').get('id')
-            t_lesson = clist.get('lesson').get('id')
-            is_score = check_score_lesson(t_lesson, teacher)
-            clist['is_score'] = is_score
-
-            # Өнгө шалгах
             if clist.get('color'):
                 color_type = isLightOrDark(clist.get('color'))
                 clist['textColor'] = color_type
                 clist['scolor'] = clist.get('color')
 
             clist['color'] = clist.get('color')
+
+            if is_month == 'false':
+                if begin_date and end_date:
+                    day_by_day = []
+                    current_date = datetime.strptime(begin_date, '%Y-%m-%d').date()  # Convert string to datetime.date object
+                    while current_date <= datetime.strptime(end_date, '%Y-%m-%d').date():  # Convert end_date to datetime.date object
+                        if current_date.weekday() == 5:  # Saturday
+                            current_date += timedelta(days=2)  # Skip to Monday
+                            continue
+                        elif current_date.weekday() == 6:  # Sunday
+                            current_date += timedelta(days=1)  # Skip to Monday
+                            continue
+                        hours = clist.get('hours', {})
+                        start_time_str = hours.get("start_time")
+                        end_time_str = hours.get("end_time")
+                        if start_time_str and end_time_str:
+                            start_hours, start_minutes = map(int, start_time_str.split(":"))
+                            end_hours, end_minutes = map(int, end_time_str.split(":"))
+
+                            start_datetime = datetime.combine(current_date, time(start_hours, start_minutes))
+                            end_datetime = datetime.combine(current_date, time(end_hours, end_minutes))
+
+                            day_by_day.append({
+                                'start': start_datetime.isoformat(),
+                                'end': end_datetime.isoformat(),
+                                'title':title,
+                                **clist
+                            })
+
+                        current_date += timedelta(days=1)
+
+                    clist['day_by_day_events'] = day_by_day
+
+            # Check if there's any score for the lesson
+            clist['is_score'] = False
+
+            # Check color and adjust accordingly
 
         return request.send_data(timetable_list)
 

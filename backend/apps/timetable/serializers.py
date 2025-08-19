@@ -165,6 +165,67 @@ class TimeTableAllListSerializer(serializers.ModelSerializer):
         return list(qs_group)
 
 
+class TimeTableListKuratsSerializer(serializers.ModelSerializer):
+
+    lesson = serializers.SerializerMethodField(read_only=True)
+    room = RoomListSerializer(many=False, read_only=True)
+    event_id = serializers.IntegerField(source='id')
+    title = serializers.SerializerMethodField(read_only=True)
+    times = serializers.SerializerMethodField()
+    hours = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TimeTable
+        exclude = ['created_at', 'updated_at', 'support_teacher']
+
+    def get_times(self, obj):
+        times = self.context.get('times')
+        parent_kurats = obj.parent_kurats_id
+        times = times.get(parent_kurats)
+        return times
+
+    def get_title(self, obj):
+        type_name = obj.get_type_display()
+        return obj.lesson.name + "," + type_name + "," + (obj.room.name if obj.room else "")
+
+    def get_hours(self, obj):
+        start_time = ''
+        end_time = ''
+        time_dict = {
+            1: ('08:00', '09:30'),
+            2: ('09:30', '11:00'),
+            3: ('11:00', '12:30'),
+            4: ('12:30', '14:00'),
+            5: ('14:00', '15:30'),
+            6: ('15:30', '17:00'),
+            7: ('17:00', '18:30'),
+            8: ('18:30', '20:00')
+        }
+
+        times = self.context.get('times')
+        parent_kurats = obj.parent_kurats_id
+        times = times.get(parent_kurats)
+
+        if times:
+            first_time = times[0]
+            if first_time in time_dict:
+                start_time = time_dict[first_time][0]  # Start time of the first element
+
+            last_time = times[len(times) - 1]
+            if last_time in time_dict:
+                end_time = time_dict[last_time][1]  # End time of the last element
+
+        return {
+            'start_time': start_time,
+            'end_time': end_time
+        }
+
+    def get_lesson(self, obj):
+        return {
+            'name': obj.lesson.name
+        }
+
+
 # Цагийн хуваарь
 class TimeTableListSerializer(serializers.ModelSerializer):
 
