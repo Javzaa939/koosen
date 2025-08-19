@@ -414,7 +414,7 @@ const AddTimetableComponent = ({ }) => {
             if (['lesson', 'group'].includes(radioName)) {
                 const seenSet = new Set()
 
-                data.forEach((item) => {
+                data?.forEach((item) => {
                     const newItem = {
                         id: item.resourceId,
                     }
