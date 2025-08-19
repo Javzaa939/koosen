@@ -188,7 +188,7 @@ export const searchComponent = (searchValue, setSearchValue, rowsPerPage, setRow
 	}
 
 	function handlePerPage(e) {
-		setRowsPerPage(parseInt(e.target.value))
+        setRowsPerPage(e.target.value === 'Бүгд' ? e.target.value : parseInt(e.target.value))
 	}
 
 	return (
