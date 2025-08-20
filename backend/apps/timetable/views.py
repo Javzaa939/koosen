@@ -368,7 +368,10 @@ class TimeTableAPIView(
 
     @has_permission(must_permissions=['lms-timetable-register-create'])
     def post(self, request):
-        " Цагийн хуваарь шинээр үүсгэх "
+        """
+        Цагийн хуваарь шинээр үүсгэх
+        Used only for 'kurats' timetable
+        """
 
         st_time = start_time()
         errors = []
@@ -2363,6 +2366,9 @@ class TimeTableKuratsAPIView(
     mixins.CreateModelMixin,
     mixins.ListModelMixin
 ):
+    """
+    Used only for 'kurats' timetable
+    """
 
     queryset = TimeTable.objects.all().select_related('lesson','room__building')
     serializer_class = TimeTableSerializer
@@ -2407,6 +2413,10 @@ class TimeTableKuratsAPIView(
     # endregion
 
     def get(self, request):
+        """
+        Used only for 'kurats' timetable
+        """
+
         dep_id = self.request.query_params.get('selectedValue')
         department = self.request.query_params.get('department')
         school = self.request.query_params.get('school')
@@ -2551,6 +2561,10 @@ class TimeTableKuratsAPIView(
 class TimeTableNewAPIView(
     generics.GenericAPIView,
 ):
+    """
+    Used for all timetable types except "kurats/date"
+    """
+
     pagination_class = RawQueryCustomPagination
 
     @staticmethod
@@ -3099,6 +3113,10 @@ class TimeTableNewAPIView(
         return query
 
     def get(self, request):
+        """
+        Used for all timetable types except "kurats/date"
+        """
+
         def get_year_season_arguments(request_year, request_season):
             year, season = get_active_year_season()
 
@@ -3800,9 +3818,16 @@ class TimeTableExcelImportAPIView(
 class TimeTableResource(
     generics.GenericAPIView
 ):
-    """ Хичээлийн хуваарийн resource """
+    """
+    Хичээлийн хуваарийн resource
+    NOTE this is commented in useApi.js
+    """
 
     def get(self, request):
+        """
+        NOTE this is commented in useApi.js
+        """
+
         all_list = []
         qs_lesson = LessonStandart.objects
         qs_room = Room.objects
@@ -3965,9 +3990,16 @@ class TimeTableResource(
 class TimeTableResource1(
     generics.GenericAPIView
 ):
-    """ Хичээлийн хуваарийн resource """
+    """
+    Хичээлийн хуваарийн resource
+    Used for all timetable types except "kurats/date"
+    """
 
     def get(self, request):
+        """
+        Used for all timetable types except "kurats/date"
+        """
+
         year, season = get_active_year_season()
         request_year = self.request.query_params.get('year')
         request_season = self.request.query_params.get('season')
@@ -5905,13 +5937,20 @@ class TimeTableDate(
     generics.GenericAPIView,
     mixins.CreateModelMixin
 ):
-    """ Хичээлийн хуваарь огноогоор """
+    """
+    Хичээлийн хуваарь огноогоор
+    Used only for 'Date' timetable
+    """
 
     queryset = TimeTable.objects.all()
     serializer_class = TimeKuratsSerializer
 
     @transaction.atomic()
     def post(self, request):
+        """
+        Used only for 'Date' timetable
+        """
+
         user = request.user
         request_data = request.data
         errors = []
@@ -6268,6 +6307,7 @@ class TimeTableDate(
 
         except Exception as e:
             print('e', e)
+            transaction.savepoint_rollback(sid)
             return request.send_error("ERR_002", "Хичээлийн хуваарь давхцаж байна.")
 
         return request.send_info('INF_001')
@@ -6282,14 +6322,20 @@ class TimeTableSimpleAPIView(
     mixins.ListModelMixin,
     generics.GenericAPIView
 ):
-    """  Цагийн хуваарь """
+    """
+    Цагийн хуваарь
+    Used only for 'Simple' and 'Block' timetables
+    """
 
     queryset = TimeTable.objects.all()
     serializer_class = TimeTableSimpleSerializer
 
     @has_permission(must_permissions=['lms-timetable-register-create'])
     def post(self, request):
-        " Цагийн хуваарь шинээр үүсгэх "
+        """
+        Цагийн хуваарь шинээр үүсгэх
+        Used only for 'Simple' and 'Block' timetables
+        """
 
         st_time = start_time()
         errors = []
