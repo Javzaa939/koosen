@@ -2034,3 +2034,23 @@ def get_weekday_kurats_date_mnums_version(kurats_start_date, kurats_end_date, le
             kurats_day_list.append(kweek_kurats)
 
     return kurats_day_list
+
+
+def get_dates_from_week_mnums_version():
+    lesson_year, lesson_season = get_active_year_season()
+    week = get_week_num_from_date()
+    weeks = get_16week_start_date(lesson_year, lesson_season)
+
+    SystemSettings = apps.get_model('lms', 'SystemSettings')
+    qs_activeyear = SystemSettings.objects.filter(season_type=SystemSettings.ACTIVE).first()
+
+    if week == 0 and qs_activeyear:
+        start_date = qs_activeyear.start_date
+        return {
+            'start_date': start_date,
+            'end_date':  start_date + timedelta(days=7)
+        }
+    else:
+        for day_week in weeks:
+            if day_week.get('id') == week:
+                return day_week

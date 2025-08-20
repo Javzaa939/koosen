@@ -16,7 +16,7 @@ from rest_framework.exceptions import ValidationError
 
 from main.utils.function.pagination import CustomPagination, RawQueryCustomPagination
 from main.utils.file import save_file, remove_folder, split_root_path
-from main.utils.function.utils import get_user_permissions, get_weekday_kurats_date_mnums_version, is_access_for_case_1, is_access_for_case_2, str2bool, remove_key_from_dict, isLightOrDark, get_active_year_season, magicFunction, get_dates_from_week, get_lesson_choice_student, strip_if_str
+from main.utils.function.utils import get_dates_from_week_mnums_version, get_user_permissions, get_weekday_kurats_date_mnums_version, is_access_for_case_1, is_access_for_case_2, str2bool, remove_key_from_dict, isLightOrDark, get_active_year_season, magicFunction, get_dates_from_week, get_lesson_choice_student, strip_if_str
 from main.utils.function.utils import has_permission, get_error_obj, get_fullName, get_teacher_queryset, get_weekday_kurats_date, start_time, end_time, dict_fetchall
 
 from django.db import transaction
@@ -3816,21 +3816,22 @@ class TimeTableResource1(
         # Хэрэглэгчид дундаас багш нарыг авах queryset
         qs_teacher = get_teacher_queryset()
         year, season = get_active_year_season()
+        request_year = self.request.query_params.get('year')
+        request_season = self.request.query_params.get('season')
 
-        week = get_dates_from_week()
+        if request_year:
+            year = request_year
+        if request_season:
+            season = request_season
+
+
+        # week = get_dates_from_week()
 
         is_volume = request.query_params.get('is_volume')
-
-        if str2bool(is_volume):
-            qs_tgroup = TeacherCreditVolumePlan_group.objects.filter(creditvolume__lesson_year=year, creditvolume__lesson_season=season)
-            time_tablequeryset = TeacherCreditVolumePlan.objects.exclude(teacher__isnull=True).filter(lesson_year=year.strip(), lesson_season=season)
-        else:
-            time_tablequeryset = TimeTable.objects.filter(lesson_year=year, lesson_season=season)
-            timetable_ids = time_tablequeryset.values_list('id', flat=True)
-            qs_tgroup = TimeTable_to_group.objects.filter(timetable__in=list(timetable_ids))
-
         school = self.request.query_params.get('school')
         selectedValue = self.request.query_params.get('selectedValue')
+        department = self.request.query_params.get('department')
+        lesson_type = self.request.query_params.get('lesson_type')
 
         # Хайх төрлөөс хамаараад сонгогдсон утга
         option_filter = self.request.query_params.get('option')
@@ -3838,20 +3839,30 @@ class TimeTableResource1(
         # Calendar төрөл (энгийн, курац)
         stype = self.request.query_params.get('stype')
 
+        # if str2bool(is_volume):
+        #     qs_tgroup = TeacherCreditVolumePlan_group.objects.filter(creditvolume__lesson_year=year, creditvolume__lesson_season=season)
+        #     time_tablequeryset = TeacherCreditVolumePlan.objects.exclude(teacher__isnull=True).filter(lesson_year=year.strip(), lesson_season=season)
 
-        if selectedValue:
-            group_ids = Group.objects.filter(department_id=selectedValue).values_list('id', flat=True)
-            if is_volume:
-                t_ids = qs_tgroup.filter(group_id__in=group_ids).values_list('creditvolume', flat=True)
-            else:
-                t_ids = qs_tgroup.filter(group_id__in=group_ids).values_list('timetable', flat=True)
+        time_tablequeryset = TimeTable.objects.filter(lesson_year=year, lesson_season=season)
 
-            time_tablequeryset = time_tablequeryset.filter(id__in=t_ids)
+        # Тэнхимийн эрхлэгч
+        permission = get_user_permissions(request.user)
+        if department and 'lms-timetable-register-teacher-update' in permission:
+            time_tablequeryset = time_tablequeryset.filter(Q(Q(choosing_deps__contains=[department])))
+
+        if stype == 'lesson':
+            time_tablequeryset = time_tablequeryset.filter(is_kurats=False)
+
+        timetable_ids = time_tablequeryset.values_list('id', flat=True)
+        qs_tgroup = TimeTable_to_group.objects.filter(timetable__in=list(timetable_ids))
 
         if school:
             qs_tgroup = qs_tgroup.filter(group__school=school)
-            time_tablequeryset = time_tablequeryset.filter(Q(Q(school=school) | Q(lesson__is_general=True)))
+            if 'lms-timetable-register-teacher-update' not in permission:
+                time_tablequeryset = time_tablequeryset.filter(Q(Q(school=school)))
 
+        if lesson_type:
+            time_tablequeryset = time_tablequeryset.filter(type=lesson_type)
         try:
             # Ангиар хайлт хийх хэсэг
             if stype == 'group':
@@ -3877,8 +3888,8 @@ class TimeTableResource1(
                 timetable_teachers = time_tablequeryset.values_list('teacher', flat=True)
                 qs_teacher = qs_teacher.filter(id__in=timetable_teachers)
 
-                if school:
-                    qs_teacher = qs_teacher.filter(Q(Q(sub_org=school) | Q(sub_org__org_code=10)))
+                # if school:
+                #     qs_teacher = qs_teacher.filter(Q(Q(sub_org=school) | Q(sub_org__org_code=10)))
 
                 if selectedValue:
                     qs_teacher = qs_teacher.filter(salbar_id=selectedValue)
@@ -3904,30 +3915,31 @@ class TimeTableResource1(
                 if option_filter:
                     time_tablequeryset = time_tablequeryset.filter(lesson=option_filter)
 
-                lesson_ids = time_tablequeryset.values('lesson', 'teacher', 'lesson__name', 'teacher__first_name', 'teacher__last_name')
+                lesson_ids = time_tablequeryset.values('lesson', 'department', 'lesson__name', 'department__name', 'lesson__code', 'choosing_deps')
 
                 for timetable in lesson_ids:
                     lesson_id = timetable.get('lesson')
-                    teacher_id = timetable.get('teacher')
+                    department = timetable.get('department')
                     lesson__name = timetable.get('lesson__name')
-                    firstName = timetable.get('teacher__first_name')
-                    lastName = timetable.get('teacher__last_name')
+                    lesson__code = timetable.get('lesson__code')
+                    deps = timetable.get('choosing_deps')
+                    name = timetable.get('department__name')
+                    if deps:
+                        salbars = Salbars.objects.filter(id__in=deps).values('id', 'name')
+                        if len(list(salbars)) > 0:
+                            for salbar in salbars:
+                                all_list.append({
+                                    'title': lesson__code + ' ' + lesson__name,
+                                    'lesson': salbar.get('name'),
+                                    'id': '{}_{}'.format(lesson_id, salbar.get('id'))
+                                })
+                    else:
+                        obj_datas= {}
+                        obj_datas['title'] = lesson__code + ' ' + lesson__name
+                        obj_datas['lesson'] = name
+                        obj_datas['id'] = '{}_{}'.format(lesson_id, department)
 
-                    obj_datas= {}
-                    fullName = None
-
-                    if firstName and lastName:
-                        fullName = get_fullName(lastName, firstName, is_dot=True, is_strim_first=True)
-
-                        # Хичээлийг багшаар групп хийх
-                        # obj_datas['lesson'] = fullName if fullName else lesson.name
-                        # obj_datas['title'] = lesson.name if lesson else ''
-
-                    obj_datas['title'] = fullName if fullName else firstName
-                    obj_datas['lesson'] = lesson__name
-                    obj_datas['id'] = '{}_{}'.format(lesson_id, teacher_id)
-
-                    all_list.append(obj_datas)
+                        all_list.append(obj_datas)
             else:
                 room_ids = time_tablequeryset.values_list('room', flat=True)
                 room_queryset = Room.objects.filter(id__in=room_ids)
@@ -3947,7 +3959,6 @@ class TimeTableResource1(
             return request.send_error('ERR_002')
 
         return request.send_data(list(all_list))
-
 
 
 @permission_classes([IsAuthenticated])
