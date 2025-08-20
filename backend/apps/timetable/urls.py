@@ -29,6 +29,7 @@ urlpatterns = [
     # region to edit data
 	# get() method to edit all timetable types
 	# put() method to edit all timetable types for rest cases
+	# delete() method to delete all timetable types
     path('register/<int:pk>/', TimeTableAPIView.as_view()),
 
     # put() method to edit data for:
