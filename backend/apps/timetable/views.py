@@ -2781,8 +2781,12 @@ class TimeTableNewAPIView(
 
         if school:
             addon_grouptab_where += """
-            and addon_group_ttg_group.school_id = {}
-            """.format(school)
+            and (
+                addon_group_ttg_group.school_id = {}
+                OR
+                tt.school_id = {}
+            )
+            """.format(school, school)
 
         if dep_id:
             addon_grouptab_where += """
