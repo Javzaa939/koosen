@@ -950,7 +950,7 @@ function useApi(isDisplay=false) {
 				postSimple: (data, type) => instance.post(`/timetable/register/simple/?type=${type}`, data),
 				getOne: (pk) => instance.get(`/timetable/register/${pk}/`),
 				getPotok: (lesson, potok) => instance.get(`/timetable/list/?lesson=${lesson}&potok=${potok}&school=${school_id}&year=${cyear_name}&season=${cseason_id}`),
-				put: (data, pk) => instance.put(`/timetable/register/${pk}/`, data),
+				put: (data, pk) => instance.put(`/timetable/register/${pk}/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`, data),
 				edit: (data, pk) => instance.put(`/timetable/register/edit/${pk}/`, data),
 				delete: (pk) => instance.delete(`/timetable/register/${pk}/`),
 				deleteByList: (ids='') => instance.delete(`/timetable/register/?ids=${ids}`),

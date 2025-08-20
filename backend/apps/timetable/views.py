@@ -481,7 +481,7 @@ class TimeTableAPIView(
 
         # Курац байх үед сонгосон өдрүүдийн гаригууд, цагуудтай ижил хуваариудыг авна.
         if is_kurats:
-            kweek_list = get_weekday_kurats_date(begin_date, end_date)
+            kweek_list = get_weekday_kurats_date_mnums_version(begin_date, end_date, lesson_year, lesson_season)
             for kweek in kweek_list:
                 kweek_days.append(kweek.get('weekday'))
                 kweek_ids.append(kweek.get('weekNum'))
@@ -1033,7 +1033,7 @@ class TimeTableAPIView(
         if is_kurats:
             queryset = self.queryset.exclude(id__in=old_timetable_ids)
 
-            kweek_list = get_weekday_kurats_date(begin_date, end_date)
+            kweek_list = get_weekday_kurats_date_mnums_version(begin_date, end_date, lesson_year, lesson_season)
             for kweek in kweek_list:
                 kweek_days.append(kweek.get('weekday'))
                 kweek_nums.append(kweek.get('weekNum'))
