@@ -606,8 +606,7 @@ const AddTimetableComponent = ({ }) => {
         * Өрөөгөөр шүүсэн дата
         * Өрөөгөөр хэвлэх үед ашиглана
     */
-    const filteredData = datas.filter(val => val.room === optionFilter)
-
+    const filteredData = optionFilter ? datas.filter(val => val.room === optionFilter) : datas
     // #region delete timetable
     const [deleteModal, setDeleteModal] = useState(false)
 
