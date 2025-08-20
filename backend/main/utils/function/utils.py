@@ -2036,10 +2036,35 @@ def get_weekday_kurats_date_mnums_version(kurats_start_date, kurats_end_date, le
     return kurats_day_list
 
 
+def get_week_num_from_date_mnums_version(current_date=datetime.today().strftime('%Y-%m-%d')):
+    """ Хэддэх 7 хоног вэ гэдгийг буцаана
+        return int
+    """
+
+    lesson_year, lesson_season = get_active_year_season()
+    weeks = get_16week_start_date_mnums_version(lesson_year, lesson_season)
+
+    weekNum = 0
+
+    for week in weeks:
+        start_date =  datetime.strptime(week.get('start_date'), '%Y-%m-%d')
+        end_date = datetime.strptime(week.get('end_date'), '%Y-%m-%d')
+
+        delta = end_date - start_date
+
+        for i in range(delta.days + 1):
+            day = start_date + timedelta(days=i)
+            cday = day.strftime('%Y-%m-%d')
+            if cday == current_date:
+                weekNum = week.get('id')
+
+    return weekNum
+
+
 def get_dates_from_week_mnums_version():
     lesson_year, lesson_season = get_active_year_season()
-    week = get_week_num_from_date()
-    weeks = get_16week_start_date(lesson_year, lesson_season)
+    week = get_week_num_from_date_mnums_version()
+    weeks = get_16week_start_date_mnums_version(lesson_year, lesson_season)
 
     SystemSettings = apps.get_model('lms', 'SystemSettings')
     qs_activeyear = SystemSettings.objects.filter(season_type=SystemSettings.ACTIVE).first()

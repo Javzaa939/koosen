@@ -2562,7 +2562,8 @@ class TimeTableNewAPIView(
         school,
         option_filter,
         year,
-        season
+        season,
+        lesson_type,
     ):
         # lesson tab addons
         addon_lessontab_where_option_filter = ''
@@ -2580,8 +2581,7 @@ class TimeTableNewAPIView(
         permission = get_user_permissions(user)
 
         if 'lms-timetable-register-teacher-update' in permission and department:
-            if department:
-                dep_sql = 'and tt.department_id={} or choosing_deps && ARRAY[{}]'.format(department, department)
+            dep_sql = 'and (tt.department_id={} or choosing_deps && ARRAY[{}])'.format(department, department)
         else:
             # not group condition used because in TimeTableResource1 it was after taking timetable_ids and it's filter (qs_tgroup = TimeTable_to_group) was before school filter
             if school:
@@ -2600,6 +2600,13 @@ class TimeTableNewAPIView(
                         tt.school_id = {school_id}
                     )
                 """.format(school_id=school)
+
+        addon_where = ''
+
+        if lesson_type:
+            addon_where += """
+            and tt.type = {}
+            """.format(lesson_type)
 
         query = '''
             SELECT
@@ -2716,6 +2723,7 @@ class TimeTableNewAPIView(
             WHERE
                 -- all tabs addons
                 tt.lesson_year = '{year}' and tt.lesson_season_id = {season} {dep_sql}
+                {addon_where}
 
                 -- all tabs addons except group tab
                 {addon_no_permission_where_school}
@@ -2733,8 +2741,8 @@ class TimeTableNewAPIView(
                 season=season,
                 begin_date=begin_date,
                 end_date=end_date,
-                # dep_condition=f"AND tt.id in ( SELECT timetable_id FROM lms_timetable_to_group WHERE group_id in (SELECT id FROM lms_group WHERE department_id={dep_id}))" if dep_id else '',
                 dep_sql=dep_sql,
+                addon_where=addon_where,
 
                 #all tabs addons except group tab
                 addon_no_permission_where_school=addon_no_permission_where_school,
@@ -2755,8 +2763,8 @@ class TimeTableNewAPIView(
         option_filter,
         year,
         season,
-        group,
         lesson_type,
+        group,
         dep_id
     ):
         # all tabs addons
@@ -2766,8 +2774,7 @@ class TimeTableNewAPIView(
         permission = get_user_permissions(user)
 
         if 'lms-timetable-register-teacher-update' in permission and department:
-            if department:
-                dep_sql = 'and tt.department_id={} or choosing_deps && ARRAY[{}]'.format(department, department)
+            dep_sql = 'and (tt.department_id={} or choosing_deps && ARRAY[{}])'.format(department, department)
 
         # group tab addons
         addon_grouptab_where = ''
@@ -2792,8 +2799,10 @@ class TimeTableNewAPIView(
             and addon_group_ttg_group.id = {}
             """.format(group)
 
+        addon_where = ''
+
         if lesson_type:
-            addon_grouptab_where += """
+            addon_where += """
             and tt.type = {}
             """.format(lesson_type)
 
@@ -2900,12 +2909,12 @@ class TimeTableNewAPIView(
             WHERE
                 -- all tabs addons
                 tt.lesson_year = '{year}' and tt.lesson_season_id = {season} {dep_sql}
+                {addon_where}
 
                 -- group tab addons
                 {addon_grouptab_where}
                 -- group tab addons end
 
-                -- all related to 'order by' addons (lesson tab, group tab, mb. etc.)
             order by addon_group_ttg_group.name, addon_group_ttg.group_id, tt.begin_date, tt.day, tt.time
         '''.format(
                 # all tabs addons
@@ -2913,8 +2922,8 @@ class TimeTableNewAPIView(
                 season=season,
                 begin_date=begin_date,
                 end_date=end_date,
-                # dep_condition=f"AND tt.id in ( SELECT timetable_id FROM lms_timetable_to_group WHERE group_id in (SELECT id FROM lms_group WHERE department_id={dep_id}))" if dep_id else '',
                 dep_sql=dep_sql,
+                addon_where=addon_where,
 
                 #group tab addons
                 addon_grouptab_where=addon_grouptab_where,
@@ -2932,6 +2941,7 @@ class TimeTableNewAPIView(
         option_filter,
         year,
         season,
+        lesson_type,
     ):
         # all tabs except group tab addons
         addon_no_permission_where_school = ''
@@ -2943,8 +2953,7 @@ class TimeTableNewAPIView(
         permission = get_user_permissions(user)
 
         if 'lms-timetable-register-teacher-update' in permission and department:
-            if department:
-                dep_sql = 'and tt.department_id={} or choosing_deps && ARRAY[{}]'.format(department, department)
+            dep_sql = 'and (tt.department_id={} or choosing_deps && ARRAY[{}])'.format(department, department)
         else:
             # not group condition used because in TimeTableResource1 it was after taking timetable_ids and it's filter (qs_tgroup = TimeTable_to_group) was before school filter
             if school:
@@ -2963,6 +2972,13 @@ class TimeTableNewAPIView(
                         tt.school_id = {school_id}
                     )
                 """.format(school_id=school)
+
+        addon_where = ''
+
+        if lesson_type:
+            addon_where += """
+            and tt.type = {}
+            """.format(lesson_type)
 
         query = '''
             SELECT
@@ -3057,11 +3073,11 @@ class TimeTableNewAPIView(
             WHERE
                 -- all tabs addons
                 tt.lesson_year = '{year}' and tt.lesson_season_id = {season} {dep_sql}
+                {addon_where}
 
                 -- all tabs addons except group tab
                 {addon_no_permission_where_school}
 
-                -- all related to 'order by' addons (lesson tab, group tab, mb. etc.)
             order by tt.begin_date, tt.day, tt.time
         '''.format(
                 # all tabs addons
@@ -3069,8 +3085,8 @@ class TimeTableNewAPIView(
                 season=season,
                 begin_date=begin_date,
                 end_date=end_date,
-                # dep_condition=f"AND tt.id in ( SELECT timetable_id FROM lms_timetable_to_group WHERE group_id in (SELECT id FROM lms_group WHERE department_id={dep_id}))" if dep_id else '',
                 dep_sql=dep_sql,
+                addon_where=addon_where,
 
                 #all tabs addons except group tab
                 addon_no_permission_where_school=addon_no_permission_where_school,
@@ -3108,6 +3124,7 @@ class TimeTableNewAPIView(
             option_filter = request.query_params.get('option')
             begin_date, end_date = get_date_arguments()
             year, season = get_year_season_arguments(request.query_params.get('year'), request.query_params.get('season'))
+            lesson_type = request.query_params.get('lesson_type')
 
             return (
                 begin_date,
@@ -3116,12 +3133,13 @@ class TimeTableNewAPIView(
                 school,
                 option_filter,
                 year,
-                season
+                season,
+                lesson_type
             )
 
         selectedType = request.query_params.get('type')
         query = ''
-        begin_date, end_date, department, school, option_filter, year, season = get_general_arguments(request)
+        begin_date, end_date, department, school, option_filter, year, season, lesson_type = get_general_arguments(request)
 
         if selectedType == 'lesson':
             query = self.get_lesson_tab_query(
@@ -3132,7 +3150,8 @@ class TimeTableNewAPIView(
                 school,
                 option_filter,
                 year,
-                season
+                season,
+                lesson_type,
             )
 
         elif selectedType == 'group':
@@ -3145,8 +3164,8 @@ class TimeTableNewAPIView(
                 option_filter,
                 year,
                 season,
+                lesson_type,
                 request.query_params.get('group'),
-                request.query_params.get('lesson_type'),
                 request.query_params.get('selectedValue'),
             )
 
@@ -3159,7 +3178,8 @@ class TimeTableNewAPIView(
                 school,
                 option_filter,
                 year,
-                season
+                season,
+                lesson_type,
             )
 
         if not query:
@@ -3176,6 +3196,7 @@ class TimeTableNewAPIView(
         }
 
         return request.send_data(response_data)
+
 
 @permission_classes([IsAuthenticated])
 class TimeTableExcelImportAPIView(
