@@ -16,7 +16,7 @@ from rest_framework.exceptions import ValidationError
 
 from main.utils.function.pagination import CustomPagination, RawQueryCustomPagination
 from main.utils.file import save_file, remove_folder, split_root_path
-from main.utils.function.utils import get_user_permissions, is_access_for_case_1, is_access_for_case_2, str2bool, remove_key_from_dict, isLightOrDark, get_active_year_season, magicFunction, get_dates_from_week, get_lesson_choice_student, strip_if_str
+from main.utils.function.utils import get_user_permissions, get_weekday_kurats_date_mnums_version, is_access_for_case_1, is_access_for_case_2, str2bool, remove_key_from_dict, isLightOrDark, get_active_year_season, magicFunction, get_dates_from_week, get_lesson_choice_student, strip_if_str
 from main.utils.function.utils import has_permission, get_error_obj, get_fullName, get_teacher_queryset, get_weekday_kurats_date, start_time, end_time, dict_fetchall
 
 from django.db import transaction
@@ -3515,7 +3515,7 @@ class TimeTableExcelImportAPIView(
                     # endregion
 
                     # region to expand dates range and to get parent_kurats and to check overlapping
-                    kweek_list = get_weekday_kurats_date(begin_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
+                    kweek_list = get_weekday_kurats_date_mnums_version(begin_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'), lesson_year, lesson_season)
                     kweek_days = []
                     kweek_nums = []
 
@@ -4836,7 +4836,7 @@ class TimeTableListAPIView(
         if is_kurats:
             queryset = self.queryset.exclude(id__in=old_ids)
 
-            kweek_list = get_weekday_kurats_date(begin_date, end_date, lesson_year, lesson_season)
+            kweek_list = get_weekday_kurats_date_mnums_version(begin_date, end_date, lesson_year, lesson_season)
             for kweek in kweek_list:
                 kweek_days.append(kweek.get('weekday'))
                 kweek_nums.append(kweek.get('weekNum'))
@@ -5759,7 +5759,7 @@ class TimeTableDate(
                 request_data['end_date'] = end_date
                 kurats_times = [time.get('id') for time in kurats_time.get('times')]
 
-                kweek_list = get_weekday_kurats_date(begin_date, end_date)
+                kweek_list = get_weekday_kurats_date_mnums_version(begin_date, end_date, lesson_year, lesson_season)
                 for kweek in kweek_list:
                     kweek_days.append(kweek.get('weekday'))
                     kweek_ids.append(kweek.get('weekNum'))
