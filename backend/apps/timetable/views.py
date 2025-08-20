@@ -4435,9 +4435,15 @@ class TimeTablePrint(
 
         season_obj = Season.objects.get(pk=lesson_season)
 
-        timetable_ids = TimeTable.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season, school=school).values_list('id', flat=True)
+        timetable_ids = TimeTable.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season).values_list('id', flat=True)
 
-        timetable_group = TimeTable_to_group.objects.filter(timetable__in=timetable_ids, group__profession__school=school).values('group', 'group__name').distinct('group')
+        timetable_group = TimeTable_to_group.objects.filter(
+            Q(timetable__in=timetable_ids)&
+            Q(
+                Q(group__profession__school=school)|
+                Q(timetable__school=school)
+            )
+        ).values('group', 'group__name').distinct('group')
 
         user = request.user
 
