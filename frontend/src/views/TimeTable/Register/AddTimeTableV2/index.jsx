@@ -79,7 +79,7 @@ const AddModalV2 = ({ open, handleModal, refreshDatas, editValues }) => {
             {
             is_loading &&
                 <div className='fallback-spinner'>
-                    <Spinner size='bg'/>
+                    <Spinner size='sm'/>
                     <span className='ms-50'>{t("Түр хүлээнэ үү...")}</span>
                 </div>
             }

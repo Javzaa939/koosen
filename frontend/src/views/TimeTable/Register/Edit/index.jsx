@@ -683,7 +683,7 @@ const EditModal = ({ open, handleModal, editDatas, refreshDatas }) => {
                     {
                         is_loading &&
                         <div className='suspense-loader'>
-                            <Spinner size='bg' />
+                            <Spinner size='sm' />
                             <span className='ms-50'>{t("Түр хүлээнэ үү...")}</span>
                         </div>
                     }
@@ -1115,7 +1115,7 @@ const EditModal = ({ open, handleModal, editDatas, refreshDatas }) => {
                                                         {...field}
                                                         type='date'
                                                         bsSize='sm'
-                                                        isDisabled={is_disabled}
+                                                        disabled={is_disabled}
                                                         invalid={errors.begin_date ? true : false}
                                                     />
                                                 )

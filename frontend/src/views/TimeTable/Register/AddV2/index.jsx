@@ -919,7 +919,7 @@ const AddTimetableComponent = ({ }) => {
                             {
                                 is_loading && Loader
                                 // <div className='suspense-loader'>
-                                //     <Spinner size='bg'/>
+                                //     <Spinner size='sm'/>
                                 //     <span className='ms-50'>{t('Түр хүлээнэ үү...')}</span>
                                 // </div>
                             }
