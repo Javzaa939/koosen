@@ -2581,7 +2581,7 @@ class TimeTableNewAPIView(
         permission = get_user_permissions(user)
 
         if 'lms-timetable-register-teacher-update' in permission and department:
-            dep_sql = 'and (tt.department_id={} or choosing_deps && ARRAY[{}])'.format(department, department)
+            dep_sql = 'and (tt.department_id={} or tt.choosing_deps && ARRAY[{}])'.format(department, department)
         else:
             # not group condition used because in TimeTableResource1 it was after taking timetable_ids and it's filter (qs_tgroup = TimeTable_to_group) was before school filter
             if school:
@@ -2774,7 +2774,7 @@ class TimeTableNewAPIView(
         permission = get_user_permissions(user)
 
         if 'lms-timetable-register-teacher-update' in permission and department:
-            dep_sql = 'and (tt.department_id={} or choosing_deps && ARRAY[{}])'.format(department, department)
+            dep_sql = 'and (tt.department_id={} or tt.choosing_deps && ARRAY[{}])'.format(department, department)
 
         # group tab addons
         addon_grouptab_where = ''
@@ -2957,7 +2957,7 @@ class TimeTableNewAPIView(
         permission = get_user_permissions(user)
 
         if 'lms-timetable-register-teacher-update' in permission and department:
-            dep_sql = 'and (tt.department_id={} or choosing_deps && ARRAY[{}])'.format(department, department)
+            dep_sql = 'and (tt.department_id={} or tt.choosing_deps && ARRAY[{}])'.format(department, department)
         else:
             # not group condition used because in TimeTableResource1 it was after taking timetable_ids and it's filter (qs_tgroup = TimeTable_to_group) was before school filter
             if school:
