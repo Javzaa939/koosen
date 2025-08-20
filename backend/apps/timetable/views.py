@@ -2550,157 +2550,41 @@ class TimeTableKuratsAPIView(
 @permission_classes([IsAuthenticated])
 class TimeTableNewAPIView(
     generics.GenericAPIView,
-    mixins.CreateModelMixin,
-    mixins.ListModelMixin
 ):
-
-    queryset = TimeTable.objects.all().filter(is_kurats=False)
-    serializer_class = TimeTableSerializer
-
     pagination_class = RawQueryCustomPagination
 
-    def get(self, request):
-        st_time = start_time()
-        # queryset = self.get_queryset()
-        week = get_dates_from_week()
-
-        begin_date = week.get('start_date')
-        end_date = week.get('end_date')
-        selectedType = request.query_params.get('type')
-        department = request.query_params.get('department')
-
-        is_volume = request.query_params.get('is_volume')
-        school = self.request.query_params.get('school')
-        option_filter = self.request.query_params.get('option')
-        group = request.query_params.get('group')
-        lesson_type = request.query_params.get('lesson_type')
-
-        if not begin_date and not end_date:
-            current_date = datetime.today()
-            begin_date = current_date - timedelta(days=current_date.weekday())
-            end_date = begin_date + timedelta(days=6)
-
-        dep_id = self.request.query_params.get('selectedValue')
-
-        year, season = get_active_year_season()
-        request_year = self.request.query_params.get('year')
-        request_season = self.request.query_params.get('season')
-
-        if request_year:
-            year = request_year
-        if request_season:
-            season = request_season
-
-        self.queryset = self.queryset.filter(lesson_year=year.strip(), lesson_season=season)
-        # TODO add conditions as in main query mb atleast those who were merged from resource1
-        # estimate_query = '''
-        #     SELECT 8 as day, tt.odd_even,  true as is_default, ls.school_id, tt.id as event_id,  tt.lesson_id AS lesson, ls.is_general,  tt.teacher_id as teacher, ls.name as lesson_name,  CONCAT(SUBSTRING(cu.last_name, 1, 1), '.', cu.first_name) as teacher_name,
-        #     CASE
-        #         WHEN tt.type = 1 THEN 'Лаб'
-        #         WHEN tt.type  = 2 THEN 'Лк'
-        #         WHEN tt.type  = 3 THEN 'Сем'
-        #         WHEN tt.type  = 4 THEN 'Бу'
-        #         WHEN tt.type  = 5 THEN 'Дад'
-        #         WHEN tt.type  = 6 THEN 'Б/д'
-        #     ELSE ''
-        #     END AS title,
-
-        #     CASE
-        #         WHEN tt.type = 1 THEN 'Лаборатори'
-        #         WHEN tt.type  = 2 THEN 'Лекц'
-        #         WHEN tt.type  = 3 THEN 'Семинар'
-        #         WHEN tt.type  = 4 THEN 'Бусад'
-        #         WHEN tt.type  = 5 THEN 'Дадлага'
-        #         WHEN tt.type  = 6 THEN 'Бие даалт'
-        #     ELSE ''
-        #     END AS type_name,
-        #     t.group,
-        #     ta.group_list,
-        #     public.get_time(tt.id) as time
-        #     FROM lms_teachercreditvolumeplan tt
-        #     LEFT JOIN lms_lessonstandart ls
-        #     ON tt.lesson_id = ls.id
-        #     LEFT JOIN core_userinfo cu
-        #     ON tt.teacher_id = cu.id,
-        #     LATERAL (
-        #         SELECT ARRAY(
-        #             SELECT gr.name
-        #             FROM lms_TeacherCreditVolumePlan_group ttg
-        #             LEFT JOIN lms_group gr ON ttg.group_id = gr.id
-        #             WHERE ttg.creditvolume_id=tt.id
-
-        #         ) AS group
-        #     ) t,
-
-        #     LATERAL (
-        #         SELECT ARRAY(
-        #             SELECT  CAST(gr.id as varchar)
-        #             FROM lms_TeacherCreditVolumePlan_group ttg
-        #             LEFT JOIN lms_group gr ON ttg.group_id = gr.id
-        #             WHERE ttg.creditvolume_id=tt.id
-
-        #         ) AS group_list
-        #     ) ta
-
-        #     WHERE tt.lesson_year='{year}' and tt.lesson_season_id ='{season}' and tt.teacher_id is not null and is_timetable is false {dep_condition}
-        # '''.format(year=year, season=season, dep_condition=f"AND tt.id in ( SELECT creditvolume_id FROM lms_TeacherCreditVolumePlan_group WHERE group_id in (SELECT id FROM lms_group WHERE department_id={dep_id}))" if dep_id else '')
-
-        # all tabs addons
-        order_by = ''
-
+    @staticmethod
+    def get_lesson_tab_query(
+        user,
+        begin_date,
+        end_date,
+        department,
+        school,
+        option_filter,
+        year,
+        season
+    ):
         # lesson tab addons
-        addon_lessontab_where_kurats = ''
         addon_lessontab_where_option_filter = ''
-        addon_lessontab_select = ''
-        addon_lessontab_from = ''
 
-        # in resource1 view 'choosing_deps' were expanded and used all of them but in frontend first of them used only, therefore it useless to expand here
-        # Хичээлээс бусад үед курац хуваарь харуулна
-        if selectedType == 'lesson':
-            addon_lessontab_where_kurats = 'and tt.is_kurats is false'
+        if option_filter:
+            addon_lessontab_where_option_filter = 'and tt.lesson_id = {}'.format(option_filter)
 
-            if option_filter:
-                addon_lessontab_where_option_filter = 'and tt.lesson_id = {}'.format(option_filter)
-
-            addon_lessontab_select = """
-                -- to get first element from deps and only if department column is empty because in frontend it is also used like this
-                ,CASE
-                    WHEN tt.department_id is not null THEN tt.department_id
-                    WHEN tt.choosing_deps [1] is not null THEN tt.choosing_deps [1]
-                    ELSE null
-                END AS addon_lesson_department_or_deps_first_id,
-
-                ls.code as addon_lesson_code,
-                addon_lesson_s.name as addon_lesson_department_name
-            """
-
-            addon_lessontab_from = """
-                left join core_salbars addon_lesson_s on addon_lesson_s.id = (
-                    CASE
-                        WHEN tt.department_id is not null THEN tt.department_id
-                        WHEN tt.choosing_deps [1] is not null THEN tt.choosing_deps [1]
-                        ELSE null
-                    END
-                )
-            """
-
-            order_by = 'order by addon_lesson_department_or_deps_first_id, tt.lesson_id'
-
-        # all tabs except lesson tab addons
+        # all tabs except group tab addons
         addon_no_permission_where_school = ''
 
         # all tabs addons
         dep_sql = ''
 
         # Тэнхимийн эрхлэгч үед
-        permission = get_user_permissions(request.user)
+        permission = get_user_permissions(user)
 
         if 'lms-timetable-register-teacher-update' in permission and department:
             if department:
                 dep_sql = 'and tt.department_id={} or choosing_deps && ARRAY[{}]'.format(department, department)
         else:
             # not group condition used because in TimeTableResource1 it was after taking timetable_ids and it's filter (qs_tgroup = TimeTable_to_group) was before school filter
-            if school and selectedType != 'group':
+            if school:
                 addon_no_permission_where_school = """
                     and (
                         tt.id in (
@@ -2717,53 +2601,196 @@ class TimeTableNewAPIView(
                     )
                 """.format(school_id=school)
 
+        query = '''
+            SELECT
+                tt.color,
+                tt.is_optional,
+                tt.choosing_deps,
+                tt.school_id,
+                tt.id as event_id,
+                tt.day,
+                tt.time,
+                tt.begin_date,
+                tt.lesson_id AS lesson,
+                ls.is_general,
+                tt.room_id AS room,
+                tt.teacher_id as teacher,
+                tt.department_id as department,
+                ls.name as lesson_name,
+                ls.code as lesson_code,
+                tt.odd_even,
+                CONCAT(r.code, ' ', r.name) as room_name,
+                CONCAT(
+                    SUBSTRING(cu.last_name, 1, 1),
+                    '.',
+                    cu.first_name
+                ) as teacher_name,
+                CASE
+                    WHEN tt.type = 1 THEN 'Лаб'
+                    WHEN tt.type = 2 THEN 'Лк'
+                    WHEN tt.type = 3 THEN 'Сем'
+                    WHEN tt.type = 4 THEN 'Бу'
+                    WHEN tt.type = 5 THEN 'Дад'
+                    WHEN tt.type = 6 THEN 'Б/д'
+                    ELSE ''
+                END AS title,
+                CASE
+                    WHEN tt.type = 1 THEN 'Лаборатори'
+                    WHEN tt.type = 2 THEN 'Лекц'
+                    WHEN tt.type = 3 THEN 'Семинар'
+                    WHEN tt.type = 4 THEN 'Бусад'
+                    WHEN tt.type = 5 THEN 'Дадлага'
+                    WHEN tt.type = 6 THEN 'Бие даалт'
+                    ELSE ''
+                END AS type_name,
+                t.group,
+                ta.group_list,
+                (
+                    SELECT
+                        case
+                            when COUNT(*) > 0 THEN True
+                            ELSE False
+                        end gg
+                    FROM
+                        lms_scoreregister ls
+                    WHERE
+                        ls.lesson_id = tt.lesson_id
+                        and ls.teacher_id = tt.teacher_id
+                        and lesson_year = '{year}'
+                        and lesson_season_id = {season}
+                ) as is_score,
+                public.get_color(tt.color) as textColor
+
+                -- lesson tab addons
+                -- to get first element from deps and only if department column is empty because in frontend it is also used like this
+                ,CASE
+                    WHEN tt.department_id is not null THEN tt.department_id
+                    WHEN tt.choosing_deps [1] is not null THEN tt.choosing_deps [1]
+                    ELSE null
+                END AS addon_lesson_department_or_deps_first_id,
+
+                ls.code as addon_lesson_code,
+                addon_lesson_s.name as addon_lesson_department_name
+                -- lesson tab addons end
+
+            FROM
+                lms_timetable tt
+                LEFT JOIN lms_lessonstandart ls ON tt.lesson_id = ls.id
+                LEFT JOIN lms_room r ON tt.room_id = r.id
+
+                -- lesson tab addons
+                left join core_salbars addon_lesson_s on addon_lesson_s.id = (
+                    CASE
+                        WHEN tt.department_id is not null THEN tt.department_id
+                        WHEN tt.choosing_deps [1] is not null THEN tt.choosing_deps [1]
+                        ELSE null
+                    END
+                )
+                -- lesson tab addons end
+
+                LEFT JOIN core_teachers cu ON tt.teacher_id = cu.id,
+                LATERAL (
+                    SELECT
+                        ARRAY(
+                            SELECT
+                                gr.name
+                            FROM
+                                lms_timetable_to_group ttg
+                                LEFT JOIN lms_group gr ON ttg.group_id = gr.id
+                            WHERE
+                                ttg.timetable_id = tt.id
+                        ) AS group
+                ) t,
+                LATERAL (
+                    SELECT
+                        ARRAY(
+                            SELECT
+                                CAST(gr.id as varchar)
+                            FROM
+                                lms_timetable_to_group ttg
+                                LEFT JOIN lms_group gr ON ttg.group_id = gr.id
+                            WHERE
+                                ttg.timetable_id = tt.id
+                        ) AS group_list
+                ) ta
+            WHERE
+                -- all tabs addons
+                tt.lesson_year = '{year}' and tt.lesson_season_id = {season} {dep_sql}
+
+                -- all tabs addons except group tab
+                {addon_no_permission_where_school}
+
+                -- lesson tab addons
+                and tt.is_kurats is false
+                {addon_lessontab_where_option_filter}
+                -- lesson tab addons end
+
+                -- all related to 'order by' addons (lesson tab, group tab, mb. etc.)
+            order by addon_lesson_department_or_deps_first_id, tt.lesson_id, tt.begin_date, tt.day, tt.time
+        '''.format(
+                # all tabs addons
+                year=year,
+                season=season,
+                begin_date=begin_date,
+                end_date=end_date,
+                # dep_condition=f"AND tt.id in ( SELECT timetable_id FROM lms_timetable_to_group WHERE group_id in (SELECT id FROM lms_group WHERE department_id={dep_id}))" if dep_id else '',
+                dep_sql=dep_sql,
+
+                #all tabs addons except group tab
+                addon_no_permission_where_school=addon_no_permission_where_school,
+
+                # lesson tab addons
+                addon_lessontab_where_option_filter=addon_lessontab_where_option_filter,
+            )
+
+        return query
+
+    @staticmethod
+    def get_group_tab_query(
+        user,
+        begin_date,
+        end_date,
+        department,
+        school,
+        option_filter,
+        year,
+        season,
+        group,
+        lesson_type,
+        dep_id
+    ):
+        # all tabs addons
+        dep_sql = ''
+
+        # Тэнхимийн эрхлэгч үед
+        permission = get_user_permissions(user)
+
+        if 'lms-timetable-register-teacher-update' in permission and department:
+            if department:
+                dep_sql = 'and tt.department_id={} or choosing_deps && ARRAY[{}]'.format(department, department)
+
         # group tab addons
-        addon_grouptab_select = ''
-        addon_grouptab_from = ''
         addon_grouptab_where = ''
 
-        if selectedType == 'group':
-            addon_grouptab_select = """
-                addon_group_ttg_group.name as addon_group_name,
-                addon_group_ttg.group_id as addon_group_id,
-            """
+        if school:
+            addon_grouptab_where += """
+            and addon_group_ttg_group.school_id = {}
+            """.format(school)
 
-            addon_grouptab_from = """
-                inner join lms_timetable_to_group addon_group_ttg on addon_group_ttg.timetable_id = tt.id
-                left join lms_group addon_group_ttg_group on addon_group_ttg.group_id = addon_group_ttg_group.id
-            """
+        if dep_id:
+            addon_grouptab_where += """
+            and addon_group_ttg_group.department_id = {}
+            """.format(dep_id)
 
-            if school:
-                addon_grouptab_where += """
-                and addon_group_ttg_group.school_id = {}
-                """.format(school)
+        if option_filter:
+            addon_grouptab_where += """
+            and tt.lesson_id = {}
+            """.format(option_filter)
 
-            if dep_id:
-                addon_grouptab_where += """
-                and addon_group_ttg_group.department_id = {}
-                """.format(dep_id)
-
-            if option_filter:
-                addon_grouptab_where += """
-                and tt.lesson_id = {}
-                """.format(option_filter)
-
-            if group:
-                addon_grouptab_where += """
-                and addon_group_ttg_group.id = {}
-                """.format(group)
-
-            order_by = "order by addon_group_ttg_group.name, addon_group_ttg.group_id"
-
-        """
-        to display last events of page sequentally
-        Because without this sorting, events in row will be displayed randomly, so user can be confused and can miss events
-        """
-        if order_by:
-            order_by += ', tt.begin_date, tt.day, tt.time'
-
-        else:
-            order_by = 'order by tt.begin_date, tt.day, tt.time'
+        if group:
+            addon_grouptab_where += """
+            and addon_group_ttg_group.id = {}
+            """.format(group)
 
         if lesson_type:
             addon_grouptab_where += """
@@ -2773,7 +2800,8 @@ class TimeTableNewAPIView(
         query = '''
             SELECT
                 -- group tab addons
-                {addon_grouptab_select}
+                addon_group_ttg_group.name as addon_group_name,
+                addon_group_ttg.group_id as addon_group_id,
                 -- group tab addons end
 
                 tt.color,
@@ -2834,21 +2862,14 @@ class TimeTableNewAPIView(
                 ) as is_score,
                 public.get_color(tt.color) as textColor
 
-                -- lesson tab addons
-                {addon_lessontab_select}
-                -- lesson tab addons end
-
             FROM
                 lms_timetable tt
                 LEFT JOIN lms_lessonstandart ls ON tt.lesson_id = ls.id
                 LEFT JOIN lms_room r ON tt.room_id = r.id
 
-                -- lesson tab addons
-                {addon_lessontab_from}
-                -- lesson tab addons end
-
                 -- group tab addons
-                {addon_grouptab_from}
+                inner join lms_timetable_to_group addon_group_ttg on addon_group_ttg.timetable_id = tt.id
+                left join lms_group addon_group_ttg_group on addon_group_ttg.group_id = addon_group_ttg_group.id
                 -- group tab addons end
 
                 LEFT JOIN core_teachers cu ON tt.teacher_id = cu.id,
@@ -2880,20 +2901,12 @@ class TimeTableNewAPIView(
                 -- all tabs addons
                 tt.lesson_year = '{year}' and tt.lesson_season_id = {season} {dep_sql}
 
-                -- all tabs addons except lesson tab
-                {addon_no_permission_where_school}
-
-                -- lesson tab addons
-                {addon_lessontab_where_kurats}
-                {addon_lessontab_where_option_filter}
-                -- lesson tab addons end
-
                 -- group tab addons
                 {addon_grouptab_where}
                 -- group tab addons end
 
                 -- all related to 'order by' addons (lesson tab, group tab, mb. etc.)
-            {order_by}
+            order by addon_group_ttg_group.name, addon_group_ttg.group_id, tt.begin_date, tt.day, tt.time
         '''.format(
                 # all tabs addons
                 year=year,
@@ -2903,23 +2916,254 @@ class TimeTableNewAPIView(
                 # dep_condition=f"AND tt.id in ( SELECT timetable_id FROM lms_timetable_to_group WHERE group_id in (SELECT id FROM lms_group WHERE department_id={dep_id}))" if dep_id else '',
                 dep_sql=dep_sql,
 
-                #all tabs addons except lesson tab
-                addon_no_permission_where_school=addon_no_permission_where_school,
-
-                # lesson tab addons
-                addon_lessontab_where_kurats=addon_lessontab_where_kurats,
-                addon_lessontab_where_option_filter=addon_lessontab_where_option_filter,
-                addon_lessontab_select=addon_lessontab_select,
-                addon_lessontab_from=addon_lessontab_from,
-
                 #group tab addons
-                addon_grouptab_select=addon_grouptab_select,
-                addon_grouptab_from=addon_grouptab_from,
                 addon_grouptab_where=addon_grouptab_where,
-
-                # all related to 'order by' addons (lesson tab, group tab, mb. etc.)
-                order_by=order_by
             )
+
+        return query
+
+    @staticmethod
+    def get_other_tabs_query(
+        user,
+        begin_date,
+        end_date,
+        department,
+        school,
+        option_filter,
+        year,
+        season,
+    ):
+        # all tabs except group tab addons
+        addon_no_permission_where_school = ''
+
+        # all tabs addons
+        dep_sql = ''
+
+        # Тэнхимийн эрхлэгч үед
+        permission = get_user_permissions(user)
+
+        if 'lms-timetable-register-teacher-update' in permission and department:
+            if department:
+                dep_sql = 'and tt.department_id={} or choosing_deps && ARRAY[{}]'.format(department, department)
+        else:
+            # not group condition used because in TimeTableResource1 it was after taking timetable_ids and it's filter (qs_tgroup = TimeTable_to_group) was before school filter
+            if school:
+                addon_no_permission_where_school = """
+                    and (
+                        tt.id in (
+                            SELECT timetable_id FROM lms_timetable_to_group where group_id in (SELECT id from lms_group where school_id = {school_id})
+                        )
+                        OR
+                        tt.id  in (
+                            SELECT timetable_id FROM lms_timetable_to_student where student_id in (
+                                SELECT id from lms_student where group_id in (SELECT id from lms_group where school_id = {school_id})
+                            )
+                        )
+                        OR
+                        tt.school_id = {school_id}
+                    )
+                """.format(school_id=school)
+
+        query = '''
+            SELECT
+                tt.color,
+                tt.is_optional,
+                tt.choosing_deps,
+                tt.school_id,
+                tt.id as event_id,
+                tt.day,
+                tt.time,
+                tt.begin_date,
+                tt.lesson_id AS lesson,
+                ls.is_general,
+                tt.room_id AS room,
+                tt.teacher_id as teacher,
+                tt.department_id as department,
+                ls.name as lesson_name,
+                ls.code as lesson_code,
+                tt.odd_even,
+                CONCAT(r.code, ' ', r.name) as room_name,
+                CONCAT(
+                    SUBSTRING(cu.last_name, 1, 1),
+                    '.',
+                    cu.first_name
+                ) as teacher_name,
+                CASE
+                    WHEN tt.type = 1 THEN 'Лаб'
+                    WHEN tt.type = 2 THEN 'Лк'
+                    WHEN tt.type = 3 THEN 'Сем'
+                    WHEN tt.type = 4 THEN 'Бу'
+                    WHEN tt.type = 5 THEN 'Дад'
+                    WHEN tt.type = 6 THEN 'Б/д'
+                    ELSE ''
+                END AS title,
+                CASE
+                    WHEN tt.type = 1 THEN 'Лаборатори'
+                    WHEN tt.type = 2 THEN 'Лекц'
+                    WHEN tt.type = 3 THEN 'Семинар'
+                    WHEN tt.type = 4 THEN 'Бусад'
+                    WHEN tt.type = 5 THEN 'Дадлага'
+                    WHEN tt.type = 6 THEN 'Бие даалт'
+                    ELSE ''
+                END AS type_name,
+                t.group,
+                ta.group_list,
+                (
+                    SELECT
+                        case
+                            when COUNT(*) > 0 THEN True
+                            ELSE False
+                        end gg
+                    FROM
+                        lms_scoreregister ls
+                    WHERE
+                        ls.lesson_id = tt.lesson_id
+                        and ls.teacher_id = tt.teacher_id
+                        and lesson_year = '{year}'
+                        and lesson_season_id = {season}
+                ) as is_score,
+                public.get_color(tt.color) as textColor
+
+            FROM
+                lms_timetable tt
+                LEFT JOIN lms_lessonstandart ls ON tt.lesson_id = ls.id
+                LEFT JOIN lms_room r ON tt.room_id = r.id
+
+                LEFT JOIN core_teachers cu ON tt.teacher_id = cu.id,
+                LATERAL (
+                    SELECT
+                        ARRAY(
+                            SELECT
+                                gr.name
+                            FROM
+                                lms_timetable_to_group ttg
+                                LEFT JOIN lms_group gr ON ttg.group_id = gr.id
+                            WHERE
+                                ttg.timetable_id = tt.id
+                        ) AS group
+                ) t,
+                LATERAL (
+                    SELECT
+                        ARRAY(
+                            SELECT
+                                CAST(gr.id as varchar)
+                            FROM
+                                lms_timetable_to_group ttg
+                                LEFT JOIN lms_group gr ON ttg.group_id = gr.id
+                            WHERE
+                                ttg.timetable_id = tt.id
+                        ) AS group_list
+                ) ta
+            WHERE
+                -- all tabs addons
+                tt.lesson_year = '{year}' and tt.lesson_season_id = {season} {dep_sql}
+
+                -- all tabs addons except group tab
+                {addon_no_permission_where_school}
+
+                -- all related to 'order by' addons (lesson tab, group tab, mb. etc.)
+            order by tt.begin_date, tt.day, tt.time
+        '''.format(
+                # all tabs addons
+                year=year,
+                season=season,
+                begin_date=begin_date,
+                end_date=end_date,
+                # dep_condition=f"AND tt.id in ( SELECT timetable_id FROM lms_timetable_to_group WHERE group_id in (SELECT id FROM lms_group WHERE department_id={dep_id}))" if dep_id else '',
+                dep_sql=dep_sql,
+
+                #all tabs addons except group tab
+                addon_no_permission_where_school=addon_no_permission_where_school,
+            )
+
+        return query
+
+    def get(self, request):
+        def get_year_season_arguments(request_year, request_season):
+            year, season = get_active_year_season()
+
+            if request_year:
+                year = request_year
+
+            if request_season:
+                season = request_season
+
+            return year, season
+
+        def get_date_arguments():
+            week = get_dates_from_week_mnums_version()
+            begin_date = week.get('start_date')
+            end_date = week.get('end_date')
+
+            if not begin_date and not end_date:
+                current_date = datetime.today()
+                begin_date = current_date - timedelta(days=current_date.weekday())
+                end_date = begin_date + timedelta(days=6)
+
+            return begin_date, end_date
+
+        def get_general_arguments(request):
+            department = request.query_params.get('department')
+            school = request.query_params.get('school')
+            option_filter = request.query_params.get('option')
+            begin_date, end_date = get_date_arguments()
+            year, season = get_year_season_arguments(request.query_params.get('year'), request.query_params.get('season'))
+
+            return (
+                begin_date,
+                end_date,
+                department,
+                school,
+                option_filter,
+                year,
+                season
+            )
+
+        selectedType = request.query_params.get('type')
+        query = ''
+        begin_date, end_date, department, school, option_filter, year, season = get_general_arguments(request)
+
+        if selectedType == 'lesson':
+            query = self.get_lesson_tab_query(
+                request.user,
+                begin_date,
+                end_date,
+                department,
+                school,
+                option_filter,
+                year,
+                season
+            )
+
+        elif selectedType == 'group':
+            query = self.get_group_tab_query(
+                request.user,
+                begin_date,
+                end_date,
+                department,
+                school,
+                option_filter,
+                year,
+                season,
+                request.query_params.get('group'),
+                request.query_params.get('lesson_type'),
+                request.query_params.get('selectedValue'),
+            )
+
+        else:
+            query = self.get_other_tabs_query(
+                request.user,
+                begin_date,
+                end_date,
+                department,
+                school,
+                option_filter,
+                year,
+                season
+            )
+
+        if not query:
+            return request.send_data({})
 
         paginator = self.pagination_class()
         paginated_list = paginator.paginate_queryset(query, request, view=self)
@@ -2931,122 +3175,7 @@ class TimeTableNewAPIView(
             'results': paginated_list,
         }
 
-        # if is_volume:
-        #     # Цагийн ачаалал
-        #     credit_cursor = connection.cursor()
-            # credit_cursor.execute(estimate_query)
-            # estimate_rows = list(dict_fetchall(credit_cursor))
-            # for est_row in estimate_rows:
-            #     response_data.get('results').append(est_row)
-
         return request.send_data(response_data)
-
-    def put(self, request, pk=None):
-        errors = []
-
-        datas = request.data
-
-        estimate = TeacherCreditVolumePlan.objects.get(pk=pk)
-
-        day = datas.get('day')
-        time = datas.get('time')
-        odd_even = datas.get('odd_even')
-        school = datas.get('school')
-
-        lesson = estimate.lesson
-        teacher = estimate.teacher
-        year, season = get_active_year_season()
-
-        season_obj = Season.objects.get(id=season)
-        school_obj = SubOrgs.objects.get(pk=school)
-
-        group_ids = TeacherCreditVolumePlan_group.objects.filter(creditvolume=pk).values_list('group', flat=True)
-
-        st_count = Student.objects.filter(group_id__in=group_ids).count()
-
-        datas['st_count'] = st_count
-
-        qs_timetable = self.queryset.filter(lesson_year=year, lesson_season_id=season, day=day, time=time, odd_even__in=[odd_even])
-
-        timetable_ids = qs_timetable.values_list('id', flat=True)
-
-        # qs_teacher = qs_timetable.filter(teacher_id=teacher)
-
-        # Багшийн давхцал
-        # if len(qs_teacher) > 0:
-        #     teacher_obj = qs_teacher.first()
-        #     clesson = teacher_obj.lesson.name
-        #     time = teacher_obj.time
-        #     day = teacher_obj.day
-
-        #     msg = "Энэ багш нь {lesson} хичээлийн {day}-{time} дээр хуваарьтай байна.".format(lesson=clesson, day=day, time=time)
-
-        #     return request.send_error("ERR_003", msg)
-
-        # Сонгон хичээл биш тухайн ангийн хичээлийн хуваарийн давхцалыг шалгах
-        if len(timetable_ids) > 0:
-            qs = self.queryset.filter(id__in=timetable_ids).first()
-
-            # Сонгосон өдөр цагтай хуваариудын хичээлийн нэр
-            glesson = qs.lesson.name
-            for group in group_ids:
-
-                # Тухайн сонгосон анги сонгогдсон өдөр цаг дээр хичээлтэй байж болохгүй
-                qs_timetable_group = TimeTable_to_group.objects.filter(timetable_id__in=timetable_ids, group_id=group)
-                if len(qs_timetable_group) > 0:
-                    qs_groups = qs_timetable_group.first()
-                    group_name = qs_groups.group.name
-                    msg = "{group_name} анги нь {day}-{time} дээр {lesson} хичээлийн хуваарьтай байна.".format(group_name=group_name, lesson=glesson, day=day, time=time)
-                    return request.send_error("ERR_003", msg)
-
-        datas['lesson_id'] = lesson.id
-        datas['teacher_id'] = teacher.id
-        datas['school'] = school_obj if school_obj else None
-        datas['type'] = estimate.type
-        datas['lesson_season'] = season_obj
-        datas['lesson_year'] = year
-        datas['created_user_id'] = request.user.id
-
-        try:
-            with transaction.atomic():
-                table_data, created = self.queryset.update_or_create(
-                    lesson=lesson,
-                    teacher=teacher,
-                    type=estimate.type,
-                    lesson_year=year,
-                    lesson_season=season_obj,
-                    defaults={
-                        **datas
-                    }
-                )
-                # Цагийн хуваарийн хүснэгтийн id
-                table_id=table_data.id
-
-                if len(group_ids) > 0:
-                    group_datas = []
-
-                    for group_id in group_ids:
-                        timetable_group = TimeTable_to_group.objects.filter(group_id=group_id, timetable_id=table_id).first()
-                        if not timetable_group:
-                            group_datas.append(
-                                TimeTable_to_group(
-                                    group_id=group_id,
-                                    timetable_id=table_id
-                                )
-                            )
-
-                    TimeTable_to_group.objects.bulk_create(group_datas)
-
-                estimate.is_timetable = True
-                estimate.save()
-
-                return request.send_info("INF_001")
-
-        except Exception:
-            traceback.print_exc()
-
-            return request.send_error("ERR_002", "Хичээлийн хуваарь давхцаж байна.")
-
 
 @permission_classes([IsAuthenticated])
 class TimeTableExcelImportAPIView(
@@ -3825,7 +3954,7 @@ class TimeTableResource1(
             season = request_season
 
 
-        # week = get_dates_from_week()
+        # week = get_dates_from_week_mnums_version()
 
         is_volume = request.query_params.get('is_volume')
         school = self.request.query_params.get('school')
