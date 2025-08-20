@@ -65,6 +65,9 @@ urlpatterns = [
     # Цагийн хуваариас event зөөх үед үүссэний дараа
     path('event/<int:pk>/', TimeTableEvent.as_view()),
 
+    # FullCalendar's prop: "eventChange" (useapi.js - moveEvent)
+    path('register/new/<int:pk>/', TimeTableNewAPIView.as_view()),
+
     # Хичээлийн хуваарь шивэх V1
     # path('register1/', TimeTable1APIView.as_view()),
 	# NOTE this is commented in useApi.js

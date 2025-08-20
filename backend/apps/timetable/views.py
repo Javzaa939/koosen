@@ -2575,9 +2575,8 @@ class TimeTableKuratsAPIView(
 class TimeTableNewAPIView(
     generics.GenericAPIView,
 ):
-    """
-    Used for all timetable types except "kurats/date"
-    """
+    queryset = TimeTable.objects.all().filter(is_kurats=False)
+    serializer_class = TimeTableSerializer
 
     pagination_class = RawQueryCustomPagination
 
@@ -3235,6 +3234,116 @@ class TimeTableNewAPIView(
         }
 
         return request.send_data(response_data)
+
+    def put(self, request, pk=None):
+        """
+        Used only in FullCalendar's prop: "eventChange"
+        """
+
+        errors = []
+
+        datas = request.data
+
+        estimate = TeacherCreditVolumePlan.objects.get(pk=pk)
+
+        day = datas.get('day')
+        time = datas.get('time')
+        odd_even = datas.get('odd_even')
+        school = datas.get('school')
+
+        lesson = estimate.lesson
+        teacher = estimate.teacher
+        year, season = get_active_year_season()
+
+        season_obj = Season.objects.get(id=season)
+        school_obj = SubOrgs.objects.get(pk=school)
+
+        group_ids = TeacherCreditVolumePlan_group.objects.filter(creditvolume=pk).values_list('group', flat=True)
+
+        st_count = Student.objects.filter(group_id__in=group_ids).count()
+
+        datas['st_count'] = st_count
+
+        qs_timetable = self.queryset.filter(lesson_year=year, lesson_season_id=season, day=day, time=time, odd_even__in=[odd_even])
+
+        timetable_ids = qs_timetable.values_list('id', flat=True)
+
+        # qs_teacher = qs_timetable.filter(teacher_id=teacher)
+
+        # Багшийн давхцал
+        # if len(qs_teacher) > 0:
+        #     teacher_obj = qs_teacher.first()
+        #     clesson = teacher_obj.lesson.name
+        #     time = teacher_obj.time
+        #     day = teacher_obj.day
+
+        #     msg = "Энэ багш нь {lesson} хичээлийн {day}-{time} дээр хуваарьтай байна.".format(lesson=clesson, day=day, time=time)
+
+        #     return request.send_error("ERR_003", msg)
+
+        # Сонгон хичээл биш тухайн ангийн хичээлийн хуваарийн давхцалыг шалгах
+        if len(timetable_ids) > 0:
+            qs = self.queryset.filter(id__in=timetable_ids).first()
+
+            # Сонгосон өдөр цагтай хуваариудын хичээлийн нэр
+            glesson = qs.lesson.name
+            for group in group_ids:
+
+                # Тухайн сонгосон анги сонгогдсон өдөр цаг дээр хичээлтэй байж болохгүй
+                qs_timetable_group = TimeTable_to_group.objects.filter(timetable_id__in=timetable_ids, group_id=group)
+                if len(qs_timetable_group) > 0:
+                    qs_groups = qs_timetable_group.first()
+                    group_name = qs_groups.group.name
+                    msg = "{group_name} анги нь {day}-{time} дээр {lesson} хичээлийн хуваарьтай байна.".format(group_name=group_name, lesson=glesson, day=day, time=time)
+                    return request.send_error("ERR_003", msg)
+
+        datas['lesson_id'] = lesson.id
+        datas['teacher_id'] = teacher.id
+        datas['school'] = school_obj if school_obj else None
+        datas['type'] = estimate.type
+        datas['lesson_season'] = season_obj
+        datas['lesson_year'] = year
+        datas['created_user_id'] = request.user.id
+
+        try:
+            with transaction.atomic():
+                table_data, created = self.queryset.update_or_create(
+                    lesson=lesson,
+                    teacher=teacher,
+                    type=estimate.type,
+                    lesson_year=year,
+                    lesson_season=season_obj,
+                    defaults={
+                        **datas
+                    }
+                )
+                # Цагийн хуваарийн хүснэгтийн id
+                table_id=table_data.id
+
+                if len(group_ids) > 0:
+                    group_datas = []
+
+                    for group_id in group_ids:
+                        timetable_group = TimeTable_to_group.objects.filter(group_id=group_id, timetable_id=table_id).first()
+                        if not timetable_group:
+                            group_datas.append(
+                                TimeTable_to_group(
+                                    group_id=group_id,
+                                    timetable_id=table_id
+                                )
+                            )
+
+                    TimeTable_to_group.objects.bulk_create(group_datas)
+
+                estimate.is_timetable = True
+                estimate.save()
+
+                return request.send_info("INF_001")
+
+        except Exception:
+            traceback.print_exc()
+
+            return request.send_error("ERR_002", "Хичээлийн хуваарь давхцаж байна.")
 
 
 @permission_classes([IsAuthenticated])
