@@ -18,7 +18,7 @@ import Calendar from './Calendar'
 import { get_time_date } from "@utils"
 
 
-const GroupModal = ({ open, handleModal, isRtl  }) => {
+const GroupModal = ({ open, handleModal, isRtl, user  }) => {
 
     const CloseBtn = (
         <X className="cursor-pointer" size={15} onClick={handleModal} />
@@ -35,16 +35,20 @@ const GroupModal = ({ open, handleModal, isRtl  }) => {
     const { t } = useTranslation()
 
     function getGroup() {
+        var dep_id = ''
+        if(user?.permissions?.includes('lms-timetable-register-teacher-update') && user?.department) {
+            dep_id = user?.department
+        }
         Promise.all([
             // Хичээлийн хуваарийн дата
-            fetchData(calendarListApi.getCalendar(true, '', 'group', '')),
+            fetchData(calendarListApi.getCalendar('', '', '', '', true, '', 'group', '', false, dep_id)),
             // Resource дата
-            fetchData(calendarListApi.selectionDatas('group', '', '')),
+            fetchData(calendarListApi.selectionDatas('group', '', '', false, dep_id)),
         ]).then((values) => {
-            if(values[0]?.data) {
-                var data = values[0]?.data
+            if(values[0]?.data?.results) {
+                var data = values[0]?.data.results
                 for(var i in data) {
-                    const group = data[i]?.group_list
+                    const group = data[i]?.addon_group_id
                     const odd_even = data[i].odd_even
 
                     const stimes = get_time_date(data[i].time, data[i].day)
@@ -53,10 +57,8 @@ const GroupModal = ({ open, handleModal, isRtl  }) => {
                     data[i].end = stimes?.end_time
                     data[i].textColor = data[i]?.textcolor || 'white'
 
-                    if (group.length > 0) {
-                        // Resource ID
-                        data[i].resourceIds = data[i].group_list ? data[i].group_list : []
-                    }
+                    // Resource ID
+                    data[i].resourceId = group
 
                     if (odd_even == 1) {
                         data[i].classNames = ['box']
@@ -71,14 +73,18 @@ const GroupModal = ({ open, handleModal, isRtl  }) => {
     }
 
     function getTeacher() {
+        var dep_id = ''
+        if(user?.permissions?.includes('lms-timetable-register-teacher-update') && user?.department) {
+            dep_id = user?.department
+        }
         Promise.all([
             // Хичээлийн хуваарийн дата
-            fetchData(calendarListApi.getCalendar(true, '', 'teacher', '', false)),
+            fetchData(calendarListApi.getCalendar('', '', '', '', true, '', 'teacher', '', false, dep_id)),
             // Resource дата
-            fetchData(calendarListApi.selectionDatas('teacher', '', '', false)),
+            fetchData(calendarListApi.selectionDatas('teacher', '', '', false, dep_id)),
         ]).then((values) => {
-            if(values[0]?.data) {
-                var data = values[0]?.data
+            if(values[0]?.data?.results) {
+                var data = values[0]?.data.results
                 for(var i in data) {
                     const teacher = data[i]?.teacher
                     const odd_even = data[i].odd_even

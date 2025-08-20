@@ -32,6 +32,8 @@ import { useTranslation } from 'react-i18next';
 
 import CTable from '../../Table';
 import { validateSchema } from './validateSchema'
+import { student_course_level } from '@utils'
+
 
 const Block = ({  handleRoomModal, editValues, handleModal, roomModal, is_loading, setLoader, refreshDatas }) => {
     var values = {
@@ -45,7 +47,7 @@ const Block = ({  handleRoomModal, editValues, handleModal, roomModal, is_loadin
     const { t } = useTranslation()
 
     // ** Hook
-    const { control, handleSubmit, reset, setError, clearErrors, setValue, formState: { errors } } = useForm(validate(validateSchema));
+    const { control, handleSubmit, resetField, setError, clearErrors, setValue, formState: { errors } } = useForm(validate(validateSchema));
 
 	// Loader
 	const { Loader, isLoading, fetchData } = useLoader({});
@@ -68,9 +70,12 @@ const Block = ({  handleRoomModal, editValues, handleModal, roomModal, is_loadin
     const [dayOption, setDay] = useState([])
     const [groupOption, setGroup] = useState([])
     const [typeOption, setType] =useState([])
-    const [studentOption, setStudent] =useState([])
-    const [excludeStudentsOption, setExcludeStudent] = useState([])
+    // const [studentOption, setStudent] =useState([])
+    // const [excludeStudentsOption, setExcludeStudent] = useState([])
+    const [selectedTimes , setSelectedTimes] = useState([])
     const [onlineOption, setOnlineOption] = useState([])
+    const [kurs, setKurs] = useState([])
+    const [departOption, setDepartOption] = useState([])
 
     const [selectedGroups, setSelectedGroups] = useState([])
     const [selectedAddGroups, setSelectedAddGroups] = useState([])
@@ -78,16 +83,27 @@ const Block = ({  handleRoomModal, editValues, handleModal, roomModal, is_loadin
     const [removeStudents, setRemoveStudent] = useState([])
     const [roomOption, setRoom] = useState([])
     const [oddEvenOption, setOddEvenOption] =useState([])
+    const [selectDepart, setSelectDepart] = useState([])
+    const [levelOptions, setLevelOptions] = useState(student_course_level())
+    const [selectedDay, setSelectedDay] = useState([])
+    const [selectedRooms , setSelectedRooms] = useState([])
 
     const [checked, setOnlyCheck] = useState(false)
+
+    const [lessonCurrentPage, setLessonCurrentPage] = useState(1);
+    const [lessonRowsPerPage] = useState(15);
+	const [lessonPageCount, setLessonPageCount] = useState(1);
+	const [lessonSearchValue, setLessonSearchValue] = useState([]);
+    const [isFirstRender, setIsFirstRender] = useState(true)
 
     // Api
     const teacherApi = useApi().hrms.teacher
     const lessonApi = useApi().study.lessonStandart
     const groupApi = useApi().student.group
     const timetableApi = useApi().timetable.register
-    const studentApi = useApi().student
+    // const studentApi = useApi().student
     const roomApi = useApi().timetable.room
+    const departApi = useApi().hrms.department
 
     // Өрөөний жагсаалт
     async function getRoom() {
@@ -108,7 +124,7 @@ const Block = ({  handleRoomModal, editValues, handleModal, roomModal, is_loadin
 
     // Багшийн жагсаалт
     async function getTeacher() {
-        const { success, data } = await fetchData(teacherApi.getTeacher(select_value.lesson))
+        const { success, data } = await fetchData(teacherApi.getTeacher(''))
         if(success) {
             setTeacher(data)
         }
@@ -116,7 +132,7 @@ const Block = ({  handleRoomModal, editValues, handleModal, roomModal, is_loadin
 
     // Ангийн жагсаалт
     async function getGroup() {
-        const { success, data } = await fetchData(groupApi.getTimetableList(select_value.lesson))
+        const { success, data } = await fetchData(groupApi.getTimetableList(select_value.lesson, kurs))
         if(success) {
             setGroup(data)
         }
@@ -160,18 +176,31 @@ const Block = ({  handleRoomModal, editValues, handleModal, roomModal, is_loadin
         }
     }
 
-    function getAll() {
+    function getAll(page=1) {
         Promise.all(
             [
-                fetchData(fetchData(lessonApi.getTimetableList())),
+                fetchData(lessonApi.getTimeList(lessonRowsPerPage, page, lessonSearchValue))
             ]
         ).then((values) => {
-            setLessonOption(values[0]?.data)
+            const data = values[0]?.data
+            const results = data?.results
+            if (page === 1) setLessonOption(results ?? [])
+            else setLessonOption((prev) => [...prev, ...results])
+            setLessonPageCount(Math.ceil(data?.count / lessonRowsPerPage))
         })
+    }
+
+    // Тэнхимийн жагсаалт
+    async function getDepartment() {
+        const { success, data } = await fetchData(departApi.getSelectSchool(school_id))
+        if(success) {
+            setDepartOption(data)
+        }
     }
 
     useEffect(() => {
         getAll()
+        getDepartment()
         setOnlineOption(get_lesson_type())
         setBeginWeek(get_week())
         setEndWeek(get_week())
@@ -238,39 +267,39 @@ const Block = ({  handleRoomModal, editValues, handleModal, roomModal, is_loadin
         }
     }
 
-    function getStudents() {
+    // function getStudents() {
 
-        var group_ids = []
-        if (selectedGroups) {
-            selectedGroups.forEach(element => {
-                if (element) group_ids.push(element?.id)
-            })
-        }
+    //     var group_ids = []
+    //     if (selectedGroups) {
+    //         selectedGroups.forEach(element => {
+    //             if (element) group_ids.push(element?.id)
+    //         })
+    //     }
 
-        Promise.all(
-            [
-                groupFetchData(studentApi.getGroup(group_ids, true)),
-                groupFetchData(studentApi.getRemoveGroup(group_ids, false))
-            ]
-        ).then((values) => {
-            setStudent(values[0]?.data)
-            setExcludeStudent(values[1]?.data)
-        })
-    }
+    //     Promise.all(
+    //         [
+    //             groupFetchData(studentApi.getGroup(group_ids, true)),
+    //             groupFetchData(studentApi.getRemoveGroup(group_ids, false))
+    //         ]
+    //     ).then((values) => {
+    //         setStudent(values[0]?.data)
+    //         setExcludeStudent(values[1]?.data)
+    //     })
+    // }
 
-    useEffect(
-        () =>
-        {
-            if (selectedGroups.length > 0) {
-                const timeoutId = setTimeout(() => {
-                    getStudents();
-                }, 1000);
+    // useEffect(
+    //     () =>
+    //     {
+    //         if (selectedGroups.length > 0) {
+    //             const timeoutId = setTimeout(() => {
+    //                 getStudents();
+    //             }, 1000);
 
-                return () => clearTimeout(timeoutId);
-            }
-        },
-        [selectedGroups]
-    )
+    //             return () => clearTimeout(timeoutId);
+    //         }
+    //     },
+    //     [selectedGroups]
+    // )
 
     useEffect(
         () =>
@@ -280,7 +309,6 @@ const Block = ({  handleRoomModal, editValues, handleModal, roomModal, is_loadin
             }
             if (select_value?.lesson) {
                 getLessonType()
-                getGroup()
             }
         },
         [select_value.potok, select_value.lesson]
@@ -293,6 +321,36 @@ const Block = ({  handleRoomModal, editValues, handleModal, roomModal, is_loadin
         },
         [select_value?.lesson]
     )
+
+    useEffect(
+        () =>
+        {
+            if (select_value?.lesson) {
+                getGroup()
+            }
+        },
+        [select_value.lesson, kurs]
+    )
+
+    useEffect(() => {
+        if (isFirstRender) {
+            setIsFirstRender(false)
+
+            return
+        }
+
+        getAll(lessonCurrentPage)
+    }, [lessonCurrentPage])
+
+	useEffect(() => {
+		const timeoutId = setTimeout(() => {
+			if (lessonSearchValue.length !== 1) getAll();
+		}, 1000);
+
+		return () => {
+			clearTimeout(timeoutId)
+		}
+	}, [lessonSearchValue])
 
 	async function onSubmit(cdata) {
         cdata['is_block'] = true
@@ -321,6 +379,8 @@ const Block = ({  handleRoomModal, editValues, handleModal, roomModal, is_loadin
             cdata['group'] = !checked ? selectedGroups : []
             cdata['addgroup'] = !checked ? selectedAddGroups : []
 
+            cdata['is_block'] = true
+            cdata['is_simple'] = false
             cdata['school'] = school_id
             cdata['lesson_year'] = cyear_name
             cdata['lesson_season'] = cseason_id
@@ -329,6 +389,12 @@ const Block = ({  handleRoomModal, editValues, handleModal, roomModal, is_loadin
             cdata['remove_students'] = remove_students
             cdata['is_optional'] = checked
             cdata['color'] = colorName
+            cdata['day'] = selectedDay
+            cdata['time'] = selectedTimes
+            cdata['room'] = selectedRooms
+            cdata['choosing_deps'] = selectDepart?.map((c) => c.id)
+            cdata['choosing_levels'] = kurs?.map((e) => e.id)
+            cdata['department'] = selectDepart?.map((c) => c.id)?.length > 0  ? selectDepart?.map((c) => c.id)[0] : ''
 
             odd_even_list.push(defaultOddEven)
 
@@ -341,10 +407,12 @@ const Block = ({  handleRoomModal, editValues, handleModal, roomModal, is_loadin
             cdata['odd_even_list'] = odd_even_list
 
             cdata = convertDefaultValue(cdata)
-            const { success, error } = await fetchData(timetableApi.post(cdata, 'is_block'))
+            const { success, error } = await fetchData(timetableApi.postSimple(cdata, 'is_simple'))
             if(success) {
-                reset()
-                handleModal()
+                resetField('begin_week')
+                resetField('end_week')
+                resetField('day')
+                resetField('time')
                 refreshDatas()
             } else {
                 /** Алдааны мессэжийг input дээр харуулна */
@@ -360,6 +428,80 @@ const Block = ({  handleRoomModal, editValues, handleModal, roomModal, is_loadin
     // Өнгө onchange
     const handleColorChange = (e) => {
         setColorName(e.target.value)
+    }
+
+    // Анги бүтнээр check хийх
+    const handleAllCheck = (e) => {
+        if (e.target.checked) {
+            setSelectedGroups([...groupOption])
+        } else {
+            setSelectedGroups([])
+        }
+    }
+
+    // Анги нэг нэгээр check хийх
+    const handleOneSelect = (e, val) => {
+        if (e.target.checked) {
+            setSelectedGroups((prev) => [...prev, val]);
+        } else {
+            setSelectedGroups((prev) => prev.filter(item => !(item.id === val?.id)));
+        }
+    }
+
+    // Хичээлийн өдөрүүд
+    function daySelect(data) {
+        setSelectedDay(data)
+    }
+
+    // 1 өдөрт олон хуваарь
+    function timeSelect(data, day, is_add) {
+        var cdata = {
+            day: day,
+            times: data,
+        };
+
+        if (is_add) {
+            const existingEntry = selectedTimes.find(item => item.day === day)
+
+            if (existingEntry) {
+                setSelectedTimes((prev) =>
+                    prev.map(item =>
+                        item.day === day
+                            ? { ...item, times: data }
+                            : item
+                    )
+                );
+            } else {
+                setSelectedTimes((prev) => [...prev, cdata]);
+            }
+        } else {
+            setSelectedTimes((prev) => prev.filter(item => !(item.day === day)));
+        }
+    }
+
+    function roomSelect(data, day, is_add) {
+        var cdata = {
+            day: day,
+            room: data,
+        };
+
+        if (is_add) {
+            const existingEntry = selectedRooms.find(item => item.day === day);
+
+            if (existingEntry) {
+                setSelectedRooms((prev) =>
+                    prev.map(item =>
+                        item.day === day
+                            ? { ...item, room: data }
+                            : item
+                    )
+                );
+            } else {
+                setSelectedRooms((prev) => [...prev, cdata]);
+            }
+        } else {
+            setSelectedRooms((prev) => prev.filter(item => !(item.day === day)));
+        }
     }
 
 	return (
@@ -398,6 +540,14 @@ const Block = ({  handleRoomModal, editValues, handleModal, roomModal, is_loadin
                                             styles={ReactSelectStyles}
                                             getOptionValue={(option) => option.id}
                                             getOptionLabel={(option) => option.full_name}
+                                            onMenuScrollToBottom={() => {
+                                                if (lessonCurrentPage < lessonPageCount) {
+                                                    setLessonCurrentPage(lessonCurrentPage + 1)
+                                                }
+                                            }}
+                                            onInputChange={(value) => {
+                                                setLessonSearchValue(value);
+                                            }}
                                         />
                                 )}}
                             />
@@ -436,6 +586,40 @@ const Block = ({  handleRoomModal, editValues, handleModal, roomModal, is_loadin
                                 }}
                             />
                             {errors.potok && <FormFeedback className='d-block'>{t(errors.potok.message)}</FormFeedback>}
+                        </Col>
+                        <Col md={3} sm={12}>
+                            <Label className="form-label" for="department">
+                                {t("Тэнхим")}
+                            </Label>
+                            <Controller
+                                control={control}
+                                defaultValue=''
+                                name="department"
+                                render={({ field: { value, onChange} }) => {
+                                    return (
+                                        <Select
+                                            name="department"
+                                            id="department"
+                                            classNamePrefix='select'
+                                            isClearable
+                                            isMulti
+                                            className={classnames('react-select', { 'is-invalid': errors.department })}
+                                            isLoading={isLoading}
+                                            placeholder={t(`-- Сонгоно уу --`)}
+                                            options={departOption || []}
+                                            value={selectDepart}
+                                            noOptionsMessage={() => t('Хоосон байна.')}
+                                            onChange={(val) => {
+                                                setSelectDepart(val)
+                                            }}
+                                            styles={ReactSelectStyles}
+                                            getOptionValue={(option) => option.id}
+                                            getOptionLabel={(option) => option.name}
+                                        />
+                                    )
+                                }}
+                            />
+                            {errors.teacher && <FormFeedback className='d-block'>{t(errors.teacher.message)}</FormFeedback>}
                         </Col>
                         <Col md={4} sm={12}>
                             <Label className="form-label" for="teacher">
@@ -703,49 +887,8 @@ const Block = ({  handleRoomModal, editValues, handleModal, roomModal, is_loadin
                         }}
                     />
                 </Col>
-                <Col md={4}  sm={12}>
-                    <Label className="form-label" for="room">
-                        {t('Өрөө')}
-                    </Label>
-                    <Controller
-                        control={control}
-                        defaultValue=''
-                        name="room"
-                        render={({ field: { value, onChange} }) => {
-                            return (
-                                <>
-                                    <Select
-                                        name="room"
-                                        id="room"
-                                        classNamePrefix='select'
-                                        isClearable
-                                        className={classnames('react-select', { 'is-invalid': errors.room })}
-                                        isLoading={isLoading}
-                                        placeholder={t(`-- Сонгоно уу --`)}
-                                        options={roomOption || []}
-                                        value={roomOption.find((c) => c.id === value)}
-                                        noOptionsMessage={() => {
-                                            return (
-                                                <a role='button' className="link-primary" onClick={handleRoomModal}>
-                                                    {t('Өрөө шинээр үүсгэх')}
-                                                </a>
-                                            )
-                                        }}
-                                        onChange={(val) => {
-                                            onChange(val?.id || '')
-                                        }}
-                                        styles={ReactSelectStyles}
-                                        getOptionValue={(option) => option.id}
-                                        getOptionLabel={(option) => option.full_name}
-                                    />
-                                </>
-                            )
-                        }}
-                    />
-                    {errors.room && <FormFeedback className='d-block'>{t(errors.room.message)}</FormFeedback>}
-                </Col>
-                <Row className='mt-1'>
-                    <Col md={4}  sm={12}>
+                <Row>
+                    <Col md={3}  sm={12} className='mt-1'>
                         <Label className="form-label" for="day">
                             {t('Өдөр')}
                         </Label>
@@ -764,11 +907,13 @@ const Block = ({  handleRoomModal, editValues, handleModal, roomModal, is_loadin
                                         isLoading={isLoading}
                                         placeholder={t(`-- Сонгоно уу --`)}
                                         options={dayOption || []}
-                                        value={dayOption.find((c) => c.id === (value || editValues?.day))}
+                                        value={selectedDay}
                                         noOptionsMessage={() => t('Хоосон байна.')}
                                         onChange={(val) => {
                                             onChange(val?.id || '')
+                                            daySelect(val);
                                         }}
+                                        isMulti
                                         styles={ReactSelectStyles}
                                         getOptionValue={(option) => option.id}
                                         getOptionLabel={(option) => option.name}
@@ -778,40 +923,108 @@ const Block = ({  handleRoomModal, editValues, handleModal, roomModal, is_loadin
                         />
                         {errors.day && <FormFeedback className='d-block'>{t(errors.day.message)}</FormFeedback>}
                     </Col>
-                    <Col md={4} sm={12}>
-                        <Label className="form-label" for="time">
-                            {t('Цаг')}
-                        </Label>
-                        <Controller
-                            control={control}
-                            defaultValue={editValues?.time || '' }
-                            name="time"
-                            render={({ field: { value, onChange} }) => {
-                                return (
-                                    <Select
-                                        name="time"
-                                        id="time"
-                                        classNamePrefix='select'
-                                        isClearable
-                                        className={classnames('react-select', { 'is-invalid': errors.time })}
-                                        isLoading={isLoading}
-                                        placeholder={t(`-- Сонгоно уу --`)}
-                                        options={timeOption || []}
-                                        value={timeOption.find((c) => c.id === (value || editValues?.time))}
-                                        noOptionsMessage={() => t('Хоосон байна.')}
-                                        onChange={(val) => {
-                                            onChange(val?.id || '')
-                                        }}
-                                        styles={ReactSelectStyles}
-                                        getOptionValue={(option) => option.id}
-                                        getOptionLabel={(option) => option.name}
-                                    />
-                                )
-                            }}
-                        ></Controller>
-                        {errors.time && <FormFeedback className='d-block'>{t(errors.time.message)}</FormFeedback>}
-                    </Col>
-                    <Col className='d-flex align-items-center justify-content-start ms-0 mt-1' md={6} sm={12} >
+                </Row>
+                {
+                    selectedDay?.map((day) =>
+                        <Row className='mt-50'>
+                            <Col md={3}>
+                                <Label>Хичээл орох өдөр</Label>
+                                <Input
+                                    type='text'
+                                    defaultValue={day?.name}
+                                    disabled={true}
+                                    bsSize={'sm'}
+                                />
+                            </Col>
+                            <Col md={3} sm={12}>
+                                <Label className="form-label" for="time">
+                                    {t('Цаг')}
+                                </Label>
+                                <Controller
+                                    control={control}
+                                    defaultValue={editValues?.time || '' }
+                                    name="time"
+                                    render={({ field: { value, onChange} }) => {
+                                        return (
+                                            <Select
+                                                name="time"
+                                                id="time"
+                                                classNamePrefix='select'
+                                                isClearable
+                                                className={classnames('react-select', { 'is-invalid': errors.time })}
+                                                isLoading={isLoading}
+                                                placeholder={t(`-- Сонгоно уу --`)}
+                                                options={timeOption || []}
+                                                value={selectedTimes?.find((data) => data.day === day?.id)?.times || []}
+                                                noOptionsMessage={() => t('Хоосон байна.')}
+                                                onChange={(val) => {
+                                                    if (val?.length > 0) {
+                                                        timeSelect(val, day?.id, true)
+                                                    } else {
+                                                        timeSelect(val, day?.id, false)
+                                                    }
+                                                }}
+                                                isMulti
+                                                styles={ReactSelectStyles}
+                                                getOptionValue={(option) => option.id}
+                                                getOptionLabel={(option) => option.name}
+                                            />
+                                        )
+                                    }}
+                                ></Controller>
+                                {errors.time && <FormFeedback className='d-block'>{t(errors.time.message)}</FormFeedback>}
+                            </Col>
+                            <Col md={3} sm={12}>
+                                <Label className="form-label" for="room">
+                                    {t('Өрөө')}
+                                </Label>
+                                <Controller
+                                    control={control}
+                                    defaultValue=''
+                                    name="room"
+                                    render={({ field: { value, onChange} }) => {
+                                        return (
+                                            <>
+                                                <Select
+                                                    name="room"
+                                                    id="room"
+                                                    classNamePrefix='select'
+                                                    isClearable
+                                                    className={classnames('react-select', { 'is-invalid': errors.room })}
+                                                    isLoading={isLoading}
+                                                    placeholder={t(`-- Сонгоно уу --`)}
+                                                    options={roomOption || []}
+                                                    value={roomOption?.find((c) => c.id === selectedRooms.find((c) => c.day === day?.id)?.room) || '' }
+                                                    noOptionsMessage={() => {
+                                                        return (
+                                                            <a role='button' className="link-primary" onClick={handleRoomModal}>
+                                                                {t('Өрөө шинээр үүсгэх')}
+                                                            </a>
+                                                        )
+                                                    }}
+                                                    onChange={(val) => {
+                                                        if (val) {
+                                                            roomSelect(val?.id, day?.id, true)
+                                                        } else {
+                                                            roomSelect(val?.id, day?.id, false)
+                                                        }
+                                                    }}
+                                                    styles={ReactSelectStyles}
+                                                    getOptionValue={(option) => option.id}
+                                                    getOptionLabel={(option) => option.full_name}
+                                                />
+                                            </>
+                                        )
+                                    }}
+                                />
+                                {errors.room && <FormFeedback className='d-block'>{t(errors.room.message)}</FormFeedback>}
+                            </Col>
+                            <Col md={3} sm={12}></Col>
+                        </Row>
+                    )
+                }
+                <Row className='d-flex align-items-center justify-content-start  mt-1' md={6} sm={12} >
+                    <Col>
                         <Input
                             id="is_optional"
                             className="dataTable-check mb-50 me-1"
@@ -825,43 +1038,70 @@ const Block = ({  handleRoomModal, editValues, handleModal, roomModal, is_loadin
                         </Label>
                     </Col>
                 </Row>
+                <Col md={6} sm={12}>
+                    <Label className="form-label" for="kurs">
+                        { checked ? t("Сонгон хичээл сонгох курс") : t("Курс")}
+                    </Label>
+                    <Select
+                        name="kurs"
+                        id="kurs"
+                        classNamePrefix='select'
+                        isClearable
+                        className={classnames('react-select')}
+                        isLoading={groupLoading}
+                        placeholder={t(`-- Сонгоно уу --`)}
+                        options={levelOptions || []}
+                        value={levelOptions.find((c) => c.id === kurs)}
+                        noOptionsMessage={() => t('Хоосон байна.')}
+                        onChange={(val) => {
+                            setKurs(val)
+                        }}
+                        isMulti
+                        isSearchable={true}
+                        styles={ReactSelectStyles}
+                        getOptionValue={(option) => option.id}
+                        getOptionLabel={(option) => option.name}
+                    />
+                </Col>
                 {
                     !checked &&
                     <>
                         <Col sm={12}>
                             <Label className="form-label" for="group">
-                                {t("Анги")}
+                                {t("Анги хэсэг")}
                             </Label>
-                            <Controller
-                                control={control}
-                                defaultValue={editValues?.group || '' }
-                                name="group"
-                                render={({ field: { value, onChange} }) => {
-                                    return (
-                                        <Select
-                                            name="group"
-                                            id="group"
-                                            classNamePrefix='select'
-                                            isClearable
-                                            className={classnames('react-select', { 'is-invalid': errors.group })}
-                                            isLoading={isLoading}
-                                            placeholder={t(`-- Сонгоно уу --`)}
-                                            options={groupOption || []}
-                                            value={groupOption.find((c) => c.id === (value || editValues?.group))}
-                                            noOptionsMessage={() => t('Хоосон байна.')}
-                                            onChange={(val) => {
-                                                onChange(val?.id || '')
-                                                groupSelect(val)
-                                            }}
-                                            isMulti
-                                            isSearchable={true}
-                                            styles={ReactSelectStyles}
-                                            getOptionValue={(option) => option.id}
-                                            getOptionLabel={(option) => option.name}
+                            <div className='border p-1'>
+                                <div className="d-flex justify-content-start">
+                                    <div>
+                                        <Input
+                                            type='checkbox'
+                                            id='all'
+                                            className=' me-1'
+                                            bsSize="md"
+                                            checked={selectedGroups?.length === groupOption?.length ? true : false}
+                                            onChange={(e) => handleAllCheck(e)}
                                         />
+                                    </div>
+                                    <Label for='all'>{'Бүгд'}</Label>
+                                </div>
+                                {
+                                    groupOption?.map((group, idx) =>
+                                        <div className=" d-flex justify-content-start" key={idx}>
+                                            <div>
+                                                <Input
+                                                    type='checkbox'
+                                                    id='checked'
+                                                    className=' me-1'
+                                                    bsSize="md"
+                                                    checked={selectedGroups?.find((c) => c.id == group?.id)}
+                                                    onChange={(e) => handleOneSelect(e, group?.id)}
+                                                />
+                                            </div>
+                                            <Label>{group?.name}</Label>
+                                        </div>
                                     )
-                                }}
-                            ></Controller>
+                                }
+                            </div>
                             {errors.group && <FormFeedback className='d-block'>{t(errors.group.message)}</FormFeedback>}
                         </Col>
                         {
@@ -903,7 +1143,7 @@ const Block = ({  handleRoomModal, editValues, handleModal, roomModal, is_loadin
                                     {errors.addgroup && <FormFeedback className='d-block'>{t(errors.addgroup.message)}</FormFeedback>}
                                 </Col>
                         }
-                        <Col sm={12} className='mt-1'>
+                        {/* <Col sm={12} className='mt-1'>
                             <Label className="form-label" for="students">
                                 {t("Нэмэлтээр судалж буй оюутан")}
                             </Label>
@@ -974,13 +1214,13 @@ const Block = ({  handleRoomModal, editValues, handleModal, roomModal, is_loadin
                                 }}
                             ></Controller>
                             {errors.exclude_student && <FormFeedback className='d-block'>{errors.exclude_student.message}</FormFeedback>}
-                        </Col>
+                        </Col> */}
                     </>
                 }
                 <Col md={12} sm={12} className="mt-2 d-flex justify-content-start mb-0">
                     <Button color="primary" type="submit" disabled={is_loading}>
                         {is_loading && <i className={`fas fa-spinner-third fa-spin me-2`}></i>}
-                        {t('Хадгалах')}
+                        {t('Хадгалаад нэмэх')}
                     </Button>
                     <Button className='ms-1' color="secondary" type="reset" outline  onClick={handleModal}>
                         {t("Буцах")}
