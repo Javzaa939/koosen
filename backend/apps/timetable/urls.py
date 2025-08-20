@@ -27,6 +27,12 @@ urlpatterns = [
     path('date/', TimeTableDate.as_view()),
 	# endregion
 
+    # to edit data for:
+	# - all types of timetable
+    # - lms-timetable-register-teacher-update permission
+    # - !user?.is_superuser && !cdata?.is_optional
+    path('register/edit/<int:pk>/',TimeTableEditAPIView.as_view()),
+
     # Хичээлийн байр
     path('building/', BuildingAPIView.as_view()),
     path('building/<int:pk>/', BuildingAPIView.as_view()),
