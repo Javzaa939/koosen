@@ -3155,6 +3155,9 @@ class TimeTableNewAPIView(
             )
 
         elif selectedType == 'group':
+            # NOTE this is department id from select input. Field with name "department" is department from user details
+            dep_id = request.query_params.get('selectedValue')
+
             query = self.get_group_tab_query(
                 request.user,
                 begin_date,
@@ -3166,7 +3169,7 @@ class TimeTableNewAPIView(
                 season,
                 lesson_type,
                 request.query_params.get('group'),
-                request.query_params.get('selectedValue'),
+                dep_id,
             )
 
         else:
