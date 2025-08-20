@@ -15,10 +15,8 @@ urlpatterns = [
 
     # region "Add timetable" button
 	# post() method for "Add" button for "kurats" timetable only.
-    # NOTE APIView have all CRUD methods (may be some of RUD are not used)
+    # NOTE APIView have all CRUD methods (may be R or D are not used)
     path('register/', TimeTableAPIView.as_view()),
-    # Цагийн хуваарь үүссэний дараа
-    path('register/<int:pk>/', TimeTableAPIView.as_view()),
 
     # here is only post() method for "Add" button for "simple" and "block" timetables only.
     path('register/simple/', TimeTableSimpleAPIView.as_view()),
@@ -27,11 +25,17 @@ urlpatterns = [
     path('date/', TimeTableDate.as_view()),
 	# endregion
 
-    # to edit data for:
+    # Цагийн хуваарь үүссэний дараа
+    # region to edit data
+	# put() method to edit all timetable types for rest cases
+    path('register/<int:pk>/', TimeTableAPIView.as_view()),
+
+    # put() method to edit data for:
 	# - all types of timetable
     # - lms-timetable-register-teacher-update permission
     # - !user?.is_superuser && !cdata?.is_optional
     path('register/edit/<int:pk>/',TimeTableEditAPIView.as_view()),
+	# endregion
 
     # Хичээлийн байр
     path('building/', BuildingAPIView.as_view()),
