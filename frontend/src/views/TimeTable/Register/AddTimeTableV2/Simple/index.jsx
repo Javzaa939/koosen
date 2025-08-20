@@ -974,8 +974,8 @@ const Simple = ({ handleRoomModal, editValues, handleModal, roomModal, is_loadin
                         {errors.day && <FormFeedback className='d-block'>{t(errors.day.message)}</FormFeedback>}
                     </Col>
                     {
-                        selectedDay?.map((day) =>
-                            <Row className='mt-50'>
+                        selectedDay?.map((day, index) =>
+                            <Row className='mt-50' key={index}>
                                 <Col md={3}>
                                     <Label>Хичээл орох өдөр</Label>
                                     <Input
