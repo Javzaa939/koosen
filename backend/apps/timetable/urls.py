@@ -15,7 +15,7 @@ urlpatterns = [
 
     # region "Add timetable" button
 	# post() method for "Add" button for "kurats" timetable only.
-    # NOTE APIView have all CRUD methods (may be R or D are not used)
+    # NOTE APIView have all CRUD methods (D are not used)
     path('register/', TimeTableAPIView.as_view()),
 
     # here is only post() method for "Add" button for "simple" and "block" timetables only.
@@ -27,6 +27,7 @@ urlpatterns = [
 
     # Цагийн хуваарь үүссэний дараа
     # region to edit data
+	# get() method to edit all timetable types
 	# put() method to edit all timetable types for rest cases
     path('register/<int:pk>/', TimeTableAPIView.as_view()),
 

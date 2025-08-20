@@ -2232,6 +2232,7 @@ class ExamRepeatStudentScoreListAPIView(
 
         return request.send_data(all_result)
 
+
 @permission_classes([IsAuthenticated])
 class TimeTablePotok(
     generics.GenericAPIView,
