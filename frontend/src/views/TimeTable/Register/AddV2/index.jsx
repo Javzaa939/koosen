@@ -664,7 +664,7 @@ const AddTimetableComponent = ({ }) => {
                                 refreshDatas={getRefresh}
                             />
                         </div>
-                        <Button className='ms-1 my-50' color='primary' onClick={() => { navigate(`/timetable/teacher/`) }} disabled={user?.permissions?.includes('lms-timetable-register-teacher-read') ? false : false} >Хуваарь жагсаалтаар харах</Button>
+                        <Button className='ms-1 my-50' color='primary' onClick={() => { navigate(`/timetable/teacher/`) }} disabled={user?.permissions?.includes('lms-timetable-register-teacher-read') ? false : true} >Хуваарь жагсаалтаар харах</Button>
                         {/* Api бэлэн болох үед ашиглах нь */}
                         <Button className='ms-1 my-50' color='primary' disabled={excelLoading || !school_id} onClick={() => { getExcelData() }}>{excelLoading ? <Spinner size='sm' /> : <FileText size={15} />} Эксел татах</Button>
                         {/* <Button className='ms-1' color='primary' onClick={() => { excelDownLoad() }}><Printer size={15}/> Хэвлэх</Button> */}
