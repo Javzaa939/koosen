@@ -1142,7 +1142,7 @@ const Simple = ({ handleRoomModal, editValues, handleModal, roomModal, is_loadin
                                                     id='checked'
                                                     className=' me-1'
                                                     bsSize="md"
-                                                    checked={selectedGroups?.find((c) => c.id == group?.id)}
+                                                    checked={selectedGroups?.find((c) => c.id == group?.id) ?? false}
                                                     onChange={(e) => handleOneSelect(e, group)}
                                                 />
                                             </div>
