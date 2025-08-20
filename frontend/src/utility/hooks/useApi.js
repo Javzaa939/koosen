@@ -932,7 +932,7 @@ function useApi(isDisplay=false) {
 			},
 			/* Хичээлийн өрөө */
 			room:{
-				getList: (room_type='') => instance.get(`/timetable/room/list/?room_type=${room_type}`),
+				getList: (room_type = '', school='') => instance.get(`/timetable/room/list/?room_type=${room_type}&school=${school? school : school_id}`),
 				get: () => instance.get(`/timetable/room/`),
 				post: data => instance.post('/timetable/room/', data),
 				getOne: (pk) => instance.get(`/timetable/room/${pk}/`),
