@@ -322,6 +322,10 @@ class RoomListAPIView(
     def get_queryset(self):
         queryset = self.queryset
         room_type = self.request.query_params.get('room_type')
+        school = self.request.query_params.get('school')
+
+        if school:
+            queryset = queryset.filter(school=school)
         if room_type:
             queryset = queryset.filter(type=room_type)
 
