@@ -887,6 +887,7 @@ function useApi(isDisplay=false) {
 		/** Цагийн хуваарь */
 		timetable: {
 			// #region Delete timetable button modal
+			// also for Button: "Хуваарь жагсаалтаар харах". Page: /timetable/teacher/
 			getList: (limit = 'Бүгд', page = 1, sort = '', search = '', department_id, lesson, teacher, start_date, end_date, group = '', day = '', time = '', type = '', is_delete = false) => instance.get(`/timetable/list/teacher/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&school=${school_id}&department=${department_id}&lesson=${lesson}&teacher=${teacher}&start_date=${start_date}&end_date=${end_date}&group=${group}&day=${day}&time=${time}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&type=${type}&is_delete=${is_delete}`),
 
 			getSelectGroups: (args) => {
