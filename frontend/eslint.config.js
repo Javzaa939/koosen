@@ -49,9 +49,9 @@ export default [
             'no-unreachable': 'warn',
 
             // ESLint plugin: unused-imports
-            'no-unused-vars': 'warn', // instead of 'error'
+            'no-unused-vars': ['warn', { varsIgnorePattern: '^React$' }],
             'unused-imports/no-unused-vars': 'warn',
-            'unused-imports/no-unused-imports': 'warn',
+            'unused-imports/no-unused-imports': 'off',
 
             'react/jsx-no-undef': 'warn',
             'react/jsx-no-target-blank': 'warn',
