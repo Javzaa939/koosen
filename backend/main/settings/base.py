@@ -195,7 +195,7 @@ CORS_ORIGIN_WHITELIST = []
 
 # Хүсэлт илгээх бүрт session хадгалах
 SESSION_SAVE_EVERY_REQUEST = True
-SESSION_COOKIE_AGE = 60 * 60 * 4
+SESSION_COOKIE_AGE = 60 * 60 * 1
 
 
 # Хугацаа
