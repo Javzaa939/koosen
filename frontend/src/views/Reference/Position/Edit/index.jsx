@@ -1,23 +1,12 @@
 import {
-    Row,
-    Col,
-    Modal,
 	Form,
-	Input,
-	Label,
-	Button,
-    ModalBody,
-	ModalHeader,
-    Spinner,
-    FormFeedback,
 } from "reactstrap";
 import { t } from 'i18next';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
-import { useForm, Controller } from "react-hook-form";
-import React, { Fragment, useEffect} from 'react'
+import { useForm } from "react-hook-form";
+import { useEffect} from 'react'
 import { convertDefaultValue } from "@utils"
-import { X } from "react-feather";
 
 
 const UpdateModal = ({ open, editId, handleEdit, refreshDatas, school_id }) => {

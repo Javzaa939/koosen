@@ -1,29 +1,15 @@
 // ** React Imports
-import { Fragment, useState, useEffect, useContext, useMemo } from 'react'
+import { useState, useEffect, useContext, useMemo } from 'react'
 
 // ** Third Party Components
 import classnames from 'classnames'
-import {
-    Row,
-    Col,
-    Input,
-    Button,
-    Label,
-    Spinner,
-    Collapse,
-    Card,
-    CardHeader,
-    CardTitle,
-    UncontrolledTooltip,
-} from 'reactstrap'
 
-import Select from "react-select"
+
+
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 
-import Calendar from './Calendar'
-import KuratsCalendar from './KuratsCalendar'
 
 import ActiveYearContext from '@context/ActiveYearContext'
 import SchoolContext from '@context/SchoolContext'
@@ -37,13 +23,9 @@ import  useUpdateEffect  from '@hooks/useUpdateEffect'
 import { get_time_date, ReactSelectStyles, get_par_from_strTime, convert_kurats_times } from "@utils"
 
 // import Addmodal from '../Add'
-import AddModalV2 from '../AddTimeTableV2';
-import EditModal from '../Edit'
-import GroupModal from './GroupModal';
 
 // ** Styles
 import '@styles/react/apps/app-calendar.scss'
-import { Eye, FileText, Printer, AlertCircle } from 'react-feather';
 
 import { excelDownLoad } from './excelDownload';
 import { useNavigate } from 'react-router-dom';

@@ -1,25 +1,12 @@
-import React, { Fragment, useState, useEffect, useContext } from "react";
-import { Link } from "react-router-dom";
-import {
-	Row,
-	Input,
-	Button,
-	Col,
-	Card,
-	CardBody,
-	CardHeader,
-	Label,
-	CardFooter,
-} from "reactstrap";
-import { Search, File, Camera, Film, Headphones } from "react-feather";
-import ReactPaginate from "react-paginate";
+import { useState, useEffect, useContext } from "react";
+
+
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
-import Select from "react-select";
 import classnames from "classnames";
 import { useTranslation } from "react-i18next";
 import { ReactSelectStyles } from "@utils";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import SchoolContext from "@context/SchoolContext";
 
 function LessonMaterial() {

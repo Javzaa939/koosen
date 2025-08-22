@@ -1,8 +1,6 @@
 import { t } from 'i18next'
 
-import { Edit, Book } from 'react-feather'
 
-import { Badge, UncontrolledTooltip } from 'reactstrap'
 
 export function getColumns (currentPage, rowsPerPage, total_count, handleEditModal, handleRequestDetail) {
 

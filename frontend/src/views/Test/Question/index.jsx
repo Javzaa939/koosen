@@ -1,21 +1,9 @@
-import React, { Fragment, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
-import { Plus, Search} from "react-feather";
 
-import {
-	Row,
-	CardHeader,
-	Card,
-	CardTitle,
-	Button,
-	Col,
-	Input,
-	Label,
-	Spinner,
-} from "reactstrap";
 
-import DataTable from "react-data-table-component";
-import Select from 'react-select'
+
+
 import { ReactSelectStyles } from "@utils"
 
 import useApi from "@hooks/useApi";
@@ -28,7 +16,6 @@ import { getPagination } from "@utils";
 
 import { getColumns } from "./helpers";
 
-import AddQuestion from "./AddQuestion";
 
 const Questions = () => {
 

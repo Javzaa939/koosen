@@ -12,21 +12,14 @@ import {
 
 // ** Third Party Components
 import classnames from "classnames"
-import { ArrowUp } from "react-feather"
 
 // ** Reactstrap Imports
-import { Navbar, Button } from "reactstrap"
 
 // ** Configs
 import themeConfig from "@configs/themeConfig"
 
 // ** Custom Components
 
-import Customizer from "@components/customizer"
-import ScrollToTop from "@components/scrolltop"
-import FooterComponent from "./components/footer"
-import NavbarComponent from "./components/navbar"
-import SidebarComponent from "./components/menu/vertical-menu"
 
 // ** Custom Hooks
 import { useRTL } from "@hooks/useRTL"

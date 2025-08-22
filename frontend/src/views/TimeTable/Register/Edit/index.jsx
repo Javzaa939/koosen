@@ -1,9 +1,7 @@
 // ** React imports
-import React, { Fragment, useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
-import { X } from "react-feather";
 
-import Select from 'react-select'
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
@@ -12,23 +10,10 @@ import AuthContext from "@context/AuthContext"
 
 import classnames from "classnames";
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import {
-    Row,
-    Col,
 	Form,
-	Modal,
-	Label,
-    Input,
-	Button,
-    Spinner,
-	ModalBody,
-	ModalHeader,
-	FormFeedback,
-    Card,
-    CardHeader,
-    CardBody,
 } from "reactstrap";
 
 import {  get_day, get_time, ReactSelectStyles, get_lesson_type, get_potok, get_week, get_oddeven_type, convertDefaultValue} from "@utils"
@@ -37,7 +22,6 @@ import { useTranslation } from 'react-i18next';
 
 import useModal from "@hooks/useModal";
 
-import { RoomAdd } from '../Add/roomAdd';
 import useUpdateEffect from '@src/utility/hooks/useUpdateEffect';
 
 const EditModal = ({ open, handleModal, editDatas, refreshDatas }) => {

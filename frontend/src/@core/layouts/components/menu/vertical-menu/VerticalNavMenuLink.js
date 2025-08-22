@@ -5,7 +5,6 @@ import { NavLink } from "react-router-dom"
 import classnames from "classnames"
 
 // ** Reactstrap Imports
-import { Badge } from "reactstrap"
 
 import { useTranslation } from "react-i18next";
 

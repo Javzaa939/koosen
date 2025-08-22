@@ -1,7 +1,6 @@
 
-import React, { useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 
-import { Row } from 'reactstrap'
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next'
 

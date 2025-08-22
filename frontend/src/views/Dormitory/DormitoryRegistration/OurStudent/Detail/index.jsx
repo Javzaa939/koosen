@@ -1,7 +1,5 @@
 
-import React, { Fragment } from 'react'
 
-import { Row, Col, Modal, ModalBody, ModalHeader, Card, CardBody } from "reactstrap";
 
 import { useTranslation } from 'react-i18next';
 import './style.scss'

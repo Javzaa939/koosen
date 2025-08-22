@@ -1,32 +1,18 @@
-import { getPagination, convertDefaultValue, ReactSelectStyles, validate} from "@utils";
-import React, { Fragment, useState, useEffect, useRef } from "react";
+import { getPagination, convertDefaultValue, ReactSelectStyles} from "@utils";
+import { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useForm, Controller } from "react-hook-form";
-import { Plus, Search, AlertCircle } from "react-feather";
+import { useForm } from "react-hook-form";
 import { getQuestionColumns } from "./QuestionHelpers";
 import { getColumns } from "./helpers";
 
-import {
-	Row,
-	Col,
-	Form,
-	Input,
-	Label,
-	Button,
-	CardHeader,
-	Card,
-	CardTitle,
-    Badge
-} from "reactstrap";
 
-import Select from "react-select";
+
+
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 import classnames from "classnames";
-import DataTable from "react-data-table-component";
 
-import AddQuestion from "./AddQuestion";
 
 
 function AddStudent(){

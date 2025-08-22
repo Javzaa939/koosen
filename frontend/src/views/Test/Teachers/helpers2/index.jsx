@@ -1,6 +1,4 @@
 import { t } from 'i18next';
-import { Badge, UncontrolledTooltip } from 'reactstrap'
-import { FileText} from 'react-feather'
 
 // Хүснэгтийн баганууд
 export function getColumnsLesson(currentPage, rowsPerPage, total_count, handleDetail) {

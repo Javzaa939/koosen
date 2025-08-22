@@ -1,5 +1,3 @@
-import { useSkin } from '@src/utility/hooks/useSkin'
-import React from 'react'
 
 /**
  * Хүснэгтэд зориулсан

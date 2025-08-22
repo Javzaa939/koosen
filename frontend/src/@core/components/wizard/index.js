@@ -1,11 +1,10 @@
 // ** React Imports
-import { useEffect, useState, Fragment, forwardRef } from "react"
+import { useEffect, useState, forwardRef } from "react"
 
 // ** Third Party Components
 import Stepper from "bs-stepper"
 import classnames from "classnames"
 import { PropTypes } from "prop-types"
-import { ChevronRight } from "react-feather"
 
 // ** Styles
 import "bs-stepper/dist/css/bs-stepper.min.css"

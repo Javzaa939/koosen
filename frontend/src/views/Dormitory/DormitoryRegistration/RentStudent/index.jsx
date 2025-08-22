@@ -1,8 +1,6 @@
-import React, {useState, useEffect, Fragment } from 'react'
+import {useState, useEffect } from 'react'
 
-import {Col, Row, Card, Input, Label, Button, Spinner, CardTitle, CardHeader} from 'reactstrap'
 
-import { Search, ChevronDown } from 'react-feather';
 
 import useApi from '@hooks/useApi';
 
@@ -10,17 +8,13 @@ import useLoader from '@hooks/useLoader';
 
 import { useTranslation } from 'react-i18next';
 
-import DataTable from 'react-data-table-component'
 
 import { getPagination } from '@utils'
 
 import { getColumns } from './helpers';
 
-import CModal from './Modal';
 
-import Detail from './Detail'
 
-import AddModal from './Add';
 
 const RentStudent = ({ is_teacher }) => {
 

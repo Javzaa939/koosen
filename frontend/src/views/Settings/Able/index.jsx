@@ -1,8 +1,6 @@
 
-import { Fragment, useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Card, Button, CardTitle, CardHeader, Spinner } from 'reactstrap'
-import { RefreshCcw } from 'react-feather'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';

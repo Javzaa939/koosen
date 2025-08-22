@@ -7,14 +7,12 @@ import classnames from "classnames"
 import * as Icon from "react-feather"
 
 // ** Reactstrap Imports
-import { NavItem, NavLink } from "reactstrap"
 
 // ** Store & Actions
 import { useDispatch } from "react-redux"
 import { handleSearchQuery } from "@store/navbar"
 
 // ** Custom Components
-import Autocomplete from "@components/autocomplete"
 
 const NavbarSearch = () => {
   // ** Store Vars

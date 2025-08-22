@@ -1,17 +1,10 @@
 // ** React Imports
-import { Fragment, useState, useEffect, useContext, memo } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
-import {
-    Col,
-    Card,
-    Input,
-    Button,
-    Spinner
-} from 'reactstrap'
 
-import { ChevronDown, Search, Plus } from 'react-feather'
+
+
 import { useTranslation } from 'react-i18next'
-import DataTable from 'react-data-table-component'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
@@ -21,7 +14,6 @@ import AuthContext from '@context/AuthContext'
 import { getPagination } from '@utils'
 
 import { getColumns } from './helpers'
-import { Addmodal } from './Add'
 
 const List = ({ type }) => {
 

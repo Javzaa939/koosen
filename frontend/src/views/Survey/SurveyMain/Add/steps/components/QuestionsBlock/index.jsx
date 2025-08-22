@@ -1,11 +1,6 @@
-import {
-	Button,
-	Col,
-	Input,
-	Label
-} from "reactstrap";
 
-import Questions from "../../Questions";
+
+
 import { useEffect, useState } from "react";
 
 

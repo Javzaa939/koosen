@@ -1,23 +1,12 @@
 import {
-    Row,
-    Col,
-    Modal,
 	Form,
-	Input,
-	Label,
-	Button,
-    ModalBody,
-	ModalHeader,
-    Spinner,
 } from "reactstrap";
 import { t } from 'i18next';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
-import { validateSchema } from './validateSchema'
-import { useForm, Controller } from "react-hook-form";
-import React, { Fragment, useEffect, useState} from 'react'
-import { convertDefaultValue , validate } from "@utils"
-import { X } from "react-feather";
+import { useForm } from "react-hook-form";
+import { useEffect} from 'react'
+import { convertDefaultValue  } from "@utils"
 
 const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
     const CloseBtn = (

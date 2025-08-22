@@ -1,16 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-import {
-    Card,
-    TabContent,
-    Nav,
-    NavItem,
-    NavLink,
-    CardBody
-} from 'reactstrap'
 
-import News from "./News";
-import NewsDetail from "./NewsDetail";
+
+
 
 function RoleRoutes() {
 

@@ -1,26 +1,15 @@
-import { useState, Fragment, useContext, useEffect } from 'react';
+import { useState, useContext } from 'react';
 import { AuthContext } from "@context/AuthContext";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { convertDefaultValue, ReactSelectStyles } from "@utils";
 import { t } from 'i18next';
 
 import {
-	Modal,
-	ModalHeader,
-	ModalBody,
-    Row,
     Form,
-    Col,
-    Label,
-    Input,
-    Button,
-    FormFeedback,
 } from "reactstrap";
 
-import Select from 'react-select';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
-import Flatpickr from 'react-flatpickr';
 import '@styles/react/libs/flatpickr/flatpickr.scss';
 
 const Editmodal = ({ open, handleModal, refreshDatas, select_datas }) => {

@@ -1,10 +1,6 @@
-import { Card, CardHeader, CardTitle, Button } from 'reactstrap'
 import { useTranslation } from 'react-i18next';
 import { printTableBody } from "@utils"
-import { Printer } from 'react-feather';
 
-import TableComponent from './TableComponent';
-import React from 'react';
 
 
 const ExamSchedule = () => {

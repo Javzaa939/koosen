@@ -1,6 +1,4 @@
 import useModal from '@src/utility/hooks/useModal';
-import { Edit, Trash2 } from 'react-feather';
-import { Badge, Button, UncontrolledTooltip } from 'reactstrap';
 import '../../style.scss';
 
 export default function QuezChoicesBlock({

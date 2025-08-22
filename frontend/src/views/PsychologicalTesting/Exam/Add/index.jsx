@@ -1,27 +1,15 @@
-import React, {Fragment, useState, useContext, useEffect} from 'react'
+import { useState, useContext, useEffect} from 'react'
 import {validate, formatDate, convertDefaultValue} from "@utils"
-import {useForm, Controller} from "react-hook-form";
-import {X} from "react-feather";
+import {useForm} from "react-hook-form";
 import {t} from 'i18next';
 
 import { useQuill } from 'react-quilljs';
 import {
-    Row,
-    Col,
     Form,
-    Modal,
-    Label,
-    Input,
-    Button,
-    Spinner,
-    ModalBody,
-    ModalHeader,
-    FormFeedback,
 } from "reactstrap";
 
 import AuthContext from '@context/AuthContext'
 import useLoader from "@hooks/useLoader";
-import Flatpickr from 'react-flatpickr'
 import useApi from "@hooks/useApi";
 import moment from 'moment';
 import * as Yup from 'yup';

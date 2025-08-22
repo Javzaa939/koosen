@@ -1,8 +1,6 @@
 // ** Third Party Components
-import ReactCountryFlag from 'react-country-flag'
 
 // ** Reactstrap Imports
-import { UncontrolledDropdown, DropdownMenu, DropdownItem, DropdownToggle } from 'reactstrap'
 
 import { useTranslation } from "react-i18next";
 

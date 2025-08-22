@@ -1,12 +1,10 @@
 // ** React imports
-import React, { Fragment, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
-import { Card, Row, Col, Label, CardBody } from 'reactstrap';
 
 import useApi from "@hooks/useApi"
 import useLoader from '@hooks/useLoader';
 
-import Select from 'react-select'
 
 import { ReactSelectStyles } from '@utils'
 
@@ -14,8 +12,6 @@ import classnames from 'classnames'
 
 import { useTranslation } from 'react-i18next'
 
-import Calendar from './Calendar';
-import AddEventSidebar from './Add';
 import moment from 'moment';
 
 const Sports = () => {

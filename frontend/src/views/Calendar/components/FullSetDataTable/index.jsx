@@ -1,10 +1,7 @@
 import { getPagination } from "@src/utility/Utils";
-import DataTable from "react-data-table-component";
 import { useTranslation } from "react-i18next";
 import { ExpandedComponent, getColumns, handleSort, onSelectedRowsChange, searchComponent } from "./helpers";
 import { handlePagination } from "./helpers";
-import { ChevronDown } from "react-feather";
-import { Spinner } from "reactstrap";
 
 export default function FullSetDataTable({
 	currentPage,

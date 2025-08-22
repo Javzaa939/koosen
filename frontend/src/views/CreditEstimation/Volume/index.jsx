@@ -1,23 +1,11 @@
 // ** React Imports
-import { Fragment, useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
-import {
-    Row,
-    Col,
-    Card,
-    Input,
-    Label,
-    Button,
-    CardTitle,
-    CardHeader,
-    Spinner,
-} from 'reactstrap'
 
-import { ChevronDown, Plus, Search, Circle, Printer } from 'react-feather'
+
+
 import { useTranslation } from 'react-i18next'
-import DataTable from 'react-data-table-component'
 import { useNavigate } from 'react-router-dom'
-import Select from 'react-select'
 
 import classnames from 'classnames'
 
@@ -33,8 +21,6 @@ import ActiveYearContext from '@context/ActiveYearContext'
 import { getPagination, ReactSelectStyles, generateLessonYear } from '@utils'
 
 import { getColumns, getDetailColumns } from './helpers'
-import Addmodal from './Add'
-import EditModal from './Edit'
 
 export function ExpandedComponent({ data, season_id, refreshDatas })
 {

@@ -1,22 +1,19 @@
 // ** React Imports
-import { Fragment, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
-import { ChevronLeft, ChevronRight, X } from 'react-feather'
 
-import { Label, Input, Row, Col, Button, FormFeedback, Form  } from 'reactstrap'
+import { Form  } from 'reactstrap'
 
 import { useTranslation } from 'react-i18next'
 
-import { Controller, useForm } from "react-hook-form"
+import { useForm } from "react-hook-form"
 
-import Select from 'react-select'
 
 import classnames from "classnames"
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 
-import Flatpickr from 'react-flatpickr'
 
 import * as Yup from 'yup'
 

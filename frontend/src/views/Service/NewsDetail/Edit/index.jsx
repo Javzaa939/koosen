@@ -1,12 +1,11 @@
-import React, { Fragment, useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 
-import { Row, ModalBody, ModalHeader, Col, FormFeedback, Input, Form, Modal, Label, Button} from 'reactstrap'
+import { Form} from 'reactstrap'
 
 import { useQuill } from 'react-quilljs';
 
-import Select from 'react-select'
 
 import 'quill/dist/quill.snow.css'
 
@@ -20,9 +19,8 @@ import AuthContext from '@context/AuthContext'
 
 import SchoolContext from "@context/SchoolContext"
 
-import { validate, convertDefaultValue, ReactSelectStyles, get_news_people_type, student_course_level  } from "@utils"
+import { validate, convertDefaultValue, get_news_people_type, student_course_level  } from "@utils"
 
-import classnames from "classnames";
 
 import { validateSchema } from "../validateSchema";
 

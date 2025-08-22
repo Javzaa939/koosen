@@ -1,7 +1,4 @@
-import React, {useState, useEffect} from "react";
 import { t } from 'i18next'
-import { Badge, UncontrolledTooltip } from 'reactstrap';
-import { Book ,Eye} from 'react-feather'
 
 const AVG_SCORE = 2
 const MAX_SCORE = 1

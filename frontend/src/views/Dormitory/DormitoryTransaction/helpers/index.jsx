@@ -1,6 +1,5 @@
 import { t } from 'i18next'
 
-import { Badge } from 'reactstrap'
 
 import { formatDate } from '@utils'
 

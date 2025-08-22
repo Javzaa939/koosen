@@ -1,15 +1,6 @@
-import React, {Fragment} from 'react'
-import {
-	Row,
-	Col,
-	Button,
-	Modal,
-    Table,
-	ModalHeader,
-	ModalBody,
-} from 'reactstrap'
 
-import { X, AlertCircle, Download } from 'react-feather'
+
+
 import { downloadExcel } from '@utils'
 
 import useModal from "@hooks/useModal"

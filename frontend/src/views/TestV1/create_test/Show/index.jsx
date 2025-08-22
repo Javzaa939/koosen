@@ -1,14 +1,8 @@
-import React, { Fragment } from 'react'
 
-import {
-	Modal,
-	ModalHeader,
-	ModalBody,
-} from "reactstrap";
 
-import Verification from '../Add/components/Verification';
 
-import { X } from 'react-feather';
+
+
 
 export default function Show({ open, handleModal, datas }) {
 

@@ -1,10 +1,7 @@
-import React, { memo, useState, useEffect } from 'react'
+import { memo, useState, useEffect } from 'react'
 
-import {
-    Col,
-    Input,
-    Label,
-} from 'reactstrap'
+
+
 
 import classnames from 'classnames'
 

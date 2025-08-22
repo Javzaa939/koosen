@@ -1,8 +1,5 @@
-import React from 'react';
 
-import { Modal, ModalBody, ModalHeader, Table, Row, Popover, PopoverHeader, PopoverBody, Button, Tooltip } from 'reactstrap';
 
-import { X } from 'react-feather'
 
 import { useTranslation } from 'react-i18next';
 

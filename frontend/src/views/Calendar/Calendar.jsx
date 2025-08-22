@@ -2,7 +2,6 @@
 import { useRef, useContext } from 'react'
 
 // ** Full Calendar & it's Plugins
-import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
@@ -11,8 +10,6 @@ import AuthContext from "@context/AuthContext"
 
 import { useTranslation } from 'react-i18next'
 
-import { Menu } from 'react-feather'
-import { Card, CardBody } from 'reactstrap'
 
 import useWindowDimensions from '@lms_components/useWindowDimensions'
 

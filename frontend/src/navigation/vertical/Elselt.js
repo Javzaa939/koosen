@@ -1,5 +1,4 @@
 
-import { Circle } from 'react-feather'
 export default [
     {
         id: 'elselt',

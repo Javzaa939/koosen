@@ -450,6 +450,46 @@ class SchoolAPIView(
 
 
 @permission_classes([IsAuthenticated])
+<<<<<<< HEAD
+class TeacherExcel(
+    generics.GenericAPIView,
+    mixins.UpdateModelMixin,
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+):
+
+    queryset = Teachers.objects.all()
+    # serializer_class = DepartmentRegisterSerailizer
+
+    @transaction.atomic()
+    def post(self, request):
+        excel_file = request.data.get("file")
+
+        df = pd.read_excel(excel_file)
+        for _, row in df.iterrows():
+            data = row.to_dict()
+            gender = (
+                Teachers.GENDER_MALE if data["gender"] == 0 else Teachers.GENDER_FEMALE
+            )
+            # user_data = {
+            #     "email": email,
+            #     "password": make_password(data.get("register")[-8:]),
+            #     "username": email,
+            # }
+            # user = User.objects.create(**user_data)
+            salbar_code = data.pop("salbar_code")
+            salbar = Salbars.objects.get(code=salbar_code)
+            teacher_data = {**data, "gender": gender, "salbar": salbar,}
+            teacher = Teachers.objects.create(
+                **teacher_data,
+            )
+        return request.send_data([])
+
+
+@permission_classes([IsAuthenticated])
+=======
+>>>>>>> parent of b5e8dce3 (update)
 class DepartmentAPIView(
     generics.GenericAPIView,
     mixins.UpdateModelMixin,

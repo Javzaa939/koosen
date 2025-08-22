@@ -1,9 +1,7 @@
-import { Fragment, useEffect, useState, useContext } from "react"
+import { useEffect, useState, useContext } from "react"
 
 import { t } from 'i18next';
-import { X } from "react-feather";
 
-import Select from 'react-select'
 
 import classnames from "classnames";
 
@@ -13,13 +11,12 @@ import useLoader from "@hooks/useLoader";
 import ActiveYearContext from "@context/ActiveYearContext"
 import AuthContext from "@context/AuthContext"
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
-import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, ModalHeader, FormFeedback, InputGroupText, InputGroup, Spinner } from "reactstrap";
+import { Form } from "reactstrap";
 
 import { ReactSelectStyles, get_correspond_type, validate, convertDefaultValue } from "@utils"
 
-import AddTable from './Table'
 import { validateSchema } from './validationSchema'
 
 const Add = ({ open, handleModal, refreshDatas, datas, editId, isSolved }) => {

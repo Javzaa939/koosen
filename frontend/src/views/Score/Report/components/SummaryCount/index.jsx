@@ -1,5 +1,3 @@
-import StatsHorizontal from "@src/@core/components/widgets/stats/StatsHorizontal";
-import { UserCheck } from "react-feather";
 
 export default function SummaryCount({count, title}) {
 

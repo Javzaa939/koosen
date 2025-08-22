@@ -1,7 +1,6 @@
 // ** React imports
-import React, { Fragment, useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
-import Select from 'react-select'
 
 import useApi from "@hooks/useApi";
 
@@ -18,20 +17,10 @@ import { t } from 'i18next'
 
 import classnames from "classnames";
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import {
-    Row,
-    Col,
-	Form,
-	Modal,
-	Input,
-	Label,
-	Button,
-	ModalBody,
-	ModalHeader,
-	FormFeedback,
-    Spinner
+	Form
 } from "reactstrap";
 
 import { validate, convertDefaultValue } from "@utils"
@@ -383,7 +372,7 @@ const EditModal = ({ open, handleModal, graduate_id, refreshDatas }) => {
                                 />
                             {errors.diplom_topic_uig && <FormFeedback className='d-block'>{t(errors.diplom_topic_uig.message)}</FormFeedback>}
                             <small>Цэгийг хэвээр нь ашиглах бол <code style={{ fontSize: '20px' }}>․</code></small><br />
-                            <small>Англи үг <a href="https://lingojam.com/Sans-SerifConverter" target='_blank'><code style={{ fontSize: '10px' }}>https://lingojam.com/Sans-SerifConverter</code></a></small>
+                            <small>Англи үг <a href="https://lingojam.com/Sans-SerifConverter" target='_blank' rel="noreferrer"><code style={{ fontSize: '10px' }}>https://lingojam.com/Sans-SerifConverter</code></a></small>
                         </Col>
                         <Col lg={6} md={12}>
                             <Label className="form-label" for="leader">

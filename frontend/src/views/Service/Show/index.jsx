@@ -1,18 +1,15 @@
 
-import React, { Fragment, useState, useEffect } from "react"
+import { useState, useEffect } from "react"
 
 import { useParams, useNavigate } from 'react-router-dom'
-import { Clock } from "react-feather"
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
-import { ChevronsLeft } from 'react-feather'
 import { useTranslation } from "react-i18next";
 
 
-import {
-    Card
-} from 'reactstrap'
+
+
 
 function Show() {
 

@@ -1,12 +1,7 @@
 
-import { Fragment, useState, useEffect, useContext} from 'react';
+import { useState, useEffect, useContext} from 'react';
 
-import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, ListGroupItem, Spinner } from 'reactstrap';
-import { ChevronDown, Search, Plus, Menu, Edit, Trash2 } from 'react-feather';
 import { useTranslation } from 'react-i18next';
-import { ReactSortable } from 'react-sortablejs'
-import Select from 'react-select'
-import DataTable from 'react-data-table-component'
 import { useNavigate } from 'react-router-dom'
 
 import { getPagination, ReactSelectStyles } from '@utils'
@@ -18,7 +13,6 @@ import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import useModal from '@hooks/useModal';
 
-import SignatureModal from '@views/Student/Attachment/Signature/index.jsx'
 import { getColumns } from '@views/Student/Attachment/helpers/index.jsx'
 
 import '@styles/react/libs/drag-and-drop/drag-and-drop.scss'

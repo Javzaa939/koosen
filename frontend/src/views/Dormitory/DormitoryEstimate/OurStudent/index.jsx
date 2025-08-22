@@ -1,13 +1,10 @@
-import React, {useState, useEffect, Fragment } from 'react'
+import {useState, useEffect } from 'react'
 
-import {Col, Row, Card, Input, Label, Button, Spinner} from 'reactstrap'
 
-import { Search } from 'react-feather';
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 
-import Select from 'react-select'
 
 import classnames from 'classnames';
 
@@ -15,7 +12,6 @@ import { useTranslation } from 'react-i18next';
 
 import { ReactSelectStyles } from '@utils'
 
-import CTable from './helpers/Table';
 
 const OurStudent = () => {
 

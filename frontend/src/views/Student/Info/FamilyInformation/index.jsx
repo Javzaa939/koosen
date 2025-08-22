@@ -1,7 +1,5 @@
 
-import React from "react"
 
-import { Card, UncontrolledCollapse, Table } from "reactstrap"
 import { useTranslation } from 'react-i18next'
 
 export default function FamilyInformation({ datas })

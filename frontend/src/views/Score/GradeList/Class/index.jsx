@@ -1,23 +1,9 @@
-import React, { Fragment, useState, useEffect, useContext } from "react";
-import Select from 'react-select'
-import { useForm, Controller } from "react-hook-form";
-import {ChevronDown, Search} from "react-feather"
+import { useState, useEffect, useContext } from "react";
+import { useForm } from "react-hook-form";
 
 import {
-    Row,
-    Col,
-    Card,
-    Input,
-	Label,
-    Button,
-    Spinner,
     Form,
-    Modal,
-    ModalHeader,
-    ModalBody,
-    FormFeedback,
 } from "reactstrap";
-import DataTable from 'react-data-table-component'
 import { useTranslation } from 'react-i18next'
 
 import classnames from "classnames";

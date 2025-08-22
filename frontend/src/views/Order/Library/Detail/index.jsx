@@ -1,11 +1,8 @@
 
-import React, { Fragment } from 'react'
 
-import { Row, Col, Modal, ModalBody, ModalHeader, Card, CardBody } from "reactstrap";
 
 import { useTranslation } from 'react-i18next';
 
-import { request_flag_color } from "@utils"
 
 export default function Detail({ isOpen, handleModal, datas })
 {

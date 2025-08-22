@@ -1,4 +1,14 @@
 // ** React Imports
+<<<<<<< HEAD
+import { useState, useEffect, useContext } from 'react';
+
+import { useForm } from 'react-hook-form';
+
+
+import { useTranslation } from 'react-i18next';
+
+
+=======
 import { Fragment, useState, useEffect, useContext } from 'react'
 
 import { Controller, useForm } from 'react-hook-form'
@@ -11,6 +21,7 @@ import { useTranslation } from 'react-i18next'
 import Select from 'react-select'
 
 import DataTable from 'react-data-table-component'
+>>>>>>> parent of b5e8dce3 (update)
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
@@ -21,7 +32,10 @@ import AuthContext from '@context/AuthContext'
 import SchoolContext from '@context/SchoolContext'
 
 import { getColumns } from './helpers';
+<<<<<<< HEAD
+=======
 import AddModal from './Add'
+>>>>>>> parent of b5e8dce3 (update)
 
 const Teacher = () => {
 

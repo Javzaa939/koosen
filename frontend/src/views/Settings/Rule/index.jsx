@@ -1,22 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react'
-import {
-    Card,
-    Form,
-    Label,
-    Input,
-    Button,
-    CardBody,
-    CardHeader,
-    CardTitle,
-    FormFeedback,
-    Col,
-    Row,
-    Spinner,
-    Badge,
-} from 'reactstrap'
+import { useState, useEffect } from 'react'
 
-import { Edit, Download, Trash2 } from 'react-feather'
-import { useForm, Controller } from "react-hook-form";
+
+
+import { useForm } from "react-hook-form";
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
@@ -25,9 +11,7 @@ import * as Yup from 'yup';
 import { validate } from '@utils'
 import classNames from 'classnames';
 import { ReactSelectStyles } from '@src/utility/Utils';
-import Select from 'react-select'
 import { useTranslation } from 'react-i18next';
-import DataTable from 'react-data-table-component';
 import moment from 'moment';
 import useModal from '@src/utility/hooks/useModal';
 import './style.css'

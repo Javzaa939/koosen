@@ -1,6 +1,4 @@
-import { Swiper, SwiperSlide } from 'swiper/react/swiper-react';
 import { useRTL } from '@hooks/useRTL';
-import { Button } from 'reactstrap';
 
 import SwiperCore, {
     Grid,

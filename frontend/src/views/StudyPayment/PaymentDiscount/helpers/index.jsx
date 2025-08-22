@@ -1,10 +1,7 @@
 import { useContext } from 'react'
-import { X,Edit } from "react-feather";
 import useModal from '@hooks/useModal'
 import SchoolContext from "@context/SchoolContext"
 
-import css from '@mstyle/style.module.css'
-import {  Badge } from 'reactstrap'
 
 import { t } from 'i18next'
 

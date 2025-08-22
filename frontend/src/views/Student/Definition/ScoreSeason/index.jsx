@@ -1,7 +1,6 @@
-import React, { useEffect, useContext } from 'react'
+import { useContext } from 'react'
 import { useLocation } from 'react-router-dom';
 
-import useApi from "@hooks/useApi"
 import useLoader from '@hooks/useLoader';
 import SchoolContext from '@context/SchoolContext'
 

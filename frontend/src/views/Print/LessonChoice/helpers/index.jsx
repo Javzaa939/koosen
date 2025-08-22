@@ -1,8 +1,6 @@
-import { Printer } from "react-feather";
 
 import useModal from '@hooks/useModal'
 
-import css from '@mstyle/style.module.css'
 
 import { t } from 'i18next'
 

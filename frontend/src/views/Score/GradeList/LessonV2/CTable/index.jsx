@@ -1,12 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
-import ReactPaginate from "react-paginate";
 
-import { Table } from 'reactstrap'
-import Header from './headers'
-import CBody from './body'
 
-import { Previous, Next } from '@utils'
 
 /**
  * @param {array} headers Хүснэгтийн баганын нэр array

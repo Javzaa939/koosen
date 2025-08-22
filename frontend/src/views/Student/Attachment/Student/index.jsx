@@ -1,19 +1,14 @@
 
-import React, { useEffect, Fragment, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
-import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, UncontrolledTooltip, CardBody } from 'reactstrap';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import DataTable from 'react-data-table-component'
-import { Edit2, X, AlertCircle, ChevronsLeft } from 'react-feather';
-import Flatpickr from 'react-flatpickr'
 import { Mongolian } from "flatpickr/dist/l10n/mn.js"
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import useModal from '@src/utility/hooks/useModal';
 import { getColumns } from '@views/Student/Attachment/Student/helpers/index.jsx'
-import ConfigModal from './ConfigModal';
 // ** Styles Imports
 import '@styles/react/libs/flatpickr/flatpickr.scss'
 import './style.css'

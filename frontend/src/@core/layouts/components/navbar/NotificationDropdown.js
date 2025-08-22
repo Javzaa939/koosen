@@ -1,24 +1,13 @@
 // ** React Imports
-import { Fragment } from "react"
 
 // ** Custom Components
-import Avatar from "@components/avatar"
 
 // ** Third Party Components
 import classnames from "classnames"
-import PerfectScrollbar from "react-perfect-scrollbar"
-import { Bell, X, Check, AlertTriangle } from "react-feather"
 
 // ** Reactstrap Imports
-import {
-  Button,
-  Badge,
-  Input,
-  DropdownMenu,
-  DropdownItem,
-  DropdownToggle,
-  UncontrolledDropdown
-} from "reactstrap"
+
+
 
 const NotificationDropdown = () => {
   // ** Notification Array
@@ -97,7 +86,7 @@ const NotificationDropdown = () => {
   ]
 
   // ** Function to render Notifications
-  /*eslint-disable */
+   
   const renderNotificationItems = () => {
     return (
       <PerfectScrollbar
@@ -164,7 +153,7 @@ const NotificationDropdown = () => {
       </PerfectScrollbar>
     );
   };
-  /*eslint-enable */
+   
 
   return (
     <UncontrolledDropdown

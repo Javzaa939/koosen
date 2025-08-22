@@ -2,9 +2,7 @@ import useModal from '@hooks/useModal'
 
 import { t } from 'i18next'
 
-import { Button, Badge, UncontrolledTooltip } from 'reactstrap'
 
-import { Book, CheckCircle } from 'react-feather'
 
 export function getColumns (currentPage, rowsPerPage, total_count, handleRequestSolved, handleViewModal) {
 

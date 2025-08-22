@@ -1,17 +1,7 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import {
-    Button,
-    Col,
-    Input,
-    Label,
-    Form,
-    Modal,
-    ModalBody,
-    ModalHeader,
-    Row,
-    FormFeedback
+    Form
 } from 'reactstrap'
-import Flatpickr from 'react-flatpickr'
 import '@styles/react/libs/flatpickr/flatpickr.scss'
 import { validate } from "@utils"
 import { useForm } from 'react-hook-form';
@@ -22,7 +12,6 @@ import moment from 'moment';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 
-import Help from '@src/components/Help'
 import { Mongolian } from "flatpickr/dist/l10n/mn.js"
 
 import './style.scss'

@@ -1,13 +1,12 @@
-import React, { Fragment, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 
-import { Row, ModalBody, ModalHeader, Col, FormFeedback, Input, Form, Modal, Label, Button, Spinner } from 'reactstrap'
+import { Form } from 'reactstrap'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 
-import Select from 'react-select'
 
 import classnames from "classnames";
 

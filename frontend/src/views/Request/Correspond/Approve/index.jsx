@@ -1,23 +1,13 @@
-import React, { useEffect, useState, useContext, useMemo } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 
-import {
-    Row,
-    Col,
-    Label,
-    Input,
-    Modal,
-    Button,
-    ModalBody,
-    ModalHeader
-} from 'reactstrap'
 
-import { X } from 'react-feather'
+
+
 import { useTranslation } from 'react-i18next'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 
-import Select from 'react-select'
 
 import classnames from "classnames";
 

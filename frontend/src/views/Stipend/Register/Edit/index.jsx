@@ -1,7 +1,6 @@
 // ** React imports
-import React, { Fragment, useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
-import Select from 'react-select'
 
 import useApi from "@hooks/useApi";
 
@@ -11,20 +10,10 @@ import { ReactSelectStyles, stipent_is_own_or_other } from "@utils"
 
 import classnames from "classnames";
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import {
-    Row,
-    Col,
-    Form,
-    Modal,
-    Input,
-    Label,
-    Button,
-    ModalBody,
-    ModalHeader,
-    FormFeedback,
-    Spinner
+    Form
 } from "reactstrap";
 
 import { t } from 'i18next';
@@ -41,7 +30,6 @@ import ActiveYearContext from "@context/ActiveYearContext"
 import 'react-quill/dist/quill.snow.css'; // Import the Quill styles
 import { useQuill } from 'react-quilljs';
 
-import datas from "../Detail"
 
 
 const EditModal = ({ open, handleEdit, edit_id, refreshDatas }) => {

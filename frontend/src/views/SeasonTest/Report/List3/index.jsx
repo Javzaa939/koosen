@@ -1,7 +1,6 @@
 // ** React Imports
 import { memo, useEffect, useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import Select from 'react-select'
 
 import useApi from '@hooks/useApi'
 import useLoader from '@hooks/useLoader'
@@ -9,15 +8,9 @@ import useLoader from '@hooks/useLoader'
 import { getPagination } from "@utils";
 import { getColumns } from "./helpers";
 
-import { Col, Label, Row, Button, Input } from 'reactstrap'
 import { ReactSelectStyles } from '@src/utility/Utils'
-import { File, Search } from 'react-feather'
 
-import DataTable from "react-data-table-component";
 import classnames from "classnames";
-import ResultModal from '@src/views/Test/DetailShow/Modal'
-import Chart from './Chart'
-import ExamFilter from '../helpers/ExamFilter'
 
 const List3 = () => {
     const { t } = useTranslation()

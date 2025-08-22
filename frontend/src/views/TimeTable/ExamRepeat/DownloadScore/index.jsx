@@ -1,9 +1,7 @@
 // ** React imports
-import React, { Fragment } from 'react'
 
 import { useTranslation } from 'react-i18next';
 
-import { Modal, ModalBody, ModalHeader, Table } from "reactstrap";
 
 const DownloadScore = ({ open, handleModal, studentDatas }) => {
 

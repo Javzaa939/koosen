@@ -1,7 +1,4 @@
-import React, { useState, useEffect } from "react";
 import { t } from 'i18next'
-import { Badge, UncontrolledTooltip } from 'reactstrap';
-import { Eye } from 'react-feather'
 
 
 export function getColumns(currentPage, rowsPerPage, datas, handleResultModal) {

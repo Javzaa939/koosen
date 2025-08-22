@@ -1,16 +1,7 @@
-import {
-	Badge,
-	Button,
-	Card,
-	Col,
-	Input,
-	Label,
-	UncontrolledTooltip
-} from 'reactstrap';
 
-import DataTable from 'react-data-table-component';
+
+
 import moment from 'moment';
-import { CheckSquare, LogOut, Search, XSquare } from 'react-feather';
 
 export function handleSort(column, sort, setSort) {
 	if (sort === 'asc') {

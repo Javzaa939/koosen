@@ -1,9 +1,7 @@
 
-import React, { useEffect } from "react"
+import { useEffect } from "react"
 
-import { Row } from 'reactstrap'
 
-import useLoader from '@hooks/useLoader';
 
 // ** Styles
 

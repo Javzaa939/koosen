@@ -1,19 +1,13 @@
 // ** React Imports
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
-import { Button, Col, Input, Label, Row } from 'reactstrap'
-import DataTable from 'react-data-table-component'
-import { ChevronDown, Search } from 'react-feather'
 
 import useApi from '@hooks/useApi'
 import useLoader from '@hooks/useLoader'
 import { getPagination } from '@src/utility/Utils'
 
-import ExamFilter from '../helpers/ExamFilter'
 import './style.scss'
 import { getColumns } from './helpers'
-import GroupFilter from '../helpers/GroupFilter'
 
 export default function Report1() {
     // states

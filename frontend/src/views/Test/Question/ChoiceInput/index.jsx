@@ -1,16 +1,7 @@
-import React from 'react'
 
-import {
-    InputGroup,
-    Input,
-    InputGroupText,
-    Popover,
-    PopoverBody,
-    Badge,
-    FormFeedback
-} from 'reactstrap'
 
-import { Minus, X } from 'react-feather'
+
+
 import empty from "@src/assets/images/empty-image.jpg"
 
 import '../../style.css'

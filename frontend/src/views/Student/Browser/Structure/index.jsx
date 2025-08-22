@@ -1,12 +1,9 @@
 import { t } from "i18next"
 import { useState, useContext, useEffect } from "react"
-import DataTable from "react-data-table-component"
-import { Edit, Download, Trash2, Trash } from "react-feather"
-import { Card, CardHeader, CardTitle, Col, Row, Input, Label, Button, Spinner, CardBody, Form, Badge, FormFeedback } from "reactstrap"
 import { getPagination } from '@utils'
 import AuthContext from '@context/AuthContext'
 import useLoader from '@hooks/useLoader';
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { validate } from '@utils'
 import * as Yup from 'yup';
 import useModal from '@hooks/useModal';

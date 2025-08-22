@@ -1,23 +1,11 @@
-import { Fragment, useState, useEffect } from "react"
+import { useState, useEffect } from "react"
 
-import {
-    Col,
-    Row,
-    Card,
-    Input,
-    Label,
-    Button,
-    CardTitle,
-    CardHeader,
-    Spinner
-} from 'reactstrap'
 
-import Select from 'react-select'
+
+
 import classnames from 'classnames'
 import { useTranslation } from 'react-i18next'
-import DataTable from 'react-data-table-component'
-import { Controller, useForm } from "react-hook-form";
-import { ChevronDown ,Search } from "react-feather"
+import { useForm } from "react-hook-form";
 import { getPagination, generateYear, ReactSelectStyles } from '@utils'
 
 import useApi from '@hooks/useApi';

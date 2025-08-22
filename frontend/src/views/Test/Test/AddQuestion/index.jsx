@@ -1,21 +1,12 @@
-import { useState, Fragment, useEffect } from 'react';
-import { useForm, Controller } from "react-hook-form";
+import { useState, useEffect } from 'react';
+import { useForm } from "react-hook-form";
 import { convertDefaultValue, ReactSelectStyles } from "@utils";
 import { t } from 'i18next';
 
 import {
-    Modal,
-    ModalHeader,
-    ModalBody,
-    Row,
     Form,
-    Col,
-    Label,
-    Input,
-    Button,
 } from "reactstrap";
 
-import Select from 'react-select';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 

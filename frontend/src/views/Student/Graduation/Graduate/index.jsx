@@ -1,29 +1,16 @@
 // ** React imports
-import React, { Fragment, useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 
 import { t } from 'i18next'
 
-import { AlertTriangle } from "react-feather";
-import DataTable from 'react-data-table-component';
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { convertDefaultValue } from '@utils'
 
 import {
-    Row,
-    Col,
-	Form,
-	Modal,
-	Input,
-	Label,
-	Button,
-    Badge,
-	ModalBody,
-	ModalHeader,
-    Spinner,
-    UncontrolledTooltip
+	Form
 } from "reactstrap";
 
 function getColumns() {

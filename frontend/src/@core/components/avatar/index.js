@@ -6,7 +6,6 @@ import Proptypes from 'prop-types'
 import classnames from 'classnames'
 
 // ** Reactstrap Imports
-import { Badge } from 'reactstrap'
 
 const imageError = require("@src/assets/images/pages/error-image-generic.png").default
 

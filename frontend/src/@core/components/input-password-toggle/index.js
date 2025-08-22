@@ -1,13 +1,11 @@
 // ** React Imports
-import { Fragment, useState, forwardRef } from "react"
+import { useState, forwardRef } from "react"
 
 // ** Third Party Components
 import PropTypes from "prop-types"
 import classnames from "classnames"
-import { Eye, EyeOff } from "react-feather"
 
 // ** Reactstrap Imports
-import { InputGroup, Input, InputGroupText, Label } from "reactstrap"
 
 const InputPasswordToggle = forwardRef((props, ref) => {
   // ** Props
@@ -60,14 +58,14 @@ const InputPasswordToggle = forwardRef((props, ref) => {
           className={classnames({
             [inputClassName]: inputClassName
           })}
-          /*eslint-disable */
+           
           {...(label && htmlFor
             ? {
                 id: htmlFor,
               }
             : {})}
           {...rest}
-          /*eslint-enable */
+           
         />
         <InputGroupText
           className="cursor-pointer"

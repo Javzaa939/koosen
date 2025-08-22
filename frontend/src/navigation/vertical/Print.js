@@ -1,4 +1,3 @@
-import { PrinterIcon, Circle } from 'lucide-react';
 
 export default [
     {

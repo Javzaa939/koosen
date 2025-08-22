@@ -1,25 +1,17 @@
 import { useContext } from "react"
 import { useSkin } from "@hooks/useSkin"
 
-import { Link, useNavigate } from "react-router-dom"
-import InputPasswordToggle from "@components/input-password-toggle"
+import { useNavigate } from "react-router-dom"
 
-import {
-	Row,
-	Col,
-	Form,
-	Label,
-	Input,
-	Button,
-	FormFeedback
-} from "reactstrap"
+
+
 
 import "@styles/react/pages/page-authentication.scss"
 
 import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
 
-import { useForm, Controller } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 
 import SchoolContext from '@context/SchoolContext'
 

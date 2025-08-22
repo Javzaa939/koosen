@@ -1,7 +1,6 @@
 
-import React, { Fragment, useState } from 'react'
+import { useState } from 'react'
 
-import { Row, Col, Card, CardBody } from "reactstrap";
 
 import { useTranslation } from 'react-i18next';
 

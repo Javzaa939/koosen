@@ -1,14 +1,12 @@
-import React, { Fragment, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
-import { X } from 'react-feather'
 
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 
-import Select from 'react-select'
 
 import { convertDefaultValue, validate, ReactSelectStyles } from '@utils'
 
-import { Modal, Row, Col, Label, ModalHeader, ModalBody, Form, Input, Button, FormFeedback, Spinner} from 'reactstrap'
+import { Form} from 'reactstrap'
 
 import { useTranslation } from 'react-i18next'
 

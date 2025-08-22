@@ -1,7 +1,5 @@
 
-import React from "react"
 
-import { Table } from 'reactstrap'
 
 export function CTable({ data, title })
 {

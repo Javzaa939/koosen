@@ -1,19 +1,12 @@
-import React, { Fragment, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from 'react-router-dom';
 import { useTranslation } from "react-i18next";
 import { getColumns } from "./helpers";
 import { getPagination } from "@utils";
 
-import {
-    Row,
-    Card,
-    CardHeader,
-    CardBody,
-    CardTitle,
-    Col,
-} from "reactstrap";
 
-import DataTable from "react-data-table-component";
+
+
 import useLoader from "@hooks/useLoader";
 import useApi from "@hooks/useApi";
 

@@ -8,7 +8,7 @@ import UiLoader from "@components/ui-loader"
 import { ChevronDown, RotateCw, X } from "react-feather"
 
 // ** Reactstrap Imports
-import { Card, CardHeader, CardTitle, Collapse } from "reactstrap"
+import { Collapse } from "reactstrap"
 
 const CardActions = (props) => {
   // ** Props
@@ -104,13 +104,13 @@ const CardActions = (props) => {
 
   return (
     <BlockUiWrapper
-      /*eslint-disable */
+       
       {...(actions === "reload" || actions.includes("reload")
         ? {
             blocking: reload,
           }
         : {})}
-      /*eslint-enable */
+       
     >
       <Card
         className={classnames("card-action", {

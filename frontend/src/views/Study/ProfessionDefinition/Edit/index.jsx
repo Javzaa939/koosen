@@ -1,15 +1,10 @@
 
-import React, { useState, Fragment, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
 import { useNavigate } from 'react-router-dom'
 
-import { TabContent, Nav, NavItem, NavLink, Card } from 'reactstrap'
 
-import { ChevronsLeft } from 'react-feather'
 
-import Introduction from './Introduction'
-import MainInformation from './MainInformation'
-import LessonName from './LessonName'
 
 import { useTranslation } from 'react-i18next'
 

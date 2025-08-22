@@ -1,16 +1,12 @@
 // ** React Imports
-import { Fragment, useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 
-import { Card, CardHeader, CardTitle, Col, Input, Label, Row, Spinner } from 'reactstrap'
 
-import { ChevronDown } from 'react-feather'
 import { useTranslation } from 'react-i18next'
 
-import Select from 'react-select'
 
-import DataTable from 'react-data-table-component'
 
 import useApi from '@hooks/useApi'
 import useLoader from '@hooks/useLoader'
@@ -18,8 +14,6 @@ import useLoader from '@hooks/useLoader'
 import SchoolContext from '@context/SchoolContext'
 import { getPagination, ReactSelectStyles } from '@utils'
 
-import EQuestions from './EQuestions'
-import SeasonQuestions from './SeasonQuestion'
 import { getColumns } from './helpers'
 
 export default function Question() {

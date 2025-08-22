@@ -1,9 +1,7 @@
 
-import React, { useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 
-import { Row, Col } from 'reactstrap'
 import { useParams } from 'react-router-dom';
-import { CheckSquare, Square } from 'react-feather'
 
 import useApi from "@hooks/useApi"
 import useLoader from '@hooks/useLoader';

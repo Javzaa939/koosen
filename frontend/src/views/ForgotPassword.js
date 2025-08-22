@@ -1,34 +1,21 @@
 import { useContext, useEffect, useState } from 'react'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 
 // ** React Imports
-import { Link } from "react-router-dom"
 
 // ** Custom Hooks
 import { useSkin } from "@hooks/useSkin"
 
 // ** Icons Imports
-import { ChevronLeft } from "react-feather"
 
 // ** Reactstrap Imports
-import {
-  Row,
-  Col,
-  Form,
-  Label,
-  Input,
-  Button,
-  Spinner,
-  CardText,
-  CardTitle,
-  FormFeedback,
-} from "reactstrap"
+
+
 
 // ** Styles
 import "@styles/react/pages/page-authentication.scss"
 
 import * as yup from 'yup'
-import { yupResolver } from '@hookform/resolvers/yup'
 import { useNavigate } from "react-router-dom"
 
 // hooks imports

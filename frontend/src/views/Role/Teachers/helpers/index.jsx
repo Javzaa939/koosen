@@ -1,7 +1,5 @@
 import { t } from 'i18next'
 
-import { Badge, UncontrolledTooltip} from 'reactstrap'
-import { Book, Edit, X} from 'react-feather'
 import useModal from '@hooks/useModal'
 
 export function getColumns(currentPage, rowsPerPage, total_count, handleUpdateModal, handleDetailModal, handleDelete){

@@ -1,4 +1,4 @@
-import {utils, writeFile} from 'xlsx-js-style'
+import {utils} from 'xlsx-js-style'
 
 export function prognozSheet(datas){
     const mainData = datas.map((data, index) => {

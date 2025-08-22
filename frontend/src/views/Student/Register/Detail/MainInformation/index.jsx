@@ -1,9 +1,7 @@
 // ** React imports
-import React, { useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
-import { Edit, Save } from "react-feather";
 
-import Select from 'react-select'
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
@@ -11,27 +9,16 @@ import useLoader from "@hooks/useLoader";
 import AuthContext from "@context/AuthContext"
 import SchoolContext from "@context/SchoolContext"
 
-import { ReactSelectStyles, check_image_ext, mental_type, pay_type } from "@utils"
+import { ReactSelectStyles, mental_type, pay_type } from "@utils"
 
 import { useParams, useNavigate } from 'react-router-dom';
 
 import classnames from "classnames";
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import {
-    Row,
-    Col,
-	Form,
-	Input,
-	Label,
-	Button,
-    Spinner,
-	FormFeedback,
-    CardHeader,
-    Card,
-    CardTitle,
-    CardBody
+	Form
 } from "reactstrap";
 
 import { validate, convertDefaultValue, get_ys_undes, get_admission_before, get_gender_list } from "@utils"

@@ -1,27 +1,13 @@
-import React, { Fragment, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
-import {
-    Card,
-    CardHeader,
-    CardTitle,
-    Row,
-    Col,
-    Input,
-    Label,
-    Button,
-    ListGroupItem,
-    Spinner,
-} from 'reactstrap';
-import { ChevronDown, Plus, Search, Menu, Trash2, Edit } from 'react-feather';
+
+
 import { useTranslation } from 'react-i18next';
-import DataTable, { ExpanderComponentProps } from 'react-data-table-component';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 
-import { ReactSortable } from 'react-sortablejs';
 
 import { getPagination, ReactSelectStyles } from '@utils';
 
-import Select from 'react-select';
 import classnames from 'classnames';
 
 import useApi from '@hooks/useApi';
@@ -31,7 +17,6 @@ import useModal from '@hooks/useModal';
 // drag-and-drop.scss
 import '@styles/react/libs/drag-and-drop/drag-and-drop.scss';
 
-import FormModal from './form';
 import { getColumns, ExpandedComponent } from './helpers';
 
 export default function Specification() {

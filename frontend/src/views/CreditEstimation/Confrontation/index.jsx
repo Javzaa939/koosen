@@ -1,11 +1,9 @@
 
-import React, { Fragment, useContext, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 
-import { Row, Col, Card, Label, Button, CardTitle, CardHeader, FormFeedback, Form } from 'reactstrap'
+import { Form } from 'reactstrap'
 import { useTranslation } from 'react-i18next'
-import { useForm, Controller } from "react-hook-form";
-import Select from 'react-select'
-import { BookOpen } from 'react-feather'
+import { useForm } from "react-hook-form";
 import { useNavigate } from 'react-router-dom'
 
 import classnames from "classnames";

@@ -1,11 +1,8 @@
 import { t } from 'i18next'
 
-import css from '@mstyle/style.module.css'
 
 import useModal from '@hooks/useModal'
 
-import { X, Edit, Book } from 'react-feather'
-import { Badge, UncontrolledTooltip } from 'reactstrap'
 
 
 // Хүснэгтийн баганууд
@@ -95,7 +92,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, user, handleE
 							id={`complaintListDatatableDetail${row.id}`}
 							className='ms-1'
 							href={`/service/show/${row.id}`}
-							target={'_blank'}
+							target={'_blank'} rel="noreferrer"
 						>
 							<Badge color="light-info" pill><Book  width={"15px"} /></Badge>
 						</a>

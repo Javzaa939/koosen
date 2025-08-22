@@ -1,14 +1,6 @@
-import React, {Fragment} from 'react'
-import {
-	Row,
-	Button,
-	Modal,
-    Table,
-	ModalHeader,
-	ModalBody,
-} from 'reactstrap'
 
-import { X, Download } from 'react-feather'
+
+
 import { downloadExcel } from '@utils'
 
 export function CTable({headers, datas, file_name}) {

@@ -1,9 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from "react-i18next";
-import { Col, Row, Card, Nav, NavItem, NavLink, TabContent } from "reactstrap";
 
-import SummaryCount from "./components/SummaryCount";
-import SemesterExamReport from './tabs/SemesterExamReport';
 import useGeneralData from './utils';
 
 export default function Report() {

@@ -1,29 +1,16 @@
 
-import React, { Fragment, useEffect, useState } from 'react';
-import { useForm, Controller } from "react-hook-form";
-import { Trash2, Edit, Menu } from "react-feather"
-import { ReactSortable } from 'react-sortablejs'
+import { useEffect, useState } from 'react';
+import { useForm } from "react-hook-form";
 
 import {
-    Button,
-    Modal,
-    ModalHeader,
-    ModalBody,
-    Row,
-    Col,
     Form,
-    Label,
-    Input,
-    FormFeedback,
-    Spinner,
-    ListGroupItem,
 } from 'reactstrap';
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import useModal from '@hooks/useModal'
 
-import { convertDefaultValue, validate } from "@utils"
+import { validate } from "@utils"
 import { t } from "i18next";
 
 import { validateSchema } from '../validateSchema';

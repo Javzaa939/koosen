@@ -1,12 +1,9 @@
 import { t } from 'i18next'
-import css from '@mstyle/style.module.css'
 
 import useModal from "@hooks/useModal"
 import AuthContext from "@context/AuthContext"
 import { useContext } from 'react'
 
-import { X, Edit } from 'react-feather'
-import { Badge, UncontrolledTooltip } from 'reactstrap'
 
 import { get_gender_list } from "@utils"
 

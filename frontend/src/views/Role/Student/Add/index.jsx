@@ -1,32 +1,19 @@
-import React, { Fragment, useState, useContext, useEffect } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import {
-    Col,
-    Row,
-    Form,
-    Modal,
-    Label,
-    Input,
-    Button,
-    ModalBody,
-    ModalHeader,
-    FormFeedback,
-    Spinner
+    Form
 } from 'reactstrap'
-import Select from 'react-select'
-import { X } from 'react-feather'
 import useApi from '@hooks/useApi';
 import classnames from 'classnames'
 import useLoader from '@hooks/useLoader';
 import { useTranslation } from 'react-i18next'
 import AuthContext from "@context/AuthContext"
 import SchoolContext from "@context/SchoolContext"
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { validateSchema } from '../Add/validateSchema'
 import ActiveYearContext from "@context/ActiveYearContext"
 import { validate, ReactSelectStyles, convertDefaultValue } from '@utils'
 
 
-import Flatpickr from 'react-flatpickr'
 // flatpickr style
 import '@styles/react/libs/flatpickr/flatpickr.scss'
 // import { Mongolian } from "flatpickr/dist/l10n/mn.js"

@@ -1,28 +1,18 @@
 import { t } from 'i18next';
-import { Fragment, useEffect, useState } from 'react';
-import { useForm, Controller } from "react-hook-form";
+import { useEffect, useState } from 'react';
+import { useForm } from "react-hook-form";
 import '@styles/react/libs/flatpickr/flatpickr.scss';
 import classNames from 'classnames';
 import { ReactSelectStyles } from '@src/utility/Utils';
-import Select from 'react-select'
 
 import {
-    Button,
-    Col,
-    Form,
-    FormFeedback, Input, Label,
-    Modal,
-    ModalBody,
-    ModalHeader,
-    Row
+    Form
 } from "reactstrap";
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import { convertDefaultValue } from "@utils";
 
-import Editor from '../Editor';
-import InputFile from '../InputFile';
 import { PDF, QUIZ, TEXT, VIDEO } from '../../utils';
 
 const fileTypeOptions = [

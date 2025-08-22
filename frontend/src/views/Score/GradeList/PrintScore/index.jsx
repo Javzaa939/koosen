@@ -1,7 +1,6 @@
 
-import React, { useEffect, useState } from "react"
+import { useState } from "react"
 
-import { Row, Spinner } from 'reactstrap'
 import { useLocation } from 'react-router-dom';
 
 import useApi from "@hooks/useApi"

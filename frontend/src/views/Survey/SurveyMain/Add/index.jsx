@@ -1,23 +1,12 @@
 // ** React Imports
-import { useRef, useState, Fragment, useEffect } from 'react'
+import { useRef, useState, useEffect } from 'react'
 
 // ** Custom Components
-import Wizard from '@components/wizard'
-import {
-    Modal,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-    Button
-} from "reactstrap";
 
-import { Info, X, Flag, Target } from 'react-feather'
+
+
 
 // ** Steps
-import MainInfo from './steps/MainInfo'
-import Asuult from './steps/Asuult';
-import Scope from './steps/Scope';
-import Type from './steps/Type';
 
 const Createmodal = ({ open, handleModal, editData, isEdit, refreshDatas, toggle, toggleNested, toggleAll, closeAll, nestedModal }) => {
     const closeBtn = (

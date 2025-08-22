@@ -2,11 +2,8 @@
 import { useState, useEffect, useContext } from 'react'
 
 // ** Third Party Components
-import { X } from 'react-feather'
-import Flatpickr from 'react-flatpickr'
 import Select from 'react-select' // eslint-disable-line
-import PerfectScrollbar from 'react-perfect-scrollbar'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 
 import useApi from '@hooks/useApi';
 import useModal from "@hooks/useModal";
@@ -16,7 +13,6 @@ import AuthContext from "@context/AuthContext"
 import { useTranslation } from 'react-i18next'
 
 // ** Reactstrap Imports
-import { Button, Modal, ModalHeader, ModalBody, Label, Input, Form, FormFeedback, Spinner } from 'reactstrap'
 
 // ** Utils
 import { get_event_people_type, ReactSelectStyles, convertDefaultValue, isObjEmpty, get_action_type } from '@utils'

@@ -1,5 +1,4 @@
 
-import { Modal, Button, ModalHeader, ModalFooter, ModalBody } from 'reactstrap';
 
 import useModal from '@hooks/useModal';
 import { t } from 'i18next';

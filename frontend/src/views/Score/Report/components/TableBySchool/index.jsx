@@ -1,7 +1,5 @@
-import VerticalBarChartLoader from "@src/components/VerticalBarChart";
 import { getAbbreviation } from "@src/utility/Utils";
 import { useTranslation } from "react-i18next";
-import { Card, CardBody, CardTitle } from "reactstrap";
 
 export default function TableBySchool({ isLoading, subSchoolData, mainSchoolData }) {
 	const { t } = useTranslation()

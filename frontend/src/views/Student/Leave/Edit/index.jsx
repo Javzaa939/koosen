@@ -1,9 +1,8 @@
-import React, { Fragment, useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 import { useTranslation } from "react-i18next";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import { ReactSelectStyles } from "@utils"
-import Select from 'react-select'
 
 import { validateSchema } from '../validateSchema';
 import { validate, generateLessonYear, convertDefaultValue } from "@utils"
@@ -17,20 +16,9 @@ import AuthContext from '@context/AuthContext'
 import SchoolContext from '@context/SchoolContext'
 
 import {
-    Row,
-    Col,
-	Form,
-	Modal,
-	Input,
-	Label,
-	Button,
-	ModalBody,
-	ModalHeader,
-	FormFeedback,
-    Spinner
+	Form
 } from "reactstrap";
 
-import Flatpickr from 'react-flatpickr'
 // flatpickr style
 import '@styles/react/libs/flatpickr/flatpickr.scss'
 // import { Mongolian } from "flatpickr/dist/l10n/mn.js"

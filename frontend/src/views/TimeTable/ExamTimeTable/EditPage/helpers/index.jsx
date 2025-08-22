@@ -1,8 +1,5 @@
-import { Edit, Eye, Minus, X } from "react-feather";
 
-import { Badge, UncontrolledTooltip } from "reactstrap";
 
-import useModal from '@hooks/useModal'
 
 import { t } from 'i18next'
 

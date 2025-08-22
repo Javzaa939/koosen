@@ -20,13 +20,8 @@ import Survey from './Survey'
 import Role from './Role'
 // import Science from './Science'
 import Statistic from './Statistic'
-import Test from './Test'
-import Elselt from './Elselt'
-import PsychologicalTesting from './PsychologicalTesting'
 
 import OnlineLesson from "./OnlineLesson";
-import StudentBrowsers from "./StudentBrowser";
-import RemoteRoutes from './RemoteLesson'
 
 export default [
   ...Calendar,

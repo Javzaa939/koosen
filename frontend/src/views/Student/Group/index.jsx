@@ -1,19 +1,15 @@
 // ** React Imports
-import { Fragment, useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
-import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner } from 'reactstrap'
 
-import { ChevronDown, FileText, Plus, Search } from 'react-feather'
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
-import DataTable from 'react-data-table-component'
 
 import classnames from "classnames";
 
 import { useTranslation } from 'react-i18next'
 
-import Select from 'react-select'
 
 import useApi from '@hooks/useApi';
 
@@ -27,9 +23,7 @@ import { getPagination, ReactSelectStyles, generateLessonYear } from '@utils'
 
 import { getColumns } from './helpers'
 
-import Addmodal from './Add'
 
-import EditModal from './Edit'
 import excelDownload from '@src/utility/excelDownload';
 
 const Score = () => {

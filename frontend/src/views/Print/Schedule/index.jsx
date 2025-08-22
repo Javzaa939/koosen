@@ -1,11 +1,7 @@
 
-import React, { Fragment, useState, useEffect, useContext } from "react"
+import { useState, useEffect, useContext } from "react"
 
-import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader } from "reactstrap"
-import { useForm, Controller } from "react-hook-form"
-import DataTable from "react-data-table-component"
-import Select from "react-select"
-import { Printer, Search} from 'react-feather'
+import { useForm } from "react-hook-form"
 
 import { t } from "i18next"
 import classnames from "classnames"

@@ -1,8 +1,5 @@
-import React from 'react';
 
-import { Table } from 'reactstrap';
 
-import { Trash2 } from 'react-feather';
 
 import useModal from '@hooks/useModal'
 

@@ -1,22 +1,11 @@
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 
-import {useForm, Controller } from "react-hook-form"
+import {useForm } from "react-hook-form"
 
 import {
-    Row,
-    Col,
-    Modal,
-    ModalHeader,
-    ModalBody,
-    Button,
-    Spinner,
-    Form,
-    FormFeedback,
-    Label,
-    Input
+    Form
 } from "reactstrap";
 
-import { Check, X } from 'react-feather'
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";

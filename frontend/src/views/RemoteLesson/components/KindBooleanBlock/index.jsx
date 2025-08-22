@@ -1,6 +1,4 @@
-import { Controller } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { Col, Input, Label, Row } from "reactstrap";
 
 export default function KindBooleanBlock({
 	control,

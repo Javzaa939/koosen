@@ -1,5 +1,4 @@
 
-import { Input } from 'reactstrap'
 
 export function getColumns(checkScore, allCheck)
 {

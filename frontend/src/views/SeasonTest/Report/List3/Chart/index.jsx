@@ -1,12 +1,9 @@
 import { useCallback, useEffect, useState } from "react"
 
-import { Card, CardBody, CardSubtitle, CardTitle, Col, Row } from "reactstrap";
 
-import { Bar } from 'react-chartjs-2';
 
 import useApi from '@hooks/useApi';
 import useLoader from "@hooks/useLoader"
-import VerticalBarChartLoader from "@lms_components/VerticalBarChart";
 
 import {
     Chart as ChartJS,

@@ -1,9 +1,9 @@
 
-import React, { Fragment, useState } from 'react'
+import { useState } from 'react'
 
-import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, ModalHeader, FormFeedback } from "reactstrap";
+import { Form } from "reactstrap";
 import { useTranslation } from 'react-i18next';
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";

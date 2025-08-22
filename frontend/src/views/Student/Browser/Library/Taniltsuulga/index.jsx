@@ -1,15 +1,11 @@
 import { t } from "i18next"
-import { Fragment, useState, useContext, useEffect } from "react"
-import DataTable from "react-data-table-component"
-import { ChevronDown, Search, Plus } from "react-feather"
-import { Card, CardHeader, CardTitle, Col, Row, Input, Label, Button, Spinner } from "reactstrap"
+import { useState, useContext, useEffect } from "react"
 import { getPagination } from '@utils'
 import AuthContext from '@context/AuthContext'
 import useApi from "@hooks/useApi"
 import useLoader from '@hooks/useLoader';
 
 import { getColumns } from './helpers'
-import CreateModal from './Add'
 
 const Taniltsuulga = () => {
 

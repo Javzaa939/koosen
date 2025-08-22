@@ -1,8 +1,6 @@
 
-import { Eye, Edit, X } from 'react-feather'
 
 import useModal from "@hooks/useModal"
-import { Badge, UncontrolledTooltip } from 'reactstrap';
 
 function request_flag_color(request_flag)
     {

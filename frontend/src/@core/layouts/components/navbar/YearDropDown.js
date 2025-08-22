@@ -4,7 +4,6 @@ import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 
 // ** Reactstrap Imports
-import { UncontrolledDropdown, DropdownToggle } from 'reactstrap'
 
 import ActiveYearContext from '@context/ActiveYearContext'
 

@@ -1,9 +1,7 @@
 // ** React Imports
 import { useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
 
 // ** Icons Imports
-import { Disc, X, Circle } from 'react-feather';
 
 // ** Config
 import themeConfig from '@configs/themeConfig';

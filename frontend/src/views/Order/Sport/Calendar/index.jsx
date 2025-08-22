@@ -1,8 +1,7 @@
 // ** React Imports
-import { Fragment, useState, useRef } from 'react'
+import { useState, useRef } from 'react'
 
 // ** Third Party Components
-import { Card, CardBody, Row, Col, Spinner, Modal, ModalHeader, ModalBody } from 'reactstrap'
 
 import useApi from '@hooks/useApi';
 import useToast from "@hooks/useToast";
@@ -11,7 +10,6 @@ import useLoader from '@hooks/useLoader';
 import useModal from "@hooks/useModal";
 
 // ** Full Calendar & it's Plugins
-import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 
 import interactionPlugin from "@fullcalendar/interaction";
@@ -22,7 +20,6 @@ import useWindowDimensions from '@lms_components/useWindowDimensions'
 
 import moment from 'moment'
 
-import { Eye } from 'react-feather'
 
 // ** Styles
 import '@styles/react/apps/app-calendar.scss'

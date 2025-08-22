@@ -1,31 +1,15 @@
-import React, { Fragment, useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { getPagination, get_questiontimetype, ReactSelectStyles, generateLessonYear } from "@utils";
 import { useTranslation } from "react-i18next";
 import { getColumns } from "./helpers";
-import { Plus, HelpCircle, Search } from "react-feather";
 import SchoolContext from '@context/SchoolContext'
 
-import {
-	Row,
-	CardHeader,
-	Card,
-	CardTitle,
-	Button,
-	Col,
-	Input,
-	Label,
-	CardBody,
-	Alert
-} from "reactstrap";
 
-import DataTable from "react-data-table-component";
-import Select from 'react-select'
+
+
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 
-import Addmodal from "./Add";
-import Show from "../Show";
-import Exam from "./Exam"
 import classNames from "classnames"
 
 const TestProgram = () => {

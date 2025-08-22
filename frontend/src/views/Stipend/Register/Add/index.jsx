@@ -1,25 +1,13 @@
 import classNames from "classnames"
 import { t } from "i18next"
-import React, { Fragment, useState, useContext, useEffect } from 'react'
-import Select from 'react-select'
+import { useState, useContext, useEffect } from 'react'
 import { ReactSelectStyles, convertDefaultValue, stipent_is_own_or_other } from "@utils"
-import { useForm, Controller } from "react-hook-form";
-import { X } from "react-feather";
+import { useForm } from "react-hook-form";
 import useLoader from "@hooks/useLoader";
 import { validate } from "@utils"
 import { validateSchema } from '../validateSchema';
 import {
-    Row,
-    Col,
-	Form,
-	Modal,
-    Input,
-	Label,
-    Button,
-	ModalBody,
-	ModalHeader,
-	FormFeedback,
-    Spinner
+	Form
 } from "reactstrap";
 import useApi from "@hooks/useApi"
 import ActiveYearContext from '@context/ActiveYearContext'

@@ -1,28 +1,22 @@
-import React, { Fragment, useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
-import { ChevronDown, Plus, Search } from 'react-feather'
 
-import { Card, CardHeader, CardTitle, Button, Row, Col, Input, Label, Spinner } from 'reactstrap'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader'
 import ActiveYearContext from "@context/ActiveYearContext"
 
-import DataTable from 'react-data-table-component'
 
 import { useTranslation } from 'react-i18next'
 
 import classnames from 'classnames';
 
-import Select from 'react-select'
 
 import { getPagination, generateLessonYear, ReactSelectStyles } from '@utils'
 
 import { getColumns } from './helpers'
 
-import Addmodal from './Add'
 
-import EditModal from './Edit'
 
 const PaymentConfig = () => {
 

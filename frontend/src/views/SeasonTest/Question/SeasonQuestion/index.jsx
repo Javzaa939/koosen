@@ -1,21 +1,14 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ModalBody, Card, CardBody, CardHeader, Col, Modal,
-    ModalHeader, Row, FormFeedback, Form, Table, Button, Label, Input,
-    Badge,
-    UncontrolledTooltip,
-    ListGroupItem,
-    ListGroup
+import { Form
 } from 'reactstrap'
-import Select from 'react-select'
 import classnames from 'classnames'
 import * as Yup from "yup";
 import useLoader from '@hooks/useLoader';
 import useApi from '@hooks/useApi';
 import { useTranslation } from 'react-i18next';
 import { validate, ReactSelectStyles } from "@utils";
-import { Controller, useForm } from 'react-hook-form'
-import { ChevronsLeft, PlusCircle } from 'react-feather';
+import { useForm } from 'react-hook-form'
 
 const validateSchema = Yup.object().shape({
     name: Yup.string().trim().required("Хоосон байна"),

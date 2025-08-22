@@ -2,10 +2,9 @@
 import { lazy, useContext } from 'react'
 
 // ** Router imports
-import { useRoutes, Navigate } from "react-router-dom"
+import { useRoutes } from "react-router-dom"
 
 // ** Layouts
-import BlankLayout from '@layouts/BlankLayout'
 
 // ** GetRoutes
 import { getRoutes } from "./routes"

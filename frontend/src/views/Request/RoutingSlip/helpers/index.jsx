@@ -1,11 +1,8 @@
 import { useContext } from "react"
 
 import { useTranslation } from 'react-i18next'
-import { Link } from "react-router-dom"
 
-import { Badge, UncontrolledTooltip, Button } from 'reactstrap'
 
-import { Book, Square, CheckSquare, AlertCircle, Printer } from 'react-feather'
 
 import AuthContext from "@context/AuthContext"
 

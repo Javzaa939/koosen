@@ -1,11 +1,7 @@
-import React, { useState, useEffect, Fragment } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"
-import {
-    Card,
-    Col,
-    CardHeader,
-    Spinner,
-} from "reactstrap";
+
+
 
 import { useParams } from 'react-router-dom';
 
@@ -28,8 +24,6 @@ import { Chart as
     Title,
 } from 'chart.js';
 
-import { Doughnut, Pie, Bar } from 'react-chartjs-2';
-import { ChevronsLeft } from "react-feather";
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 ChartJS.register(

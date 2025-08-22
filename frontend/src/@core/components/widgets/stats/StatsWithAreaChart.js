@@ -1,13 +1,10 @@
 // ** Custom Components
-import Avatar from "@components/avatar"
 
 // ** Third Party Components
 import PropTypes from "prop-types"
 import classnames from "classnames"
-import Chart from "react-apexcharts"
 
 // ** Reactstrap Imports
-import { Card, CardBody } from "reactstrap"
 
 // ** Default Options
 import { areaChartOptions } from "./ChartOptions"

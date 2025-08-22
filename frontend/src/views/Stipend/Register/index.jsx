@@ -1,19 +1,13 @@
 import { t } from "i18next"
-import { Fragment, useState, useContext, useEffect } from "react"
-import DataTable from "react-data-table-component"
-import { ChevronDown, Search, Plus } from "react-feather"
-import { Card, CardHeader, CardTitle, Col, Modal, Row, Input, Label, Button, Spinner } from "reactstrap"
+import { useState, useContext, useEffect } from "react"
 import { getPagination } from '@utils'
 import { getColumns } from './helpers'
 import AuthContext from '@context/AuthContext'
 import SchoolContext from '@context/SchoolContext'
-import Createmodal from './Add'
 import useApi from "@hooks/useApi"
 import useLoader from '@hooks/useLoader';
 
-import EditModal from './Edit'
 
-import Detail from './Detail'
 
 const Register = () => {
 

@@ -1,19 +1,8 @@
-import React, { useState, useEffect } from 'react'
-import {
-    Card,
-    Form,
-    Label,
-    Input,
-    Button,
-    CardBody,
-    CardHeader,
-    CardTitle,
-    FormFeedback,
-    Col,
-} from 'reactstrap'
+import { useState, useEffect } from 'react'
 
-import { Edit } from 'react-feather'
-import { useForm, Controller } from "react-hook-form";
+
+
+import { useForm } from "react-hook-form";
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';

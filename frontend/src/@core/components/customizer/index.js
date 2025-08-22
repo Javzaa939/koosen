@@ -2,13 +2,9 @@
 import { useState } from "react"
 
 // ** Third Party Components
-import Select from "react-select"
 import classnames from "classnames"
-import { Settings, X } from "react-feather"
-import PerfectScrollbar from "react-perfect-scrollbar"
 
 // ** Reactstrap Imports
-import { Input, Label } from "reactstrap"
 
 // ** Styles
 import "@styles/react/libs/react-select/_react-select.scss"

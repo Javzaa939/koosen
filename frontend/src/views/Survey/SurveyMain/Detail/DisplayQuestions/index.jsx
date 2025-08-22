@@ -1,13 +1,9 @@
-import React from "react";
 
 import "./style.css";
 
-import {
-	Badge,
-  Input
-} from "reactstrap";
 
-import { AlertCircle } from "react-feather";
+
+
 
 
 const KIND_ONE_CHOICE = 1; // 'Нэг сонголт'

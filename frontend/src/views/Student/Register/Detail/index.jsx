@@ -1,20 +1,12 @@
-import React, { useState, Fragment, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
 import { useNavigate } from 'react-router-dom'
 
-import { TabContent, Nav, NavItem, NavLink, Card } from 'reactstrap'
 
-import { ChevronsLeft } from 'react-feather'
 
-import Address from './Address'
-import AdmissionScore from './AdmissionScore'
-import Education from './Education'
-import Family from './Family'
-import MainInformation from './MainInformation'
 import AuthContext from "@context/AuthContext"
 
 import { useTranslation } from 'react-i18next'
-import Medal from './Medal'
 
 
 const Detail = () => {

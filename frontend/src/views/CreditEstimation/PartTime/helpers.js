@@ -1,5 +1,3 @@
-import { Badge,UncontrolledTooltip } from 'reactstrap';
-import { Plus } from 'react-feather'
 import { t } from 'i18next';
 
 // Хүснэгтийн баганууд

@@ -1,8 +1,6 @@
 import { t } from "i18next";
 import useModal from "@hooks/useModal"
 
-import { Badge, UncontrolledTooltip, Button } from "reactstrap";
-import { X } from 'react-feather'
 
 export function getColumns (currentPage, rowsPerPage, total_count,  handleUpdateModal, user, handleDelete, handleStop) {
 

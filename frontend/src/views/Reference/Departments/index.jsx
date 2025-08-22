@@ -1,4 +1,10 @@
 // ** React Imports
+<<<<<<< HEAD
+import { useState, useEffect, useContext } from 'react';
+
+
+
+=======
 import { Fragment, useState, useEffect, useContext} from 'react'
 
 import { Row, Col, Card, Input, CardTitle, CardHeader, Spinner, Button, Label } from 'reactstrap'
@@ -6,6 +12,7 @@ import { Row, Col, Card, Input, CardTitle, CardHeader, Spinner, Button, Label } 
 import { ChevronDown, Plus} from 'react-feather'
 
 import DataTable from 'react-data-table-component'
+>>>>>>> parent of b5e8dce3 (update)
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
@@ -14,8 +21,11 @@ import SchoolContext from '@context/SchoolContext'
 import { getPagination } from '@utils';
 
 import { getColumns } from './helpers';
+<<<<<<< HEAD
+=======
 import UpdateModal from "./Edit"
 import AddModal from "./Add"
+>>>>>>> parent of b5e8dce3 (update)
 
 
 import { useTranslation } from "react-i18next";

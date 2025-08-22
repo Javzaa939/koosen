@@ -1,7 +1,5 @@
-import React from 'react'
 
 import './style.scss'
-import { AlertTriangle, ChevronsLeft, Home } from 'react-feather'
 import { useNavigate } from 'react-router-dom'
 
 function PrintError() {

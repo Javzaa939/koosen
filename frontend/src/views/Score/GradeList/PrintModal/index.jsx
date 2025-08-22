@@ -1,9 +1,7 @@
-import React, { Fragment, useEffect, useState } from "react";
-import { FileText, Printer } from "react-feather";
+import { useEffect, useState } from "react";
 
 import useApi from "@hooks/useApi"
 import useLoader from '@hooks/useLoader';
-import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 import { utils, writeFile } from 'xlsx-js-style';
 
 function PrintModal({ pmodal, modalToggler, groupId, file_name, printValues }) {

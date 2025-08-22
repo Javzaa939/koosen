@@ -1,10 +1,7 @@
 // ** Third Party Components
-import { X } from "react-feather"
 import Proptypes from "prop-types"
 import classnames from "classnames"
-import PerfectScrollbar from "react-perfect-scrollbar"
 
-import { Modal, ModalHeader, ModalBody } from "reactstrap"
 
 const Sidebar = (props) => {
   // ** Props
@@ -46,13 +43,13 @@ const Sidebar = (props) => {
         "sidebar-lg": size === "lg",
         "sidebar-sm": size === "sm"
       })}
-      /*eslint-disable */
+       
       {...(width !== undefined
         ? {
             style: { width: String(width) + "px" },
           }
         : {})}
-      /*eslint-enable */
+       
       {...rest}
     >
       <ModalHeader

@@ -75,7 +75,7 @@ export function getExpandedColumns() {
 		},
 		{
 			name: t("Сэтгүүлийн холбоос"),
-			selector: (row) => { return  ( <a type='link' target={'_blank'} href={row?.mag_link} className='text-decoration-underline'>{row?.mag_link}</a>)},
+			selector: (row) => { return  ( <a type='link' target={'_blank'} href={row?.mag_link} className='text-decoration-underline' rel="noreferrer">{row?.mag_link}</a>)},
 			center: true
 		},
 		{

@@ -1,22 +1,17 @@
-import React, {useState, useEffect, Fragment, useContext } from 'react'
+import {useState, useEffect, useContext } from 'react'
 
-import {Col, Row, Card, CardHeader, CardTitle, Input, Label, Button, Spinner } from 'reactstrap'
 
-import { Search, Plus } from 'react-feather';
 
 import useApi from '@hooks/useApi';
 import AuthContext from '@context/AuthContext'
 import useLoader from '@hooks/useLoader';
 
-import Select from 'react-select'
 
-import classnames from 'classnames'
 
 import { useTranslation } from 'react-i18next';
 
 import { generateYear, generateMonths, ReactSelectStyles, first_balance } from '@utils'
 
-import CTable from './helpers/Table';
 
 const RentStudent = ({ is_teacher }) => {
     const default_footer = {

@@ -1,31 +1,23 @@
-import React, {useState, useEffect, Fragment } from 'react'
+import {useState, useEffect } from 'react'
 
-import {Col, Row, Card, CardHeader, CardTitle, Input, Label, Button, Spinner} from 'reactstrap'
 
-import { Search, ChevronDown } from 'react-feather';
 
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 
 import useApi from '@hooks/useApi';
 
 import useLoader from '@hooks/useLoader';
 
-import Select from 'react-select'
 
 import { useTranslation } from 'react-i18next';
 
-import DataTable from 'react-data-table-component'
 
-import { getPagination, ReactSelectStyles } from '@utils'
+import { getPagination } from '@utils'
 
-import classnames from "classnames";
 
 import { getColumns } from './helpers';
 
-import SolveModal from './Modal';
 
-import Detail from './Detail'
-import AddModal from './Add';
 
 const AnotherStudent = () => {
 

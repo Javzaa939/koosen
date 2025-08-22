@@ -1,16 +1,12 @@
 // ** React imports
-import React, { Fragment, useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
-import { Card, CardHeader, CardTitle, Row, Col, Label, Input, Button,Spinner } from 'reactstrap';
 
 import useApi from "@hooks/useApi"
 import useLoader from '@hooks/useLoader';
 
-import Select from 'react-select'
 
-import DataTable from 'react-data-table-component';
 
-import { ChevronDown, Search } from 'react-feather'
 
 import { getPagination, get_unit_list, ReactSelectStyles } from '@utils'
 
@@ -23,8 +19,6 @@ import { useTranslation } from 'react-i18next'
 
 import { getColumns } from './helpers';
 
-import AddModal from './Add';
-import EditModal from './Edit';
 
 const Request = () => {
 

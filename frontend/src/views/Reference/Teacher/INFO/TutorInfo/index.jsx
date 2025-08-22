@@ -1,7 +1,5 @@
 
-import React, { useState } from "react"
 
-import { UncontrolledCollapse, Card, Table } from 'reactstrap';
 
 export default function Tutor({ datas })
 {

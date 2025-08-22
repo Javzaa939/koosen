@@ -1,7 +1,6 @@
 // ** Icons Import
 
 // Өргөдөл цэсэнд цэс нэмэхдээ  id -г дарааллаар нь бичих back руу хадгалж байгаа
-import { Circle, GitPullRequest,Send } from 'react-feather'
 export default [
     {
         id: 'complaint',

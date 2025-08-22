@@ -1,12 +1,9 @@
-import { Button, Card, Col, Input, Label, Row, Spinner, UncontrolledTooltip } from 'reactstrap'
 import './style.scss'
-import React, { useContext, useEffect, useState } from "react";
-import { useParams, useLocation } from 'react-router-dom';
+import { useContext, useEffect, useState } from "react";
+import { useParams } from 'react-router-dom';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
-import { Badge, Form, FormFeedback } from "reactstrap";
-import { AlertTriangle, ChevronsLeft, Minus, MinusCircle, Plus, X } from "react-feather";
-import DataTable from 'react-data-table-component';
+import { Form } from "reactstrap";
 import { getColumns } from "./helpers";
 import { getPagination } from "@utils";
 import { validate, ReactSelectStyles, convertDefaultValue } from "@utils"
@@ -15,10 +12,8 @@ import ActiveYearContext from "@context/ActiveYearContext"
 
 import classnames from "classnames";
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { validateSchema } from './validateSchema';
-import Select from 'react-select'
-import SchoolContext from "@context/SchoolContext"
 import { useNavigate } from "react-router-dom"
 
 const ACTIVE_STUDENT = 1

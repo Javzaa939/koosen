@@ -1,20 +1,10 @@
 import '@styles/react/libs/flatpickr/flatpickr.scss';
 import { t } from 'i18next';
 import { useEffect, useState } from 'react';
-import { X } from 'react-feather';
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import {
-    Button,
-    Col,
-    Form,
-    FormFeedback,
-    Input,
-    Label,
-    Modal,
-    ModalBody,
-    ModalHeader,
-    Row
+    Form
 } from "reactstrap";
 
 import useApi from '@hooks/useApi';

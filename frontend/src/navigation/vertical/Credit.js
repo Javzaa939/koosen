@@ -1,5 +1,4 @@
 // ** Icons Import
-import { ClipboardClockIcon, Circle } from 'lucide-react';
 
 export default [
     {

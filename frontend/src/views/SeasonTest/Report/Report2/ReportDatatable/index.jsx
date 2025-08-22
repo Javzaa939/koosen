@@ -1,21 +1,12 @@
 // ** React Imports
 import { useEffect, useState, useMemo, useRef } from 'react'
-import { Search } from 'react-feather'
 import { useTranslation } from 'react-i18next'
-import { Button, Col, Input, Label, Row } from 'reactstrap'
 
 import useApi from '@hooks/useApi'
 
-import ExamFilter from '../../helpers/ExamFilter'
-import GenericDataTable from '../../helpers/GenericDataTable'
-import GroupFilter from '../../helpers/GroupFilter'
 import './style.scss'
-import ProfessionFilter from '../../helpers/ProfessionFilter'
-import LessonsModal from '../../helpers/LessonsModal'
-import TeacherScoreGroupFilter from '../../helpers/TeacherScoreGroupFilter'
-import Flatpickr from 'react-flatpickr'
 import moment from "moment";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 // css files
 import '@styles/react/libs/flatpickr/flatpickr.scss'
 

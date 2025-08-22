@@ -1,18 +1,8 @@
-import { Fragment, } from "react";
 import { useTranslation } from "react-i18next";
 import { ReactSelectStyles } from '@utils';
 import classnames from "classnames";
-import Select from 'react-select';
-import {
-	Button,
-	Col,
-	Label,
-	Modal,
-	ModalBody,
-	ModalFooter,
-	ModalHeader,
-	Row
-} from "reactstrap";
+
+
 
 function Add({ open, handleModal , groups, selected_groups, handleSelectGroup, onSubmit}) {
 

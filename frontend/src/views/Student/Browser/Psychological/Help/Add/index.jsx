@@ -1,17 +1,16 @@
 // ** React imports
-import React, { useState, Fragment, useContext, useEffect } from 'react'
+import { useState, useContext, useEffect } from 'react'
 
 import { t } from 'i18next';
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
-import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, FormFeedback, Spinner} from "reactstrap";
+import { Form} from "reactstrap";
 
 import { validate, convertDefaultValue } from "@utils"
-import { Download } from 'react-feather'
 
 import AuthContext from '@context/AuthContext'
 import * as Yup from 'yup';

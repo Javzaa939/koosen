@@ -1,21 +1,12 @@
-import React, { Fragment, useState,  useCallback, useEffect } from 'react'
-import {
-    Row,
-    Col,
-    Button,
-    Label,
-    Input,
-    Spinner
-} from "reactstrap";
+import { useState,  useCallback } from 'react'
 
-import { ChevronLeft, Check, ChevronRight } from "react-feather"
-import Questions from "./Questions"
+
+
 
 import useLoader from "@hooks/useLoader";
 import useApi from '@hooks/useApi';
 // import QuestionsBlock from './components/QuestionsBlock';
 import { useTranslation } from 'react-i18next';
-import QuestionTitles from './components/QuestionTitles';
 
 
 const Asuult = ({ handleModal , stepper, cdata, editData, isEdit, refreshDatas, setSubmitDatas }) => {

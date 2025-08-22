@@ -1,7 +1,5 @@
 
-import React from "react"
 
-import { UncontrolledCollapse, Card, Table } from 'reactstrap';
 
 export default function LessonSchedule({ datas })
 {

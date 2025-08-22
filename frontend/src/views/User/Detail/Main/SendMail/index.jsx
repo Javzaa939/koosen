@@ -1,8 +1,6 @@
-import React from 'react';
 
 import { useParams } from 'react-router-dom';
 
-import { Card, CardBody, Button, Spinner } from 'reactstrap';
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';

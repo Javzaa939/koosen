@@ -1,6 +1,4 @@
-import React, { Fragment, useState, useEffect } from 'react';
-import { Modal, Card, CardBody, ModalBody, ModalHeader, Table, Spinner } from 'react-bootstrap';
-import { X } from 'react-feather';
+import { useState, useEffect } from 'react';
 import useLoader from '@hooks/useLoader';
 import useApi from '@hooks/useApi';
 

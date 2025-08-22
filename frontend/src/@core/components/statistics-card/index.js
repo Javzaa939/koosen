@@ -1,10 +1,8 @@
 // ** Third Party Components
 import Proptypes from "prop-types"
 import classnames from "classnames"
-import Chart from "react-apexcharts"
 
 // ** Reactstrap Imports
-import { Card, CardBody } from "reactstrap"
 
 const StatisticsCards = (props) => {
   // ** Props

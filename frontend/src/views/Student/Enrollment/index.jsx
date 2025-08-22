@@ -1,21 +1,8 @@
-import { Fragment, useState, useEffect, useContext } from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import {
-    Row,
-    Col,
-    Card,
-    Input,
-    Label,
-    CardTitle,
-    CardHeader,
-    Spinner,
-    Button,
-    UncontrolledTooltip,
-} from 'reactstrap';
-import { ChevronDown, Edit, Edit2, Edit3, Printer, Search } from 'react-feather';
+import { useState, useEffect, useContext } from 'react';
+import { useForm } from 'react-hook-form';
+
+
 import { useTranslation } from 'react-i18next';
-import Select from 'react-select';
-import DataTable from 'react-data-table-component';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import { utils, writeFile } from 'xlsx-js-style';
@@ -23,11 +10,9 @@ import { getColumns } from './helpers';
 
 import { useNavigate } from 'react-router-dom';
 import { getPagination, ReactSelectStyles } from '@utils';
-import EditModal from './EditModal';
 import AuthContext from '@src/utility/context/AuthContext';
 
 import classnames from 'classnames';
-import { FileIcon, SquarePenIcon } from 'lucide-react';
 
 const Enrollment = () => {
     const genderOp = [

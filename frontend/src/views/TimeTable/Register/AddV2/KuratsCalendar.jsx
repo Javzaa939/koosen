@@ -1,13 +1,11 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 
-import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 
-import { Card, CardBody, UncontrolledTooltip } from "reactstrap";
 
 import useWindowDimensions from "@lms_components/useWindowDimensions";
 

@@ -1,4 +1,3 @@
-import { MonitorPlayIcon } from 'lucide-react';
 
 const RemoteRoutes = [
     {

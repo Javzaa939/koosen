@@ -1,22 +1,14 @@
-import React, { Fragment, useState, useEffect } from "react";
-import {
-    Row,
-    Col,
-    Card,
-    CardBody,
-    Badge,
-    Button,
-} from "reactstrap";
+import { useState, useEffect } from "react";
+
+
 
 import { useParams, useNavigate } from "react-router-dom";
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 
-import EditModal from './Edit'
 
 // ** Custom Components
-import Avatar from '@components/avatar'
 
 const roleColors = {
     true: 'light-success',

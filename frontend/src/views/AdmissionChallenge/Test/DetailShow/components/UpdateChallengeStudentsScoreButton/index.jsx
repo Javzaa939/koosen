@@ -1,12 +1,8 @@
-import { AlertCircle, X } from "react-feather";
-import { Button, Modal, ModalBody, ModalHeader } from "reactstrap";
 import { useTranslation } from 'react-i18next'
-import { RefreshCcw } from 'react-feather'
 import useModal from '@src/utility/hooks/useModal'
 import useApi from '@src/utility/hooks/useApi'
 import useLoader from "@src/utility/hooks/useLoader";
 import { useState } from "react";
-import { Table } from 'reactstrap'
 
 export default function UpdateChallengeStudentsScoreButton({ selected_exam }) {
 	const { t } = useTranslation()

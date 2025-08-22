@@ -1,13 +1,9 @@
 import { useCallback, useEffect, useState } from "react"
 
-import { Card, CardBody, CardSubtitle, CardTitle, Col, Row } from "reactstrap";
 
-import { Bar, ChartProps } from 'react-chartjs-2';
 
 import useApi from '@hooks/useApi';
 import useLoader from "@hooks/useLoader"
-import useUpdateEffect from "@hooks/useUpdateEffect";
-import VerticalBarChartLoader from "@lms_components/VerticalBarChart";
 
 import { moneyFormat } from "@utils"
 
@@ -22,8 +18,6 @@ import {
 } from 'chart.js';
 
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import StatsHorizontal from '@components/widgets/stats/StatsHorizontal'
-import { Check, CheckCircle, Sunrise, Sunset, Users } from 'react-feather'
 
 import { t } from 'i18next'
 

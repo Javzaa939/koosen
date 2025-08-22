@@ -1,10 +1,7 @@
-import React, { Fragment } from 'react';
 
-import { Typography } from '@mui/material';
 
 // import CCarousel from "@lms_components/Carousel";
 
-import { Card, Row, Col } from 'reactstrap';
 
 export default function CDetailModal(props) {
     const emptyImage = require('@src/assets/images/empty-image.jpg').default;

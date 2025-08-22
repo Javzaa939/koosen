@@ -1,25 +1,10 @@
-import React from "react";
-import { Fragment, useState, useEffect, useContext, useMemo } from 'react'
-import {
-    Row,
-    Col,
-    Card,
-    Input,
-    Label,
-    Button,
-    CardTitle,
-    CardHeader,
-    Spinner,
-    InputGroupText,
-    InputGroup,
-    UncontrolledTooltip
-} from 'reactstrap'
+import { useState, useEffect, useMemo } from 'react'
+
+
 
 import { useNavigate } from "react-router-dom";
 
-import { ChevronDown, Search, Printer } from 'react-feather'
 
-import DataTable from 'react-data-table-component'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
@@ -29,12 +14,8 @@ import { getPagination, formatDate } from '@utils'
 import { getColumns } from './helpers'
 
 import { useTranslation } from "react-i18next";
-import Flatpickr from 'react-flatpickr'
 import { Mongolian } from "flatpickr/dist/l10n/mn.js"
 
-import UpdateModal from './Update'
-import Add from "../../../Request/Correspond/Add";
-import PrintModal from "./PrintModal";
 
 const Irsen = () => {
 

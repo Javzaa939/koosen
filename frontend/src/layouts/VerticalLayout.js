@@ -1,10 +1,8 @@
 // ** React Imports
-import React, { useContext, useEffect, useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { useContext, useEffect, useState } from 'react';
 
 // ** Core Layout Import
 // !Do not remove the Layout import
-import Layout from '@layouts/VerticalLayout';
 
 // ** Menu Items Array
 import navigation from '@src/navigation/vertical';

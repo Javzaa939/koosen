@@ -1,24 +1,13 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next';
 
-import {
-    Modal,
-    ModalBody,
-    ModalHeader,
-    Row,
-    Col,
-    Label,
-    Input,
-    Button,
-    UncontrolledTooltip,
 
-} from 'reactstrap'
 
-import { AlertCircle } from 'react-feather';
+
+
 import { formatDate } from '@src/utility/Utils';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
-import Flatpickr from 'react-flatpickr'
 import { Mongolian } from "flatpickr/dist/l10n/mn.js"
 import '@styles/react/libs/flatpickr/flatpickr.scss'
 

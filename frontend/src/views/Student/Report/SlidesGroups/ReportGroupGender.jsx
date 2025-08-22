@@ -1,18 +1,8 @@
-import { Fragment } from 'react';
 import { useKeenSlider } from 'keen-slider/react';
 
 import '../style.css';
-import { Button, Col, Row } from 'reactstrap';
 
-import Group from '../Group';
-import Student from '../Student';
-import StudentCourse from '../StudentCourse';
-import StudentProfession from '../StudentProfession';
-import StudentProvince from '../StudentProvince';
-import StudentSchool from '../StudentSchool';
 import { t } from 'i18next';
-import { SkipBackIcon } from 'lucide-react';
-import { SkipForward } from 'react-feather';
 
 export default function ReportGroupGender() {
     // ** Hook

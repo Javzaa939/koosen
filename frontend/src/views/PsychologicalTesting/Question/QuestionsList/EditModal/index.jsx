@@ -1,28 +1,9 @@
-import React, { Fragment, useState, useEffect, useReducer } from "react";
-import { useTranslation } from "react-i18next";
-import { getPagination, get_boolean_list, get_questionype, ReactSelectStyles } from "@utils";
-import Select from 'react-select'
+import { useState, useReducer } from "react";
+import { get_boolean_list, get_questionype, ReactSelectStyles } from "@utils";
 import classnames from "classnames";
-import {
-    Button,
-    Form,
-    Modal,
-    ModalHeader,
-    ModalBody,
-    Badge,
-    Row,
-    Col,
-    Label,
-    Input,
-    ListGroup,
-    ListGroupItem,
-    InputGroup,
-    InputGroupText,
-    FormFeedback,
-    Alert
-} from 'reactstrap'
+
+
 import empty from "@src/assets/images/empty-image.jpg"
-import { Edit, Minus, MinusCircle, PlusCircle, Save, X } from "react-feather";
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 

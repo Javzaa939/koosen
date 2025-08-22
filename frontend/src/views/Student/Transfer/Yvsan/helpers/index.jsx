@@ -1,10 +1,7 @@
 import { useContext } from 'react';
-import { X, Edit } from 'react-feather'
-import { Badge, UncontrolledTooltip } from "reactstrap";
 
 import { t } from 'i18next';
 
-import css from '@mstyle/style.module.css'
 
 
 import useModal from "@hooks/useModal"

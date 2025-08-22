@@ -1,14 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 
-import { Button, Table } from 'reactstrap'
 
-import ReactPaginate from "react-paginate";
 
 import { useTranslation } from 'react-i18next';
 
-import { AlignRight, ChevronDown, ChevronUp } from "react-feather"
 
-import { Previous, Next } from '@utils'
 
 import './style.css'
 import { right } from '@popperjs/core';

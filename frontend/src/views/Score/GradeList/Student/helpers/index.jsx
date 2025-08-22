@@ -1,19 +1,14 @@
-import React, { useState, useRef, useContext} from "react";
+import { useState, useRef, useContext} from "react";
 
 import useLoader from "@hooks/useLoader";
 import useModal from '@hooks/useModal'
 
-import {
-    Input,
-	FormFeedback,
-	Badge,
-	UncontrolledTooltip
-} from "reactstrap";
+
+
 
 import AuthContext from '@context/AuthContext'
 
 import useApi from '@hooks/useApi';
-import { X } from 'react-feather'
 
 import { t } from "i18next";
 

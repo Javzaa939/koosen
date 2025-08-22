@@ -1,10 +1,6 @@
 
-import React, { Fragment, useEffect } from 'react'
 
-import { Row, Col, Modal, ModalBody, ModalHeader, Card, CardBody } from "reactstrap";
 import { useTranslation } from 'react-i18next';
-import DataTable from 'react-data-table-component';
-import { CheckSquare, XSquare } from 'react-feather'
 
 import { zeroFill } from "@utils"
 
@@ -147,7 +143,7 @@ export default function Detail({ isOpen, handleModal, datas })
                                                         <a
                                                             href={datas?.file}
                                                             className="me-2 text-primary text-decoration-underline"
-                                                            target={"_blank"}
+                                                            target={"_blank"} rel="noreferrer"
                                                         >
                                                             {datas?.file.toString().split("/").pop()}
                                                         </a>

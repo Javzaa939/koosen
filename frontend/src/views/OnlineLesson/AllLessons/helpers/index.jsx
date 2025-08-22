@@ -1,7 +1,4 @@
 import { t } from "i18next";
-import { Book } from "react-feather";
-import { Link } from "react-router-dom";
-import { Badge, UncontrolledTooltip } from "reactstrap";
 // Хүснэгтийн баганууд
 export function getColumns(currentPage, rowsPerPage, total_count) {
 

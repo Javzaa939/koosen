@@ -2,31 +2,13 @@ import { useEffect, useMemo, useState } from 'react';
 
 import useModal from '@hooks/useModal';
 
-import Accordion from '@mui/material/Accordion';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import AccordionSummary from '@mui/material/AccordionSummary';
 
-import {
-    Badge,
-    CardBody,
-    Modal,
-    ModalHeader,
-    Nav,
-    NavItem,
-    NavLink,
-    TabPane,
-    UncontrolledTooltip,
-} from 'reactstrap';
+
+
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 
-import WeekMaterial from '../WeekMaterial';
-import AddHomework from '../Homework/AddHomework';
-import OnlineExamModal from '../OnlineExamModal/index';
-import { Edit, X } from 'react-feather';
-import CreateWeekModal from './CreateWeekModal';
-import { ExpandIcon } from 'lucide-react';
 
 export default function WeeksList({ lesson, isFresh }) {
     const { showWarning } = useModal();

@@ -1,27 +1,15 @@
 // ** React Imports
-import { Fragment, useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
-import {
-    Row,
-    Col,
-    Card,
-    Input,
-    Label,
-    Button,
-    CardTitle,
-    CardHeader,
-    Spinner,
-} from 'reactstrap'
+
+
 
 import { useTranslation } from 'react-i18next'
 
-import Select from 'react-select'
 
-import { ChevronDown, Search } from 'react-feather'
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
-import DataTable from 'react-data-table-component'
 
 import classnames from "classnames";
 
@@ -32,7 +20,6 @@ import { getPagination, ReactSelectStyles } from '@utils'
 import SchoolContext from '@src/utility/context/SchoolContext'
 
 import { getColumns, getFooter } from './helpers'
-import ExcelExportButton from './components/ExcelExportButton'
 
 export default function ProgressScore() {
 

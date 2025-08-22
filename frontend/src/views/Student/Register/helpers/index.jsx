@@ -1,7 +1,5 @@
 import { useContext } from 'react';
 
-import { X, Edit, Lock, Shield, ShieldOff } from 'react-feather'
-import {Badge, UncontrolledTooltip} from 'reactstrap'
 
 import useModal from "@hooks/useModal"
 import useLoader from '@hooks/useLoader';

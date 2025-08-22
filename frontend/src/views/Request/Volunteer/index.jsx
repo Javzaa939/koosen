@@ -1,24 +1,12 @@
-import {
-    Col,
-    Row,
-    Card,
-    Input,
-    Label,
-    Button,
-    CardTitle,
-    CardHeader,
-    Spinner
-} from 'reactstrap'
+
+
 
 import useApi from '@hooks/useApi';
 import { getPagination } from '@utils'
 import useLoader from '@hooks/useLoader';
 import { useTranslation } from 'react-i18next'
-import { ChevronDown ,Search} from "react-feather"
-import { Fragment, useState, useEffect } from "react"
-import DataTable from 'react-data-table-component'
+import { useState, useEffect } from "react"
 
-import UpdateModal from "./Update"
 import { getColumns } from './helpers'
 
 const RequestRegister = () => {

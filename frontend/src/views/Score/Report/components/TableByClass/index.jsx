@@ -1,6 +1,4 @@
-import VerticalBarChartLoader from "@src/components/VerticalBarChart";
 import { useTranslation } from "react-i18next";
-import { Card, CardBody, CardTitle } from "reactstrap";
 
 export default function TableByClass({ scoreRanges, isLoading, examTypeData, level2_key1, level2_key2 }) {
 	const { t } = useTranslation()

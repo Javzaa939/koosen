@@ -2,10 +2,7 @@
 import { useContext } from "react"
 
 import { useTranslation } from 'react-i18next'
-import { Link } from "react-router-dom"
-import { Badge, UncontrolledTooltip, Button } from 'reactstrap'
 
-import { Printer, Book, Square, CheckSquare, AlertCircle, XSquare } from 'react-feather'
 
 import AuthContext from "@context/AuthContext"
 
@@ -120,7 +117,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, roleMenus, ha
             center: true,
 			selector: (row) => {
 				return (
-					<a role="button" className='text-decoration-underline' href={`/student/${row.student.id}/info/`} target="_blank" >
+					<a role="button" className='text-decoration-underline' href={`/student/${row.student.id}/info/`} target="_blank" rel="noreferrer" >
 						{row?.student?.full_name} {row?.student.code}
 					</a>
 				)

@@ -1,14 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Row, Label, Col, Input, Spinner } from 'reactstrap';
+import { useState, useEffect } from 'react';
 import useApi from '@hooks/useApi';
-import { ChevronRight, Square, CheckSquare, MinusSquare } from 'react-feather';
 
 import { t } from 'i18next';
 import useLoader from '@hooks/useLoader';
 
 import classnames from 'classnames';
 import './checkbox.css';
-import StateCustomPagination from '../../../Detail/Scope/components/StateCustomPagination';
 
 function Student({ onChosenScopeChange }) {
     const [isAll, setIsAll] = useState(false);

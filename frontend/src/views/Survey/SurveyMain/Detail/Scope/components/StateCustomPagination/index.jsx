@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Col, Input, Label, Row } from "reactstrap";
 
 import { getPagination } from "@src/utility/Utils";
 

@@ -1,5 +1,3 @@
-import { FileText, Trash } from 'react-feather'
-import {  UncontrolledTooltip } from 'reactstrap';
 import useModal from '@hooks/useModal';
 import { get_questionype, get_leveltype, get_levelseasons } from "@utils"
 

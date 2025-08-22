@@ -1,5 +1,5 @@
 // ** React imports
-import React, { Fragment, useContext, useEffect } from 'react'
+import { useContext, useEffect } from 'react'
 
 
 import { t } from 'i18next';
@@ -7,9 +7,9 @@ import { t } from 'i18next';
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
-import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, ModalHeader, FormFeedback, Spinner, InputGroupText, InputGroup, } from "reactstrap";
+import { Form, } from "reactstrap";
 
 import { validate, convertDefaultValue } from "@utils"
 

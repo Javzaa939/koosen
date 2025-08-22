@@ -1,13 +1,10 @@
-import { React, useState, useEffect } from 'react'
-import { Button, Form, FormFeedback, Label, Modal, ModalBody, ModalHeader } from 'reactstrap'
-import Select from 'react-select'
+import { useState, useEffect } from 'react'
 
 import { ReactSelectStyles } from '@utils'
 import { validate} from "@utils"
 
 import * as yup from 'yup'
-import { Controller, useForm } from 'react-hook-form'
-import { AlertTriangle, FileText } from 'react-feather'
+import { useForm } from 'react-hook-form'
 import classnames from "classnames";
 import useApi from '@src/utility/hooks/useApi'
 import useLoader from "@hooks/useLoader";

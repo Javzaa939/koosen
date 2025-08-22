@@ -1,22 +1,7 @@
-import { ArrowLeft, ArrowUpLeft, ChevronRight, Minus, MinusCircle, Plus, PlusCircle, X } from 'react-feather'
-import { Controller, useFormContext, useFieldArray, useForm } from 'react-hook-form'
+import { useFormContext, useFieldArray } from 'react-hook-form'
 
-import {
-    Button,
-    Form,
-    Modal,
-    ModalHeader,
-    ModalBody,
-    Badge,
-    Row,
-    Col,
-    Label,
-    Input,
-    ListGroup,
-    ListGroupItem,
-    InputGroup,
-    InputGroupText
-} from 'reactstrap'
+
+
 import { useTranslation } from 'react-i18next';
 
 

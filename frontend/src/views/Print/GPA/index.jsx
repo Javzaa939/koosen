@@ -1,9 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
-import { Card, Nav, NavItem, NavLink, TabContent } from 'reactstrap'
 
-import GPAStudent from './GPAStudent'
-import GPAProfession from './GPAProfession'
 function Student() {
 
     const [activeTab, setActiveTab] = useState(0)

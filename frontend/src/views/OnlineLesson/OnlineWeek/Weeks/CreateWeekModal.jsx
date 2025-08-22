@@ -1,24 +1,14 @@
 
 import { t } from "i18next";
 import { useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 
-import {
-	Col,
-	Row,
-	Form,
-	Input,
-	Label,
-	Button,
-	ModalBody,
-	ModalFooter,
-	FormFeedback,
-} from "reactstrap";
 
-import AddHomework from "../Homework/AddHomework";
+
+
 
 function CreateWeekModal({ toggle, lesson, isFresh, setIsFresh, editId='' }) {
 	const [beforeWeeks, setBeforeWeeks] = useState([])

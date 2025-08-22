@@ -1,7 +1,5 @@
-import { ArrowDown, ArrowRight, Edit, FileText, Trash } from 'react-feather'
-import { Badge, UncontrolledTooltip } from 'reactstrap';
 import useModal from '@hooks/useModal';
-import { ReactSelectStyles, get_questionype, get_leveltype } from "@utils"
+import { get_questionype, get_leveltype } from "@utils"
 
 export function getColumns(currentPage, rowsPerPage, total_count, handleDelete, handleQuestionEdit) {
 

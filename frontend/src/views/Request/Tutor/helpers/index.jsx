@@ -1,7 +1,4 @@
 import { t } from 'i18next'
-import useModal from '@hooks/useModal'
-import { Book, CheckCircle} from 'react-feather'
-import { Badge, UncontrolledTooltip} from 'reactstrap'
 import { request_flag_color } from '@utils'
 
 

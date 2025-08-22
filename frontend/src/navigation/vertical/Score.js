@@ -1,5 +1,4 @@
 // ** Icons Import
-import { Circle, FileUserIcon } from 'lucide-react';
 
 export default [
     {

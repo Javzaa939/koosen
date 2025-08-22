@@ -1,21 +1,12 @@
-import { useState, Fragment, useEffect } from 'react';
-import { useForm, Controller } from "react-hook-form";
+import { useState, useEffect } from 'react';
+import { useForm } from "react-hook-form";
 import { convertDefaultValue, ReactSelectStyles, validate } from "@utils";
 import { validateSchema } from "./validationSchema";
 import { useTranslation } from 'react-i18next'
-import { ChevronLeft, ChevronRight, X } from 'react-feather'
 import {
-	Card,
-    Row,
     Form,
-    Col,
-    Label,
-    Input,
-    Button,
-    FormFeedback,
 } from "reactstrap";
 
-import Select from 'react-select';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 // import Flatpickr from 'react-flatpickr';

@@ -1,15 +1,13 @@
-import React, { Fragment, useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
-import { Label, Input, Col, Button,  Form, Modal, ModalHeader, ModalBody, Spinner } from 'reactstrap'
+import {  Form } from 'reactstrap'
 
 import { useForm } from "react-hook-form"
-import { X } from 'react-feather'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader'
 import { t } from 'i18next'
 
-import Question from './Questions';
 import './style.css'
 
 const KIND_MULTI_CHOICE = 2 // 'Олон сонголт'

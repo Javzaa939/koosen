@@ -1,17 +1,10 @@
 // ** React Imports
-import { Fragment } from "react"
 
 // ** Custom Components
-import NavbarUser from "./NavbarUser"
-import IntlDropdown from "./IntlDropdown"
-import YearDropDown from "./YearDropDown"
-import LanguageDropdown from "./LanguageDropdown"
 
 // ** Third Party Components
-import { Sun, Moon, Menu } from "react-feather"
 
 // ** Reactstrap Imports
-import { NavItem, NavLink } from "reactstrap"
 
 const ThemeNavbar = (props) => {
     // ** Props

@@ -1,22 +1,10 @@
-import React, { Fragment, useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 
-import {
-	Row,
-	CardHeader,
-	Card,
-	CardTitle,
-	Button,
-	Col,
-	Input,
-	Label,
-	Spinner,
-} from "reactstrap";
 
-import { Search, Plus } from "react-feather";
+
+
 import { useTranslation } from "react-i18next";
 
-import DataTable from "react-data-table-component";
-import Select from 'react-select'
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
@@ -26,8 +14,6 @@ import AuthContext from "@context/AuthContext"
 import { getPagination, get_questiontimetype, ReactSelectStyles } from "@utils";
 import { getColumns } from "./helpers";
 
-import Createmodal from "./Add";
-import Detail from "./Detail";
 
 
 const Survey = () => {

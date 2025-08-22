@@ -1,18 +1,9 @@
-import DataTable from "react-data-table-component";
-import { Search } from "react-feather";
 
-import {
-	Button,
-	Card,
-	CardHeader,
-	CardTitle,
-	Col,
-	Input
-} from "reactstrap";
+
+
 
 import { getPagination } from "@utils";
 import getColumns from "../../hooks/getColumns";
-import React from "react";
 
 export default function StudentListBlock({
 	t,

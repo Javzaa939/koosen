@@ -1,14 +1,8 @@
 // #region 3rd party
-import { Fragment, useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
-import { Card, CardBody, CardHeader, Col, Row, Button, Modal, UncontrolledTooltip, Label, Input, Spinner } from "reactstrap";
-import { ChevronDown, ChevronsRight, Grid, List, X } from 'react-feather'
-import DataTable from "react-data-table-component";
+import { useEffect, useRef, useState } from "react";
 import { t } from "i18next";
-import Select from 'react-select'
 import classnames from 'classnames'
-import { Controller, useForm } from "react-hook-form";
-import Flatpickr from 'react-flatpickr'
+import { useForm } from "react-hook-form";
 
 // css files
 import '@styles/react/libs/flatpickr/flatpickr.scss'
@@ -22,13 +16,11 @@ import { getPagination, ReactSelectStyles } from "@src/utility/Utils";
 // #endregion
 
 // #region custom local
-import AddLessonForm from "./AddLessonForm";
 import { getColumns } from './helpers'
 
 // css files
 import './style.css'
 import moment from "moment";
-import { DotIcon } from "lucide-react";
 // #endregion
 
 export default function AllLessons() {

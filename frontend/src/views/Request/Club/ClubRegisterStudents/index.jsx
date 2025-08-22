@@ -1,24 +1,19 @@
-import { Fragment, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import {Col, Row, Input, Label, Button, Spinner} from 'reactstrap'
 
-import { Search, ChevronDown } from 'react-feather';
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 
-import Select from 'react-select'
 
 import { useTranslation } from 'react-i18next';
 
-import DataTable from 'react-data-table-component'
 
 import { getPagination, ReactSelectStyles } from '@utils'
 
 import classnames from "classnames";
 
 import { getColumns } from './helpers';
-import SolveModal from './Modal';
 
 const ClubRegisterStudents = (props) => {
     const { is_header, def_club_id='' } = props

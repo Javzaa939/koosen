@@ -1,5 +1,4 @@
 import { t } from 'i18next'
-import { Col, Row } from 'reactstrap'
 import '../style.scss'
 
 // Хүснэгтийн баганууд

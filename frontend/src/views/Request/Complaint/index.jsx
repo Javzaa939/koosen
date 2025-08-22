@@ -1,14 +1,10 @@
 
 // ** React imports
-import React, { Fragment, useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
-import { Card, CardHeader, CardTitle, Row, Col, Label, FormFeedback, Input, Button, Spinner } from 'reactstrap';
 
 import { useTranslation } from 'react-i18next'
-import { useForm, Controller } from 'react-hook-form'
-import Select from 'react-select'
-import { ChevronDown, Search } from 'react-feather'
-import DataTable from 'react-data-table-component';
+import { useForm } from 'react-hook-form'
 
 import classnames from 'classnames'
 
@@ -22,8 +18,6 @@ import { getPagination, SOLVED_TYPES, ReactSelectStyles, get_complaint_type } fr
 
 import { getColumns } from './helpers';
 
-import Detail from './detail'
-import Solve from './solve';
 
 
 export default function Request()

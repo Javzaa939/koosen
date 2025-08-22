@@ -1,6 +1,5 @@
-import React, { Fragment, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import useApi from "@hooks/useApi";
-import { Modal, ModalBody, ModalHeader, Card, CardBody, Label, Input, Button, Spinner } from "reactstrap";
 import useLoader from "@hooks/useLoader";
 import './style.css';
 

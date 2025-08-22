@@ -1,9 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
-import { Card, CardBody, CardTitle, CardSubtitle, Carousel, CarouselCaption } from "reactstrap"
 
-import { Bar, ChartProps } from 'react-chartjs-2';
 
-import { moneyFormat } from "@utils"
 import { GRAPHIC_LABEL } from "@utility/consts";
 
 import {
@@ -20,7 +17,6 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 import useApi from '@hooks/useApi';
 import useLoader from "@hooks/useLoader"
-import VerticalBarChartLoader from "@lms_components/VerticalBarChart";
 import { t } from "i18next";
 
 ChartJS.register(

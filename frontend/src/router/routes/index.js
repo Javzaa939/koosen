@@ -1,5 +1,5 @@
 // ** React Imports
-import { Fragment, lazy } from 'react';
+import { Fragment } from 'react';
 
 import UserRoutes from './User';
 import SettingsRoutes from './Settings';
@@ -29,9 +29,6 @@ import OnlineLessonRoutes from './OnlineLesson';
 import StudentBrowserRoutes from './StudentBrowser';
 
 // ** Layouts
-import BlankLayout from '@layouts/BlankLayout';
-import VerticalLayout from '@src/layouts/VerticalLayout';
-import HorizontalLayout from '@src/layouts/HorizontalLayout';
 import LayoutWrapper from '@src/@core/layouts/components/layout-wrapper';
 
 // ** Route Components
@@ -112,9 +109,9 @@ const MergeLayoutRoutes = (layout, defaultLayout) => {
                 }
                 if (route.element) {
                     const Wrapper =
-                        // eslint-disable-next-line multiline-ternary
+                         
                         isObjEmpty(route.element.props) && isBlank === false
-                            ? // eslint-disable-next-line multiline-ternary
+                            ?  
                               LayoutWrapper
                             : Fragment;
 

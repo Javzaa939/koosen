@@ -1,18 +1,9 @@
-import {
-	Col,
-	Input,
-	Label,
-	Row
-} from "reactstrap";
 
-import { Button } from 'reactstrap';
+
+
 import classnames from "classnames";
-import Select from 'react-select';
 
-import { ReactSelectStyles } from "@utils";
 
-import QuestionsBlock from '../QuestionsBlock';
-import { useEffect } from "react";
 
 
 export default function QuestionTitles({

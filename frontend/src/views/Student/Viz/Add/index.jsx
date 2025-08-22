@@ -1,9 +1,7 @@
 // ** React imports
-import React, { Fragment, useState, useEffect, useContext, useMemo } from 'react'
+import { useState, useEffect, useContext, useMemo } from 'react'
 
-import { X } from "react-feather";
 
-import Select from 'react-select'
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
@@ -13,27 +11,15 @@ import { ReactSelectStyles, getPagination} from "@utils"
 
 import classnames from "classnames";
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import {
-    Row,
-    Col,
 	Form,
-	Modal,
-	Input,
-	Label,
-	Button,
-    Spinner,
-	ModalBody,
-	ModalHeader,
-	FormFeedback,
 } from "reactstrap";
 
-import { ChevronDown, Plus, Search } from 'react-feather'
 import { validate, convertDefaultValue,generateLessonYear, get_status} from "@utils"
 import { validateSchema } from '../validateSchema';
 import { useTranslation } from 'react-i18next'
-import DataTable from 'react-data-table-component'
 import { getColumns, customStyles } from './helpers'
 
 const Addmodal = ({ open, handleModal, refreshDatas}) => {

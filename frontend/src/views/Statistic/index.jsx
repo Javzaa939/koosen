@@ -1,37 +1,11 @@
-import React, { useEffect, useState } from "react";
-import {
-    Card,
-    TabContent,
-    Nav,
-    NavItem,
-    NavLink,
-    CardHeader,
-    CardBody
-} from 'reactstrap'
+import { useEffect, useState } from "react";
 
 
-import ADB1 from "./ADB1";
-import ADB2 from "./ADB2";
-import ADB3 from "./ADB3";
-import ADB4 from "./ADB4";
-import ADB5 from "./ADB5";
-import ADB6 from "./ADB6";
-import ADB7 from "./ADB7";
-import ADB8 from "./ADB8";
-import ADB9 from "./ADB9";
-import ADB10 from "./ADB10";
-import ADB11 from "./ADB11";
-import ADB12 from "./ADB12";
-import ADB13 from "./ADB13";
-import ADB14 from "./ADB14";
-import ADB15 from "./ADB15";
-import ADB16 from "./ADB16";
-import ADB17 from "./ADB17";
-import ADB18 from "./ADB18";
+
+
 
 
 import './style.scss'
-import Blank from "./Blank";
 
 
 function Statistic() {

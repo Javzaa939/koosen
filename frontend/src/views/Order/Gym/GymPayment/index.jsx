@@ -1,25 +1,19 @@
-import { Fragment, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import { Col, Row, Card, CardHeader, CardTitle, Input, Label, Button, Spinner } from 'reactstrap'
 
-import { Search, ChevronDown, Plus } from 'react-feather';
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 
 import { useTranslation } from 'react-i18next';
 
-import DataTable from 'react-data-table-component'
 
 import { getPagination } from '@utils'
 
 import { getColumns } from './helpers';
 
-import Addmodal from './Add';
 
-import EditModal from './Edit';
 
-import Detail from '../GymPayment/Detail'
 
 const GymPayment = () => {
     const { t } = useTranslation()

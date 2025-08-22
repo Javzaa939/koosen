@@ -1,7 +1,5 @@
 import { t } from 'i18next'
 
-import { Badge, UncontrolledTooltip } from 'reactstrap'
-import { X, Edit } from 'react-feather'
 import useModal from "@hooks/useModal"
 import AuthContext from "@context/AuthContext"
 import { useContext } from 'react'

@@ -1,5 +1,4 @@
 // ** Icons Import
-import { Circle } from 'react-feather'
 
 export default [
     {

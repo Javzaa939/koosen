@@ -1,17 +1,7 @@
 import { useEffect, useState } from 'react';
-import { MinusCircle, PlusCircle, } from 'react-feather'
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import {
-    Button,
     Form,
-    Modal,
-    ModalHeader,
-    ModalBody,
-    Row,
-    Col,
-    Label,
-    Input,
-    FormFeedback,
 } from 'reactstrap'
 import { useTranslation } from 'react-i18next';
 import { validate } from "@utils";

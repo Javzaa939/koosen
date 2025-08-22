@@ -1,4 +1,4 @@
-import { utils, writeFile } from 'xlsx-js-style';
+import { utils } from 'xlsx-js-style';
 
 export function dass21Sheet(datas) {
     const mainData = datas.map((data, index) => {

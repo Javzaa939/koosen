@@ -1,12 +1,8 @@
-import { t } from 'i18next';
 import { useState, useEffect, useContext } from 'react'
 
-import ReactCountryFlag from 'react-country-flag'
 
 // ** Reactstrap Imports
-import { UncontrolledDropdown, DropdownMenu, DropdownItem, DropdownToggle } from 'reactstrap'
 
-import {Circle } from 'react-feather';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 

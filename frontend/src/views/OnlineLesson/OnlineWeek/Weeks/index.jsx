@@ -1,8 +1,5 @@
 import { useMemo, useState } from "react";
-import { Button, Modal, ModalHeader } from "reactstrap";
 
-import WeeksList from "./WeeksList";
-import CreateWeekModal from "./CreateWeekModal";
 
 function CreateWeek({ lesson}) {
 	const toggle = () => setModal(!modal);

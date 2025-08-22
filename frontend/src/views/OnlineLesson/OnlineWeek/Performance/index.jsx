@@ -1,32 +1,19 @@
-import React, { Fragment, useEffect, useState } from "react";
-import {
-    Button,
-    Card,
-    CardHeader,
-    CardTitle,
-    Col,
-    Input,
-    Label,
-    Row
-} from 'reactstrap';
+import { useEffect, useState } from "react";
 
-import Select from 'react-select';
+
+
 
 import useApi from '@hooks/useApi';
 import useLoader from "@hooks/useLoader";
 
-import {
-	Edit3,
-    Search
-} from 'react-feather';
+
+
 import { useTranslation } from "react-i18next";
 
-import DataTable from "react-data-table-component";
 
 import { getPagination, ReactSelectStyles } from "@utils";
 import { getColumns } from "./helpers";
 
-import Add from "./Add";
 
 function Performance({lesson}) {
 

@@ -1,15 +1,10 @@
 // ** React Imports
-import { Fragment, useState, useContext } from 'react'
+import { useState, useContext } from 'react'
 import { useParams } from 'react-router-dom'
 
 // ** Reactstrap Imports
-import { TabContent, TabPane, Nav, NavItem, NavLink, Row, Col  } from 'reactstrap'
-import { User, Lock } from 'react-feather'
 
 // ** User View Components
-import ChangePass from './ChangePassword'
-import UserInfo from './UserInformation'
-import UserMainPage from './Main'
 
 // ** Styles
 import '@styles/react/apps/app-users.scss'

@@ -1,16 +1,12 @@
 
 import { useState, useEffect } from 'react'
-import { Card, CardTitle, CardHeader } from 'reactstrap'
 import { useTranslation } from 'react-i18next'
-import { ChevronDown } from 'react-feather'
-import DataTable from 'react-data-table-component'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 
 import { getPagination } from '@utils'
 import { getColumns } from './helpers'
-import UpdateModal from './Modal'
 
 
 export default function Signature()

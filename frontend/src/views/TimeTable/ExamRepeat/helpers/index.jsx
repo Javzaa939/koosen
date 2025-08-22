@@ -1,8 +1,6 @@
-import { DownloadCloud, Edit, Printer, XSquare } from 'react-feather'
 import { t } from "i18next";
 import useModal from "@hooks/useModal"
 
-import { Badge, UncontrolledTooltip } from "reactstrap";
 
 // Хүснэгтийн баганууд
 export function getColumns (currentPage, rowsPerPage, datas, handleEditModal,handleDelete,  user, handlePrint,handleDownloadScore) {

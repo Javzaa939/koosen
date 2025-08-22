@@ -1,7 +1,6 @@
 
-import React, { useEffect, useState } from "react"
+import { useState } from "react"
 
-import { Table, Popover, PopoverBody, Button } from "reactstrap"
 
 /** Олон Popover ашиглахын тулд ашигласан
  * Төлбөр хийсэн түүх

@@ -1,5 +1,4 @@
 // ** Icons Import
-import { CalendarClockIcon, Circle } from 'lucide-react';
 
 export default [
     {

@@ -1,11 +1,8 @@
-import React, { Fragment, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
-import { Card, Nav, NavItem, NavLink, TabContent, Row, Col, CardBody } from 'reactstrap'
 
 import { useTranslation } from 'react-i18next';
 
-import GymRegisterStudents from './GymRegisterStudents';
-import GymPayment from './GymPayment';
 
 const Gym = () => {
 

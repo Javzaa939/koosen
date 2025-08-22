@@ -1,6 +1,5 @@
 
 import { t } from 'i18next'
-import { Button } from 'reactstrap';
 
 export function getColumns (currentPage, rowsPerPage, total_count, printAll)
 {

@@ -1,7 +1,11 @@
 import { t } from 'i18next';
+<<<<<<< HEAD
+import useModal from '@hooks/useModal';
+=======
 import { Badge, UncontrolledTooltip} from 'reactstrap'
 import { Edit, X} from 'react-feather'
 import useModal from "@hooks/useModal"
+>>>>>>> parent of b5e8dce3 (update)
 
 // Хүснэгтийн баганууд
 export function getColumns (currentPage, rowsPerPage, total_count, handleUpdateModal, handleDelete, is_hr) {
