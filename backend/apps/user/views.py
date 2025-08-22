@@ -162,8 +162,6 @@ class UserAPILoginView(
 ):
     """ User login api view """
 
-    serializer_class = UserInfoSerializer
-
     def get(self, request):
         """ Нэвтэрсэн хэрэглэгчийн мэдээллийг авах """
 
@@ -172,7 +170,7 @@ class UserAPILoginView(
         if not user:
             return request.send_data({})
 
-        serializer = self.get_serializer(user)
+        serializer = UserInfoSerializer(user)
 
         return request.send_data(serializer.data)
 
