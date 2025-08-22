@@ -39,7 +39,8 @@ const Position = () => {
     const [update_modal, setUpdateModal] = useState(false)
     const [editData, setEditData] = useState({})
     const [edit_id, setEditId] = useState([]);
-
+    const [permission_option, setPerOption] = useState([]);
+    const [mainPositionData, setMainPositionData] = useState([])
 
     // Нийт датаны тоо
     const [total_count, setTotalCount] = useState(1)
@@ -64,6 +65,26 @@ const Position = () => {
             setTotalCount(data?.count)
         }
     }
+
+    async function getPerListData() {
+        const { success, data } = await fetchData(positionApi.getPerList())
+        if (success) {
+            setPerOption(data)
+        }
+    }
+    useEffect(() => {
+        getPerListData()
+    },[])
+
+    async function getMainPosionData() {
+        const { success, data } = await fetchData(positionApi.getMainPosition())
+        if (success) {
+            setMainPositionData(data)
+        }
+    }
+    useEffect(() => {
+        getMainPosionData()
+    },[])
 
     // addModal
     const handleModal =() =>{
@@ -178,8 +199,8 @@ const Position = () => {
                     </div>
                 }
             </Card>
-            { add_modal && <AddModal open={add_modal} handleModal={handleModal} refreshDatas={getDatas} editData={editData}/> }
-			{ update_modal && <UpdateModal open={update_modal} editId={edit_id}  handleEdit={handleEdit} refreshDatas={getDatas} editData={editData} school_id={school_id}/> }
+            { add_modal && <AddModal open={add_modal} handleModal={handleModal} refreshDatas={getDatas} permission_option={permission_option} mainPositionData={mainPositionData}/> }
+			{ update_modal && <UpdateModal open={update_modal} editId={edit_id}  handleEdit={handleEdit} refreshDatas={getDatas} editData={editData} permission_option={permission_option} mainPositionData={mainPositionData}/> }
         </Fragment>
     )
 }

@@ -59,7 +59,8 @@ urlpatterns = [
     path('position/', OrgPositionListAPIView().as_view()),
     path('position/list/', AllOrgPositionListAPIView().as_view()),
     path('position/<int:pk>/', OrgPositionListAPIView().as_view()),
-    path('position/permission/', PermissionListAPIView().as_view()),
+    path('permission/', PermissionListAPIView().as_view()),
+    path('position/main/', MainPositionAPIView.as_view()),
 
     # Хөтөлбөрийн багийн ахлагчийн жагсаалт
     path('leader/list/', DepLeaderAPIView().as_view()),

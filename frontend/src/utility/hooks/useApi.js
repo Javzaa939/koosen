@@ -653,6 +653,8 @@ function useApi(isDisplay=false) {
 				post: (data) => instance.post(`/core/position/`, data),
 				put: (data, pk) => instance.put(`/core/position/${pk}/`, data),
 				delete: (pk) => instance.delete(`/core/position/${pk}/`),
+				getMainPosition: () => instance.get(`/core/position/main/`),
+
 			},
 
 		},

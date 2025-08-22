@@ -40,7 +40,7 @@ from core.models import Teachers
 from core.models import Employee
 from core.models import OrgPosition
 from core.models import User
-from core.models import Permissions
+from core.models import Permissions, MainPosition
 
 
 from lms.models import Country
@@ -1179,7 +1179,7 @@ class OrgPositionListAPIView(
 ):
     """ Албан тушаалын жагсаалт """
 
-    queryset = OrgPosition.objects.all()
+    queryset = OrgPosition.objects.all().order_by('-created_at')
     serializer_class = OrgPositionSerializer
 
     pagination_class = CustomPagination
@@ -1202,22 +1202,20 @@ class OrgPositionListAPIView(
 
     @login_required()
     def post(self, request):
-
-        org = getattr(request, 'org_filter', {}).get('org')
-
-        if not org:
-            return request.send_error("ERR_002", "Албан тушаал нэмэх эрхгүй байна")
-
-        request.data["org"] = org.id
+        # org = getattr(request, 'org_filter', {}).get('org')
+        # if not org:
+        #     return request.send_error("ERR_002", "Албан тушаал нэмэх эрхгүй байна")
 
         self.serializer_class = OrgPositionPostSerializer
+        # request.data["org"] = org.id
+        request.data["org"] = 2
 
-        with transaction.atomic():
-            try:
+        try:
+            with transaction.atomic():
                 self.create(request).data
-            except Exception as e:
-                print(e)
-                return request.send_error('ERR_002')
+        except Exception as e:
+            print(e)
+            return request.send_error('ERR_002')
         return request.send_info("INF_001")
 
     @login_required()
@@ -1226,6 +1224,7 @@ class OrgPositionListAPIView(
 
         request_data = request.data
         instance = self.queryset.filter(id=pk).first()
+        print('request_data,request_data', request_data)
 
         try:
             serializer = self.get_serializer(instance, data=request_data)
@@ -1257,7 +1256,7 @@ class PermissionListAPIView(
 ):
     """ Албан тушаалын жагсаалт """
 
-    queryset = Permissions.objects
+    queryset = Permissions.objects.all()
     serializer_class = PermissionSerializer
 
     def get(self, request):
@@ -1904,3 +1903,15 @@ class SysInfoApiView(
             'student': queryset.filter(system_type=AccessHistoryLms.STUDENT).count(),
             'teacher': queryset.filter(system_type=AccessHistoryLms.TEACHER).count(),
         })
+
+
+class MainPositionAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+):
+    """ Албан тушаалын үндсэн төрөлүүд """
+
+    def get(self, request):
+
+        data = MainPosition.objects.all().values('id', 'name', 'code')
+        return request.send_data(list(data))
