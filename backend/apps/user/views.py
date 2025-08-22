@@ -281,7 +281,8 @@ class UserAPILoginView(
             if request.data.get('isStudent'):
                 self.student_login(request, ending_data)
 
-            self.default_login(request, ending_data)
+            else:
+                self.default_login(request, ending_data)
 
         except Exception:
             traceback.print_exc()
