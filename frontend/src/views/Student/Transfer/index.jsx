@@ -1,13 +1,10 @@
 // ** React Imports
-import { Fragment, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
-import { Card, TabContent, Nav, NavItem, NavLink } from 'reactstrap'
 
 import { useTranslation } from "react-i18next";
 
-import Irsen from './Irsen'
 
-import Yvsan from './Yvsan'
 
 const Transfer = () => {
 

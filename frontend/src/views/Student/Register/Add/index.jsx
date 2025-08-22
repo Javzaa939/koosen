@@ -1,9 +1,7 @@
 // ** React imports
-import React, { Fragment, useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
-import { X } from "react-feather";
 
-import Select from 'react-select'
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
@@ -14,20 +12,10 @@ import { ReactSelectStyles , pay_type } from "@utils"
 
 import classnames from "classnames";
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import {
-    Row,
-    Col,
 	Form,
-	Modal,
-	Input,
-	Label,
-	Button,
-    Spinner,
-	ModalBody,
-	ModalHeader,
-	FormFeedback,
 } from "reactstrap";
 
 import { validate, convertDefaultValue, get_ys_undes } from "@utils"

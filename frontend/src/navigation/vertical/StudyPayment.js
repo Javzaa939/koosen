@@ -1,5 +1,4 @@
 // ** Icons Import
-import { CreditCardIcon, Circle } from 'lucide-react';
 
 export default [
     {

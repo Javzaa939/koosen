@@ -1,31 +1,19 @@
 // ** React imports
-import React, { Fragment, useState} from 'react'
+import { useState} from 'react'
 
-import Select from 'react-select'
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 import { t } from 'i18next'
 
-import classnames from "classnames";
 
 import { useForm} from "react-hook-form";
 
 import {
-    Row,
-    Col,
 	Form,
-	Modal,
-	Label,
-	Button,
-	ModalBody,
-	ModalHeader,
-    Spinner,
-	FormFeedback,
 } from "reactstrap";
 
-import { validate, ReactSelectStyles, get_status } from '@utils'
-import { validateSchema } from '../validateSchema'
+import { ReactSelectStyles, get_status } from '@utils'
 
 
 const EditModal = ({ open, handleModal, refreshDatas, studentVizData}) => {

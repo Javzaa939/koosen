@@ -1,19 +1,10 @@
 // import {Modal, ModalHeader, ModalBody, } from 'reactstrap'
-import { Plus, } from 'react-feather'
-import {  FormProvider, useFieldArray, useForm } from 'react-hook-form'
+import { useFieldArray, useForm } from 'react-hook-form'
 import {
-    Button,
     Form,
-    Modal,
-    ModalHeader,
-    ModalBody,
-    Row,
-    Col,
-    FormFeedback,
 } from 'reactstrap'
 import { useTranslation } from 'react-i18next';
 
-import SingleQuestion from './SingleQuestion';
 import { validate } from "@utils";
 import * as Yup from "yup";
 import useLoader from '@hooks/useLoader';

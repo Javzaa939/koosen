@@ -1,18 +1,17 @@
 // ** React imports
-import React, { Fragment, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 
-import Select from 'react-select'
 
 import { useTranslation } from 'react-i18next';
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import classnames from 'classnames'
 
-import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, ModalHeader, FormFeedback } from "reactstrap";
+import { Form } from "reactstrap";
 
 import { validate, get_solved_type, ReactSelectStyles, convertDefaultValue } from "@utils"
 

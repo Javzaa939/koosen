@@ -1,13 +1,10 @@
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 
-import { Button, FormFeedback, Input, Badge } from 'reactstrap';
-import { CornerDownRight, X} from 'react-feather'
 
 import { useTranslation } from 'react-i18next';
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
-import Select from 'react-select'
 
 import useModal from '@hooks/useModal'
 import AuthContext from "@context/AuthContext"

@@ -1,16 +1,11 @@
-import React, { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 
-import {
-    Modal,
-    ModalBody,
-    ModalHeader,
-    Input,
-} from 'reactstrap'
+
+
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 
-import CTable from '@lms_components/CTable'
 
 function UpdateInput(props) {
 

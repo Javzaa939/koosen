@@ -1,6 +1,4 @@
-import React, { useState, useRef } from 'react'
-import { Button, Modal, ModalHeader, ModalBody } from 'reactstrap'
-import ReactQuill from 'react-quill';
+import { useState, useRef } from 'react'
 
 import useApi from "@hooks/useApi";
 import useLoader from '@hooks/useLoader';

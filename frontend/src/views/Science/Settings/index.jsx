@@ -1,8 +1,6 @@
-import React, { useState, Fragment, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
-import { TabContent, Nav, NavItem, NavLink, Card } from 'reactstrap'
 
-import CHAMBER from './Champer'
 
 export default function Settings() {
 

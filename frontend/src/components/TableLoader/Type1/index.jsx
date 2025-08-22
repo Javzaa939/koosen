@@ -1,5 +1,3 @@
-import React from 'react'
-import { Spinner } from 'reactstrap'
 
 function Type1({ skin }) {
     return (

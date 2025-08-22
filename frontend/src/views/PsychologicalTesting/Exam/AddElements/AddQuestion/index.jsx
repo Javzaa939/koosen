@@ -1,23 +1,13 @@
-import {useState, Fragment, useEffect} from 'react';
+import {useState, useEffect} from 'react';
 import {ReactSelectStyles} from "@utils";
 import {useForm} from "react-hook-form";
-import {X} from "react-feather";
 import {t} from 'i18next';
 
-import {
-    Col,
-    Row,
-    Label,
-	Modal,
-    Button,
-	ModalBody,
-    ModalFooter,
-	ModalHeader,
-} from "reactstrap";
+
+
 
 import useLoader from '@hooks/useLoader';
 import useApi from '@hooks/useApi';
-import Select from 'react-select';
 
 
 const AddQuestion = ({ open, handleModal, refreshDatas, test_id, refreshQuestionData}) => {

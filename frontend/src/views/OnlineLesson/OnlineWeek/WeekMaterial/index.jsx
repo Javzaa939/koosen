@@ -1,16 +1,12 @@
 import { useState, useContext, useEffect } from "react";
-import { Modal, ModalHeader, ModalBody, Form, Row, Input, Col, Label, FormFeedback, Button, Alert, Badge, Spinner } from "reactstrap";
 import AuthContext from "@context/AuthContext"
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import classnames from "classnames"
-import Select from 'react-select'
 import { t } from "i18next";
 import { ReactSelectStyles, material_type, validate } from '@utils'
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import useModal from "@hooks/useModal";
-import LectureModal from './LectureModal'
-import { X } from "react-feather";
 
 import * as Yup from "yup";
 

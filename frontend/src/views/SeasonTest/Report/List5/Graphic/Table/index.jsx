@@ -1,5 +1,4 @@
-import React, { useCallback } from "react";
-import { Table } from "reactstrap";
+import { useCallback } from "react";
 
 /**
  * @param {} props

@@ -1,7 +1,6 @@
 // ** Icons Import
 
 // import ableLogo from "@src/assets/images/ableLogo.png"
-import { SettingsIcon, Circle } from 'lucide-react';
 
 export default [
     {

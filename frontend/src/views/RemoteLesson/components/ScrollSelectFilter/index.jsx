@@ -1,4 +1,3 @@
-import Select from 'react-select';
 import { ReactSelectStyles } from "@utils";
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';

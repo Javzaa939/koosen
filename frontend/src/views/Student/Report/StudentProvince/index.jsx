@@ -1,4 +1,3 @@
-import React from 'react'
 import { useState, useEffect } from 'react'
 
 import useApi from '@hooks/useApi';
@@ -7,9 +6,7 @@ import { useSkin } from "@hooks/useSkin"
 
 import Highcharts from 'highcharts';
 
-import { Card, CardBody } from 'reactstrap';
 
-import VerticalBarChartLoader from "@lms_components/VerticalBarChart";
 
 require('highcharts/indicators/indicators')(Highcharts)
 require('highcharts/indicators/pivot-points')(Highcharts)

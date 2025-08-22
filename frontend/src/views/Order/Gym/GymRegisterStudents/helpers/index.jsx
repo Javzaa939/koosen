@@ -1,10 +1,7 @@
-import useModal from '@hooks/useModal'
 
 import { t } from 'i18next'
 
-import { Badge, UncontrolledTooltip } from 'reactstrap'
 
-import { Edit } from 'react-feather'
 
 export function getColumns (currentPage, rowsPerPage, total_count, is_header) {
 

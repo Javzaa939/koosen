@@ -1,25 +1,13 @@
-import { Fragment, useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
-import {
-    Row,
-    Col,
-    Card,
-    Input,
-    Label,
-    Button,
-    CardTitle,
-    CardHeader,
-    Spinner,
-} from 'reactstrap'
 
-import Addleavemodal from './Add';
+
+
 
 import { useTranslation } from "react-i18next";
-import { ChevronDown, Edit, FileText, Plus, Printer, Search } from 'react-feather'
 
 import useLoader from '@hooks/useLoader';
 import useUpdateEffect from '@hooks/useUpdateEffect'
-import DataTable from 'react-data-table-component'
 
 import { getColumns } from './helpers'
 import AuthContext from '@context/AuthContext'
@@ -27,12 +15,9 @@ import { getPagination } from '@utils'
 import SchoolContext from '@context/SchoolContext'
 import useApi from '@hooks/useApi';
 
-import EditModal from './Edit'
 
-import Select from 'react-select'
 import {  ReactSelectStyles, generateLessonYear } from "@utils"
 
-import TushaalModal from './TushaalModal'
 import { useNavigate } from 'react-router-dom';
 import excelDownload from '@src/utility/excelDownload';
 

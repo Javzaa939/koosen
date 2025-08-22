@@ -1,22 +1,8 @@
-import React, { useState } from 'react'
-import {
-    Accordion,
-    AccordionBody,
-    AccordionHeader,
-    AccordionItem,
-    Button,
-    Col,
-    Modal,
-    ModalBody,
-    ModalFooter,
-    ModalHeader,
-    Row
-} from 'reactstrap'
+import { useState } from 'react'
+
+
 
 import './style.scss'
-import PrintMongolia from '../PrintMongolia';
-import PrintEnglish from '../PrintEnglish';
-import PrintNational from '../PrintNational';
 import { useNavigate } from 'react-router-dom';
 
 function PrintModal({ printModal, multiplePrintHandler, selectedRows }) {

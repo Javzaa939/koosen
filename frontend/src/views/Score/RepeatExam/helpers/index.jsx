@@ -1,8 +1,5 @@
 import { t } from "i18next";
-import { Edit } from 'react-feather'
-import { Badge, UncontrolledTooltip } from "reactstrap";
 import { useContext } from 'react'
-import css from '@mstyle/style.module.css'
 
 import AuthContext from "@context/AuthContext"
 import SchoolContext from "@context/SchoolContext"

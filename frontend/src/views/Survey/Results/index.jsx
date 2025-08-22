@@ -1,18 +1,8 @@
-import React, { Fragment, useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 
-import {
-	Row,
-	CardHeader,
-	Card,
-	CardTitle,
-	Button,
-	Col,
-	Input,
-	Spinner,
-	Badge
-} from "reactstrap";
 
-import { Search, AlertCircle } from "react-feather";
+
+
 import { useTranslation } from "react-i18next";
 
 
@@ -20,7 +10,6 @@ import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 
 
-import ListC from "./ListC";
 import "./style.css"
 
 function SurveyResults() {

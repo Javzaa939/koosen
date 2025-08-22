@@ -1,12 +1,11 @@
-import React, { Fragment, useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 
-import { Row, ModalBody, ModalHeader, Col, FormFeedback, Input, Form, Modal, Label, Button} from 'reactstrap'
+import { Form} from 'reactstrap'
 
 import { useQuill } from 'react-quilljs';
 
-import Select from 'react-select'
 
 import 'quill/dist/quill.snow.css'
 

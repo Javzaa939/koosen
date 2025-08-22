@@ -1,21 +1,14 @@
 
-import React, { useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 
 import { useParams } from 'react-router-dom';
-import { Card, Row, Col, Form } from 'reactstrap';
-import { ChevronsLeft } from 'react-feather'
+import { Form } from 'reactstrap';
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import { useTranslation } from "react-i18next";
 import { useNavigate } from 'react-router-dom'
 
-import LessonSchedule from "./LessonSchedule";
-import BoardingHouse from "./DormitoryInfo"
-import Institute from "./Institute"
-import Tutor from './TutorInfo'
-import SelfGroup from './SelfGroup'
-import TeachLesson from './TeachLesson'
 
 export default function Info()
 {

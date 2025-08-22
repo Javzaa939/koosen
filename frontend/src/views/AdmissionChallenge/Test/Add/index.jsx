@@ -1,26 +1,15 @@
-import { useState, Fragment, useEffect } from 'react';
-import { useForm, Controller } from "react-hook-form";
-import { convertDefaultValue, ReactSelectStyles, validate } from "@utils";
+import { useState, useEffect } from 'react';
+import { useForm } from "react-hook-form";
+import { convertDefaultValue, validate } from "@utils";
 import { validateSchema } from "./validationSchema";
 import { t } from 'i18next';
 
 import {
-	Modal,
-	ModalHeader,
-	ModalBody,
-    Row,
     Form,
-    Col,
-    Label,
-    Input,
-    Button,
-    FormFeedback,
 } from "reactstrap";
 
-import Select from 'react-select';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
-import Flatpickr from 'react-flatpickr';
 import '@styles/react/libs/flatpickr/flatpickr.scss';
 
 const Addmodal = ({ open, handleModal, refreshDatas, select_datas, editData, examType }) => {

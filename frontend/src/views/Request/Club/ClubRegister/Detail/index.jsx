@@ -1,12 +1,9 @@
-import React, { Fragment, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
-import { Modal, Row, Col, ModalHeader, ModalBody, Nav, NavItem, NavLink, TabContent } from 'reactstrap'
 
 import { useTranslation } from 'react-i18next'
 
-import ClubRegisterStudents from '../../ClubRegisterStudents';
 
-import CDetailModal from './Modal';
 
 const DetailModal = (props) => {
 

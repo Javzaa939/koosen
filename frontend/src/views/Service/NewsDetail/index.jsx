@@ -1,14 +1,11 @@
-import React, { Fragment, useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect } from "react";
 
-import { Col, Row, Card, CardHeader, CardTitle, Button, Input, Label, Spinner } from 'reactstrap'
 
 import { useTranslation } from 'react-i18next'
 
-import { ChevronDown, Plus, Search } from 'react-feather'
 
-import DataTable from "react-data-table-component";
 
-import { getPagination, ReactSelectStyles } from '@utils'
+import { getPagination } from '@utils'
 
 import AuthContext from '@context/AuthContext'
 
@@ -18,10 +15,7 @@ import useApi from "@hooks/useApi"
 
 import { getColumns } from "./helpers";
 
-import Addmodal from "./Add";
 
-import EditModal from "./Edit";
-import { get } from "react-hook-form";
 
 const News = () => {
 

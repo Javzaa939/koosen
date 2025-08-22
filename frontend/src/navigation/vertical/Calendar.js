@@ -1,4 +1,3 @@
-import { CalendarDaysIcon } from 'lucide-react';
 
 export default [
     {

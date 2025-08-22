@@ -1,20 +1,14 @@
 // ** React imports
-import React, { Fragment, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
-import { X } from "react-feather";
 
-import {
-	Modal,
-	ModalBody,
-	ModalHeader,
-    Spinner
-} from "reactstrap";
+
+
 
 import { useTranslation } from 'react-i18next';
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
-import Calendar from './Calendar'
 import { get_time_date } from "@utils"
 
 

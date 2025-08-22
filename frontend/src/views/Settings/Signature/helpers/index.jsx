@@ -1,9 +1,5 @@
 
-import React, { Fragment } from "react";
-import { Clipboard } from "react-feather";
-import { UncontrolledTooltip } from "reactstrap";
 
-import useModal from '@hooks/useModal'
 
 import { t } from "i18next";
 

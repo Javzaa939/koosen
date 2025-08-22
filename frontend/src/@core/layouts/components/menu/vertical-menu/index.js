@@ -1,13 +1,10 @@
 // ** React Imports
-import { Fragment, useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 
 // ** Third Party Components
 import classnames from 'classnames';
-import PerfectScrollbar from 'react-perfect-scrollbar';
 
 // ** Vertical Menu Components
-import VerticalMenuHeader from './VerticalMenuHeader';
-import VerticalNavMenuItems from './VerticalNavMenuItems';
 
 const Sidebar = (props) => {
     // ** Props

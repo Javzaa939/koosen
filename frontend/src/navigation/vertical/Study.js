@@ -1,5 +1,4 @@
 // ** Icons Import
-import { BookOpenCheckIcon, Circle } from 'lucide-react';
 
 export default [
     {

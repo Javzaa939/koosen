@@ -1,30 +1,23 @@
 // ** React Import
-import { Fragment, useState, useEffect, useContext, useUpdateEffect } from "react"
+import { useState, useEffect, useContext } from "react"
 
-import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner } from "reactstrap"
 
 import { useTranslation } from "react-i18next"
 
-import { ChevronDown, Plus, Search } from "react-feather"
 
-import DataTable from "react-data-table-component"
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import AuthContext from '@context/AuthContext'
 import SchoolContext from "@context/SchoolContext"
-import ActiveYearContext from "@context/ActiveYearContext"
 
 import classnames from "classnames";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import { getPagination, generateLessonYear,ReactSelectStyles} from '@utils'
 
 import { getColumns } from "./helpers"
 
-import Addmodal from './Add'
-import Editmodal from "./Edit"
-import Select from 'react-select'
 
 
 

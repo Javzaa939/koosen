@@ -1,27 +1,15 @@
 // ** React Imports
-import { Fragment, useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
-import {
-    Row,
-    Col,
-    Card,
-    Input,
-    Label,
-    Button,
-    CardTitle,
-    CardHeader,
-    Spinner,
-} from 'reactstrap'
+
+
 
 import { useTranslation } from 'react-i18next'
 
-import Select from 'react-select'
 
-import { ChevronDown, Download, Search, HelpCircle } from 'react-feather'
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
-import DataTable from 'react-data-table-component'
 
 import classnames from "classnames";
 
@@ -32,7 +20,6 @@ import SchoolContext from '@context/SchoolContext'
 import { getPagination, ReactSelectStyles } from '@utils'
 
 import { getColumns } from './helpers'
-import DetailModal from './DetailModal'
 
 const ScoreRegister = () => {
 
@@ -378,7 +365,7 @@ const ScoreRegister = () => {
                     </Col>
                     <Col md={3} sm={12} className='d-flex justify-content-start align-items-center'>
                         <Button size='sm' color='primary' className='mt-2' onClick={handleTeacherDownload} disabled={!(selectedDatas && selectedDatas.length > 0)}  ><Download size={15} className='me-1' />Багшийн дүн татах</Button>
-                        <a href='https://drive.google.com/file/d/1eeuuD1bJxZjmqrc_sCuAg4i0OHQyGCoc/view?usp=sharing' target="_blank">
+                        <a href='https://drive.google.com/file/d/1eeuuD1bJxZjmqrc_sCuAg4i0OHQyGCoc/view?usp=sharing' target="_blank" rel="noreferrer">
                             <Button color='primary' container className='mx-1 mt-2' size='sm'>
                                 <HelpCircle size={15} />
                                 <span className='align-middle ms-50'>{t('Заавар')}</span>

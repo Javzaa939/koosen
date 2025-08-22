@@ -1,25 +1,14 @@
 
 import {
-    Row,
-    Col,
-    Card,
 	Form,
-	Modal,
-	Input,
-	Label,
-	Button,
-    CardBody,
-	ModalBody,
-	ModalHeader,
 } from "reactstrap";
 import { t } from 'i18next';
-import Select from 'react-select'
 import useApi from '@hooks/useApi';
 import classnames from 'classnames'
 import useLoader from '@hooks/useLoader';
 import { validateSchema } from './validateSchema'
-import { useForm, Controller } from "react-hook-form";
-import React, { Fragment, useEffect, useState} from 'react'
+import { useForm } from "react-hook-form";
+import { useEffect, useState} from 'react'
 import { convertDefaultValue , validate,request_flag_color, request_flag_option, ReactSelectStyles} from "@utils"
 
 const UpdateModal = ({ open, handleModal, is_view, editId, refreshDatas, datas }) => {

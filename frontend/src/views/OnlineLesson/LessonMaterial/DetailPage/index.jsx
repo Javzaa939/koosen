@@ -1,30 +1,14 @@
-import React, { Fragment, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import useModal from "@hooks/useModal";
+
+
 import {
-	Row,
-	Col,
-	Button,
-	Input,
-	Card,
-	CardBody,
-	CardHeader,
-	ListGroup,
-	ListGroupItem,
-	Badge,
-	UncontrolledTooltip,
-} from "reactstrap";
-import {
-	Search,
-	Plus,
 	File,
 	Camera,
 	Film,
 	Headphones,
-	X,
-	ChevronsLeft,
 } from "react-feather";
-import Addmodal from "../Add";
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 import { t } from "i18next";

@@ -1,6 +1,5 @@
-import React, { Fragment, useState, useEffect, useContext, useRef, useMemo} from "react";
+import { useState, useEffect, useContext, useRef, useMemo} from "react";
 
-import Select from 'react-select'
 
 import useLoader from "@hooks/useLoader";
 
@@ -8,27 +7,18 @@ import { ReactSelectStyles, generateLessonYear } from "@utils"
 
 import classnames from "classnames";
 
-import {ChevronDown ,Search} from "react-feather"
 
-import {
-    Row,
-    Col,
-    Card,
-    Input,
-	Label,
-    Button,
-    Spinner,
-} from "reactstrap";
+
+
 
 
 import useApi from '@hooks/useApi';
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import SchoolContext from "@context/SchoolContext"
 import { t } from "i18next";
 
-import CTable from './CTable'
 import AuthContext from "@context/AuthContext"
 
 function UpdateInput(props) {

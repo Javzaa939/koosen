@@ -1,8 +1,6 @@
 import { t } from 'i18next';
 
-import { Button, Badge, UncontrolledTooltip } from 'reactstrap'
 
-import { Book, CheckCircle } from 'react-feather'
 
 // Хүснэгтийн баганууд
 export function getColumns (currentPage, rowsPerPage, total_count, handleRequestSolved)
@@ -52,7 +50,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleRequest
 			header: 'student',
 			name: `${t('Оюутан')}`,
 			selector: (row) => {
-				return <a className='text-decoration-underline' href={`/student/${row.student.id}/info/`} target="_blank" >{row?.student?.full_name}</a>
+				return <a className='text-decoration-underline' href={`/student/${row.student.id}/info/`} target="_blank" rel="noreferrer" >{row?.student?.full_name}</a>
 			},
             sortable: true,
 			minWidth: "180px",

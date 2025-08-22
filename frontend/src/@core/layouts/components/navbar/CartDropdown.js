@@ -1,13 +1,10 @@
 // ** React Imports
 import { Link } from 'react-router-dom';
-import { useEffect, Fragment, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 // ** Third Party Components
-import PerfectScrollbar from 'react-perfect-scrollbar';
-import { ShoppingCart, X, Plus, Minus } from 'react-feather';
 
 // ** Reactstrap Imports
-import { Dropdown, DropdownMenu, DropdownToggle, DropdownItem, Badge, Button } from 'reactstrap';
 
 // ** Store & Actions
 import { useDispatch, useSelector } from 'react-redux';

@@ -1,9 +1,6 @@
-import React, { useState, Fragment, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
-import { TabContent, Nav, NavItem, NavLink, Card } from 'reactstrap'
-import List from './List'
 
-import PerformanceList from './Performance/List'
 
 const NOT_CHAMBER = 1
 const TEACHER_DEGREE_KREDIT = 2

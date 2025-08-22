@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Modal, ModalBody, ModalHeader, Table, Button, Input } from "reactstrap";
 import useApi from "@src/utility/hooks/useApi";
 import { useParams } from "react-router-dom";
 import moment from 'moment';

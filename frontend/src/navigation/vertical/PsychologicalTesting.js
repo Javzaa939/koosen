@@ -23,7 +23,6 @@
 //     }
 // ]
 
-import { Circle, UserCheck } from 'react-feather'
 
 export default [
     {

@@ -1,22 +1,12 @@
 import useApi from "@src/utility/hooks/useApi";
 import useLoader from "@src/utility/hooks/useLoader";
 import { useEffect, useState } from "react";
-import { LogOut } from "react-feather";
 import { useTranslation } from "react-i18next";
 
-import {
-	Button,
-	Col,
-	Label,
-	Modal,
-	ModalBody,
-	ModalHeader,
-	Row
-} from "reactstrap";
 
-import FullSetDataTable from "../FullSetDataTable";
+
+
 import { clearSelected } from "../FullSetDataTable/helpers";
-import SimpleSelectFilter from "../SimpleSelectFilter";
 
 const MOBILE = 1
 const TABLET = 2

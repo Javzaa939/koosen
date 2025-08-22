@@ -1,9 +1,7 @@
 import { t } from 'i18next'
 
-import { Eye, Edit, X, Book } from 'react-feather'
 
 import useModal from "@hooks/useModal"
-import { Badge, UncontrolledTooltip } from 'reactstrap';
 
 function request_flag_color(request_flag)
     {
@@ -195,7 +193,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, h
                         id={`complaintListDatatableDetail${row?.id}`}
                         className='ms-1'
                         href={`/challenge/detail/${row?.id}`}
-                        target={'_blank'}
+                        target={'_blank'} rel="noreferrer"
                     >
                         <Badge color="light-info" pill><Book  width={"15px"} /></Badge>
                     </a>

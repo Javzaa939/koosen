@@ -1,9 +1,6 @@
 import { useState } from 'react'
 import './style.css'
 import { t } from 'i18next'
-import { Switcher } from './helpers/Switcher'
-import ReportGroupPayment from './SlidesGroups/ReportGroupPayment'
-import ReportGroupGender from './SlidesGroups/ReportGroupGender'
 
 export default function Report() {
     const [isPaymentModeOn, setIsPaymentModeOn] = useState(false);

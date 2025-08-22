@@ -1,38 +1,19 @@
-import React, { Fragment, useState, useEffect,  } from "react";
+import { useState, useEffect,  } from "react";
 import { useTranslation } from "react-i18next";
 import { getPagination } from "@utils";
 import { getColumns, customStyles } from "./helpers";
 import { useNavigate } from "react-router-dom";
-import {
-	CardHeader,
-	Card,
-	CardTitle,
-	Button,
-	Spinner,
-	CardBody,
-	Dropdown,
-	DropdownToggle,
-	DropdownMenu,
-	DropdownItem,
-	Col,
-	Label,
-	Row
-} from "reactstrap";
+
+
 
 import classnames from 'classnames'
-import Select from "react-select"
 
-import {PenTool, UploadCloud, ChevronsLeft,Download} from 'react-feather'
 import { useSkin } from '@src/utility/hooks/useSkin'
-import DataTable from "react-data-table-component";
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
-import AddQuestion from "./AddQuestion";
 
 import { ReactSelectStyles, get_questionype, get_leveltype, get_levelseasons } from "@utils"
 
-import EditModal from "./EditModal";
-import FileModal from "./FileModal"
 import { EXAM_QUESTIONS_ROOT_PAGE } from "@src/views/SeasonTest/helpers";
 
 const QuestionsList = ({ filterId, season=false, teacher_id, is_graduate }) => {

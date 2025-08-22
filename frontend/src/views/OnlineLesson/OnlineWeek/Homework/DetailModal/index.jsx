@@ -1,19 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import moment from "moment";
 // ** Reactstrap Imports
 import {
-    Row,
-    Form,
-    Modal,
-    ModalHeader,
-    ModalBody,
-    Table,
-    Button
+    Form
 } from 'reactstrap'
 
 import useLoader from "@src/utility/hooks/useLoader";
 import useApi from "@src/utility/hooks/useApi";
-import StudentModal from './Modal';
 import { useTranslation } from 'react-i18next'
 
 const DetailModal = ({ open, handleModal, homework }) => {

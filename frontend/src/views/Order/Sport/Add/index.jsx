@@ -1,9 +1,7 @@
 import { useEffect } from 'react';
 
 // ** Third Party Components
-import { X } from 'react-feather'
-import PerfectScrollbar from 'react-perfect-scrollbar'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 
 import useApi from '@hooks/useApi';
 import useToast from "@hooks/useToast";
@@ -12,7 +10,6 @@ import useLoader from '@hooks/useLoader';
 import { useTranslation } from 'react-i18next'
 
 // ** Reactstrap Imports
-import { Button, Modal, ModalHeader, ModalBody, Label, Input, Form, FormFeedback } from 'reactstrap'
 
 import { validate } from '@utils'
 

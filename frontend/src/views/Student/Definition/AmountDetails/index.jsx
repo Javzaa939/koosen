@@ -1,10 +1,8 @@
 
-import React, { Fragment, useEffect, useState,useContext } from "react"
+import { useEffect,useContext } from "react"
 
-import { Row, Col } from 'reactstrap'
 import { useLocation } from 'react-router-dom';
 
-import useApi from "@hooks/useApi"
 import useLoader from '@hooks/useLoader';
 import SchoolContext from '@context/SchoolContext'
 

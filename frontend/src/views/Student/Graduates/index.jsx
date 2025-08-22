@@ -1,34 +1,18 @@
 // ** React Imports
-import { Fragment, useState, useEffect } from 'react'
-
-import {
-    Row,
-    Col,
-    Card,
-    Input,
-    Label,
-    Button,
-    CardTitle,
-    CardHeader,
-    Spinner,
-    DropdownMenu,
-    DropdownItem,
-    DropdownToggle,
-    UncontrolledButtonDropdown
-} from 'reactstrap'
-
-import { ChevronDown, Search, FileText, Grid, Download } from 'react-feather'
+import { useState, useEffect } from 'react'
 
 
-import Select from 'react-select'
+
+
+
+
 import classnames from "classnames";
 
-import DataTable from 'react-data-table-component'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import { getPagination, ReactSelectStyles } from '@utils'
 
@@ -36,7 +20,7 @@ import { getColumns } from './helpers'
 import excelDownload from '@src/utility/excelDownload'
 
 import { useTranslation } from 'react-i18next'
-import { downloadCSV, downloadExcel } from '@utils'
+import { downloadCSV } from '@utils'
 
 const Graduates = () => {
 

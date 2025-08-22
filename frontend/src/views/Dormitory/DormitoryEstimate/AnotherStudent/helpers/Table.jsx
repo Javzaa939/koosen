@@ -1,20 +1,16 @@
 import { useState, useEffect, useContext } from 'react';
 
-import ReactPaginate from "react-paginate";
 
 import { useTranslation } from 'react-i18next';
 
-import { ChevronDown, ChevronUp, Save, Edit } from "react-feather"
 
-import useModal from '@hooks/useModal'
 import AuthContext from '@context/AuthContext'
 
-import { Previous, Next, isObjEmpty, getFormatedCurrency } from '@utils'
+import { isObjEmpty, getFormatedCurrency } from '@utils'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 
-import { Input, InputGroup, InputGroupText, Table, Spinner } from 'reactstrap'
 
 import '../../style.css'
 

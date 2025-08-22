@@ -1,18 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import moment from 'moment';
-import {
-    Row,
-    Modal,
-    ModalHeader,
-    ModalBody,
-    Table,
-    Button,
-    Input
-} from 'reactstrap';
+
+
 
 import useLoader from '@src/utility/hooks/useLoader';
 import useApi from '@src/utility/hooks/useApi';
-import StudentModal from './Modal';
 import { useTranslation } from 'react-i18next';
 
 const LectureModal = ({ open, handleModal, homework }) => {

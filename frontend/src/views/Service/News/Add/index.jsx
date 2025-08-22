@@ -1,6 +1,5 @@
-import React, { Fragment, useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
-import { X } from 'react-feather'
 
 import { useQuill } from 'react-quilljs';
 
@@ -8,13 +7,12 @@ import 'quill/dist/quill.snow.css'
 
 import '../style.css'
 
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 
 import { convertDefaultValue, validate } from '@utils'
 
-import { Modal, Row, Col, Label, ModalHeader, ModalBody, Form, Input, Button, FormFeedback,} from 'reactstrap'
+import { Form,} from 'reactstrap'
 
-import Select from 'react-select'
 
 import { useTranslation } from 'react-i18next'
 

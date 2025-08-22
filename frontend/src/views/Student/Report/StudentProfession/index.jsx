@@ -1,11 +1,8 @@
 import { useCallback, useEffect, useState } from "react"
-import { Card, CardBody, CardTitle } from "reactstrap"
 
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 import useApi from '@hooks/useApi';
 import useLoader from "@hooks/useLoader"
-import VerticalBarChartLoader from "@lms_components/VerticalBarChart";
 
 /**
     @param {} props

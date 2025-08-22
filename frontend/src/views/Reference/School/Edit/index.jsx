@@ -1,21 +1,11 @@
 import {
-    Row,
-    Col,
-    Modal,
 	Form,
-	Input,
-	Label,
-	Button,
-    ModalBody,
-	ModalHeader,
-    Spinner,
 } from "reactstrap";
 import { t } from 'i18next';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
-import { useForm, Controller } from "react-hook-form";
-import React, { Fragment, useEffect, useState} from 'react'
-import { X } from "react-feather";
+import { useForm } from "react-hook-form";
+import { useEffect, useState} from 'react'
 
 const UpdateModal = ({ open, handleEdit, refreshDatas, datas }) => {
     const editId = datas?.id

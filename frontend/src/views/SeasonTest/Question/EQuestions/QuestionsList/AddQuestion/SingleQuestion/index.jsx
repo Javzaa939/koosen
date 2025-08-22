@@ -1,22 +1,13 @@
-import { FilePlus, MinusCircle, Plus, X } from 'react-feather'
-import { Controller, useFormContext, useFieldArray, useWatch } from 'react-hook-form'
-import { Fragment, useEffect, useState } from 'react'
-import Select from 'react-select'
+import { useFormContext, useFieldArray, useWatch } from 'react-hook-form'
+import { useEffect, useState } from 'react'
 import classnames from "classnames";
-import {
-    Button,
-    Row,
-    Col,
-    Label,
-    Input,
-    UncontrolledTooltip
-} from 'reactstrap'
+
+
 
 import { ReactSelectStyles, get_questionype } from "@utils"
 import { useTranslation } from 'react-i18next';
 
 import empty from "@src/assets/images/empty-image.jpg"
-import Answers from './Answers';
 import useLoader from '@src/utility/hooks/useLoader';
 import useApi from '@src/utility/hooks/useApi';
 

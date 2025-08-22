@@ -1,22 +1,15 @@
 import { convertDefaultValue } from "@utils";
 import { t } from 'i18next';
-import { Fragment, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useForm } from "react-hook-form";
 
 import {
-    Button,
-    Col,
-    Form,
-    Modal,
-    ModalBody,
-    ModalHeader,
-    Row
+    Form
 } from "reactstrap";
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import '@styles/react/libs/flatpickr/flatpickr.scss';
-import Elearn from '../Elearn';
 
 const AddEditModal = ({ open, handleModal: handleModalOriginal, refreshDatas, editData }) => {
     const { control, handleSubmit, setError, setValue, reset, formState: { errors } } = useForm({

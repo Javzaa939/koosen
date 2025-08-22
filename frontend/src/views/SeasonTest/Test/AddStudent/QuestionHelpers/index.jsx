@@ -1,6 +1,4 @@
 
-import { Trash2 } from 'react-feather'
-import { Badge } from 'reactstrap';
 import useModal from "@hooks/useModal"
 
 export function getQuestionColumns(currentPage, rowsPerPage, total_count, handleDeleteQuestion, difficultyLevelsOption) {

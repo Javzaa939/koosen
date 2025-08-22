@@ -1,13 +1,9 @@
 
-import React, { Fragment, useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
-import { Card, CardHeader, CardTitle, Row, Col, Label,  Input, Button, Spinner } from 'reactstrap';
 
 import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
-import Select from 'react-select'
-import { ChevronDown, Search } from 'react-feather'
-import DataTable from 'react-data-table-component';
 
 import classnames from 'classnames'
 
@@ -19,8 +15,6 @@ import useLoader from '@hooks/useLoader';
 import { getPagination, leave_types, ReactSelectStyles } from '@utils'
 
 import { getColumns } from './helpers';
-import Solve from './solve';
-import Detail from './detail'
 
 export default function Leave()
 {

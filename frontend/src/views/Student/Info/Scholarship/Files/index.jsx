@@ -1,16 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 // ** Reactstrap Imports
 import {
-    Row,
-    Form,
-    Modal,
-    ModalHeader,
-    ModalBody,
-    Table
+    Form
 } from 'reactstrap'
 
-import { Download } from 'react-feather';
 
 import { useTranslation } from 'react-i18next'
 

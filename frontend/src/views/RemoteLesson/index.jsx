@@ -1,21 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Edit, Plus, Search, Trash2 } from 'react-feather';
-import {
-    Badge,
-    Button,
-    Card,
-    CardBody,
-    CardHeader,
-    CardTitle,
-    Col,
-    Input,
-    PopoverBody,
-    PopoverHeader,
-    Progress,
-    Row,
-    UncontrolledPopover,
-    UncontrolledTooltip,
-} from 'reactstrap';
+
+
 import { Link } from 'react-router-dom';
 
 import useApi from '@hooks/useApi';
@@ -24,7 +9,6 @@ import { getPagination } from '@utils';
 import empty from '@src/assets/images/empty-image.jpg';
 import useModal from '@src/utility/hooks/useModal';
 
-import AddEditModal from './components/AddEditModal';
 import './style.scss';
 
 function RemoteLesson() {

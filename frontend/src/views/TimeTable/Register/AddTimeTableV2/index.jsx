@@ -1,23 +1,13 @@
 // ** React imports
-import React, { Fragment, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
-import { X } from "react-feather";
 
-import {
-	Modal,
-	ModalBody,
-	ModalHeader,
-    TabContent, Nav, NavItem, NavLink,
-    Spinner
-} from "reactstrap";
+
+
 
 import { useTranslation } from 'react-i18next';
 
-import Simple from './Simple';
-import Block from './Block';
-import Kurats from './Kurats';
 
-import { RoomAdd } from './roomAdd';
 
 import  '../Add/style.css'
 

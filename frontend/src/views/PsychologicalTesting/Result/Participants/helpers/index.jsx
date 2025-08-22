@@ -1,5 +1,3 @@
-import {Badge, UncontrolledTooltip} from 'reactstrap'
-import {Book} from 'react-feather'
 import {t} from 'i18next'
 
 

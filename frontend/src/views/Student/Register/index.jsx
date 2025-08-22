@@ -1,36 +1,19 @@
 // ** React Imports
-import { Fragment, useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
-import {
-    Row,
-    Col,
-    Card,
-    Input,
-    Label,
-    Button,
-    CardTitle,
-    CardHeader,
-    Spinner,
-    DropdownMenu,
-    DropdownItem,
-    DropdownToggle,
-    UncontrolledButtonDropdown,
-    Dropdown
-} from 'reactstrap'
 
-import { ChevronDown, Plus, Search, FileText, Grid, Download, PenTool, UploadCloud, File } from 'react-feather'
+
+
 
 import { useNavigate } from 'react-router-dom'
 
-import Select from 'react-select'
 import classnames from "classnames";
 
-import DataTable from 'react-data-table-component'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import AuthContext from '@context/AuthContext'
 import SchoolContext from '@context/SchoolContext'
@@ -39,14 +22,10 @@ import { getPagination, ReactSelectStyles, generateLessonYear, level_option } fr
 
 import { getColumns } from './helpers'
 
-import Addmodal from './Add'
 
 import { useTranslation } from 'react-i18next'
 import { downloadCSV, downloadExcel } from '@utils'
-import FileModal from '@src/components/FileModal'
-import DetailModal from './DetailModal'
 import { useSkin } from '@src/utility/hooks/useSkin'
-import Report from '../Report'
 
 const Register = () => {
 

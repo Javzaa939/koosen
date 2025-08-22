@@ -1,9 +1,7 @@
-import React, { Fragment, useState, useEffect, useContext } from 'react'
-import { X } from "react-feather";
-import { useForm, Controller } from "react-hook-form";
+import { useState, useEffect, useContext } from 'react'
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
-import Select from 'react-select'
 import { ReactSelectStyles } from "@utils"
 
 import useApi from '@hooks/useApi';
@@ -17,20 +15,9 @@ import SchoolContext from '@context/SchoolContext'
 import classnames from "classnames";
 
 import {
-    Row,
-    Col,
 	Form,
-	Modal,
-	Input,
-	Label,
-	Button,
-	ModalBody,
-	ModalHeader,
-	FormFeedback,
-    Spinner,
 } from "reactstrap";
 
-import Flatpickr from 'react-flatpickr'
 // flatpickr style
 import '@styles/react/libs/flatpickr/flatpickr.scss'
 // import { Mongolian } from "flatpickr/dist/l10n/mn.js"

@@ -1,6 +1,3 @@
-import React from 'react'
-import { HelpCircle } from 'react-feather'
-import { UncontrolledTooltip } from 'reactstrap'
 
 function Help(
     {

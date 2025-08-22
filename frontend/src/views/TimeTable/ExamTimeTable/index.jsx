@@ -1,33 +1,26 @@
-import { Fragment, useState, useEffect, useContext } from "react"
+import { useState, useEffect, useContext } from "react"
 
-import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner, Badge, Modal, ModalHeader, ModalBody } from "reactstrap"
 
 import { useTranslation } from "react-i18next"
 
-import { AlertCircle, ChevronDown, Plus, Search } from "react-feather"
 
 import { useNavigate } from "react-router-dom"
-import DataTable from "react-data-table-component"
 
 import useApi from '@hooks/useApi';
 import useModal from "@hooks/useModal";
 import useLoader from '@hooks/useLoader';
 import AuthContext from '@context/AuthContext'
 import SchoolContext from '@context/SchoolContext'
-import Select from 'react-select'
 import { ReactSelectStyles, examType } from '@utils'
 
 import { getPagination } from '@utils'
 
 import { getColumns } from "./helpers"
 
-import Addmodal from './Add'
 // import Editmodal from "./Edit"
 import classNames from "classnames"
-import DownloadScore from "./DownloadScore"
 
 // #region print score info
-import ElementToPrint from "./helpers/ElementToPrint"
 import moment from "moment"
 import { stableStylesPrintElement } from "@src/utility/Utils"
 // #endregion

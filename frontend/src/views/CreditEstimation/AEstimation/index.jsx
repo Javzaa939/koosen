@@ -1,26 +1,14 @@
 // ** React Imports
-import { Fragment, useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
-import {
-    Row,
-    Col,
-    Card,
-    Input,
-    Label,
-    Button,
-    CardTitle,
-    CardHeader,
-    Spinner,
-} from 'reactstrap'
 
-import { ChevronDown, Search, Circle, Printer } from 'react-feather'
+
+
 
 import { useTranslation } from 'react-i18next'
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useNavigate } from 'react-router-dom'
 
-import Select from 'react-select'
-import DataTable from 'react-data-table-component'
 
 import classnames from 'classnames'
 
@@ -37,7 +25,6 @@ import { getPagination, ReactSelectStyles } from '@utils'
 
 import { getColumns, getColumnsDetail } from './helpers'
 
-import AddChamber from './AddChamber'
 
 export function ExpandedComponent({ data })
 {

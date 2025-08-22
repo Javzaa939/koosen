@@ -1,16 +1,12 @@
 // ** React Imports
 import { memo, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
-import Select from 'react-select'
 
 import useApi from '@hooks/useApi'
 import useLoader from '@hooks/useLoader'
 
-import { Col, Label, Row, Button } from 'reactstrap'
 import { ReactSelectStyles, generateLessonYear } from '@src/utility/Utils'
 import classnames from "classnames";
-import Graphic from './Graphic'
 const List5 = () => {
 
     var values = {

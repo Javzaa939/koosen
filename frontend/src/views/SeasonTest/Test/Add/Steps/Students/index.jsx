@@ -1,9 +1,7 @@
-import React, { Fragment, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
-import { Card, CardBody, Col, Button, Row, Table, Alert, Badge } from 'reactstrap'
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
-import { ChevronLeft, ChevronRight } from 'react-feather'
 
 export default function Students({stepper, setSubmitDatas, selectedLesson, onSubmit, selectExam, is_repeat=false}) {
     const [studensOption, setStudents] = useState([]);

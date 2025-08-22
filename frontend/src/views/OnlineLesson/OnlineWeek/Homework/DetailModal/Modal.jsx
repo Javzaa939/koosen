@@ -1,16 +1,6 @@
-import React from 'react';
-import {
-    Row,
-    Form,
-    Modal,
-    ModalHeader,
-    ModalBody,
-    Button,
-    Input,
-    FormFeedback,
-    Label, Col,
-} from 'reactstrap';
-import { Controller, useForm } from "react-hook-form";
+
+
+import { useForm } from "react-hook-form";
 import useLoader from "@src/utility/hooks/useLoader";
 import useApi from "@src/utility/hooks/useApi";
 import { useTranslation } from 'react-i18next';

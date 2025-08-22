@@ -1,10 +1,7 @@
-import { t } from 'i18next'
 
-import { Eye, Edit, X, Book, Paperclip, Trash, Trash2, PlusCircle, PlusSquare, Plus, EyeOff } from 'react-feather'
 
 import useModal from "@hooks/useModal"
 import { formatDate } from '@utils'
-import { Badge, UncontrolledTooltip } from 'reactstrap';
 import { EXAM_ROOT_PAGE } from '../../helpers';
 
 export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, handleDelete, handleShow, handleSend, handleEditModal, handleExamModal) {

@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
-import { Card, Col, Form, Label, Input, Button, CardHeader, CardBody, Alert, Modal, ModalBody } from 'reactstrap';
 
 const KIND_ONE_CHOICE = 1; // 'Нэг сонголт'
 const KIND_MULTI_CHOICE = 2; // 'Олон сонголт'

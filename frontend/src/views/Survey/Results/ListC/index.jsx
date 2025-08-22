@@ -1,14 +1,8 @@
-import React from "react";
 import { useNavigate } from "react-router-dom"
 
-import {
-  CardBody,
-  CardTitle,
-  Badge,
-  CardFooter,
-  CardHeader,
 
-} from "reactstrap";
+
+
 
 import "../style.css";
 
@@ -42,7 +36,6 @@ ChartJS.register(
 );
 
 import './list.css'
-import DisplayQuill from "../../components/DisplayQuill";
 
 const KIND_STUDENT = 8;
 const KIND_TEACHER = 5;

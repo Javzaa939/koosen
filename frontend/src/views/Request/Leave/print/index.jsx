@@ -1,9 +1,7 @@
 
-import React, { useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 
-import { Row, Col, Table } from 'reactstrap'
 import { useParams } from 'react-router-dom';
-import { CheckSquare, Square } from "react-feather";
 
 import useApi from "@hooks/useApi"
 import useLoader from '@hooks/useLoader';
@@ -13,7 +11,6 @@ import logo from "@src/assets/images/logo/dxis_logo.png"
 import '@styles/base/pages/app-invoice-print.scss'
 
 import { zeroFill } from "@utils"
-import { COMPLAINT_UNIT_BMA_ID } from '@utility/consts'
 
 export default function Print()
 {

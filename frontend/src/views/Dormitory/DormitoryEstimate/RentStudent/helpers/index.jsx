@@ -1,20 +1,16 @@
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 import { t } from 'i18next'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 
-import { useForm, Controller } from "react-hook-form";
 
-import { Button, Badge, Input, InputGroup, InputGroupText } from 'reactstrap'
 
-import { Save, Edit } from 'react-feather';
 
 import { isObjEmpty } from '@utils'
 
-import css from '@mstyle/style.module.css'
 
 export function getColumns (currentPage, rowsPerPage, total_count, datas, refreshDatas, handleRequestSolved, handleViewModal) {
     const page_count = Math.ceil(total_count / rowsPerPage)

@@ -1,4 +1,3 @@
-import { User } from "react-feather"
 
 export default [
       {

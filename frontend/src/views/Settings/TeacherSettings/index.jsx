@@ -1,13 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
-import { Card, Nav, NavItem, NavLink, TabContent } from 'reactstrap'
-import Score from '../ActiveYear'
-import Signature from '../Signature'
-import Learning from '../../TimeTable/Building'
-import Room from '../../TimeTable/Room'
-import Season from '../Season'
-import Country from '../Country'
-import Print from '../Print'
 
 function Teacher() {
 

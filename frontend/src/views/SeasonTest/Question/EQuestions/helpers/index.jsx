@@ -1,6 +1,4 @@
 
-import { ArrowDown, ArrowRight, Edit } from 'react-feather'
-import { Badge, UncontrolledTooltip } from 'reactstrap';
 
 export function getColumns (currentPage, rowsPerPage, total_count, handleEdit) {
 

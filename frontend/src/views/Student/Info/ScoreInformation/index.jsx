@@ -1,10 +1,7 @@
 
-import React from "react"
 
-import { Card, Row, Col, UncontrolledCollapse } from "reactstrap"
 import { useTranslation } from 'react-i18next'
 
-import { CTable } from "./CTable"
 
 export default function ScoreInformation({ datas })
 {

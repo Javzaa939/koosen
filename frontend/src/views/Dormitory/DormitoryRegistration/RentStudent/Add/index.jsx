@@ -1,10 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { X } from "react-feather";
-import Select from 'react-select'
-import { Badge, Button, Col, Collapse, Input, Modal, ModalBody, ModalFooter, ModalHeader,Form,  Row, Label, FormFeedback } from "reactstrap";
+import { useEffect, useState } from "react";
+import {Form } from "reactstrap";
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { validate, convertDefaultValue } from "@utils"
 import './style.scss'
 import { ReactSelectStyles } from "@utils"
@@ -13,10 +11,8 @@ import classnames from 'classnames'
 // import { validateSchema } from "./validateSchema";
 import ActiveYearContext from "@context/ActiveYearContext"
 import { useContext } from 'react'
-import Flatpickr from 'react-flatpickr'
 // flatpickr style
 import '@styles/react/libs/flatpickr/flatpickr.scss'
-import { ToastContainer, toast } from 'react-toastify';
 
 import 'react-toastify/dist/ReactToastify.css';
 

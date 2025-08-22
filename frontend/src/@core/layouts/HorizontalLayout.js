@@ -1,5 +1,4 @@
 // ** React Imports
-import { Link } from "react-router-dom"
 import { useState, useEffect } from "react"
 
 // ** Store & Actions
@@ -8,21 +7,14 @@ import { handleMenuHidden, handleContentWidth } from "@store/layout"
 
 // ** Third Party Components
 import classnames from "classnames"
-import { ArrowUp } from "react-feather"
 
 // ** Reactstrap Imports
-import { Navbar, NavItem, Button } from "reactstrap"
 
 // ** Configs
 import themeConfig from "@configs/themeConfig"
 
 // ** Custom Components
 
-import Customizer from "@components/customizer"
-import ScrollToTop from "@components/scrolltop"
-import NavbarComponent from "./components/navbar"
-import FooterComponent from "./components/footer"
-import MenuComponent from "./components/menu/horizontal-menu"
 
 // ** Custom Hooks
 import { useRTL } from "@hooks/useRTL"

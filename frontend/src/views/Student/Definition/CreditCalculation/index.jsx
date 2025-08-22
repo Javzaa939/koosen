@@ -1,7 +1,6 @@
 
-import React, { useEffect, useState, useRef, useMemo } from "react"
+import { useEffect, useState, useRef, useMemo } from "react"
 
-import { Row } from 'reactstrap'
 import { useLocation } from 'react-router-dom';
 
 import useApi from "@hooks/useApi"

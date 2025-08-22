@@ -1,14 +1,10 @@
-import React from 'react'
 
-import { Fragment, useState, useEffect, useContext } from "react"
+import { useState, useEffect } from "react"
 
-import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner } from "reactstrap"
 
 import { useTranslation } from "react-i18next"
 
-import { ChevronDown,  Search } from "react-feather"
 
-import DataTable from "react-data-table-component"
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';

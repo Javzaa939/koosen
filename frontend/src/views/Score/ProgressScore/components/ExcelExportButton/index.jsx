@@ -1,9 +1,7 @@
 import excelDownload from "@src/utility/excelDownload";
 import useToast from "@src/utility/hooks/useToast";
 import { transliterate } from "@src/utility/Utils";
-import { FileText } from "react-feather";
 import { useTranslation } from "react-i18next";
-import { Button } from "reactstrap";
 
 export default function ExcelExportButton({ data }) {
 	const addToast = useToast()

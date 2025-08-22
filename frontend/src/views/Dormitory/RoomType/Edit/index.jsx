@@ -1,22 +1,9 @@
-import React, { Fragment, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 
 import {
-    Row,
-    ModalBody,
-    ModalHeader,
-    Col,
-    FormFeedback,
-    Table,
-    Input,
-    Form,
-    Modal,
-    Label,
-    Button,
-    Badge,
-    Spinner,
-    UncontrolledTooltip
+    Form
 } from 'reactstrap'
 
 import useApi from '@hooks/useApi';
@@ -26,12 +13,10 @@ import { validate, convertDefaultValue, ReactSelectStyles, get_rent_type } from 
 
 import { validateSchema } from "../validateSchema";
 
-import Select from 'react-select'
 import classnames from "classnames";
 
 import { t } from 'i18next';
 
-import { X, Trash2 } from 'react-feather'
 
 const EditModal = ({ open, handleEdit, editId, refreshDatas }) => {
 

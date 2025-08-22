@@ -1,15 +1,12 @@
 // ** React Imports
-import { Fragment } from "react"
 
 // ** Third Party Components
 import Proptypes from "prop-types"
 import classnames from "classnames"
 
 // ** Reactstrap Imports
-import { UncontrolledTooltip } from "reactstrap"
 
 // ** Custom Components Imports
-import Avatar from "@components/avatar"
 
 const AvatarGroup = (props) => {
   // ** Props

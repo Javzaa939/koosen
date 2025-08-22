@@ -1,29 +1,22 @@
-import React, { Fragment, useState, useEffect, useContext, useRef } from 'react'
+import { useState, useEffect, useContext, useRef } from 'react'
 
-import { Col, Button, Input, Card, CardHeader, CardTitle, Row, Spinner, Label } from 'reactstrap'
 
 import { useTranslation } from "react-i18next"
 
-import { ChevronDown, Plus, Search } from "react-feather"
 
-import Select from 'react-select'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import AuthContext from "@context/AuthContext"
 import SchoolContext from "@context/SchoolContext"
-import DataTable from 'react-data-table-component'
 
 import { getPagination, get_EXAM_STATUS, ReactSelectStyles } from '@utils'
 
 import { getColumns } from "./helpers"
-import ElementToPrint, { printElement } from "./helpers/ElementToPrint"
+import { printElement } from "./helpers/ElementToPrint"
 import moment from 'moment'
-import AddModal from './Add'
 import classNames from "classnames"
 import ReactDOM from 'react-dom';
-import Editmodal from "./Edit"
-import DownloadScore from './DownloadScore'
 
 export default function ExamRepeat() {
 

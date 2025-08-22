@@ -1,15 +1,9 @@
-import React, { Fragment, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import {
-    Col,
-    Row,
-    Label,
-    Input,
-    FormFeedback,
-    Form,
-    Button
+    Form
 } from 'reactstrap'
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import { validate, get_room_type, convertDefaultValue } from "@utils"
 

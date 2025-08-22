@@ -1,6 +1,4 @@
-import { Trash2 } from "react-feather";
 
-import { Badge } from 'reactstrap'
 
 import css from '@mstyle/style.module.css'
 

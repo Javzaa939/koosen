@@ -1,15 +1,13 @@
 // ** React Imports
 import { useEffect } from "react"
-import { Link, useLocation } from "react-router-dom"
+import { useLocation } from "react-router-dom"
 
 // ** Third Party Components
 import classnames from "classnames"
 
 // ** Reactstrap Imports
-import { Collapse, Badge } from "reactstrap"
 
 // ** Vertical Menu Items Component
-import VerticalNavMenuItems from "./VerticalNavMenuItems"
 
 // ** Utils
 import { hasActiveChild, removeChildren } from "@layouts/utils"

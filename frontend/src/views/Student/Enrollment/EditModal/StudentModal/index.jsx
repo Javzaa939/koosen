@@ -1,12 +1,9 @@
-import React, { Fragment, useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 
-import { Modal, ModalBody, ModalHeader, Col, Input, Label, Spinner, Button } from 'reactstrap'
 
 // icon
-import { ChevronDown } from 'react-feather'
 
 // ** Third Party Components
-import DataTable from "react-data-table-component";
 
 import { useTranslation } from "react-i18next";
 

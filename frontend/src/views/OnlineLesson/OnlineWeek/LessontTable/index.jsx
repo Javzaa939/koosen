@@ -1,9 +1,4 @@
-import Weeks from "../Weeks/index";
 
-import Announcement from "../Announcement";
-import Plan from "../Plan";
-import WeekExam from "../WeekExam";
-import Performance from "../Performance";
 
 
 const RenderLessonCards = ({ lesson }) => {

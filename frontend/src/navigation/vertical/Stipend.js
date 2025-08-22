@@ -1,5 +1,4 @@
 // ** Icons Import
-import { AwardIcon, Circle } from 'lucide-react';
 
 export default [
     {

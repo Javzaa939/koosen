@@ -1,13 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
-import FullSpinner from "@lms_components/Loader/FullSpinner";
-import ButtonSpinner from "@lms_components/Loader/ButtonSpinner";
-import MediumSpinner from "@lms_components/Loader/MediumSpinner";
 
 // Шинэ Spinner
-import Spinn from "@components/spinner/Spinn";
-import MdSpinn from "@components/spinner/MedSpinn";
-import SmSpinn from "@components/spinner/SmSpinn";
 
 
 /**

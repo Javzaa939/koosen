@@ -1,10 +1,7 @@
 import useLoader from "@src/utility/hooks/useLoader"
 import { getPagination } from "@src/utility/Utils"
 import { useEffect, useRef, useState } from "react"
-import DataTable from "react-data-table-component"
-import { ChevronDown } from "react-feather"
 import { useTranslation } from "react-i18next"
-import { Spinner } from "reactstrap"
 
 export default function GenericDataTable({ apiGetFunc, apiGetFuncArgs, isApiGetFuncArgsDefault, columns, rows_per_page, search_value, render_to_search, conditionalRowStyles={} }) {
 	// states

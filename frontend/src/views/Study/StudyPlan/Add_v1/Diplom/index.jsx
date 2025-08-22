@@ -1,10 +1,8 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 
-import { Button, Card, Table, Spinner, Collapse } from 'reactstrap';
 
 import { useTranslation } from 'react-i18next';
 
-import { Plus } from 'react-feather'
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
@@ -13,7 +11,6 @@ import AuthContext from "@context/AuthContext"
 
 import classnames from "classnames";
 
-import TableRows from "../TableRows"
 
 const Diplom = ({ datas, isOpen, mergejil_id, degree }) => {
 

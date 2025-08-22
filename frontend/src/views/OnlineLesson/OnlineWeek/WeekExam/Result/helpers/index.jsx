@@ -1,6 +1,4 @@
-import {Badge, UncontrolledTooltip} from 'reactstrap'
 // import {state_flag_color} from '@utils'
-import {Eye} from 'react-feather'
 import {t} from 'i18next';
 
 export function getColumns (currentPage, rowsPerPage, total_count)

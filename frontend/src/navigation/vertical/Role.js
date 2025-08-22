@@ -1,4 +1,3 @@
-import { Circle, GlassesIcon } from 'lucide-react'
 
 export default [
     {

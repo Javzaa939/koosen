@@ -1,7 +1,6 @@
 // ** React imports
-import React, { Fragment, useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
-import Select from 'react-select'
 
 import { useTranslation } from 'react-i18next';
 
@@ -12,22 +11,12 @@ import { ReactSelectStyles } from "@utils"
 
 import classnames from "classnames";
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import { useParams } from 'react-router-dom';
 
 import {
-    Row,
-    Col,
-	Form,
-	Input,
-	Label,
-	Button,
-	Card,
-    CardHeader,
-    CardBody,
-	FormFeedback,
-    Spinner
+	Form
 } from "reactstrap";
 
 import AuthContext from "@context/AuthContext"

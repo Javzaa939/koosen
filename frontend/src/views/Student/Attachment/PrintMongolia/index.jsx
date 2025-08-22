@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';

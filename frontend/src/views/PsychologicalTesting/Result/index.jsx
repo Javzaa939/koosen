@@ -1,19 +1,9 @@
-import { Fragment, useEffect, useState } from 'react';
-import {
-    Card,
-    Col,
-    Nav,
-    NavItem,
-    NavLink,
-    Row,
-    TabContent
-} from 'reactstrap';
+import { useEffect, useState } from 'react';
+
+
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
-import Elsegch from './Elsegch';
-import Student from './Student';
-import Teacher from './Teacher';
 
 function Result() {
     const [active, setActive] = useState('1')

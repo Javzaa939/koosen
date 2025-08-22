@@ -3,7 +3,6 @@ import PropTypes from "prop-types"
 import classnames from "classnames"
 
 // ** Reactstrap Imports
-import { Card, CardBody } from "reactstrap"
 
 const StatsHorizontal = ({
   icon,

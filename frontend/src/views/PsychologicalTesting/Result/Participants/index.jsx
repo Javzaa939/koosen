@@ -1,26 +1,14 @@
-import React, {Fragment, useState, useEffect} from "react";
+import { useState, useEffect} from "react";
 import {useTranslation} from "react-i18next";
 import {getPagination} from "@utils";
 import {getColumns} from "./helpers";
 import {useParams} from "react-router-dom";
-import {Search} from "react-feather";
 
-import {
-    Row,
-	Col,
-	Card,
-	Input,
-    Label,
-	Button,
-	CardTitle,
-	CardHeader,
-} from "reactstrap";
+
+
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
-import DataTable from "react-data-table-component";
-import BreadCrumbs from '@components/breadcrumbs';
-import ResultModal from "./Modal";
 
 function Participants(){
 

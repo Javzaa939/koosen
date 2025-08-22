@@ -1,17 +1,13 @@
-import { Fragment, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import { Col, Row, Card, CardHeader, CardTitle, Input, Label, Button, Spinner } from 'reactstrap'
 
-import { Search, ChevronDown, Plus } from 'react-feather';
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 
 import { useTranslation } from 'react-i18next';
 
-import DataTable from 'react-data-table-component'
 
-import Select from 'react-select'
 
 import { getPagination, club_type_option, ReactSelectStyles } from '@utils'
 
@@ -19,10 +15,6 @@ import classnames from 'classnames';
 
 import { getColumns } from './helpers';
 
-import Addmodal from './Add';
-import EditModal from './Edit';
-import CEditModal from './Edit/Modal'
-import DetailModal from './Detail';
 
 const ClubRegister = () => {
     const { t } = useTranslation()

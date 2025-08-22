@@ -1,10 +1,7 @@
 import useApi from '@src/utility/hooks/useApi';
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { Button, Card, CardBody, CardHeader, Col, Row } from 'reactstrap';
-import LessonTable from './LessontTable';
+import { useParams } from 'react-router-dom';
 import useLoader from '@hooks/useLoader';
-import { ArrowLeftIcon } from 'lucide-react';
 
 const menuOptions = [
     {

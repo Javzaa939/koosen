@@ -1,14 +1,11 @@
 import { useMemo, useContext, useState } from "react"
 
 import { t } from 'i18next';
-import Select from 'react-select'
 
-import { Plus, Trash2 } from "react-feather";
 import classnames from "classnames";
 
 import AuthContext from "@context/AuthContext"
 
-import { Button, Table, Input, Badge, FormFeedback } from 'reactstrap';
 
 import { ReactSelectStyles } from "@utils"
 

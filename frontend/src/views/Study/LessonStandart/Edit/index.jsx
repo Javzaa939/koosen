@@ -1,13 +1,9 @@
-import React, { useState, Fragment, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
 import { useNavigate } from 'react-router-dom'
 
-import { TabContent, Nav, NavItem, NavLink, Card } from 'reactstrap'
 
-import { ChevronsLeft } from 'react-feather'
 
-import TitlePlan from './TitlePlan'
-import MainInformation from './MainInformation'
 
 import { useTranslation } from 'react-i18next'
 

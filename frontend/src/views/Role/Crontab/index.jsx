@@ -1,13 +1,10 @@
 // ** React Imports
-import { Fragment, useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
-import { Col, Card, Input, Button, CardTitle, CardHeader, Spinner } from 'reactstrap'
 
-import { ChevronDown, Plus, Search } from 'react-feather'
 
 import { useTranslation } from 'react-i18next'
 
-import DataTable from 'react-data-table-component'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
@@ -16,7 +13,6 @@ import AuthContext from "@context/AuthContext"
 
 import { getPagination } from '@utils'
 
-import CrontabAdd from './Add'
 
 import { getColumns } from './helpers';
 

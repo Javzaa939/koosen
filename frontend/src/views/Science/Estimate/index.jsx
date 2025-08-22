@@ -1,21 +1,9 @@
-import { Fragment, useState, useEffect} from "react"
+import { useState, useEffect} from "react"
 
-import {
-    Col,
-    Row,
-    Card,
-    Input,
-    Label,
-    Button,
-    CardTitle,
-    CardHeader,
-    Spinner
-} from 'reactstrap'
 
-import Select from 'react-select'
+
+
 import { useTranslation } from 'react-i18next'
-import DataTable from 'react-data-table-component'
-import { ChevronDown, Search, Printer, Plus } from "react-feather"
 import { getPagination, ReactSelectStyles, printTableHtml } from '@utils'
 
 // ** Styles Imports

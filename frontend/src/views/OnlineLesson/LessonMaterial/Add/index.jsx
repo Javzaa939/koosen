@@ -1,18 +1,9 @@
-import React, { Fragment, useState } from "react";
-import { Loader, X } from "react-feather";
-import { Controller, useForm } from "react-hook-form";
+import { useState } from "react";
+import { Loader } from "react-feather";
+import { useForm } from "react-hook-form";
 import useApi from "@hooks/useApi";
-import {
-  Modal,
-  Row,
-  Col,
-  Label,
-  ModalHeader,
-  ModalBody,
-  Form,
-  Input,
-  Button,
-} from "reactstrap";
+
+
 import useLoader from "@hooks/useLoader";
 import { t } from "i18next";
 import { convertDefaultValue } from "@utils";

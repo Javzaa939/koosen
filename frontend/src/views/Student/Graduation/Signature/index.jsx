@@ -1,10 +1,8 @@
-import React, { Fragment } from 'react'
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import { t } from 'i18next';
-import { X } from "react-feather";
-import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, ModalHeader, FormFeedback } from "reactstrap";
+import { Form } from "reactstrap";
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";

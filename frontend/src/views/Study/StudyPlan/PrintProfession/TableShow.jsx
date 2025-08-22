@@ -1,4 +1,3 @@
-import React from 'react';
 
 function TableShow({ rows,  standart_bagts_option }) {
 

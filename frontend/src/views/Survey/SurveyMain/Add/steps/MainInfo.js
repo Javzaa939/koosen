@@ -1,26 +1,17 @@
 import { t } from "i18next"
-import React, { Fragment, useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 // editor imports
-import ReactQuill from 'react-quill';
 import 'quill/dist/quill.snow.css'
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import { validate } from "@utils"
 import {
-    Row,
-    Col,
-	Form,
-    Input,
-	Label,
-    Button,
-    FormFeedback
+	Form
 } from "reactstrap";
 
-import { ChevronLeft, ChevronRight, X } from "react-feather"
 
-import Flatpickr from 'react-flatpickr'
 
 // flatpickr style
 import '@styles/react/libs/flatpickr/flatpickr.scss'

@@ -1,11 +1,9 @@
 
-import React, { useEffect } from "react"
-import { Row } from 'reactstrap'
+import { useEffect } from "react"
 import { useTranslation } from "react-i18next";
 
 import './style.css'
 import useLoader from '@hooks/useLoader';
-import PrintError from "@src/components/PrintError";
 
 export default function LearningTrueEn()
 {

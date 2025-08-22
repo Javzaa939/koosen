@@ -1,6 +1,5 @@
-import React, { Fragment, useState, useEffect, useContext} from "react";
+import { useState, useEffect, useContext} from "react";
 
-import Select from 'react-select'
 
 import useLoader from "@hooks/useLoader";
 
@@ -8,19 +7,10 @@ import { ReactSelectStyles } from "@utils"
 
 import classnames from "classnames";
 
-import {ChevronDown ,Search} from "react-feather"
 
-import {
-    Row,
-    Col,
-    Card,
-    Input,
-	Label,
-    Button,
-    Spinner,
-} from "reactstrap";
 
-import DataTable from 'react-data-table-component'
+
+
 
 import useApi from '@hooks/useApi';
 

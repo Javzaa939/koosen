@@ -1,14 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Button, Col, Modal, ModalHeader, Row } from 'reactstrap';
-import AddAnnouncementModal from './AddAnnouncement';
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import useModal from '@hooks/useModal';
 import { useParams } from 'react-router-dom';
-import { Clock } from 'react-feather';
 import moment from 'moment';
-import { ExpandIcon } from 'lucide-react';
 
 function Announcement({ lesson }) {
     const { index } = useParams();

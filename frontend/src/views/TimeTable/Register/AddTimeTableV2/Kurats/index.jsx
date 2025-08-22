@@ -1,7 +1,6 @@
 // ** React imports
-import React, { Fragment, useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
-import Select from 'react-select'
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
@@ -9,21 +8,10 @@ import SchoolContext from "@context/SchoolContext"
 import ActiveYearContext from '@context/ActiveYearContext'
 
 import classnames from "classnames";
-import CTable from '../../Table';
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import {
-    Row,
-    Col,
 	Form,
-	Label,
-    Input,
-	Button,
-    Spinner,
-	FormFeedback,
-    Card,
-    CardHeader,
-    CardBody,
 } from "reactstrap";
 
 import {  get_time, ReactSelectStyles, get_lesson_type, get_potok, convertDefaultValue, validate } from "@utils"

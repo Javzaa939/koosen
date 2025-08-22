@@ -1,6 +1,3 @@
-import ChartByAnyField from "../../components/ChartByAnyField";
-import TableByClass from "../../components/TableByClass";
-import TableBySchool from "../../components/TableBySchool";
 
 export default function SemesterExamReport({ data, scoreRanges, isLoading, examType, level2_key1, level2_key2, main_school_name }) {
 	const level1_key1 = ['school_name']

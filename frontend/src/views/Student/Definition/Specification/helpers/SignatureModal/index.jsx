@@ -1,14 +1,8 @@
-import React, { useEffect, useState } from "react";
-import {
-    Button,
-    Label,
-    Modal,
-    ModalBody,
-    ModalHeader,
-} from "reactstrap";
+import { useEffect, useState } from "react";
+
+
 import { useTranslation } from 'react-i18next';
-import Select from 'react-select';
-import { Controller, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { ReactSelectStyles } from "@utils";
 import useLoader from '@hooks/useLoader';
 import classnames from "classnames";

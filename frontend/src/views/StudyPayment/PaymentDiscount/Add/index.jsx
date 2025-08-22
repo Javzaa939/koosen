@@ -1,5 +1,5 @@
 // ** React imports
-import React, { Fragment, useState,useContext, useEffect } from 'react'
+import { useState,useContext, useEffect } from 'react'
 
 import { useTranslation } from 'react-i18next';
 var values = {
@@ -7,15 +7,13 @@ var values = {
         stipent_type: '',
     }
 
-import { X } from "react-feather";
 
-import Select from 'react-select'
 
 import classnames from "classnames";
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
-import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, ModalHeader, FormFeedback, Spinner } from "reactstrap";
+import { Form } from "reactstrap";
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 

@@ -1,18 +1,15 @@
 // ** React imports
-import React, { Fragment, useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 
-import { X } from "react-feather";
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
-import { Row, Col, Form, Modal, Label, Button, ModalBody, ModalHeader, FormFeedback, Spinner, Input } from "reactstrap";
+import { Form } from "reactstrap";
 
 import { useTranslation } from 'react-i18next';
 
-import Select from 'react-select'
-import classnames from 'classnames'
 import useLoader from "@hooks/useLoader";
-import { ReactSelectStyles, validate, get_state } from "@utils"
+import { validate } from "@utils"
 import {validateSchema} from  "../validateSchema";
 import useApi from "@hooks/useApi";
 import empty from "@src/assets/images/empty-image.jpg"

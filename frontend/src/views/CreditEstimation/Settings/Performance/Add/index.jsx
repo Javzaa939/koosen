@@ -1,26 +1,15 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import {
-    Modal,
-    ModalBody,
-    ModalHeader,
-    Col,
-    Row,
-    Label,
-    Input,
-    FormFeedback,
-    Form,
-    Button,
-    Spinner
+    Form
 } from 'reactstrap'
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import { validate, convertDefaultValue, ReactSelectStyles,  lesson_level} from "@utils"
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 
-import Select from 'react-select'
 import classNames from "classnames"
 
 import { useTranslation } from 'react-i18next';

@@ -1,35 +1,19 @@
-import React, {useState, useEffect, Fragment, useContext} from 'react';
+import {useState, useEffect, useContext} from 'react';
 import {getPagination, ReactSelectStyles} from '@utils';
-import {useForm, Controller} from 'react-hook-form';
+import {useForm} from 'react-hook-form';
 import {useTranslation} from 'react-i18next';
 import {getColumns} from './helpers';
 
-import {
-    Row,
-    Col,
-    Card,
-    Label,
-    Input,
-    Button,
-    Spinner,
-    CardBody,
-    CardTitle,
-    CardHeader,
-} from 'reactstrap';
 
-import {
-    Plus,
-    Search,
-    ChevronDown,
-} from 'react-feather';
 
-import DataTable from 'react-data-table-component';
+
+
+
+
 import AuthContext from '@context/AuthContext'
 import useLoader from '@hooks/useLoader';
 import classnames from 'classnames';
 import useApi from '@hooks/useApi';
-import Select from 'react-select';
-import Addmodal from './Add';
 
 
 const Exam = () => {

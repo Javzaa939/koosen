@@ -1,7 +1,5 @@
 // ** React Imports
-import { Fragment, useState } from 'react'
-import SeasonQuestions from './SeasonQuestion'
-import EQuestions from '../../Test/EQuestions'
+import { useState } from 'react'
 
 export default function Question() {
 	const [titleToNextStep, setTitleToNextStep] = useState('')

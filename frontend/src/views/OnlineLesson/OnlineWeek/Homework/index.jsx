@@ -1,10 +1,5 @@
 import useApi from "@src/utility/hooks/useApi";
 import { useState } from "react";
-import { Col, Modal, ModalHeader, Row, Button } from "reactstrap";
-import AddHomework from "./AddHomework";
-import { Trash } from "react-feather";
-import ReceviedHomeWorks from "./ReceviedHomeWorks";
-import HomeWorkContainer from "./HomeWorkContainer";
 
 function HomeWork({ item, deleteHomeWork, refresh }) {
 	const [modal, setModal] = useState(false);

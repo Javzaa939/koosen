@@ -1,11 +1,7 @@
-import { Fragment, useEffect, useState } from 'react';
-import {
-    Button,
-    Col,
-    Row,
-} from "reactstrap";
+import { useEffect, useState } from 'react';
 
-import { BookOpen, ChevronLeft, ChevronRight, Feather } from "react-feather";
+
+
 import { useTranslation } from 'react-i18next';
 import './transition.css';
 

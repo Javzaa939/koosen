@@ -1,23 +1,22 @@
 // ** React imports
 // ** React imports
-import React, { Fragment, useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 
-import Select from 'react-select'
 
 import { useTranslation } from 'react-i18next';
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import classnames from 'classnames'
 
 import AuthContext from '@context/AuthContext'
 
-import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, ModalHeader, Card, CardBody, FormFeedback } from "reactstrap";
+import { Form } from "reactstrap";
 
-import { SOLVED_TYPES, ReactSelectStyles, convertDefaultValue, solved_type_color } from "@utils"
+import { SOLVED_TYPES, ReactSelectStyles, convertDefaultValue } from "@utils"
 
 const SolveModal = ({ request_id, isOpen, is_view, handleModal, refreshDatas }) => {
 
@@ -151,7 +150,7 @@ const SolveModal = ({ request_id, isOpen, is_view, handleModal, refreshDatas }) 
                                                                                     <a
                                                                                         href={file?.file}
                                                                                         className="me-2 text-primary text-decoration-underline"
-                                                                                        target={"_blank"}
+                                                                                        target={"_blank"} rel="noreferrer"
                                                                                     >
                                                                                         {file?.file.toString().split("/").pop()}
                                                                                     </a>

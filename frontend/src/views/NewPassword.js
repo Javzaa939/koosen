@@ -1,26 +1,17 @@
 // ** React Imports
-import { Link, useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 
 // ** Custom Hooks
 import { useSkin } from "@hooks/useSkin"
 
 // ** Icons Imports
-import { ChevronLeft } from "react-feather"
 
-import {useForm, Controller } from "react-hook-form"
+import {useForm } from "react-hook-form"
 
-import InputPasswordToggle from "@components/input-password-toggle"
 
 // ** Reactstrap Imports
-import {
-  Row,
-  Col,
-  Form,
-  Label,
-  Button,
-  CardTitle,
-  FormFeedback,
-} from "reactstrap"
+
+
 
 // ** Styles
 import "@styles/react/pages/page-authentication.scss"

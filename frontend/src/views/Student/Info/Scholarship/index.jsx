@@ -1,11 +1,8 @@
 
-import React, { useState } from "react"
+import { useState } from "react"
 
-import { Card, UncontrolledCollapse, Table, Badge } from "reactstrap"
-import { Eye } from 'react-feather'
 import { useTranslation } from 'react-i18next'
 
-import Files from "./Files"
 
 export default function Scholarship({ datas })
 {

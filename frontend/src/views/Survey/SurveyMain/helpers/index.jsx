@@ -1,6 +1,4 @@
-import { Edit, Eye, X } from "react-feather";
 
-import { Badge, UncontrolledTooltip } from "reactstrap";
 
 import useModal from '@hooks/useModal'
 

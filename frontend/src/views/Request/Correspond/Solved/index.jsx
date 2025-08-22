@@ -1,27 +1,15 @@
-import React, { useEffect, useState, useContext } from 'react'
+import { useEffect, useState, useContext } from 'react'
 
-import {
-    Row,
-    Col,
-    Label,
-    Input,
-    Modal,
-    Card,
-    Button,
-    ModalBody,
-    ModalHeader
-} from 'reactstrap'
+
+
 
 import { useTranslation } from 'react-i18next'
 
-import DataTable from 'react-data-table-component'
 
-import { X, Download, CheckSquare, XSquare } from 'react-feather'
 
 import AuthContext from "@context/AuthContext"
 import RequestContext from "@context/RequestContext"
 
-import AddTable from '../Add/Table'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
@@ -73,7 +61,7 @@ function detailRows( datas ) {
                                                 <a
                                                     href={datas?.file}
                                                     className="me-2 text-primary text-decoration-underline"
-                                                    target={"_blank"}
+                                                    target={"_blank"} rel="noreferrer"
                                                 >
                                                     {datas?.file_name}
                                                 </a>

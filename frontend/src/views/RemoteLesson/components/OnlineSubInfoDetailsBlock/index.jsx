@@ -1,8 +1,5 @@
-import { Badge, Card, CardBody } from 'reactstrap';
 import '../../style.scss';
-import DisplayQuill from '../DisplayQuill';
 import { PDF, QUIZ, TEXT, VIDEO } from '../../utils';
-import QuizBlock from '../QuizBlock';
 
 export default function OnlineSubInfoDetailsBlock({
 	t,

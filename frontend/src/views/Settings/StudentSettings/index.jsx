@@ -1,16 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
-import { Card, Nav, NavItem, NavLink, TabContent } from 'reactstrap'
 
-import Learning from '../Learning'
-import ProfessionalDegree from '../ProfessionalDegree'
-import StudentRegisterType from '../StudentRegisterType'
-import DiscountType from '../DiscountType'
-import LessonCategory from '../LessonCategory'
-import LessonGroup from '../LessonGroup'
-import Score from '../Score'
-import AdmissionLesson from '../AdmissionLesson'
-import UsgenUnelgee from '../UsgenUnelgee'
 
 function Student() {
 

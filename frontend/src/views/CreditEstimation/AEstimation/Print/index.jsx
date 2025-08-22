@@ -1,7 +1,6 @@
 
-import React, { useMemo, useEffect} from "react"
+import { useMemo, useEffect} from "react"
 
-import { Row } from 'reactstrap'
 import { useLocation } from 'react-router-dom';
 
 // ** Styles

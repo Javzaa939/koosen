@@ -1,26 +1,14 @@
 // ** React imports
-import React, { useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
 import { useParams } from 'react-router-dom';
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import {
-    Row,
-    Col,
 	Form,
-	Input,
-	Label,
-	FormFeedback,
-    CardHeader,
-    Card,
-    Button,
-    CardTitle,
-    CardBody, TabContent, TabPane, Nav, NavItem, NavLink,
 } from "reactstrap";
 
-import { Edit, Save } from 'react-feather';
 
-import Select from 'react-select'
 
 import classnames from "classnames";
 
@@ -29,7 +17,7 @@ import useLoader from "@hooks/useLoader";
 import AuthContext from '@context/AuthContext'
 import { useTranslation } from 'react-i18next'
 
-import { validate, convertDefaultValue, ReactSelectStyles } from "@utils"
+import { convertDefaultValue, ReactSelectStyles } from "@utils"
 
 import SchoolContext from "@context/SchoolContext"
 

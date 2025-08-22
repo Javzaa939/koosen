@@ -1,26 +1,20 @@
-import { Fragment, useState, useContext, useEffect } from "react"
+import { useState, useContext, useEffect } from "react"
 
 import { t } from "i18next"
 
-import DataTable from "react-data-table-component"
 
-import { ChevronDown, Search, Plus } from "react-feather"
 
-import { Card, CardHeader, CardTitle, Col, Row, Input, Label, Button, Spinner } from "reactstrap"
 
 import { getPagination, ReactSelectStyles, get_states} from '@utils'
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import AuthContext from '@context/AuthContext'
 
 import useApi from "@hooks/useApi"
 import useLoader from '@hooks/useLoader';
-import Select from 'react-select'
 import classnames from 'classnames'
 
 import { getColumns } from './helpers';
-import AddModal from "./Add"
-import EditModal from './Edit'
 
 const InventoryRequest = () => {
 

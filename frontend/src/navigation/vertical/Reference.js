@@ -1,5 +1,4 @@
 // ** Icons Import
-import { ContactIcon, Circle } from 'lucide-react';
 
 export default [
     {

@@ -1,19 +1,12 @@
 // ** React Imports
-import { useRef, useState, Fragment } from 'react'
+import { useRef, useState } from 'react'
 
 // ** Custom Components
-import Wizard from '@components/wizard'
-import {
-	Modal,
-	ModalHeader,
-	ModalBody,
-} from "reactstrap";
 
-import { Info, User, X } from 'react-feather'
+
+
 
 // ** Steps
-import General from './Steps/General'
-import Students from './Steps/Students';
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';

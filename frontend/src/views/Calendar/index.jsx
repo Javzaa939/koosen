@@ -1,18 +1,12 @@
 // ** React Imports
-import { Fragment, useState, useEffect } from 'react';
-import { Book, User } from 'react-feather';
-import { Card, CardBody, CardTitle, Row, Col } from 'reactstrap';
+import { useState, useEffect } from 'react';
 
 import classnames from 'classnames';
-import Avatar from '@components/avatar';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import { useRTL } from '@hooks/useRTL';
 
 // ** Calendar App Component Imports
-import Calendar from './Calendar';
-import SidebarLeft from './SidebarLeft'
-import AddEventSidebar from './Add';
 // import SwiperFade from './SwiperFade';
 // import AccessHistory from './AccessHistory';
 
@@ -20,7 +14,6 @@ import '@styles/react/apps/app-calendar.scss';
 
 import { VOLUNTEER_ACTION_TYPE } from '@utility/consts';
 
-import StatsHorizontal from '@components/widgets/stats/StatsHorizontal';
 
 const CalendarComponent = () => {
     const blankEvent = {

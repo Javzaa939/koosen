@@ -1,37 +1,23 @@
-import React, { Fragment, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
-import { ChevronDown, Plus, Search } from 'react-feather'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader'
 
-import {
-    Row,
-    CardHeader,
-    Card,
-    CardTitle,
-    Button,
-    Col,
-    Input,
-    Label,
-    Spinner
-} from 'reactstrap'
 
-import DataTable from 'react-data-table-component'
+
+
 
 import { useTranslation } from 'react-i18next'
 
 import classnames from 'classnames';
 
-import Select from 'react-select'
 
 import { getPagination, ReactSelectStyles, get_gender_list } from '@utils'
 
 import { getColumns } from './helpers'
 
-import Addmodal from './Add'
 
-import EditModal from './Edit'
 
 const Rooms = () => {
 

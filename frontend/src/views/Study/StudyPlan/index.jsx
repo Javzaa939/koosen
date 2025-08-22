@@ -1,27 +1,15 @@
 // ** React Imports
-import { Fragment, useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
-import {
-    Row,
-    Col,
-    Card,
-    Input,
-    Label,
-    Button,
-    CardTitle,
-    CardHeader,
-    Progress,
-} from 'reactstrap'
+
+
 
 import { useTranslation } from 'react-i18next'
 
-import Select from 'react-select'
 
-import { ChevronDown, Plus, Search } from 'react-feather'
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
-import DataTable from 'react-data-table-component'
 
 import classnames from "classnames";
 
@@ -35,8 +23,6 @@ import { getPagination, ReactSelectStyles, lesson_level, lesson_type } from '@ut
 
 import { getColumns } from './helpers'
 
-import Addmodal from './Add'
-import EditModal from './Edit'
 
 const StudyPlan = () => {
 

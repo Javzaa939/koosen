@@ -1,9 +1,6 @@
-import { Badge, UncontrolledTooltip } from 'reactstrap';
 import { state_flag_color } from '@utils';
-import { Eye } from 'react-feather';
 import { t } from 'i18next';
 import { IQresultExcelReport, resultExcelReport, TYPE_IQ, TYPE_PSY } from '../../helpers';
-import { DownloadIcon } from 'lucide-react';
 
 export function getColumns(
     currentPage,

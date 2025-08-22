@@ -1,17 +1,14 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 
-import { Button, UncontrolledCollapse, Card, Table } from 'reactstrap';
 
 import { useTranslation } from 'react-i18next';
 
-import { Plus } from 'react-feather'
 
 import AuthContext from "@context/AuthContext"
 import useToast from "@hooks/useToast";
 
 import classnames from "classnames";
 
-import TableRows from "../TableRows"
 
 const Laborator = ({ handleValue, handleDeleteValue, datas, type }) => {
 

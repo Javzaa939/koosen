@@ -1,16 +1,11 @@
-import { Fragment, useState, useEffect, useContext } from 'react'
+import { useState, useEffect } from 'react'
 
-import { Controller, useForm } from 'react-hook-form'
 
-import { Row, Col, Card, Input, Label, CardTitle, CardHeader, Spinner, Button } from 'reactstrap'
 
-import { ChevronDown , FileText, Search} from 'react-feather'
 
 import { useTranslation } from 'react-i18next'
 
-import Select from 'react-select'
 
-import DataTable from 'react-data-table-component'
 
 import useApi from '@hooks/useApi';
 
@@ -18,7 +13,7 @@ import useLoader from '@hooks/useLoader';
 
 import { getColumns } from './helpers';
 
-import { getPagination, ReactSelectStyles, generateLessonYear, level_option } from '@utils';
+import { getPagination, ReactSelectStyles, level_option } from '@utils';
 
 import excelDownload from "@src/utility/excelDownload";
 

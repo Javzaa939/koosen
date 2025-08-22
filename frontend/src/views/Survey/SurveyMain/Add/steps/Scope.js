@@ -1,14 +1,8 @@
-import React, { Fragment, useState, useEffect } from 'react'
-import {
-    Row,
-    Col,
-    Button,
-} from "reactstrap";
+import { useState, useEffect } from 'react'
 
-import { ChevronLeft, ChevronRight, Feather, BookOpen, Target } from "react-feather"
 
-import Student from "./hamrah/Student"
-import Teacher from "./hamrah/Teacher"
+
+
 
 import './transition.css'
 

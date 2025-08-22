@@ -1,11 +1,8 @@
 import { t } from "i18next"
 import { useState, useContext, useEffect } from "react"
-import DataTable from "react-data-table-component"
 
-import { Edit, Download, Trash2 } from 'react-feather'
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
-import { Card, CardBody, Form, CardHeader, CardTitle, Col, Row, Input, Label, Button, Spinner, Badge, FormFeedback } from "reactstrap"
 import { validate } from '@utils'
 import AuthContext from '@context/AuthContext'
 import useApi from "@hooks/useApi"

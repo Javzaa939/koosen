@@ -3,10 +3,9 @@ import { Fragment, useState } from "react"
 
 // ** Third Party Components
 import PropTypes from "prop-types"
-import { Code } from "react-feather"
 
 // ** Reactstrap Imports
-import { Card, CardHeader, CardBody, CardTitle, Collapse } from "reactstrap"
+import { CardBody } from "reactstrap"
 
 const CardSnippet = (props) => {
   // ** Props

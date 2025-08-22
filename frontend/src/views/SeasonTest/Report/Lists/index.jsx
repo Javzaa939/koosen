@@ -1,7 +1,4 @@
-import React, { useState, useEffect } from 'react'
-import { Card, Nav, NavItem, NavLink, TabContent } from 'reactstrap'
-import List5 from '../List5'
-import List6 from '../List6'
+import { useState, useEffect } from 'react'
 
 export default function Lists() {
     const [activeTab, setActiveTab] = useState(0)

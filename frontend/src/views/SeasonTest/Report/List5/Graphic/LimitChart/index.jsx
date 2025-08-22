@@ -1,4 +1,3 @@
-import {  Bar, ChartProps} from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
 
 import ChartDataLabels from 'chartjs-plugin-datalabels';

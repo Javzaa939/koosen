@@ -1,8 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import { Col, Label } from 'reactstrap'
 
-import Select from 'react-select'
 
 import { ReactSelectStyles } from "@utils"
 

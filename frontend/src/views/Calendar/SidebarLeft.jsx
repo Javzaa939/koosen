@@ -1,10 +1,8 @@
 // ** React Imports
-import { Fragment, useState, useContext, useEffect } from 'react';
+import { useState, useContext, useEffect } from 'react';
 
 // ** Reactstrap Imports
-import { Card, CardBody, Button, Input, Label, Row, Col } from 'reactstrap';
 
-import DatePicker from 'react-datepicker';
 
 import { useTranslation } from 'react-i18next';
 

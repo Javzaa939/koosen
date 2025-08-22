@@ -1,22 +1,11 @@
 // ** React Imports
-import { Fragment, useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
-import {
-    Row,
-    Col,
-    Card,
-    Input,
-    Label,
-    Button,
-    CardTitle,
-    CardHeader,
-    Spinner,
-} from 'reactstrap'
+
+
 
 import { useTranslation } from 'react-i18next'
-import { ChevronDown, Search, Plus } from 'react-feather'
 
-import DataTable from 'react-data-table-component'
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import AuthContext from '@context/AuthContext'
@@ -24,8 +13,6 @@ import SchoolContext from '@context/SchoolContext'
 import { getPagination } from '@utils'
 import { getColumns } from './helpers'
 
-import EditModal from './Edit'
-import Addmodal from './Add'
 
 const Correspond = () => {
 

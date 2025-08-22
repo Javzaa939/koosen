@@ -1,27 +1,15 @@
 /** Замын төлөвлөгөөний жагсаалт */
 
 // ** React Imports
-import { Fragment, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
 // ** Reactstrap Imports
-import {
-    Row,
-    Col,
-    Card,
-    Input,
-    Label,
-    Button,
-    CardTitle,
-    CardHeader,
-    DropdownToggle,
-    UncontrolledButtonDropdown
-} from 'reactstrap'
+
+
 
 import { useNavigate } from 'react-router-dom'
 
-import { ChevronDown, Share, Plus, Search } from 'react-feather'
 
-import DataTable from 'react-data-table-component'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';

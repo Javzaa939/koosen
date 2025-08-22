@@ -1,11 +1,7 @@
-import React,{ useEffect, useRef, useState } from "react";
-import { Badge, Tooltip, Row, UncontrolledTooltip } from "reactstrap";
-import { AlertCircle } from "react-feather";
+import{ useEffect, useState } from "react";
 import '../detail.css'
 import './scroll.css'
-import {Avatar} from "@mui/material"
 import avatarBlank from '@src/assets/images/avatars/avatar-blank.png'
-import StateCustomPagination from "./components/StateCustomPagination";
 import useLoader from "@src/utility/hooks/useLoader";
 import useApi from "@src/utility/hooks/useApi";
 

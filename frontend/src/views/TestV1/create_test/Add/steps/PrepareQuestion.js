@@ -1,12 +1,8 @@
-import React, { Fragment, useState, useCallback, useEffect } from 'react'
-import {
-    Row,
- } from 'reactstrap'
+import { useState, useCallback } from 'react'
 
-import Subject from '../components/Subject';
-import SubjectQuestions from '../components/SubjectQuestions';
 
-import Verification from '../components/Verification';
+
+
 
 export default function PrepareQuestion(props) {
 

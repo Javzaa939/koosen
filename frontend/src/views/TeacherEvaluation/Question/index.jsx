@@ -1,12 +1,9 @@
-import { Fragment, useState, useContext, useEffect } from "react"
+import { useState, useContext, useEffect } from "react"
 
 import { t } from "i18next"
 
-import DataTable from "react-data-table-component"
 
-import { ChevronDown, Search, Plus, AlertCircle } from "react-feather"
 
-import { Card, CardHeader, CardTitle, Col, Row, Input, Label, Button, Spinner, Badge } from "reactstrap"
 
 import { getPagination } from '@utils'
 import { getColumns } from './helpers'
@@ -16,7 +13,6 @@ import AuthContext from '@context/AuthContext'
 import useApi from "@hooks/useApi"
 import useLoader from '@hooks/useLoader';
 
-import AddQuestion from "./Add"
 
 const Question = () => {
 

@@ -1,32 +1,21 @@
 // ** React imports
-import React, { Fragment, useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 
-import { Plus  } from 'react-feather'
-import { useForm } from "react-hook-form";
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import DataTable from 'react-data-table-component'
 
-import {
-    Col,
-	Button,
-	Card,
-    CardHeader,
-    Spinner
-} from "reactstrap";
+
+
 
 import AuthContext from "@context/AuthContext"
 import SchoolContext from "@context/SchoolContext"
 
-import { validate } from "@utils"
-import { validateSchema } from './validateSchema';
 import { getColumns } from './helpers';
 
-import Addmodal from './Add'
 
 const MainInformation = ({ }) => {
 

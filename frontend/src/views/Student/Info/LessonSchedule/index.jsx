@@ -1,7 +1,6 @@
 
-import React, { useState } from "react"
+import { useState } from "react"
 
-import { UncontrolledCollapse, Card, Table } from 'reactstrap';
 
 import { get_day } from '@utils';
 

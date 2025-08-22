@@ -1,20 +1,9 @@
-import React, { Fragment, useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
-import { ChevronDown, Plus, Search } from 'react-feather'
 
-import {
-    Row,
-    CardHeader,
-    Card,
-    CardTitle,
-    Button,
-    Col,
-    Input,
-    Label,
-    Spinner,
-} from 'reactstrap'
 
-import DataTable from 'react-data-table-component'
+
+
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
@@ -26,9 +15,7 @@ import { getPagination } from '@utils'
 
 import { getColumns } from './helpers'
 
-import Addmodal from './Add'
 
-import EditModal from './Edit'
 
 const RoomType = () => {
 

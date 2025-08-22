@@ -2,9 +2,7 @@ import { useState } from 'react'
 
 import { t } from 'i18next'
 
-import { Badge, UncontrolledTooltip } from 'reactstrap'
 
-import { Book, Edit } from 'react-feather'
 
 import { get_day } from '@utils'
 

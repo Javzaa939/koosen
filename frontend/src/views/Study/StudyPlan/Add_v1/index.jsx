@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import { Card, Row, Col, Form, Modal, ModalBody, ModalHeader, Button } from 'reactstrap';
+import { Form } from 'reactstrap';
 
 import { useTranslation } from 'react-i18next';
 
@@ -10,12 +10,6 @@ import useLoader from "@hooks/useLoader";
 
 import classnames from 'classnames'
 
-import Diplom from './Diplom';
-import BasicLesson from './BasicLesson';
-import ProfBasicLesson from './ProfBasicLesson';
-import ProfessionLesson from './ProfessionLesson';
-import Qualification from './Qualification';
-import { Printer } from 'react-feather';
 
 const StudyPlanAdd = ({ open, handleModal, mergejil_id }) => {
 

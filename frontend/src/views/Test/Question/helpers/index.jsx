@@ -1,6 +1,4 @@
-import { Badge, UncontrolledTooltip } from 'reactstrap';
 
-import { Edit } from 'react-feather';
 
 export function getColumns (currentPage, rowsPerPage, total_count, handleEdit) {
 

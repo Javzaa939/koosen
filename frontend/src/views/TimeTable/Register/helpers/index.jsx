@@ -1,5 +1,4 @@
 import { useContext } from 'react'
-import { Trash2 } from 'react-feather'
 
 import css from '@mstyle/style.module.css'
 

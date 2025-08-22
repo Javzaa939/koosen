@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom";
 
 import { useContext } from "react";
 
-import { Badge } from "reactstrap"
 
 import css from '@mstyle/style.module.css'
 

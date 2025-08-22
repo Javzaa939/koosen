@@ -1,5 +1,3 @@
-import { Edit, Delete } from "react-feather";
-import { UncontrolledTooltip } from "reactstrap";
 import { t } from "i18next";
 
 import useModal from "@hooks/useModal";

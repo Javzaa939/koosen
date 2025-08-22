@@ -1,11 +1,8 @@
-import { useContext, useState, useRef } from 'react';
-import { UncontrolledTooltip, Badge } from 'reactstrap';
-import { Eye } from 'react-feather';
+import { useContext } from 'react';
 import { t } from 'i18next';
 import useModal from '@hooks/useModal';
 
 import AuthContext from '@context/AuthContext';
-import { UndoIcon } from 'lucide-react';
 
 // Хүснэгтийн баганууд
 export function getColumns(

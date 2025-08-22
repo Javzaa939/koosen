@@ -1,30 +1,16 @@
-import React, { Fragment, useState, useEffect } from "react";
-import { Download, Search } from "react-feather";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { getPagination } from "@utils";
 import { getColumns } from "./helpers";
 import { useParams, Link } from 'react-router-dom';
 import { utils, writeFile } from 'xlsx-js-style';
 
-import {
-	Row,
-	CardHeader,
-	Card,
-	CardTitle,
-	Button,
-	Col,
-	Input,
-	Label,
-	Alert,
-} from "reactstrap";
 
-import DataTable from "react-data-table-component";
+
+
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 
-import DetailModal from './Detail';
-import ResultModal from "./Modal";
-import UpdateChallengeStudentsScoreButton from "./components/UpdateChallengeStudentsScoreButton";
 
 export function excelDownLoad(datas, STATE_LIST) {
 	const mainData = datas.map((data, idx) => {

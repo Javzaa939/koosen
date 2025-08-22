@@ -1,6 +1,3 @@
-import { Box, Card, CardContent, CardHeader, Grid, Typography } from '@mui/material';
-import { MessageCircleWarning } from 'lucide-react';
-import LimitChart from './LimitChart';
 
 /**
     @param {} props

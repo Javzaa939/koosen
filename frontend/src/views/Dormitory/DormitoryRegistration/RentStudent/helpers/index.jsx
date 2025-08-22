@@ -2,9 +2,7 @@
 
 import { t } from 'i18next'
 
-import { Button, Badge, UncontrolledTooltip } from 'reactstrap'
 
-import { Book, CheckCircle } from 'react-feather'
 
 import { solved_type_color } from '@utils'
 

@@ -1,10 +1,7 @@
 
-import React, { useState } from "react"
 
-import { Card, Row, Col, UncontrolledCollapse, Table, Popover, PopoverBody, Button, PopoverHeader } from "reactstrap"
 import { useTranslation } from 'react-i18next'
 
-import BalancePopover from "./BalancePopover"
 
 export default function PaymentInformation({ datas })
 {

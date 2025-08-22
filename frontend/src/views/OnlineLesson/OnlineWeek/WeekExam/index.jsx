@@ -1,21 +1,11 @@
-import React, { useState, Fragment, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { downloadExcelReport } from './Participants/downloadExcelReport';
 import { downloadIQExcelReport } from './Participants/downloadIQExcelReport';
-import {
-    Col,
-    Row,
-    Nav,
-    Card,
-    Button,
-    NavItem,
-    NavLink,
-    TabContent,
-    UncontrolledTooltip,
-} from 'reactstrap';
+
+
 
 import useLoader from '@hooks/useLoader';
 import useApi from '@hooks/useApi';
-import Elsegch from './Result';
 // import CreateTest from '@src/views/Test/create_test';
 // import CreateQuestion from '@src/views/Test/create_question';
 

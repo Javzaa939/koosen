@@ -1,18 +1,8 @@
-import React, { Fragment, useEffect } from 'react'
+import { useEffect } from 'react'
 import {
-    Modal,
-    ModalHeader,
-    ModalBody,
-    Form,
-    Row,
-    Col,
-    Label,
-    Input,
-    Button,
-    FormFeedback
+    Form
 } from 'reactstrap'
 
-import { X } from 'react-feather';
 import { t } from 'i18next';
 
 import useApi from "@hooks/useApi";
@@ -20,7 +10,7 @@ import useLoader from "@hooks/useLoader";
 
 import { validate, convertDefaultValue } from "@utils"
 
-import { Controller, useForm } from "react-hook-form"
+import { useForm } from "react-hook-form"
 
 import * as Yup from 'yup'
 

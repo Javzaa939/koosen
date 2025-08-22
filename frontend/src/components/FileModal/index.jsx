@@ -1,20 +1,9 @@
 import { useState } from 'react'
 import { t } from 'i18next'
 
-import { AlertCircle, X } from 'react-feather'
 
-import {
-    Col,
-    Input,
-    Label,
-    Modal,
-    Button,
-    ModalBody,
-    ModalHeader,
-    FormFeedback,
-    InputGroup,
-    InputGroupText
-} from 'reactstrap'
+
+
 
 const FileModal = (props) => {
 

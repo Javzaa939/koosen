@@ -1,38 +1,11 @@
-import { Fragment, useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 
-import {
-    Row,
-    Col,
-    Card,
-    Input,
-    Label,
-    Button,
-    CardTitle,
-    CardHeader,
-    ListGroupItem,
-    Spinner,
-    Dropdown,
-    DropdownToggle,
-    DropdownItem,
-    DropdownMenu,
-} from 'reactstrap';
-import {
-    ChevronDown,
-    Search,
-    Plus,
-    Menu,
-    Edit,
-    Trash2,
-    FileText,
-    Download,
-    Shuffle,
-} from 'react-feather';
-import DataTable from 'react-data-table-component';
+
+
+
+
 import { useTranslation } from 'react-i18next';
-import { useForm, Controller } from 'react-hook-form';
-import Select from 'react-select';
-import { ReactSortable } from 'react-sortablejs';
-import { Link } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
 
 import classnames from 'classnames';
 
@@ -42,22 +15,14 @@ import AuthContext from '@context/AuthContext';
 import SchoolContext from '@context/SchoolContext';
 
 import { getColumns } from './helpers';
-import Addmodal from './Add';
-import EditModal from './Edit';
-import SignatureModal from './Signature';
-import CreateModal from './Graduate';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import useModal from '@hooks/useModal';
 import useUpdateEffect from '@hooks/useUpdateEffect';
-import GraduationCommand from './Command';
-import FileModal from '@lms_components/FileModal';
 
 // drag-and-drop.scss
 import '@styles/react/libs/drag-and-drop/drag-and-drop.scss';
-import DetailModal from './DetailModal';
 import excelDownload from '@src/utility/excelDownload';
-import PrintModal from './PrintModal';
 
 const Graduation = () => {
     var values = {

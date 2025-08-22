@@ -1,5 +1,4 @@
 // ** Icons Import
-import { Circle, Clock } from 'react-feather'
 
 export default [
     {

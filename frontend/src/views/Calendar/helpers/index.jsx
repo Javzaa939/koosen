@@ -25,7 +25,7 @@ export function getColumns (currentPage, rowsPerPage, total_count) {
                         href={`/service/show/${row?.id}`}
                         target={'_blank'}
                         className='d-flex border rounded align-items-center'
-                        style={{  padding: '0.25rem 0.75rem', color: 'inherit', fontSize: 12 }}
+                        style={{  padding: '0.25rem 0.75rem', color: 'inherit', fontSize: 12 }} rel="noreferrer"
                     >
                         Дэлгэрэнгүй
                     </a>

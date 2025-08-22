@@ -1,19 +1,9 @@
-import React, { Fragment, useEffect, useState} from 'react'
+import { useEffect, useState} from 'react'
 import {
-    Row,
-    Col,
-    Modal,
 	Form,
-	Input,
-	Label,
-	Button,
-    ModalBody,
-    ModalHeader,
-    Spinner,
 } from "reactstrap";
 
 import { t } from 'i18next';
-import Select from 'react-select'
 import classnames from 'classnames'
 
 import useApi from '@hooks/useApi';
@@ -21,7 +11,7 @@ import useLoader from '@hooks/useLoader';
 
 import { validateSchema } from './validateSchema'
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { convertDefaultValue , validate, ReactSelectStyles } from "@utils"
 
 const UpdateModal = ({ open, editId, refreshDatas, handleEdit}) => {

@@ -1,6 +1,3 @@
-import React, { useState } from "react";
-import { AlertCircle } from "react-feather";
-import { Badge } from "reactstrap";
 
 function Blank({ text, color }){
 

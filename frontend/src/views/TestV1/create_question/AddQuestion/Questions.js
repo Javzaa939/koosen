@@ -1,17 +1,13 @@
-import React, { useState, memo } from 'react'
+import { useState, memo } from 'react'
 
-import { Plus, X } from 'react-feather'
 
-import { Label, Input, Row, Col, Button, FormFeedback, Badge } from 'reactstrap'
 
-import Select from 'react-select'
 import classnames from "classnames";
 
 import { ReactSelectStyles, get_questionype } from "@utils"
 
 import empty from "@src/assets/images/empty-image.jpg"
 
-import ChoiceInput from '../ChoiceInput';
 
 import '../../style.css'
 

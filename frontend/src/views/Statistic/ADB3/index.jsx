@@ -1,15 +1,12 @@
-import React, { Fragment, useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import useApi from "@hooks/useApi";
 
 import useLoader from "@hooks/useLoader";
-import { Button, Spinner } from "reactstrap";
-import { FileText } from 'react-feather'
 
 import { utils, writeFile } from 'xlsx-js-style';
 import './style.scss'
 import ActiveYearContext from "@context/ActiveYearContext"
 
-import { sampledata } from "./sample";
 
 function ADB3(){
 

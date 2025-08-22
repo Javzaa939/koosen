@@ -3,9 +3,7 @@ import useApi from "@src/utility/hooks/useApi";
 import useLoader from "@src/utility/hooks/useLoader";
 import useToast from "@src/utility/hooks/useToast";
 import { useContext, useEffect, useState } from "react";
-import { X } from "react-feather";
-import { Controller, useForm } from "react-hook-form";
-import { Button, Col, Form, FormFeedback, Input, Label, ModalBody, ModalFooter, Row } from "reactstrap";
+import { useForm } from "react-hook-form";
 
 import { t } from 'i18next';
 import DetailModal from "./DetailModal";
@@ -200,7 +198,7 @@ function AddHomework({ toggle='', item, refresh }) {
 									<a
 										href={datas?.file}
 										className="me-2 text-primary text-decoration-underline"
-										target={"_blank"}
+										target={"_blank"} rel="noreferrer"
 									>
 										{datas?.file.toString().split("/").pop()}
 									</a>

@@ -1,23 +1,13 @@
-import { useState, Fragment, useEffect } from 'react';
-import { useForm, Controller } from "react-hook-form";
+import { useState, useEffect } from 'react';
+import { useForm } from "react-hook-form";
 import { convertDefaultValue, ReactSelectStyles, validate } from "@utils";
 import { validateSchema } from "../Add/Steps/General/validationSchema"
 import { t } from 'i18next';
 
 import {
-	Modal,
-	ModalHeader,
-	ModalBody,
-    Row,
     Form,
-    Col,
-    Label,
-    Input,
-    Button,
-    FormFeedback,
 } from "reactstrap";
 
-import Select from 'react-select';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import '@styles/react/libs/flatpickr/flatpickr.scss';

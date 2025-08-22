@@ -1,4 +1,3 @@
-import { ListChecksIcon, Circle } from 'lucide-react';
 
 export default [
     {

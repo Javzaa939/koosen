@@ -2,7 +2,6 @@
 import { Link } from "react-router-dom"
 
 // ** Reactstrap Imports
-import { Button } from "reactstrap"
 
 // ** Custom Hooks
 import { useSkin } from "@hooks/useSkin"

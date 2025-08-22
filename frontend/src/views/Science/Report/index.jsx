@@ -1,16 +1,7 @@
 
 import { useState, useEffect } from "react"
-import {
-    Card,
-    CardTitle,
-    CardHeader,
-    CardSubtitle,
-    Badge,
-    CardBody,
-    Input
-} from 'reactstrap'
-import { Bar } from 'react-chartjs-2'
-import { ArrowDown, ArrowUp } from "react-feather"
+
+
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';

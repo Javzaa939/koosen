@@ -1,6 +1,4 @@
 import { t } from 'i18next';
-import { Badge, UncontrolledTooltip} from 'reactstrap'
-import { Edit, X} from 'react-feather'
 import useModal from "@hooks/useModal"
 
 // Хүснэгтийн баганууд

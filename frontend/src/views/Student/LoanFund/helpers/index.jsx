@@ -1,5 +1,4 @@
 import { t } from 'i18next';
-import { Badge } from "reactstrap";
 
 // Хүснэгтийн баганууд
 export function getColumns (currentPage, rowsPerPage, total_count) {

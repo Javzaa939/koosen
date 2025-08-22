@@ -1,6 +1,4 @@
-import { UploadCloud, X } from "react-feather";
 import classnames from "classnames";
-import { Label } from "reactstrap";
 import '@styles/react/libs/flatpickr/flatpickr.scss';
 
 /*

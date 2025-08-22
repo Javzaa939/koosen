@@ -1,16 +1,11 @@
 // ** React Imports
 import { useEffect, useRef, useState, useMemo } from 'react'
-import { Printer, Search, DownloadCloud } from 'react-feather'
 import { useTranslation } from 'react-i18next'
-import { Button, Col, Input, Label, Row } from 'reactstrap'
 
 import useApi from '@hooks/useApi'
 import { getPagination } from '@src/utility/Utils'
 import useLoader from '@src/utility/hooks/useLoader'
 
-import StudentsQuestionsTable from './StudentsQuestionsTable'
-import GroupFilter from '../helpers/GroupFilter'
-import ExamFilter from '../helpers/ExamFilter'
 import { stableStylesPrintElement } from '../helpers'
 import excelDownload from '@src/utility/excelDownload'
 

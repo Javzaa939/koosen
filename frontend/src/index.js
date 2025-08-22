@@ -2,19 +2,13 @@ import { lazy } from 'react';
 
 // ** React Imports
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
 
 // ** Redux Imports
 import { store } from './redux/store';
-import { Provider } from 'react-redux';
 
 // ** ThemeColors Context
 
-import { ThemeContext } from './utility/context/ThemeColors';
 
-import ModalContextProvider from '@context/ModalContext';
-import { SchoolContextProvider } from '@context/SchoolContext';
-import { ActiveYearContextProvider } from '@context/ActiveYearContext';
 
 // ** i18n
 import './configs/i18n';

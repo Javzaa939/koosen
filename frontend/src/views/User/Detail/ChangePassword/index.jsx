@@ -1,5 +1,4 @@
-import React, { Fragment, useState, useEffect } from "react";
-import { CardTitle, Row, Col, CardBody, Card,CardHeader,Button,Form,FormFeedback,Label } from "reactstrap";
+import {Form } from "reactstrap";
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
@@ -7,7 +6,7 @@ import useLoader from "@hooks/useLoader";
 //import classes
 import classnames from "classnames";
 
-import {useForm, Controller } from "react-hook-form"
+import {useForm } from "react-hook-form"
 
 import { validate, convertDefaultValue} from "@utils"
 import { validatePassSchema } from "./validationSchema.jsx"
@@ -15,7 +14,6 @@ import { validatePassSchema } from "./validationSchema.jsx"
 
 import { useParams, useNavigate } from "react-router-dom";
 
-import InputPasswordToggle from "@components/input-password-toggle"
 
 const ChangePassword = (props) => {
 

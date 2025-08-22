@@ -2,7 +2,6 @@
 import PropTypes from "prop-types"
 
 // ** Reactstrap Imports
-import { Card, CardBody } from "reactstrap"
 
 const StatsVertical = ({ icon, color, stats, statTitle, className }) => {
   return (

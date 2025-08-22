@@ -1,22 +1,13 @@
-import React, { Fragment, useState, useEffect,  } from "react";
+import { useState, useEffect,  } from "react";
 import { useTranslation } from "react-i18next";
 import { getPagination } from "@utils";
 import { getColumns, customStyles } from "./helpers";
-import {
-	CardHeader,
-	Card,
-	CardTitle,
-	Button,
-	Spinner,
-	CardBody,
-} from "reactstrap";
 
-import DataTable from "react-data-table-component";
+
+
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
-import AddQuestion from "./AddQuestion";
 
-import EditModal from "./EditModal";
 const QuestionsList = ({filterId}) => {
 
 	const { t } = useTranslation();

@@ -1,10 +1,6 @@
-import { Fragment } from 'react';
 import { useKeenSlider } from 'keen-slider/react';
 import '../style.css';
-import { Button, Col, Row } from 'reactstrap';
 import { t } from 'i18next';
-import StudentPayment from '../StudentPayment';
-import { SkipBackIcon, SkipForwardIcon } from 'lucide-react';
 
 export default function ReportGroupPayment() {
     // ** Hook

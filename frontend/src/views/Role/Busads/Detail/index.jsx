@@ -1,19 +1,8 @@
-import React, { Fragment, useState, useEffect, useContext} from 'react'
 
-import { useForm, Controller } from "react-hook-form";
 
-import {
-    Row,
-    Col,
-	Modal,
-	Card,
-	CardBody,
-	ModalBody,
-	ModalHeader,
-} from "reactstrap";
 
-import { t } from 'i18next';
-import { X } from 'react-feather'
+
+
 
 const DetailModal = ({ open, handleModal, datas }) => {
 

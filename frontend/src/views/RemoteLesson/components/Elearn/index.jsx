@@ -1,8 +1,5 @@
 import { useRef, useState } from 'react';
-import { X } from 'react-feather';
-import { Controller, useWatch } from 'react-hook-form';
-import { Col, FormFeedback, Input, Label, Row } from 'reactstrap';
-import ReactQuill from 'react-quill';
+import { useWatch } from 'react-hook-form';
 import 'quill/dist/quill.snow.css'
 
 import empty from "@src/assets/images/empty-image.jpg";

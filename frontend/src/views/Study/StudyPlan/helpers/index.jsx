@@ -1,4 +1,3 @@
-import { Trash2 } from 'react-feather'
 
 import { t } from 'i18next'
 

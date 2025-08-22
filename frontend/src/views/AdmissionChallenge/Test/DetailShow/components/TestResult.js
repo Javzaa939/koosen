@@ -1,4 +1,3 @@
-import { Label, Input, CardBody } from 'reactstrap'
 import classnames from "classnames";
 import '../../style.css'
 

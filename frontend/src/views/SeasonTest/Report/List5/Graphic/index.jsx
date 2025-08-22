@@ -1,9 +1,5 @@
-import { Box, Card, CardContent, CardHeader, Grid, Typography } from '@mui/material';
-import LimitChart from './LimitChart';
 import { useCallback } from 'react';
 import { TEACHER_IDX } from '@utility/consts';
-import AnalysisTable from './Table';
-import { CircleAlertIcon } from 'lucide-react';
 
 /**
     @param {} props

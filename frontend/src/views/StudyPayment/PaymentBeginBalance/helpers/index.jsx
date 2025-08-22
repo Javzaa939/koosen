@@ -1,7 +1,5 @@
-import { Trash2 } from "react-feather";
 
 import css from '@mstyle/style.module.css'
-import { Row, Col } from "reactstrap";
 
 import { t } from 'i18next'
 

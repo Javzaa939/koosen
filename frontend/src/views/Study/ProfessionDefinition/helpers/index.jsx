@@ -1,6 +1,4 @@
-import { X, Edit, BookOpen, Copy } from 'react-feather'
 
-import { Button,Badge, UncontrolledTooltip } from 'reactstrap'
 
 import { useTranslation } from 'react-i18next'
 

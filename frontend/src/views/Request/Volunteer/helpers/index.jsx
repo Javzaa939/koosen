@@ -1,7 +1,5 @@
 import { t } from 'i18next'
 import { request_flag_color } from '@utils'
-import { Book, CheckCircle} from 'react-feather'
-import { Badge, UncontrolledTooltip} from 'reactstrap'
 
 export function getColumns(currentPage, rowsPerPage, total_count, handleUpdateModal){
     const page_count = Math.ceil(total_count / rowsPerPage)

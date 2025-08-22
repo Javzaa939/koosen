@@ -1,13 +1,9 @@
 // ** React imports
-import React, { useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
 import { useParams } from 'react-router-dom';
 
-import {
-	Input,
-    Card,
-    CardBody, ListGroup, ListGroupItem,
-} from "reactstrap";
+
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";

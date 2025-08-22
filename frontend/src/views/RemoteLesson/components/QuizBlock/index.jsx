@@ -1,20 +1,7 @@
 import { useState } from "react";
-import { Edit, Plus, Trash2 } from "react-feather";
 
-import {
-	Accordion,
-	AccordionBody,
-	AccordionHeader,
-	AccordionItem,
-	Badge,
-	Card,
-	CardBody,
-	CardHeader,
-	CardTitle,
-	Col,
-	Row,
-	UncontrolledTooltip
-} from "reactstrap";
+
+
 
 import useApi from "@src/utility/hooks/useApi";
 import useLoader from "@src/utility/hooks/useLoader";
@@ -22,9 +9,6 @@ import useModal from "@src/utility/hooks/useModal";
 import useApiCustom from "../../hooks/useApiCustom";
 import '../../style.scss';
 import { KIND_MULTI_CHOICE, KIND_ONE_CHOICE } from "../../utils";
-import AddEditQuezChoices from "../AddEditQuezChoices";
-import AddEditQuezQuestions from "../AddEditQuezQuestions";
-import QuezChoicesBlock from "../QuezChoicesBlock";
 
 export default function QuizBlock({
 	onlineSubInfoData,

@@ -1,22 +1,11 @@
-import React, { Fragment, useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { ChevronsRight, Edit, PlusCircle, Trash, HelpCircle } from "react-feather";
 
-import {
-    Row,
-    Card,
-    Button,
-    Col,
-    CardHeader,
-    CardTitle,
-    CardBody,
-    Alert
-} from "reactstrap";
+
+
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
-import QuestionsList from "./QuestionsList";
-import AddTitle from "./AddTitle";
 import useModal from "@hooks/useModal";
 const EQuestions = ({ teacher_id, title_id, is_season, is_graduate=false }) => {
     console.log(is_graduate)

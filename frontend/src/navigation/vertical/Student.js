@@ -1,5 +1,4 @@
 // ** Icons Import
-import { ShieldUserIcon, Circle, GraduationCapIcon } from 'lucide-react';
 
 export default [
     {

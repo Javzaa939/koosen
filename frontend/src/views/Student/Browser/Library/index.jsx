@@ -1,10 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
-import { Card, Nav, NavItem, NavLink, TabContent } from 'reactstrap'
 
-import Taniltsuulga from './Taniltsuulga'
-import Time from './Time'
-import Juram from './Juram'
 
 function Library() {
 

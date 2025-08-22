@@ -1,12 +1,10 @@
 import moment from 'moment';
-import { useRef, useContext, useState, Fragment } from 'react';
+import { useRef, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import FullCalendar from '@fullcalendar/react';
 import resourceTimelinePlugin from '@fullcalendar/resource-timeline';
 import interactionPlugin from '@fullcalendar/interaction';
 
-import { Card, CardBody } from 'reactstrap';
 
 import useWindowDimensions from '@lms_components/useWindowDimensions';
 

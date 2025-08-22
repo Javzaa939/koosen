@@ -1,25 +1,12 @@
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 
-import {
-    Card,
-    Row,
-    Col,
-    Button,
-    DropdownToggle,
-    DropdownMenu,
-    DropdownItem,
-    UncontrolledDropdown
-} from 'reactstrap'
 
-import Avatar from "@components/avatar"
 
-import { t, use } from 'i18next';
 
-import SumModal from './SumModal';
-import ScoreModal from './ScoreModal';
-import ReactCountryFlag from 'react-country-flag'
-import SignatureModal from './SignatureModal';
+
+import { t } from 'i18next';
+
 
 export function getColumns(currentPage, rowsPerPage, total_count) {
     const page_count = Math.ceil(total_count / rowsPerPage)

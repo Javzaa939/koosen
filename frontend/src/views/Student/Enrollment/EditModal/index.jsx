@@ -1,23 +1,12 @@
-import React, { Fragment, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
-    Button,
-    Col,
-    Input,
-    Label,
-    Form,
-    Modal,
-    ModalBody,
-    ModalHeader,
-    Row,
-    FormFeedback
+    Form
 } from 'reactstrap'
 
-import Select from 'react-select'
 
-import Flatpickr from 'react-flatpickr'
 import '@styles/react/libs/flatpickr/flatpickr.scss'
 import { validate, ReactSelectStyles, formatDate } from "@utils"
-import { Controller, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { validateSchema } from './validateSchema';
 import { useTranslation } from "react-i18next";
 
@@ -26,9 +15,6 @@ import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import classNames from 'classnames'
 
-import Addmodal from '../../Group/Add'
-import { Eye } from 'react-feather'
-import StudentList from './StudentModal'
 
 function EditModal({ editModal, toggleEditModal, selectedRows, getDatas, profession }) {
 

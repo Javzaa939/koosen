@@ -1,15 +1,12 @@
 
-import React, { Fragment, useEffect, useState, useContext } from "react"
+import { useEffect, useState, useContext } from "react"
 
-import { Row } from 'reactstrap'
 import useApi from "@hooks/useApi"
 import useLoader from '@hooks/useLoader';
 import SchoolContext from "@src/utility/context/SchoolContext";
 
 // ** Styles
 import './style.scss'
-import { AlertCircle, ChevronsLeft } from "react-feather";
-import TableShow from "./TableShow";
 
 export default function PrintProfession({ }) {
 

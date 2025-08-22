@@ -1,20 +1,15 @@
 import { useState, useEffect, useMemo, useContext } from 'react';
 
-import { Table, Badge } from 'reactstrap'
 
-import ReactPaginate from "react-paginate";
 
 import { useTranslation } from 'react-i18next';
 
-import { ChevronDown, ChevronUp, X, Edit } from "react-feather"
 
 import useModal from '@hooks/useModal'
 import AuthContext from '@context/AuthContext'
 import SchoolContext from '@context/SchoolContext'
 
-import { Previous, Next } from '@utils'
 
-import css from '@mstyle/style.module.css'
 
 import './style.css'
 

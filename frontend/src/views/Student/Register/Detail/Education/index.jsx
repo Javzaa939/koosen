@@ -1,25 +1,12 @@
 // ** React imports
-import React, { useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
 import { useParams } from 'react-router-dom';
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
-import Select from 'react-select'
 
 import {
-    Row,
-    Col,
 	Form,
-	Input,
-	Label,
-	FormFeedback,
-    CardHeader,
-    Card,
-    Button,
-    CardTitle,
-    Modal,
-    ModalBody,
-    ModalHeader,
 } from "reactstrap";
 
 import useApi from "@hooks/useApi";
@@ -30,7 +17,6 @@ import classnames from 'classnames';
 
 import { validate, convertDefaultValue, get_education_list, ReactSelectStyles } from "@utils"
 
-import Tables from './Tables';
 
 import { validateSchema } from './validationSchema';
 import { useTranslation } from 'react-i18next';

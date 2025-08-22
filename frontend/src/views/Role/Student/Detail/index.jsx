@@ -1,30 +1,13 @@
-import React, { Fragment, useState, useEffect, useContext} from 'react'
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
-import {
-    Row,
-    Col,
-	Modal,
-	Card,
-	CardBody,
-	ModalBody,
-	ModalHeader,
-} from "reactstrap";
 
-import { t } from 'i18next';
-import Select from 'react-select'
-import classnames from 'classnames';
-import useApi from '@hooks/useApi';
+
+
 import useLoader from '@hooks/useLoader';
-import AuthContext from "@context/AuthContext"
-import SchoolContext from "@context/SchoolContext"
-import ActiveYearContext from "@context/ActiveYearContext"
-import { X } from 'react-feather'
 
 
 // import { validateSchema } from './validateSchema';
-import { convertDefaultValue, validate, ReactSelectStyles } from "@utils"
 
 const DetailModal = ({ open, handleModal,editId, datas }) => {
 

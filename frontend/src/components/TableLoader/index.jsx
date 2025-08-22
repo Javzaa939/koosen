@@ -1,7 +1,4 @@
 import { useSkin } from '@src/utility/hooks/useSkin'
-import React from 'react'
-import { Spinner } from 'reactstrap'
-import Type1 from './Type1'
 
 /**
  * Хүснэгтэд зориулсан

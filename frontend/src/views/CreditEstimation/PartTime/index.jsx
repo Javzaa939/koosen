@@ -1,20 +1,10 @@
-import React, { Fragment, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
-import { Printer} from "react-feather";
 import { useNavigate } from 'react-router-dom'
 
-import {
-	Row,
-	CardHeader,
-	Card,
-	CardTitle,
-	Button,
-	Col,
-	Label,
-} from "reactstrap";
 
-import DataTable from "react-data-table-component";
-import Select from 'react-select'
+
+
 import { ReactSelectStyles } from "@utils"
 
 import useApi from "@hooks/useApi";

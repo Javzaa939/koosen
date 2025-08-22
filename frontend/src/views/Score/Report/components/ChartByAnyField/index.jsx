@@ -1,9 +1,6 @@
-import VerticalBarChartLoader from "@src/components/VerticalBarChart";
 import { getAbbreviation } from "@src/utility/Utils";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Card, CardBody, CardTitle } from "reactstrap";
-import { Bar, BarChart, CartesianGrid, LabelList, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 export default function ChartByAnyField({ isLoading, subSchoolChartData, mainSchoolData, level2_key1, level2_key2, level1_key, chartTitle }) {
 	const { t } = useTranslation()

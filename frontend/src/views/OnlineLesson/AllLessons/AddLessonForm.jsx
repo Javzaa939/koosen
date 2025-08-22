@@ -3,25 +3,12 @@ import useLoader from "@src/utility/hooks/useLoader";
 import { convertDefaultValue } from '@src/utility/Utils';
 import { ReactSelectStyles } from '@utils';
 import classnames from "classnames";
-import { Fragment, useContext, useEffect, useState, useRef } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useContext, useEffect, useState, useRef } from "react";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import Select from 'react-select';
-import {
-	Button,
-	Col,
-	Form,
-	FormFeedback,
-	Input,
-	Label,
-	Modal,
-	ModalBody,
-	ModalFooter,
-	ModalHeader,
-	Row,
-} from "reactstrap";
 
-import ReactQuill from 'react-quill';
+
+
 import AuthContext from "@src/utility/context/AuthContext";
 import 'react-quill/dist/quill.snow.css';
 

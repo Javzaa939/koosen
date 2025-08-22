@@ -5,22 +5,12 @@ import { Link } from "react-router-dom"
 import { useSkin } from "@hooks/useSkin"
 
 // ** Icons Imports
-import { Facebook, Twitter, Mail, GitHub } from "react-feather"
 
 // ** Custom Components
-import InputPasswordToggle from "@components/input-password-toggle"
 
 // ** Reactstrap Imports
-import {
-  Row,
-  Col,
-  CardTitle,
-  CardText,
-  Form,
-  Label,
-  Input,
-  Button
-} from "reactstrap"
+
+
 
 // ** Styles
 import "@styles/react/pages/page-authentication.scss"

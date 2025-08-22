@@ -1,14 +1,8 @@
-import { useContext } from 'react';
 
-import { X, Edit } from 'react-feather'
-import {Badge, UncontrolledTooltip} from 'reactstrap'
 
-import useModal from "@hooks/useModal"
 import { t } from 'i18next';
 
-import SchoolContext from "@context/SchoolContext"
 import { status} from '@utils'
-import css from '@mstyle/style.module.css'
 import { defaultThemes } from 'react-data-table-component';
 
 // Хүснэгтийн баганууд

@@ -1,19 +1,12 @@
 // ** React imports
-import { Fragment, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import {
-    Col,
-    Input,
-    Modal,
-    ModalBody,
-    ModalHeader,
-    Row
-} from "reactstrap";
+
+
 
 import useApi from "@hooks/useApi";
 
-import GenericDataTable from '../GenericDataTable';
 
 export default function LessonsModal({ open, handleModal, student, group, profession, rowData, selected_season='', selected_year='' }) {
     // other hooks

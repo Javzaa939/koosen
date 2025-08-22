@@ -1,24 +1,12 @@
-import {
-    Row,
-    Col,
-    Card,
-    Input,
-    Label,
-    Button,
-    CardTitle,
-    CardHeader,
-    Spinner
-} from 'reactstrap'
 
-import { ChevronDown, Search } from 'react-feather'
-import { Fragment, useState, useEffect, useContext } from 'react'
 
-import DataTable from 'react-data-table-component'
+
+import { useState, useEffect, useContext } from 'react'
+
 
 import { getPagination, get_routingslip_list, ReactSelectStyles } from '@utils'
 import { useTranslation } from 'react-i18next'
 
-import Select from 'react-select'
 import classnames from "classnames";
 
 import useApi from '@hooks/useApi';
@@ -27,9 +15,7 @@ import useLoader from '@hooks/useLoader';
 import AuthContext from "@context/AuthContext"
 import RequestContext from "@context/RequestContext"
 
-import SolvedModal from './Solved'
 
-import Detail from './Detail'
 
 import { getColumns } from './helpers'
 

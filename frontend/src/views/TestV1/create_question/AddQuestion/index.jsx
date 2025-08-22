@@ -1,14 +1,12 @@
 import * as Yup from 'yup'
-import React, { Fragment, useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
-import { X } from 'react-feather'
 
-import { Label, Input, Row, Col, Button, FormFeedback,  Form, Modal, ModalHeader, ModalBody } from 'reactstrap'
+import {  Form } from 'reactstrap'
 
-import Select from 'react-select'
 import classnames from "classnames";
 
-import { Controller, useForm } from "react-hook-form"
+import { useForm } from "react-hook-form"
 
 import { ReactSelectStyles, validate } from "@utils"
 
@@ -16,7 +14,6 @@ import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import '../../style.css'
 
-import Question from './Questions';
 
 import '../../style.css'
 

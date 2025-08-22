@@ -4,18 +4,12 @@ import { useContext } from "react"
 import { Link, useNavigate } from "react-router-dom"
 
 // ** Custom Components
-import Avatar from "@components/avatar"
 
 // ** Third Party Components
-import { Power } from "react-feather"
 
 // ** Reactstrap Imports
-import {
-    UncontrolledDropdown,
-    DropdownMenu,
-    DropdownToggle,
-    DropdownItem
-} from "reactstrap"
+
+
 
 import AuthContext from '@context/AuthContext'
 import useApi from '@hooks/useApi'

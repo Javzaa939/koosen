@@ -1,10 +1,6 @@
-import { MinusCircle, X, } from 'react-feather'
-import { Controller, useFormContext } from 'react-hook-form'
-import {
-    Row,
-    Col,
-    Input,
-} from 'reactstrap'
+import { useFormContext } from 'react-hook-form'
+
+
 
 import { useTranslation } from 'react-i18next';
 

@@ -1,8 +1,8 @@
-import React, { Fragment, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 
-import { Modal, ModalHeader, ModalBody, Row, Col, Label, Form, Input, Button, FormFeedback, Spinner, Table, Badge, UncontrolledTooltip } from 'reactstrap'
+import { Form } from 'reactstrap'
 
 import useApi from '@hooks/useApi';
 
@@ -10,19 +10,16 @@ import useModal from "@hooks/useModal"
 
 import useLoader from '@hooks/useLoader';
 
-import Select from 'react-select'
 
 import { useTranslation } from 'react-i18next'
 
 import classnames from 'classnames'
 
-import { Plus, Download, Trash2, Edit } from 'react-feather'
 
 import { convertDefaultValue, validate, ReactSelectStyles, club_type_option } from '@utils'
 
 import { validateSchema } from '../validateSchema';
 
-import EditFile from '../Edit/Modal/EditFile';
 
 const EditModal = ( props ) => {
 

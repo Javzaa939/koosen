@@ -1,7 +1,5 @@
 import { useContext, useRef } from 'react';
 
-import { X, Edit, Printer, AlertOctagon, Target} from "react-feather";
-import { Badge, UncontrolledTooltip, Input, Label } from 'reactstrap';
 
 import useModal from '@hooks/useModal'
 import useLoader from "@hooks/useLoader";

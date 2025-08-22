@@ -1,16 +1,9 @@
 import { t } from 'i18next';
-import { Fragment, useCallback, useEffect } from 'react';
-import { useForm, Controller } from "react-hook-form";
+import { useCallback, useEffect } from 'react';
+import { useForm } from "react-hook-form";
 
 import {
-    Button,
-    Col,
-    Form,
-    FormFeedback, Input, Label,
-    Modal,
-    ModalBody,
-    ModalHeader,
-    Row
+    Form
 } from "reactstrap";
 
 import useApi from '@hooks/useApi';
@@ -18,7 +11,6 @@ import useLoader from '@hooks/useLoader';
 import '@styles/react/libs/flatpickr/flatpickr.scss';
 import { convertDefaultValue } from "@utils";
 
-import ScrollSelectFilter from '../ScrollSelectFilter';
 
 const AddEditOnlineInfo = ({ open, handleModal: handleModalOriginal, refreshDatas, editData, elearnId }) => {
     const { control, handleSubmit, setError, setValue, reset, formState: { errors } } = useForm({

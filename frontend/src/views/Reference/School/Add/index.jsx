@@ -1,25 +1,14 @@
 // ** React imports
-import { Fragment, useState } from 'react';
+import { useState } from 'react';
 
-import { X } from "react-feather";
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import {
-    Button,
-    Col,
     Form,
-    FormFeedback,
-    Input,
-    Label,
-    Modal,
-    ModalBody,
-    ModalHeader,
-    Row,
-    Spinner,
 } from "reactstrap";
 
 import { validate } from "@utils";

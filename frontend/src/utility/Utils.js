@@ -1,9 +1,6 @@
-import { Fragment, useState } from "react"
 import { DefaultRoute } from "../router/routes"
 
-import ReactPaginate from 'react-paginate'
 
-import { Badge, Label } from 'reactstrap'
 
 import { yupResolver } from "@hookform/resolvers/yup";
 
@@ -25,11 +22,11 @@ export const htmlToString = (html) => html.replace(/<\/?[^>]+(>|$)/g, "")
 const isToday = (date) => {
   const today = new Date()
   return (
-    /* eslint-disable operator-linebreak */
+     
     date.getDate() === today.getDate() &&
     date.getMonth() === today.getMonth() &&
     date.getFullYear() === today.getFullYear()
-    /* eslint-enable */
+     
   )
 }
 

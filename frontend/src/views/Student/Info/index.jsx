@@ -1,18 +1,12 @@
 
-import React, { useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 
 import { useParams } from 'react-router-dom';
-import { Card, Row, Col, Form } from 'reactstrap';
+import { Form } from 'reactstrap';
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 
-import LessonSchedule from "./LessonSchedule";
-import ScoreInformation from "./ScoreInformation";
-import BoardingHouse from "./BoardingHouse";
-import FamilyInformation from "./FamilyInformation";
-import PaymentInformation from "./PaymentInformation";
-import Scholarship from "./Scholarship";
 
 export default function Info()
 {

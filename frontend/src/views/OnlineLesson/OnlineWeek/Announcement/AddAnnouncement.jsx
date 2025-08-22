@@ -3,13 +3,10 @@ import useLoader from "@src/utility/hooks/useLoader";
 import { ReactSelectStyles } from '@utils';
 import classnames from "classnames";
 import { useContext, useEffect, useState , useRef} from "react";
-import { Controller, useForm } from "react-hook-form";
-import Select from 'react-select';
-import { Button, Card, CardBody, Col, Form, FormFeedback, Input, Label, ModalBody, ModalFooter, Row } from "reactstrap";
+import { useForm } from "react-hook-form";
 
 import AuthContext from "@context/AuthContext"
 
-import ReactQuill from 'react-quill';
 
 import 'react-quill/dist/quill.snow.css';
 import { useParams } from "react-router-dom";

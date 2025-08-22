@@ -1,12 +1,6 @@
-import React, { Fragment, useState, useEffect } from 'react';
-import { X } from 'react-feather';
-import {
-	Modal,
-	ModalBody,
-	ModalHeader,
-} from "reactstrap";
 
-import TestResult from '../components/TestResult';
+
+
 
 export default function DetailModal({ open, handleModal, data}){
 

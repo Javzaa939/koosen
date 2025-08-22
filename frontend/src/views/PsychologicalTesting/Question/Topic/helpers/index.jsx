@@ -1,6 +1,4 @@
 
-import { ArrowRight, Edit } from 'react-feather'
-import { Badge } from 'reactstrap';
 
 export function getColumns (currentPage, rowsPerPage, total_count, handleEdit) {
 

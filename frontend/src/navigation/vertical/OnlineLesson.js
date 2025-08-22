@@ -1,4 +1,3 @@
-import { MonitorPlayIcon, Circle } from 'lucide-react';
 const OnlineLessonRoutes = [
     {
         id: 'onlinelesson',

@@ -1,22 +1,11 @@
 import { t } from 'i18next';
 import { useEffect, useRef, useState } from 'react';
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import '@styles/react/libs/flatpickr/flatpickr.scss';
 import classNames from 'classnames';
-import Select from 'react-select'
-import { X } from 'react-feather';
 
 import {
-    Col,
-    FormFeedback,
-    Input,
-    Label,
-    Button,
-    Form,
-    Modal,
-    ModalBody,
-    ModalHeader,
-    Row
+    Form
 } from "reactstrap";
 
 import { ReactSelectStyles } from '@src/utility/Utils';
@@ -27,7 +16,6 @@ import useLoader from '@hooks/useLoader';
 import { convertDefaultValue } from "@utils";
 
 import { useVisibleFields } from '../../hooks/useVisibleFields';
-import KindBooleanBlock from '../KindBooleanBlock';
 
 const formFieldNames = {
     kind: 'kind',

@@ -1,17 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import { Button, Card, Row, Col, Form, Spinner, CardHeader, CardBody, CardFooter } from 'reactstrap';
+import { Form } from 'reactstrap';
 
 import { useTranslation } from 'react-i18next';
 
 import { useParams } from 'react-router-dom';
 
 import useApi from "@hooks/useApi";
-import useModal from '@hooks/useModal'
 import useLoader from "@hooks/useLoader";
 
-import Lecture from './Lecture';
-import { number } from 'prop-types';
 
 const TitlePlan = ({ getNavigateData }) => {
 

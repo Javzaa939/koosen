@@ -1,24 +1,19 @@
-import { Fragment, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import { Col, Row, Card, CardHeader, CardTitle, Input, Label, Button, Spinner } from 'reactstrap'
 
-import { Search, ChevronDown } from 'react-feather';
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 
 import { useTranslation } from 'react-i18next';
 
-import DataTable from 'react-data-table-component'
 
-import Select from 'react-select'
 import classnames from 'classnames'
 
 import { getPagination, ReactSelectStyles } from '@utils'
 
 import { getColumns } from './helpers';
 
-import Detail from './Detail';
 
 const order_flag_datas = [
     {

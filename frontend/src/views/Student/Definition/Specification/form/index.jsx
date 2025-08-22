@@ -1,11 +1,10 @@
 
-import React, { Fragment, useContext, useEffect, useState } from 'react'
+import { useContext } from 'react'
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import { t } from 'i18next';
-import { X } from "react-feather";
-import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, ModalHeader, FormFeedback, InputGroup, InputGroupText, Spinner } from "reactstrap";
+import { Form } from "reactstrap";
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";

@@ -1,10 +1,4 @@
-import React, { useState, useEffect } from 'react'
-import { Card, Nav, NavItem, NavLink, TabContent } from 'reactstrap'
-import Lists from './Lists'
-import List3 from './List3'
-import Report1 from './Report1'
-import Report2 from './Report2'
-import Report4 from './Report4'
+import { useState, useEffect } from 'react'
 
 export default function Report() {
     const [activeTab, setActiveTab] = useState(0)

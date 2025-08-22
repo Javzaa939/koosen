@@ -1,6 +1,6 @@
 
 // ** React imports
-import React, { useState, useEffect, useContext, Fragment } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
 import { useTranslation } from 'react-i18next';
 
@@ -12,28 +12,19 @@ import { useQuill } from 'react-quilljs';
 
 import 'quill/dist/quill.snow.css'
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import { useParams } from 'react-router-dom';
 
 import {
-    Row,
-    Col,
-	Button,
-	Card,
-    CardHeader,
-    CardBody,
-    Form,
-    Label,
-    Spinner
+    Form
 } from "reactstrap";
 
 import AuthContext from "@context/AuthContext"
 
 import SchoolContext from "@context/SchoolContext"
 
-import { validate, convertDefaultValue } from "@utils"
-import { eventListeners } from '@popperjs/core';
+import { convertDefaultValue } from "@utils"
 
 const Introduction = ({ }) => {
 

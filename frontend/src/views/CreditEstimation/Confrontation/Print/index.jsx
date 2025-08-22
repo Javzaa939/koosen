@@ -1,7 +1,6 @@
 
-import React, { useEffect, useState } from "react"
+import { useEffect } from "react"
 
-import { Row, Col, Table } from 'reactstrap'
 import { useLocation, useNavigate } from 'react-router-dom';
 
 // ** Styles

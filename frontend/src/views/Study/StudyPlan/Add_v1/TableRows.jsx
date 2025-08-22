@@ -1,17 +1,14 @@
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
-import { Button, FormFeedback, Input } from 'reactstrap';
 
 import { useTranslation } from 'react-i18next';
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
-import Select from 'react-select'
 
 import useApi from "@hooks/useApi";
 import useModal from '@hooks/useModal'
 import useLoader from "@hooks/useLoader";
-import SchoolContext from "@context/SchoolContext"
 import AuthContext from "@context/AuthContext"
 
 import { ReactSelectStyles, get_learningplan_season } from "@utils"
