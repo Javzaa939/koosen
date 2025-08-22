@@ -246,7 +246,7 @@ class UserAPILoginView(
             raise
 
         ending_data['user_id'] = user.id
-        auth_user = auth.authenticate(request, username=user.email, password=password)
+        auth_user = auth.authenticate(request, username=user.username, password=password)
 
         if not auth_user:
             ending_data['result'] = request.send_error("ERR_001")
