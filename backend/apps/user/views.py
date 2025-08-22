@@ -232,60 +232,65 @@ class UserAPILoginView(
         access_history_serilaizer.save()
 
     @staticmethod
-    def student_login():
+    def student_login(request, ending_data):
         return
 
     @staticmethod
-    def default_login(request):
-        result = None
-        user = None
-        is_logged = False
+    def default_login(request, ending_data):
+        datas = request.data
+        email = datas.get("email").strip() if datas.get("email") else None
+        password = datas.get("password").strip() if datas.get("password") else None
 
-        try:
-            datas = request.data
-            email = datas.get("email").strip() if datas.get("email") else None
-            password = datas.get("password").strip() if datas.get("password") else None
+        user = User.objects.filter(Q(email__iexact=email) | Q(username__iexact=email)).first()
 
-            user = User.objects.filter(Q(email__iexact=email) | Q(username__iexact=email)).first()
+        if not user:
+            ending_data['result'] = request.send_error("ERR_001", "Cистемд бүртгүүлнэ үү.")
+            raise
 
-            if not user:
-                result = request.send_error("ERR_001", "Cистемд бүртгүүлнэ үү.")
-                raise
+        ending_data['user_id'] = user.id
+        auth_user = auth.authenticate(request, username=user.email, password=password)
 
-            auth_user = auth.authenticate(request, username=user.email, password=password)
+        if not auth_user:
+            ending_data['result'] = request.send_error("ERR_001")
+            raise
 
-            if not auth_user:
-                result = request.send_error("ERR_001")
-                raise
+        # Хэрэглэгч нэвтрэх үед LMS систем рүү нэвтрэх эрхтэйг шалгах
+        user_permissions = get_user_permissions(user)
 
-            # Хэрэглэгч нэвтрэх үед LMS систем рүү нэвтрэх эрхтэйг шалгах
-            user_permissions = get_user_permissions(user)
+        if not user_permissions or LMS_LOGIN not in user_permissions:
+            ending_data['result'] = request.send_error("ERR_001", "Систем рүү нэвтрэх эрхгүй байна. Админд хандана уу")
+            raise
 
-            if not user_permissions or LMS_LOGIN not in user_permissions:
-                result = request.send_error("ERR_001", "Систем рүү нэвтрэх эрхгүй байна. Админд хандана уу")
-                raise
+        auth.login(request, auth_user)
+        ending_data['is_logged'] = True
 
-            auth.login(request, auth_user)
-            is_logged = True
-            user_detail = UserInfoSerializer(user).data
-            result = request.send_info("INF_004", user_detail)
-
-        except Exception:
-            traceback.print_exc()
-
-            if not result:
-                result = request.send_error("ERR_002")
-
-        UserAPILoginView.save_log(is_logged, user.id, request)
-        return result
+        user_detail = UserInfoSerializer(user).data
+        ending_data['result'] = request.send_info("INF_004", user_detail)
 
     def post(self, request):
         """ Нэвтрэх функц """
 
-        if request.data.get('isStudent'):
-            return self.student_login(request)
+        # to catch and log the latest values of variables if any exception is occurred in any random moment
+        ending_data = {
+            'is_logged': False,
+            'user_id': None,
+            'result': None
+        }
 
-        return self.default_login(request)
+        try:
+            if request.data.get('isStudent'):
+                self.student_login(request, ending_data)
+
+            self.default_login(request, ending_data)
+
+        except Exception:
+            traceback.print_exc()
+
+            if not ending_data['result']:
+                ending_data['result'] = request.send_error("ERR_002")
+
+        UserAPILoginView.save_log(ending_data['is_logged'], ending_data['user_id'], request)
+        return ending_data['result']
 
 
 class UserAPILogoutView(
