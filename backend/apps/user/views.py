@@ -176,19 +176,16 @@ class UserAPILoginView(
 
         return request.send_data(serializer.data)
 
-    def post(self, request):
-        """ Нэвтрэх функц """
+    @staticmethod
+    def save_log(is_logged, user_id, request):
+        """
+        Нэвтрэлт хийсэн төхөөрөмжийн мэдээллийг авах хэсэг
+        """
 
-        datas = request.data
-        email = datas.get("email").strip() if datas.get("email") else None
-        password = datas.get("password").strip() if datas.get("password") else None
-
-        # Нэвтрэлт хийсэн төхөөрөмжийн мэдээллийг авах хэсэг
         ip = None
-        user_id = None
-        is_logged = False
 
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+
         if x_forwarded_for:
             ip = x_forwarded_for.split(',')[0]
         else:
@@ -203,8 +200,10 @@ class UserAPILoginView(
 
         if user_agent.is_mobile:
             device_type = AccessHistoryLms.MOBILE
+
         elif user_agent.is_pc:
             device_type = AccessHistoryLms.PC
+
         else:
             device_type = AccessHistoryLms.TABLET
 
@@ -224,83 +223,69 @@ class UserAPILoginView(
             "browser": browser,
             "os_type": os,
             "ip": ip,
+            "user": user_id,
+            "is_logged": is_logged
         }
 
-        user_detail = dict()
+        access_history_serilaizer = AccessHistoryLmsSerializer(data=access_history_body)
+        access_history_serilaizer.is_valid(raise_exception=True)
+        access_history_serilaizer.save()
+
+    @staticmethod
+    def student_login():
+        return
+
+    @staticmethod
+    def default_login(request):
+        result = None
+        user = None
+        is_logged = False
+
         try:
+            datas = request.data
+            email = datas.get("email").strip() if datas.get("email") else None
+            password = datas.get("password").strip() if datas.get("password") else None
+
             user = User.objects.filter(Q(email__iexact=email) | Q(username__iexact=email)).first()
 
             if not user:
-                access_history_body.update({"user": user_id, "is_logged": is_logged})
-                access_history_serilaizer = AccessHistoryLmsSerializer(data=access_history_body)
-                if not access_history_serilaizer.is_valid():
-                    raise
+                result = request.send_error("ERR_001", "Cистемд бүртгүүлнэ үү.")
+                raise
 
-                access_history_serilaizer.save()
+            auth_user = auth.authenticate(request, username=user.email, password=password)
 
-                return request.send_error("ERR_001", "Cистемд бүртгүүлнэ үү.")
-            user_id = user.id
+            if not auth_user:
+                result = request.send_error("ERR_001")
+                raise
 
-            serializer = self.get_serializer(user)
-            user_detail = serializer.data
+            # Хэрэглэгч нэвтрэх үед LMS систем рүү нэвтрэх эрхтэйг шалгах
+            user_permissions = get_user_permissions(user)
 
-            email = user_detail['email']
-            auth_user = auth.authenticate(request, username=email, password=password)
+            if not user_permissions or LMS_LOGIN not in user_permissions:
+                result = request.send_error("ERR_001", "Систем рүү нэвтрэх эрхгүй байна. Админд хандана уу")
+                raise
+
+            auth.login(request, auth_user)
+            is_logged = True
+            user_detail = UserInfoSerializer(user).data
+            result = request.send_info("INF_004", user_detail)
 
         except Exception:
             traceback.print_exc()
-            access_history_body.update({"user": user_id, "is_logged": is_logged})
-            access_history_serilaizer = AccessHistoryLmsSerializer(data=access_history_body)
-            if not access_history_serilaizer.is_valid():
-                raise
 
-            access_history_serilaizer.save()
-            return request.send_error("ERR_002")
+            if not result:
+                result = request.send_error("ERR_002")
 
-        if not auth_user:
-            access_history_body.update({"user": user_id, "is_logged": is_logged})
-            access_history_serilaizer = AccessHistoryLmsSerializer(data=access_history_body)
-            if not access_history_serilaizer.is_valid():
-                raise
+        UserAPILoginView.save_log(is_logged, user.id, request)
+        return result
 
-            access_history_serilaizer.save()
+    def post(self, request):
+        """ Нэвтрэх функц """
 
-            return request.send_error("ERR_001")
+        if request.data.get('isStudent'):
+            return self.student_login(request)
 
-        # Хэрэглэгч нэвтрэх үед LMS систем рүү нэвтрэх эрхтэйг шалгах
-        user_permissions = get_user_permissions(user)
-
-        if not user_permissions:
-            access_history_body.update({"user": user_id, "is_logged": is_logged})
-            access_history_serilaizer = AccessHistoryLmsSerializer(data=access_history_body)
-            if not access_history_serilaizer.is_valid():
-                raise
-
-            access_history_serilaizer.save()
-
-            request.send_error("ERR_001", "Систем рүү нэвтрэх эрхгүй байна. Админд хандана уу")
-
-        if LMS_LOGIN not in user_permissions:
-            access_history_body.update({"user": user_id, "is_logged": is_logged})
-            access_history_serilaizer = AccessHistoryLmsSerializer(data=access_history_body)
-            if not access_history_serilaizer.is_valid():
-                raise
-
-            access_history_serilaizer.save()
-
-            return request.send_error("ERR_001", "Систем рүү нэвтрэх эрхгүй байна. Админд хандана уу")
-
-        auth.login(request, auth_user)
-
-        is_logged = True
-        access_history_body.update({"user": user_id, "is_logged": is_logged})
-        access_history_serilaizer = AccessHistoryLmsSerializer(data=access_history_body)
-        if not access_history_serilaizer.is_valid():
-            raise
-
-        access_history_serilaizer.save()
-
-        return request.send_info("INF_004", user_detail)
+        return self.default_login(request)
 
 
 class UserAPILogoutView(

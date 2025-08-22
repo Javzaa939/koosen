@@ -89,6 +89,9 @@ const VerticalLayout = (props) => {
                         'study3',
                     );
 
+                    /** ----------------------------- Сургалт/If user is student ---------------------------- */
+                    childrenDatas = getStudentMenu(childrenDatas, menus, user)
+
                     /** ----------------------------Лавлах сан ------------------------------- */
 
                     /** Сургууль */
@@ -992,3 +995,8 @@ const VerticalLayout = (props) => {
 };
 
 export default VerticalLayout;
+
+function getStudentMenu(childrenDatas, menus, user) {
+    console.log(user,'user')
+    return childrenDatas
+}
