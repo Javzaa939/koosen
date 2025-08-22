@@ -15,12 +15,13 @@ import { t } from 'i18next';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import { useForm, Controller } from "react-hook-form";
-import React, { Fragment, useEffect} from 'react'
-import { convertDefaultValue } from "@utils"
+import React, { Fragment, useEffect, useState} from 'react'
+import { convertDefaultValue, ReactSelectStyles } from "@utils"
 import { X } from "react-feather";
+import Select from "react-select";
+import classnames from "classnames"
 
-
-const UpdateModal = ({ open, editId, handleEdit, refreshDatas, school_id }) => {
+const UpdateModal = ({ open, editId, handleEdit, refreshDatas,editData , permission_option, mainPositionData}) => {
     const CloseBtn = (
         <X className="cursor-pointer" size={15} onClick={handleEdit} />
     )
@@ -29,6 +30,8 @@ const UpdateModal = ({ open, editId, handleEdit, refreshDatas, school_id }) => {
     const {isLoading, fetchData } = useLoader({})
 
     const { control, handleSubmit, setValue, reset, setError, formState: { errors } } = useForm();
+    const [permissionId, setPermissionId] = useState([])
+    const [removepermissionId, setRemovePermissionId] = useState([])
 
     // Api
     const getPositionApi = useApi().hrms.position
@@ -39,9 +42,17 @@ const UpdateModal = ({ open, editId, handleEdit, refreshDatas, school_id }) => {
                 // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
                 if(data === null) return
                 for(let key in data) {
-                    if(key === "org") {
-                        setValue(key, data[key]?.id)
+                    if(data[key] !== null){
+                        setValue(key, data[key])
                     }
+                    // else setValue(key,'')
+                    // if(key === "removed_perms") {
+                    //     setValue(key, data[key]?.id)
+                    // }
+                    // if(key === "permissions") {
+                    //     console.log("data", data[key])
+
+                    // }
                     else if(data[key] !== null)
                         setValue(key, data[key])
                     else setValue(key, '')
@@ -57,6 +68,10 @@ const UpdateModal = ({ open, editId, handleEdit, refreshDatas, school_id }) => {
     async function onSubmit(cdata) {
         if(editId) {
             cdata = convertDefaultValue(cdata)
+            cdata['permissions'] = permissionId.map((c)=> c.id)
+            cdata['removed_perms'] = removepermissionId.map((c)=> c.id)
+            // cdata['permissions'] = permissionId
+            // cdata['removed_perms'] = removepermissionId
             console.log('cadata', cdata)
             const { success, error } = await fetchData(getPositionApi.put(cdata, editId))
             if(success) {
@@ -72,6 +87,7 @@ const UpdateModal = ({ open, editId, handleEdit, refreshDatas, school_id }) => {
             }
         }
 	}
+    console.log('fff', errors)
 	return (
         <Fragment>
             <Modal
@@ -96,7 +112,7 @@ const UpdateModal = ({ open, editId, handleEdit, refreshDatas, school_id }) => {
                     close={CloseBtn}
                     tag="div"
                 >
-                    <h5 className="modal-title">{t('Сургуулийн мэдээлэл засах')}</h5>
+                    <h5 className="modal-title">{t('Албан тушаалийн мэдээлэл засах')}</h5>
                 </ModalHeader>
                 <ModalBody className="flex-grow-1">
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
@@ -209,6 +225,79 @@ const UpdateModal = ({ open, editId, handleEdit, refreshDatas, school_id }) => {
                                 )}
                             />
                             {errors.description && <FormFeedback className='d-block'>{errors.description.message}</FormFeedback>}
+                        </Col>
+
+                         <Col md={12}>
+                            <Label className="form-label" for="permissions">
+                                {t('Эрх нэмэх')}
+                            </Label>
+                            <Controller
+                                defaultValue=''
+                                control={control}
+                                name="permissions"
+                                render={({ field: { value, onChange} }) => {
+                                    return (
+                                        <Select
+                                            name="permissions"
+                                            id="permissions"
+                                            classNamePrefix='select'
+                                            isClearable
+                                            isMulti
+                                            className={classnames('react-select', { 'is-invalid': errors.permissions })}
+                                            isLoading={isLoading}
+                                            placeholder={t(`-- Сонгоно уу --`)}
+                                            options={permission_option || []}
+                                            value={permission_option.find((c) => c.id===value)}
+                                            noOptionsMessage={() => t('Хоосон байна.')}
+                                            onChange={(val) => {
+                                                if(val){
+                                                    onChange(val.id || '')
+                                                    setPermissionId(val)
+                                                }
+                                            }}
+                                            styles={ReactSelectStyles}
+                                            getOptionValue={(option) => option.id}
+                                            getOptionLabel={(option) => option.description}
+                                        />
+                                    )
+                                }}
+                            />
+                        </Col>
+                        <Col md={12}>
+                            <Label className="form-label" for="removed_perms">
+                                {t('Эрх устгах')}
+                            </Label>
+                            <Controller
+                                defaultValue=''
+                                control={control}
+                                name="removed_perms"
+                                render={({ field: { value, onChange} }) => {
+                                    return (
+                                        <Select
+                                            name="removed_perms"
+                                            id="removed_perms"
+                                            classNamePrefix='select'
+                                            isClearable
+                                            isMulti
+                                            className={classnames('react-select', { 'is-invalid': errors.removed_perms })}
+                                            isLoading={isLoading}
+                                            placeholder={t(`-- Сонгоно уу --`)}
+                                            options={permission_option || []}
+                                            value={permission_option.find((c) => c.id===value)}
+                                            noOptionsMessage={() => t('Хоосон байна.')}
+                                            onChange={(val) => {
+                                                if (val){
+                                                    onChange(val.id || '')
+                                                    setRemovePermissionId(val)
+                                                }
+                                            }}
+                                            styles={ReactSelectStyles}
+                                            getOptionValue={(option) => option.id}
+                                            getOptionLabel={(option) => option.description}
+                                        />
+                                    )
+                                }}
+                            />
                         </Col>
                         <Col className='text-center mt-2' md={12}>
                             <Button className="me-2" size='sm' color="primary" type="submit">

@@ -11,7 +11,7 @@ from core.models import OrgPosition
 
 from core.models import User
 from core.models import Permissions
-from core.models import  Roles
+from core.models import  Roles, MainPosition
 
 
 from lms.models import TimeTable, QuestionTitle, ChallengeQuestions
@@ -604,11 +604,6 @@ class EmployeePostSerializer(serializers.ModelSerializer):
         model = Employee
         fields = ["user", "register_code",'org_position',  'org', "sub_org", "salbar", "state"]
 
-class OrgPositionPostSerializer(serializers.ModelSerializer):
-       class Meta:
-        model = OrgPosition
-        fields = ["id", "name", "is_teacher", "name", "description", "org", "is_director", "is_hr", "created_at", "updated_at"]
-
 
 class UserFirstRegisterSerializer(serializers.ModelSerializer):
     class Meta:
@@ -631,19 +626,38 @@ class UserSaveSerializer(serializers.ModelSerializer):
 
         return instance
 
+class PermissionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Permissions
+        fields = "__all__"
+
+class OrgPositionPostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrgPosition
+        fields = ["id", "name", "is_teacher", "name", "description", "org", "is_director", "is_hr", "created_at", "updated_at", 'main_position']
+
+class MainPositionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = MainPosition
+        fields = "__all__"
 
 class OrgPositionSerializer(serializers.ModelSerializer):
     org = SubSchoolsSerializer(many=False)
+    permissions = PermissionSerializer(many=True)
+    removed_perms = PermissionSerializer(many=True)
     created_at = serializers.SerializerMethodField()
     class Meta:
         model = OrgPosition
-        fields = ["id", "name", "is_teacher", "name", "description", "org", "is_director", "is_hr", "created_at", "updated_at"]
+        fields = ["id", "name", "is_teacher", "name", "description", "org", "is_director", "is_hr", "created_at", "updated_at", "permissions", "removed_perms", "main_position"]
 
 
     def get_created_at(self, obj):
 
         fixed_date = fix_format_date(obj.created_at, format='%Y-%m-%d %H:%M:%S')
         return fixed_date
+
 # --------------------- Багшийн мэдээлэл -------------------------
 
 class TeacherInfoSerializer(serializers.ModelSerializer):
@@ -1043,10 +1057,3 @@ def generate_model_serializer(Model, inserted_fields='__all__'):
             fields = inserted_fields
 
     return TemplateSerializer
-
-
-class PermissionSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Permissions
-        fields = "__all__"
