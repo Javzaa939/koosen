@@ -509,7 +509,7 @@ class TeacherExcel(
             # user = User.objects.create(**user_data)
             salbar_code = data.pop("salbar_code")
             salbar = Salbars.objects.get(code=salbar_code)
-            teacher_data = {**data, "gender": gender, "salbar": salbar}
+            teacher_data = {**data, "gender": gender, "salbar": salbar,}
             teacher = Teachers.objects.create(
                 **teacher_data,
             )
