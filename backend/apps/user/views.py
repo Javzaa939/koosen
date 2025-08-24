@@ -164,20 +164,9 @@ class UserAPILoginView(
 ):
     """ User login api view """
 
-    def get(self, request):
-        """ Нэвтэрсэн хэрэглэгчийн мэдээллийг авах """
-
-        user = User.objects.filter(email=request.user).first()
-
-        if not user:
-            return request.send_data({})
-
-        serializer = UserInfoSerializer(user)
-
-        return request.send_data(serializer.data)
-
+    # region to reduce code duplication
     @staticmethod
-    def save_log(is_logged, user_id, request):
+    def save_log(is_logged, user_id, request, log_user_field):
         """
         Нэвтрэлт хийсэн төхөөрөмжийн мэдээллийг авах хэсэг
         """
@@ -223,10 +212,10 @@ class UserAPILoginView(
             "browser": browser,
             "os_type": os,
             "ip": ip,
-            "user": user_id,
             "is_logged": is_logged
         }
 
+        access_history_body[log_user_field] = user_id
         access_history_serilaizer = AccessHistoryLmsSerializer(data=access_history_body)
         access_history_serilaizer.is_valid(raise_exception=True)
         access_history_serilaizer.save()
@@ -255,6 +244,7 @@ class UserAPILoginView(
 
     @staticmethod
     def student_login(request, ending_data):
+        ending_data['log_user_field'] = 'student'
         datas = request.data
 
         # region check login
@@ -303,6 +293,7 @@ class UserAPILoginView(
 
     @staticmethod
     def default_login(request, ending_data):
+        ending_data['log_user_field'] = 'user'
         datas = request.data
 
         # region check login
@@ -337,6 +328,19 @@ class UserAPILoginView(
 
         # finish login and get details
         UserAPILoginView.user_login_step(user, auth_user, ending_data, request, UserInfoSerializer)
+    # endregion to reduce code duplication
+
+    def get(self, request):
+        """ Нэвтэрсэн хэрэглэгчийн мэдээллийг авах """
+
+        user = User.objects.filter(email=request.user).first()
+
+        if not user:
+            return request.send_data({})
+
+        serializer = UserInfoSerializer(user)
+
+        return request.send_data(serializer.data)
 
     def post(self, request):
         """ Нэвтрэх функц """
@@ -345,7 +349,8 @@ class UserAPILoginView(
         ending_data = {
             'is_logged': False,
             'user_id': None,
-            'result': None
+            'result': None,
+            'log_user_field': None,
         }
 
         try:
@@ -361,7 +366,7 @@ class UserAPILoginView(
             if not ending_data['result']:
                 ending_data['result'] = request.send_error("ERR_002")
 
-        UserAPILoginView.save_log(ending_data['is_logged'], ending_data['user_id'], request)
+        UserAPILoginView.save_log(ending_data['is_logged'], ending_data['user_id'], request, ending_data['log_user_field'])
         return ending_data['result']
 
 
