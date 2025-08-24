@@ -224,7 +224,7 @@ class UserAPILoginView(
     def check_user_instance(user, ending_data, request):
         if not user:
             ending_data['result'] = request.send_error("ERR_001", "Cистемд бүртгүүлнэ үү.")
-            raise
+            raise Exception("ERR_001 Cистемд бүртгүүлнэ үү.")
 
         ending_data['user_id'] = user.id
 
@@ -232,7 +232,7 @@ class UserAPILoginView(
     def check_user_password(auth_user, ending_data, request):
         if not auth_user:
             ending_data['result'] = request.send_error("ERR_001")
-            raise
+            raise Exception('ERR_001')
 
     @staticmethod
     def user_login_step(user, auth_user, ending_data, request, serializer):
@@ -286,7 +286,7 @@ class UserAPILoginView(
         # Оюутны эрх хязгаарлав
         if not user.student.is_active:
             ending_data['result'] = request.send_error("ERR_001", "Систем рүү нэвтрэх эрхгүй байна. Админд хандана уу")
-            raise
+            raise Exception('ERR_001 Систем рүү нэвтрэх эрхгүй байна. Админд хандана уу')
 
         # finish login and get details
         UserAPILoginView.user_login_step(user, auth_user, ending_data, request, StudentLoginSerializer)
@@ -301,8 +301,8 @@ class UserAPILoginView(
 
         user = (
             User.objects
-            .select_related(
-                'info__sub_org'
+            .prefetch_related(
+                'teachers_set__sub_org'
             )
             .filter(
                 Q(email__iexact=email) |
@@ -315,7 +315,7 @@ class UserAPILoginView(
 
         # check password
         password = datas.get("password").strip() if datas.get("password") else None
-        auth_user = auth.authenticate(request, username=user.username, password=password)
+        auth_user = auth.authenticate(request, username=user.email, password=password)
         UserAPILoginView.check_user_password(auth_user, ending_data, request)
 
         # region Хэрэглэгч нэвтрэх үед LMS систем рүү нэвтрэх эрхтэйг шалгах
@@ -323,7 +323,7 @@ class UserAPILoginView(
 
         if not user_permissions or LMS_LOGIN not in user_permissions:
             ending_data['result'] = request.send_error("ERR_001", "Систем рүү нэвтрэх эрхгүй байна. Админд хандана уу")
-            raise
+            raise Exception('ERR_001 Систем рүү нэвтрэх эрхгүй байна. Админд хандана уу')
         # endregion
 
         # finish login and get details
