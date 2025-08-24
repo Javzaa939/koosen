@@ -9,6 +9,7 @@ from django.db import transaction
 from django.db.models import Q, F
 from django.contrib import auth
 from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import check_password
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.core.exceptions import ValidationError
@@ -23,11 +24,12 @@ from core.models import Employee, Schools, SubOrgs, Teachers, User
 
 from .serializers import (
     AccessHistoryLmsStudentSerializer,
+    StudentLoginSerializer,
     UserInfoSerializer,
     AccessHistoryLmsSerializer,
     AccessHistoryLmsSerializerAll
 )
-from lms.models import AccessHistoryLms, Student
+from lms.models import AccessHistoryLms, Student, StudentLogin
 
 from lms.models import AccessHistoryLms
 
@@ -230,40 +232,111 @@ class UserAPILoginView(
         access_history_serilaizer.save()
 
     @staticmethod
-    def student_login(request, ending_data):
-        return
-
-    @staticmethod
-    def default_login(request, ending_data):
-        datas = request.data
-        email = datas.get("email").strip() if datas.get("email") else None
-        password = datas.get("password").strip() if datas.get("password") else None
-
-        user = User.objects.filter(Q(email__iexact=email) | Q(username__iexact=email)).first()
-
+    def check_user_instance(user, ending_data, request):
         if not user:
             ending_data['result'] = request.send_error("ERR_001", "Cистемд бүртгүүлнэ үү.")
             raise
 
         ending_data['user_id'] = user.id
-        auth_user = auth.authenticate(request, username=user.username, password=password)
 
+    @staticmethod
+    def check_user_password(auth_user, ending_data, request):
         if not auth_user:
             ending_data['result'] = request.send_error("ERR_001")
             raise
 
-        # Хэрэглэгч нэвтрэх үед LMS систем рүү нэвтрэх эрхтэйг шалгах
+    @staticmethod
+    def user_login_step(user, auth_user, ending_data, request, serializer):
+        auth.login(request, auth_user)
+        ending_data['is_logged'] = True
+
+        user_detail = serializer(user).data
+        ending_data['result'] = request.send_info("INF_004", user_detail)
+
+    @staticmethod
+    def student_login(request, ending_data):
+        datas = request.data
+
+        # region check login
+        username = datas.get("username").strip() if datas.get("username") else None
+
+        user = (
+            StudentLogin.objects
+            # to reduce sql queries from calling of related fields
+            .select_related(
+                'student__group',
+                'student__department',
+                'student__unit1',
+                'student__unit2',
+                'student__citizenship',
+                'student__status',
+            )
+            .filter(
+                Q(
+                    Q(student__status__name__icontains='Суралцаж буй') |
+                    Q(student__status__code=1)
+                ) &
+                Q(
+                    username__iexact=username
+                    # NOTE i commented it because i do not know whether it is necessary or not and in mnums_student it is not used
+                    # is_active=True
+                )
+            )
+            .first()
+        )
+
+        UserAPILoginView.check_user_instance(user, ending_data, request)
+        # endregion
+
+        # check password
+        password = datas.get("password").strip() if datas.get("password") else None
+        auth_user = user if check_password(password, user.password) else None
+        UserAPILoginView.check_user_password(auth_user, ending_data, request)
+
+        # Оюутны эрх хязгаарлав
+        if not user.student.is_active:
+            ending_data['result'] = request.send_error("ERR_001", "Систем рүү нэвтрэх эрхгүй байна. Админд хандана уу")
+            raise
+
+        # finish login and get details
+        UserAPILoginView.user_login_step(user, auth_user, ending_data, request, StudentLoginSerializer)
+
+    @staticmethod
+    def default_login(request, ending_data):
+        datas = request.data
+
+        # region check login
+        email = datas.get("email").strip() if datas.get("email") else None
+
+        user = (
+            User.objects
+            .select_related(
+                'info__sub_org'
+            )
+            .filter(
+                Q(email__iexact=email) |
+                Q(username__iexact=email)
+            ).first()
+        )
+
+        UserAPILoginView.check_user_instance(user, ending_data, request)
+        # endregion
+
+        # check password
+        password = datas.get("password").strip() if datas.get("password") else None
+        auth_user = auth.authenticate(request, username=user.username, password=password)
+        UserAPILoginView.check_user_password(auth_user, ending_data, request)
+
+        # region Хэрэглэгч нэвтрэх үед LMS систем рүү нэвтрэх эрхтэйг шалгах
         user_permissions = get_user_permissions(user)
 
         if not user_permissions or LMS_LOGIN not in user_permissions:
             ending_data['result'] = request.send_error("ERR_001", "Систем рүү нэвтрэх эрхгүй байна. Админд хандана уу")
             raise
+        # endregion
 
-        auth.login(request, auth_user)
-        ending_data['is_logged'] = True
-
-        user_detail = UserInfoSerializer(user).data
-        ending_data['result'] = request.send_info("INF_004", user_detail)
+        # finish login and get details
+        UserAPILoginView.user_login_step(user, auth_user, ending_data, request, UserInfoSerializer)
 
     def post(self, request):
         """ Нэвтрэх функц """
