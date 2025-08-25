@@ -186,7 +186,12 @@ class AccessHistoryLmsStudentSerializer(serializers.ModelSerializer):
 
 class StudentLoginSerializer(serializers.ModelSerializer):
 	student = StudentInfoSerializer(many=False, read_only=True)
+	permissions = serializers.SerializerMethodField()
 
 	class Meta:
 		model = StudentLogin
-		fields = ['id', 'student']
+		fields = ['id', 'student', 'permissions']
+
+	def get_permissions(self, obj ):
+        # to send dummy field to frontend, because it is called in many components without "?" (Optional chaining)
+		return []

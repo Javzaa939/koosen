@@ -289,6 +289,9 @@ class UserAPILoginView(
         # finish login and get details
         UserAPILoginView.user_login_step(user, auth_user, ending_data, request, StudentLoginSerializer)
 
+        # to set special flag for backend to know login type. for example in @login_required() decorator and in self.get()
+        request.session["_is_student"] = True
+
     @staticmethod
     def default_login(request, ending_data):
         ending_data['log_user_field'] = 'user'
@@ -331,14 +334,28 @@ class UserAPILoginView(
     def get(self, request):
         """ Нэвтэрсэн хэрэглэгчийн мэдээллийг авах """
 
-        user = User.objects.filter(email=request.user).first()
+        login_type = request.GET.get('loginType')
+        is_student = request.session.get('_is_student')
+        serializer_data = None
 
-        if not user:
-            return request.send_data({})
+        if login_type == 'student' or is_student == True:
+            user = StudentLogin.objects.filter(id=request.user).first()
 
-        serializer = UserInfoSerializer(user)
+            if not user:
+                return request.send_data({})
 
-        return request.send_data(serializer.data)
+            serializer_data = StudentLoginSerializer(user).data
+            serializer_data['is_student'] = True
+
+        else:
+            user = User.objects.filter(email=request.user).first()
+
+            if not user:
+                return request.send_data({})
+
+            serializer_data = UserInfoSerializer(user).data
+
+        return request.send_data(serializer_data)
 
     def post(self, request):
         """ Нэвтрэх функц """
