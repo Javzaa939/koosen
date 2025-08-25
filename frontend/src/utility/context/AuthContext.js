@@ -12,6 +12,7 @@ export default AuthContext;
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState({});
     const [loading, setLoading] = useState(true);
+    const [ isStudentUser, setIsStudentUser ] = useState(false)
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -31,6 +32,7 @@ export const AuthProvider = ({ children }) => {
             if (success) {
                 if (Object.keys(data).length > 0) {
                     setUser(data);
+                    setIsStudentUser(data?.is_student || false)
                     // themeConfig.school.name = data?.school_name || "Sus"
                     // themeConfig.app.appName = data?.school_name || "Sus"
                 } else {
@@ -52,6 +54,9 @@ export const AuthProvider = ({ children }) => {
 
         menuVisibility,
         setMenuVisibility,
+
+        isStudentUser,
+        setIsStudentUser,
     };
 
     return (
