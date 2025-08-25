@@ -13,6 +13,7 @@ from core.models import *
 from shortuuidfield import ShortUUIDField
 
 from django.contrib.postgres.fields import ArrayField
+from django.contrib.auth.models import AbstractUser, Group as AbstractGroup, Permission
 
 from .managers import SystemSettingsManager
 
@@ -894,7 +895,7 @@ class StudentLeave(models.Model):
         unique_together = ('student', 'lesson_year', 'lesson_season')
 
 
-class StudentLogin(models.Model):
+class StudentLogin(AbstractUser):
     """ Оюутны нэвтрэх """
 
     student = models.ForeignKey(Student, on_delete=models.CASCADE, verbose_name='Оюутан')
@@ -904,6 +905,19 @@ class StudentLogin(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    groups = models.ManyToManyField(
+        AbstractGroup,
+        related_name="abstract_group",
+        blank=True,
+        help_text="The groups this user belongs to."
+    )
+    user_permissions = models.ManyToManyField(
+        Permission,
+        related_name="abstract_permissions",
+        blank=True,
+        help_text="Specific permissions for this user."
+    )
 
 
 class Lesson_assignment_student(models.Model):
