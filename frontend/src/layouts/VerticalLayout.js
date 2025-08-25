@@ -34,7 +34,7 @@ const VerticalLayout = (props) => {
             }
         }
         // тухайн нэвтэрсэн хэрэглэгчийн эрхүүдээс
-        else if (user.permissions.includes(checkPerm)) {
+        else if (user?.permissions?.includes(checkPerm)) {
             navChildren = menus.navChildren.filter((child) => child.id === idName);
             if (navChildren.length > 0) {
                 saveData = [...saveData, ...navChildren];
@@ -997,6 +997,5 @@ const VerticalLayout = (props) => {
 export default VerticalLayout;
 
 function getStudentMenu(childrenDatas, menus, user) {
-    console.log(user,'user')
     return childrenDatas
 }
