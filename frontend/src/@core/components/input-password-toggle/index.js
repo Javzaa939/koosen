@@ -60,6 +60,7 @@ const InputPasswordToggle = forwardRef((props, ref) => {
           className={classnames({
             [inputClassName]: inputClassName
           })}
+          autoComplete="current-password"
           /*eslint-disable */
           {...(label && htmlFor
             ? {

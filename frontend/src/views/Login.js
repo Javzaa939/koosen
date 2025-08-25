@@ -101,7 +101,7 @@ const Login = () => {
                                 control={control}
                                 id='email'
                                 name='email'
-                                render={({ field }) => <Input id="email" placeholder='Имэйл хаяг' invalid={errors.email && true} {...field} />}
+                                render={({ field }) => <Input id="email" placeholder='Имэйл хаяг' invalid={errors.email && true} autoComplete="username" {...field} />}
                             />
 							{errors.email && <FormFeedback>{errors.email.message}</FormFeedback>}
                         </div>
