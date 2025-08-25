@@ -267,9 +267,7 @@ class UserAPILoginView(
                     Q(student__status__code=1)
                 ) &
                 Q(
-                    username__iexact=username
-                    # NOTE i commented it because i do not know whether it is necessary or not and in mnums_student it is not used
-                    # is_active=True
+                    username__iexact=username,
                 )
             )
             .first()
@@ -284,7 +282,7 @@ class UserAPILoginView(
         UserAPILoginView.check_user_password(auth_user, ending_data, request)
 
         # Оюутны эрх хязгаарлав
-        if not user.student.is_active:
+        if not user.student.is_active or not user.is_active:
             ending_data['result'] = request.send_error("ERR_001", "Систем рүү нэвтрэх эрхгүй байна. Админд хандана уу")
             raise Exception('ERR_001 Систем рүү нэвтрэх эрхгүй байна. Админд хандана уу')
 
