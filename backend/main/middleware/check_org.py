@@ -29,6 +29,11 @@ def check_org(get_response):
             return False
 
     def middleware(request):
+        StudentLogin = apps.get_model("lms", 'StudentLogin')
+
+        if isinstance(request.user, StudentLogin):
+            response = get_response(request)
+            return response
 
         #  Байгууллагын мэдээллээр шүүхэд хэрэгтэй
         #  filter ийг энэчээ оруулах
