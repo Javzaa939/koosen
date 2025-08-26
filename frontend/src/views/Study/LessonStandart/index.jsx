@@ -237,14 +237,14 @@ const LessonStandart = () => {
                         <Button color="primary" onClick={() => excelHandler()}>
                             <FileText size={16} /> Excel татах
                         </Button>
-                        {/* <input */}
-                        {/*     type="file" */}
-                        {/*     onChange={(e) => { */}
-                        {/*         if (e.target.files[0]) { */}
-                        {/*             postExcel(e.target.files[0]); */}
-                        {/*         } */}
-                        {/*     }} */}
-                        {/* /> */}
+                        <input
+                            type="file"
+                            onChange={(e) => {
+                                if (e.target.files[0]) {
+                                    postExcel(e.target.files[0]);
+                                }
+                            }}
+                        />
                         <Button
                             color="primary"
                             disabled={
