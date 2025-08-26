@@ -359,7 +359,6 @@ class UserAPILoginView(
                 return request.send_data({})
 
             serializer_data = StudentLoginSerializer(user).data
-            serializer_data['is_student'] = True
 
         else:
             user = User.objects.filter(email=request.user).first()

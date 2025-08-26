@@ -188,10 +188,11 @@ class StudentLoginSerializer(serializers.ModelSerializer):
 	student = StudentInfoSerializer(many=False, read_only=True)
 	permissions = serializers.SerializerMethodField()
 	school_id = serializers.SerializerMethodField()
+	is_student = serializers.BooleanField(default=True, read_only=True)
 
 	class Meta:
 		model = StudentLogin
-		fields = ['id', 'student', 'permissions', 'school_id']
+		fields = ['id', 'student', 'permissions', 'school_id', 'is_student']
 
 	def get_permissions(self, obj ):
         # to send dummy field to frontend, because it is called in many components without "?" (Optional chaining)
