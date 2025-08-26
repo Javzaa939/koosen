@@ -191,7 +191,7 @@ class StudentLoginSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = StudentLogin
-		fields = ['id', 'student', 'permissions']
+		fields = ['id', 'student', 'permissions', 'school_id']
 
 	def get_permissions(self, obj ):
         # to send dummy field to frontend, because it is called in many components without "?" (Optional chaining)
