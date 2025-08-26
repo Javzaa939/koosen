@@ -28,8 +28,7 @@ export const AuthProvider = ({ children }) => {
 
     async function getUser() {
         try {
-            const loginType = isStudentUser ? 'student' : ''
-            const { success, data } = await fetchData(userApi.logged(loginType));
+            const { success, data } = await fetchData(userApi.logged());
             if (success) {
                 if (Object.keys(data).length > 0) {
                     setUser(data);

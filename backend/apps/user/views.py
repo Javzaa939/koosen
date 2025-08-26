@@ -337,11 +337,10 @@ class UserAPILoginView(
     def get(self, request):
         """ Нэвтэрсэн хэрэглэгчийн мэдээллийг авах """
 
-        login_type = request.GET.get('loginType')
         is_student = request.session.get('_is_student')
         serializer_data = None
 
-        if login_type == 'student' or is_student == True:
+        if is_student == True:
             user = request.user
 
             if not isinstance(user, StudentLogin):
