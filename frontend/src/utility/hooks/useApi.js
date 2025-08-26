@@ -363,6 +363,11 @@ function useApi(isDisplay=false) {
 		study: {
 			/** Хичээлийн стандарт */
 			lessonStandart: {
+                postExcel: (data) => instance.post(`/learning/lessonstandart/post-excel/`, data, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    }
+                }),
 				getList: (schoolid, dep_id) => {
 					if (dep_id === undefined)
 						dep_id=''
