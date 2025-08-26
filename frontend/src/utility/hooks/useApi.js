@@ -177,7 +177,7 @@ function useApi(isDisplay=false) {
 
 			refresh_token: (user_id) => instance.post(`/user/token-refresh/${user_id}`),
             new_user_password: (token, data) => instance.post(`/user/new-user-password/${token}`, data),
-            logged: () => instance.get(`/user/logged/`),
+            logged: () => instance.get('/user/logged/'),
 			login: (data) => instance.post(`/user/login/`, data),
 			logout: () => instance.get(`/user/logout/`),
 			forgotPassword: (data) => instance.post(`/user/forgot-password`, data),

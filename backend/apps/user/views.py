@@ -49,7 +49,7 @@ class UserDetailAPI(
         user = None
         qs = None
 
-        if request.is_student:
+        if request.session.get('_is_student'):
             user = request.user
             qs = AccessHistoryLms.objects.filter(student=user)
 
@@ -435,7 +435,7 @@ class UserMenuAPI(
 
     def get(self, request):
 
-        if request.is_student:
+        if request.session.get('_is_student'):
             return request.send_data([])
 
         c_units = []

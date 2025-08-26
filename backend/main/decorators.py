@@ -48,7 +48,6 @@ def login_required():
             # region Оюутан нэвтэрсэн эсэхийг шалгана
             # True бол оюутан гэж тооцсон
             is_student = request.session.get('_is_student') or False
-            request.is_student = is_student
 
             if is_student:
                 userModel = apps.get_model('lms', 'StudentLogin')
