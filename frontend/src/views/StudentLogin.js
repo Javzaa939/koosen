@@ -25,6 +25,7 @@ import "@styles/react/pages/page-authentication.scss"
 
 import logo from "@src/assets/images/logo/dxis_logo.png";
 import whitelogo from "@src/assets/images/logo/dxis_logo.png";
+import SchoolContext from '@src/utility/context/SchoolContext'
 
 const HomeRoute = '/calendar'
 
@@ -39,6 +40,7 @@ const StudentLogin = () => {
 	const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true })
 
     const { setUser, setIsStudentUser } = useContext(AuthContext)
+	const { setSchool } = useContext(SchoolContext)
 
     const SignupSchema = yup.object().shape({
 		username: yup.string().required('Оюутны кодыг оруулна уу!'),
@@ -59,6 +61,7 @@ const StudentLogin = () => {
         datas['isStudent'] = true
         const { success, data } = await fetchData(userApi.login(datas))
 		if (success) {
+			setSchool(data.school_id)
             setIsStudentUser(true)
 			setUser(data)
             navigate(HomeRoute)
