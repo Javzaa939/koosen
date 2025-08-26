@@ -1,136 +1,183 @@
-import os
+import ast
+
 # import logging
 import json
-import ast
+import os
 import traceback
-from openpyxl import load_workbook
-from core.fns import WithChoices
 from datetime import datetime
-from rest_framework import mixins
-from rest_framework import generics
-from rest_framework.views import APIView
+
+import pandas as pd
+from django.conf import settings
+from django.db import transaction
+from django.db.models import (
+    Case,
+    CharField,
+    Count,
+    Exists,
+    F,
+    FloatField,
+    IntegerField,
+    Max,
+    OuterRef,
+    Q,
+    Subquery,
+    Sum,
+    Value,
+    When,
+)
+from django.db.models.functions import Concat
+from django.shortcuts import get_object_or_404
+from elselt.models import AdmissionUserProfession, ElseltUser, MentalUser
+from elselt.serializer import MentalUserSerializer
+from openpyxl import load_workbook
+from rest_framework import generics, mixins
+from rest_framework.decorators import permission_classes
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import permission_classes
+from rest_framework.views import APIView
 
-from main.utils.function.pagination import CustomPagination
-from main.utils.function.utils import create_file_to_cdn, override_get_queryset, remove_file_from_cdn, save_data_with_signals
-
-from main.utils.function.utils import has_permission, get_domain_url, _filter_queries, get_teacher_queryset, pearson_corel, str2bool
-from main.utils.file import save_file
-from main.utils.file import remove_folder
-
-from django.db import transaction
-from django.db.models import Sum, Count, Q, Subquery, OuterRef,  Value, CharField, F, Case, When, IntegerField, FloatField, Max, Exists
-from django.db.models.functions import Concat
-
-from django.shortcuts import get_object_or_404
-from django.conf import settings
-
-from elselt.models import ElseltUser
-from elselt.models import MentalUser
-from elselt.models import AdmissionUserProfession
-
+from core.fns import WithChoices
+from core.models import (
+    Employee,
+    User,
+)
+from core.serializers import TeacherNameSerializer
 from lms.models import (
-    ChallengeElseltUser,
-    Group,
-    MentalStudent,
-    Student,
-    TimeTable,
-    SubOrgs,
-    Salbars,
-    Exam_repeat,
-    LearningPlan,
-    ScoreRegister,
-    ExamTimeTable,
-    ChallengeElseltUser,
-    LessonStandart,
-    Lesson_title_plan,
-    Lesson_to_teacher,
-    ProfessionalDegree,
-    ProfessionDefinition,
     AdmissionBottomScore,
-    Profession_SongonKredit,
-    Teachers,
+    AdmissionRegisterProfession,
+    CalculatedGpaOfDiploma,
     Challenge,
-    QuestionChoices,
-    Lesson_materials,
-    Lesson_assignment,
-    ChallengeStudents,
-    TimeTable_to_group,
+    ChallengeElseltUser,
     ChallengeQuestions,
-    TimeTable_to_student,
-    Lesson_material_file,
+    ChallengeStudents,
+    Exam_repeat,
+    Exam_to_group,
+    ExamTimeTable,
+    Group,
+    LearningPlan,
+    Lesson_assignment,
     Lesson_assignment_student,
     Lesson_assignment_student_file,
-    PsychologicalTestQuestions,
+    Lesson_material_file,
+    Lesson_materials,
+    Lesson_teacher_scoretype,
+    Lesson_title_plan,
+    Lesson_to_teacher,
+    LessonStandart,
+    MentalStudent,
+    Profession_SongonKredit,
+    ProfessionalDegree,
+    ProfessionDefinition,
     PsychologicalQuestionChoices,
     PsychologicalQuestionTitle,
     PsychologicalTest,
-    AdmissionRegisterProfession,
-    TeacherScore,
-    QuestionTitle,
-    Lesson_teacher_scoretype,
-    QuestionTitle,
-    Score,
-    CalculatedGpaOfDiploma,
+    PsychologicalTestQuestions,
+    QuestionChoices,
     QuestionMainTitle,
+    QuestionTitle,
     QuestioSubTitle,
-    Exam_to_group
+    Salbars,
+    Score,
+    ScoreRegister,
+    Student,
+    SubOrgs,
+    Teachers,
+    TeacherScore,
+    TimeTable,
+    TimeTable_to_group,
+    TimeTable_to_student,
+    get_choice_image_path,
+    get_image_path,
 )
-
-from core.models import (
-    User,
-    Employee,
-)
-
-
-from lms.models import get_image_path
-from lms.models import get_choice_image_path
-
-from elselt.serializer import ElseltApproveSerializer, MentalUserSerializer
-
-from .serializers import ChallengeElseltUsersSerializer, ChallengeGroupsSerializer, ChallengeListElseltSerializer, ChallengeProfessionsSerializer, ChallengeReport2StudentsDetailSerializer, ChallengeReport2StudentsSerializer, ElseltUserChallengeSerializer, LessonStandartSerializer, ChallengeQuestionsAnswersSerializer, ChallengeReport4Serializer
-from .serializers import LessonTitlePlanSerializer
-from .serializers import LessonStandartListSerializer
-from .serializers import LessonStandartSerialzier
-from .serializers import ProfessionDefinitionSerializer
-from .serializers import LearningPlanSerializer
-from .serializers import LearningPlanListSerializer
-from .serializers import ProfessionDefinitionListSerializer
-from .serializers import ProfessionLearningPlanSerializer
-from .serializers import LearningPlanPrintSerializer
-from .serializers import GroupSerializer
-from .serializers import AdmissionBottomScoreSerializer
-from .serializers import AdmissionBottomScoreListSerializer
-from .serializers import ChallengeSerializer
-from .serializers import ChallengeListSerializer
-from .serializers import ChallengeQuestionListSerializer
-from .serializers import GroupListSerializer
-from .serializers import LessonAssignmentAssigmentListSerializer
-from .serializers import LessonAssignmentAssigmentSerializer
-from .serializers import LessonTitleSerializer
-from .serializers import LessonMaterialSerializer
-from .serializers import LessonMaterialListSerializer
-from .serializers import LessonTeacherSerializer
-from .serializers import ProfessionDefinitionJustProfessionSerializer
-from .serializers import PsychologicalTestSerializer
-from .serializers import PsychologicalTestQuestionsSerializer
-from .serializers import PsychologicalTestScopeSerializer
-from .serializers import TeachersSerializer
-from .serializers import StudentSerializer
-from .serializers import ElsegchSerializer
-from .serializers import PsychologicalTestResultSerializer
-from .serializers import PsychologicalTestParticipantsSerializer
-from .serializers import TeacherExamTimeTableSerializer
-from core.serializers import TeacherNameSerializer
-from .serializers import QuestionTitleSerializer
-from .serializers import LessonStandartCreateSerializer
-from .serializers import ChallengeDetailSerializer,ChallengeStudentsSerializer,StudentChallengeSerializer,ChallengeDetailTableStudentsSerializer
-
-from main.utils.function.utils import remove_key_from_dict, fix_format_date, get_domain_url
-from main.utils.function.utils import null_to_none, get_lesson_choice_student, get_active_year_season, json_load
+from main.utils.file import remove_folder, save_file
+from main.utils.function.pagination import CustomPagination
 from main.utils.function.serializer import dynamic_serializer
+from main.utils.function.utils import (
+    _filter_queries,
+    create_file_to_cdn,
+    fix_format_date,
+    get_active_year_season,
+    get_domain_url,
+    get_lesson_choice_student,
+    has_permission,
+    json_load,
+    null_to_none,
+    override_get_queryset,
+    pearson_corel,
+    remove_file_from_cdn,
+    remove_key_from_dict,
+    save_data_with_signals,
+    str2bool,
+)
+
+from .serializers import (
+    AdmissionBottomScoreListSerializer,
+    AdmissionBottomScoreSerializer,
+    ChallengeDetailSerializer,
+    ChallengeDetailTableStudentsSerializer,
+    ChallengeElseltUsersSerializer,
+    ChallengeGroupsSerializer,
+    ChallengeListElseltSerializer,
+    ChallengeListSerializer,
+    ChallengeProfessionsSerializer,
+    ChallengeQuestionListSerializer,
+    ChallengeQuestionsAnswersSerializer,
+    ChallengeReport2StudentsDetailSerializer,
+    ChallengeReport2StudentsSerializer,
+    ChallengeReport4Serializer,
+    ChallengeSerializer,
+    ChallengeStudentsSerializer,
+    ElsegchSerializer,
+    GroupListSerializer,
+    GroupSerializer,
+    LearningPlanListSerializer,
+    LearningPlanPrintSerializer,
+    LearningPlanSerializer,
+    LessonAssignmentAssigmentListSerializer,
+    LessonAssignmentAssigmentSerializer,
+    LessonMaterialListSerializer,
+    LessonMaterialSerializer,
+    LessonStandartCreateSerializer,
+    LessonStandartListSerializer,
+    LessonStandartSerializer,
+    LessonStandartSerialzier,
+    LessonTeacherSerializer,
+    LessonTitlePlanSerializer,
+    LessonTitleSerializer,
+    ProfessionDefinitionJustProfessionSerializer,
+    ProfessionDefinitionListSerializer,
+    ProfessionDefinitionSerializer,
+    ProfessionLearningPlanSerializer,
+    PsychologicalTestQuestionsSerializer,
+    PsychologicalTestResultSerializer,
+    PsychologicalTestSerializer,
+    QuestionTitleSerializer,
+    StudentChallengeSerializer,
+    StudentSerializer,
+    TeacherExamTimeTableSerializer,
+    TeachersSerializer,
+)
+
+
+@permission_classes([IsAuthenticated])
+class LessonStandartPostExcelAPIView(generics.GenericAPIView):
+
+    # @has_permission(must_permissions=['lms-study-lessonstandart-read'])
+    def post(self, request, pk=None):
+        excel_file = request.data.get('file')
+        df = pd.read_excel(excel_file)
+        for _, row in df.iterrows():
+            data = row.to_dict()
+            salbar_code = data.pop("salbar_code")
+            salbar = Salbars.objects.get(code=salbar_code)
+            res = {
+                **data,
+                "department": salbar,
+                "school": salbar.sub_orgs,
+            }
+            LessonStandart.objects.create(**res)
+        return request.send_data([])
+
 
 @permission_classes([IsAuthenticated])
 class LessonStandartAPIView(
@@ -139,25 +186,20 @@ class LessonStandartAPIView(
     mixins.DestroyModelMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
-    generics.GenericAPIView
+    generics.GenericAPIView,
 ):
-    """ Хичээлийн стандарт """
+    """Хичээлийн стандарт"""
 
     queryset = LessonStandart.objects.all().order_by('-updated_at')
     serializer_class = LessonStandartSerializer
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = [
-        'code',
-        'name',
-        'name_eng',
-        'name_uig'
-    ]
+    search_fields = ['code', 'name', 'name_eng', 'name_uig']
 
     @has_permission(must_permissions=['lms-study-lessonstandart-read'])
     def get(self, request, pk=None):
-        " Хичээлийн стандартын жагсаалт "
+        "Хичээлийн стандартын жагсаалт"
 
         self.serializer_class = LessonStandartListSerializer
 
@@ -187,7 +229,7 @@ class LessonStandartAPIView(
     @has_permission(must_permissions=['lms-study-lessonstandart-create'])
     @transaction.atomic
     def post(self, request):
-        " хичээлийн стандартын шинээр үүсгэх "
+        "хичээлийн стандартын шинээр үүсгэх"
 
         request_data = request.data
         self.serializer_class = LessonStandartCreateSerializer
@@ -213,7 +255,7 @@ class LessonStandartAPIView(
     @has_permission(must_permissions=['lms-study-lessonstandart-update'])
     @transaction.atomic
     def put(self, request, pk=None):
-        " хичээлийн стандартын шинээр үүсгэх "
+        "хичээлийн стандартын шинээр үүсгэх"
 
         request_data = request.data
         teachers_data = request.data.get("teachers")
@@ -228,7 +270,9 @@ class LessonStandartAPIView(
         self.perform_update(serializer)
         try:
             old_teacher_qs = Lesson_to_teacher.objects.filter(lesson=pk)
-            old_teacher_ids = Lesson_to_teacher.objects.filter(lesson=pk).values_list('teacher', flat=True)
+            old_teacher_ids = Lesson_to_teacher.objects.filter(lesson=pk).values_list(
+                'teacher', flat=True
+            )
 
             if teachers_data:
                 teacher_ids = [teacher.get('id') for teacher in teachers_data]
@@ -237,13 +281,17 @@ class LessonStandartAPIView(
                 add_ids = [item for item in teacher_ids if item not in old_teacher_ids]
 
                 # Хуучин багшийг хасах
-                remove_ids = [item for item in old_teacher_ids if item not in teacher_ids]
+                remove_ids = [
+                    item for item in old_teacher_ids if item not in teacher_ids
+                ]
 
                 if remove_ids or add_ids:
                     if len(remove_ids) > 0:
                         teacher_qs = old_teacher_qs.filter(teacher__in=remove_ids)
                         # Дүнгийн төрөл
-                        score_types = Lesson_teacher_scoretype.objects.filter(lesson_teacher__in=teacher_qs)
+                        score_types = Lesson_teacher_scoretype.objects.filter(
+                            lesson_teacher__in=teacher_qs
+                        )
                         if len(score_types) > 0:
                             score_types.delete()
 
@@ -252,15 +300,16 @@ class LessonStandartAPIView(
                     # Шинээр нэмж байгаа бүрээр нь нэмэх
                     for teacher_id in add_ids:
                         Lesson_to_teacher.objects.update_or_create(
-                            lesson_id=pk,
-                            teacher_id=teacher_id
+                            lesson_id=pk, teacher_id=teacher_id
                         )
             else:
                 # Бүх багшаа устгах үед
                 if old_teacher_ids:
                     teacher_qs = old_teacher_qs.filter(teacher__in=old_teacher_ids)
                     # Дүнгийн төрөл
-                    score_types = Lesson_teacher_scoretype.objects.filter(lesson_teacher__in=teacher_qs)
+                    score_types = Lesson_teacher_scoretype.objects.filter(
+                        lesson_teacher__in=teacher_qs
+                    )
                     if len(score_types) > 0:
                         score_types.delete()
 
@@ -268,13 +317,15 @@ class LessonStandartAPIView(
 
         except Exception as e:
             print(e)
-            return request.send_info("INF_002", 'Багшийн системд дүн оруулсан учраас устгах боломжгүй')
+            return request.send_info(
+                "INF_002", 'Багшийн системд дүн оруулсан учраас устгах боломжгүй'
+            )
 
         return request.send_info("INF_002")
 
     @has_permission(must_permissions=['lms-study-lessonstandart-delete'])
     def delete(self, request, pk=None):
-        " хичээлийн стандартыг устгах "
+        "хичээлийн стандартыг устгах"
 
         learn_plan = LearningPlan.objects.filter(Q(lesson=pk) | Q(previous_lesson=pk))
 
@@ -302,15 +353,25 @@ class LessonStandartAPIView(
             examrepeat.delete()
 
         if len(lesson_to_teacher) > 0:
-            return request.send_error("ERR_002", "Тухайн хичээлд холбогдсон багшийн мэдээлэлтэй холбогдосон устгах боломжгүй байна.")
+            return request.send_error(
+                "ERR_002",
+                "Тухайн хичээлд холбогдсон багшийн мэдээлэлтэй холбогдосон устгах боломжгүй байна.",
+            )
 
         if len(score) > 0:
-            return request.send_error("ERR_002", "Тухайн хичээлд холбогдсон дүнгийн мэдээлэл байгаа устгах боломжгүй байна.")
+            return request.send_error(
+                "ERR_002",
+                "Тухайн хичээлд холбогдсон дүнгийн мэдээлэл байгаа устгах боломжгүй байна.",
+            )
 
         if len(diplom_lesson) > 0:
-            return request.send_error("ERR_002", "Тухайн хичээл нь төгсөлтийн ажилтай холбогдсон учраас устгах боломжгүй байна.")
+            return request.send_error(
+                "ERR_002",
+                "Тухайн хичээл нь төгсөлтийн ажилтай холбогдсон учраас устгах боломжгүй байна.",
+            )
         self.destroy(request, pk)
         return request.send_info("INF_003")
+
 
 @permission_classes([IsAuthenticated])
 class LessonTitlePlanAPIView(
@@ -319,9 +380,9 @@ class LessonTitlePlanAPIView(
     mixins.DestroyModelMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
-    generics.GenericAPIView
+    generics.GenericAPIView,
 ):
-    """ Хичээлийн сэдэвчилсэн төлөвлөгөө """
+    """Хичээлийн сэдэвчилсэн төлөвлөгөө"""
 
     queryset = Lesson_title_plan.objects.all()
     serializer_class = LessonTitlePlanSerializer
@@ -331,12 +392,11 @@ class LessonTitlePlanAPIView(
 
     @has_permission(must_permissions=['lms-study-lessonstandart-read'])
     def get(self, request, pk=None, lessonID=None):
-        " хичээлийн сэдэвчилсэн төлөвлөгөө жагсаалт "
+        "хичээлийн сэдэвчилсэн төлөвлөгөө жагсаалт"
 
         # Хичээлийн хайх
         if lessonID:
             self.queryset = self.queryset.filter(lesson_id=lessonID).order_by('week')
-
 
         if pk:
             standart = self.retrieve(request, pk).data
@@ -347,7 +407,7 @@ class LessonTitlePlanAPIView(
 
     @has_permission(must_permissions=['lms-study-lessonstandart-create'])
     def post(self, request):
-        " хичээлийн сэдэвчилсэн төлөвлөгөө шинээр үүсгэх "
+        "хичээлийн сэдэвчилсэн төлөвлөгөө шинээр үүсгэх"
 
         request_data = request.data
         delete_plan_ids = request_data.get('delete_plan_ids')
@@ -371,7 +431,7 @@ class LessonTitlePlanAPIView(
                         content = datas.get('content')
                         lesson_type = datas.get('lesson_type')
                         if lesson:
-                            lesson=lesson_id
+                            lesson = lesson_id
 
                         if plan_id:
                             Lesson_title_plan.objects.filter(id=plan_id).update(
@@ -395,9 +455,10 @@ class LessonTitlePlanAPIView(
                 return request.send_error("ERR_002")
 
         return request.send_info("INF_013")
+
     @has_permission(must_permissions=['lms-study-lessonstandart-update'])
     def put(self, request, pk=None):
-        " хичээлийн сэдэвчилсэн төлөвлөгөө шинээр үүсгэх "
+        "хичээлийн сэдэвчилсэн төлөвлөгөө шинээр үүсгэх"
 
         request_data = request.data
         teachers_data = request.data.get("teachers")
@@ -424,10 +485,7 @@ class LessonTitlePlanAPIView(
                 if key == 'code':
                     msg = "Код давхцаж байна"
 
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
+                return_error = {"field": key, "msg": msg}
 
                 error_obj.append(return_error)
 
@@ -438,18 +496,15 @@ class LessonTitlePlanAPIView(
 
     @has_permission(must_permissions=['lms-study-lessonstandart-delete'])
     def delete(self, request, pk=None):
-        " хичээлийн сэдэвчилсэн төлөвлөгөө устгах "
+        "хичээлийн сэдэвчилсэн төлөвлөгөө устгах"
 
         self.destroy(request, pk)
         return request.send_info("INF_003")
 
 
 @permission_classes([IsAuthenticated])
-class LessonStandartListAPIView(
-    mixins.ListModelMixin,
-    generics.GenericAPIView
-):
-    """ Хичээлийн стандартын жагсаалт """
+class LessonStandartListAPIView(mixins.ListModelMixin, generics.GenericAPIView):
+    """Хичээлийн стандартын жагсаалт"""
 
     queryset = LessonStandart.objects.all()
     serializer_class = LessonStandartSerialzier
@@ -463,7 +518,7 @@ class LessonStandartListAPIView(
         'kredit',
         'category__category_name',
         'definition',
-        'department__name'
+        'department__name',
     ]
 
     def get(self, request):
@@ -479,12 +534,13 @@ class LessonStandartListAPIView(
         #     self.queryset = self.queryset.filter(department=department)
 
         if profession:
-            lesson_ids = LearningPlan.objects.filter(profession=profession).values_list('lesson', flat=True)
+            lesson_ids = LearningPlan.objects.filter(profession=profession).values_list(
+                'lesson', flat=True
+            )
             self.queryset = self.queryset.filter(id__in=lesson_ids)
         less_standart_list = self.list(request).data
 
         return request.send_data(less_standart_list)
-
 
 
 @permission_classes([IsAuthenticated])
@@ -494,9 +550,9 @@ class ProfessionDefinitionAPIView(
     mixins.DestroyModelMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
-    generics.GenericAPIView
+    generics.GenericAPIView,
 ):
-    """  Мэргэжлийн тодорхойлолт """
+    """Мэргэжлийн тодорхойлолт"""
 
     queryset = ProfessionDefinition.objects.all()
     serializer_class = ProfessionDefinitionSerializer
@@ -507,7 +563,7 @@ class ProfessionDefinitionAPIView(
 
     @has_permission(must_permissions=['lms-study-profession-read'])
     def get(self, request, pk=None):
-        "  Мэргэжлийн тодорхойлолт жагсаалт "
+        "Мэргэжлийн тодорхойлолт жагсаалт"
 
         self.serializer_class = ProfessionDefinitionListSerializer
 
@@ -524,13 +580,22 @@ class ProfessionDefinitionAPIView(
         if department:
             self.queryset = self.queryset.filter(department=department)
 
-        self.queryset = (
-            self.queryset
-            .annotate(
-                general_base=Subquery(Profession_SongonKredit.objects.filter(profession=OuterRef('pk'), lesson_level=LearningPlan.BASIC).values('songon_kredit')[:1]),
-                professional_base=Subquery(Profession_SongonKredit.objects.filter(profession=OuterRef('pk'), lesson_level=LearningPlan.PROF_BASIC).values('songon_kredit')[:1]),
-                professional_lesson=Subquery(Profession_SongonKredit.objects.filter(profession=OuterRef('pk'), lesson_level=LearningPlan.PROFESSION).values('songon_kredit')[:1]),
-            )
+        self.queryset = self.queryset.annotate(
+            general_base=Subquery(
+                Profession_SongonKredit.objects.filter(
+                    profession=OuterRef('pk'), lesson_level=LearningPlan.BASIC
+                ).values('songon_kredit')[:1]
+            ),
+            professional_base=Subquery(
+                Profession_SongonKredit.objects.filter(
+                    profession=OuterRef('pk'), lesson_level=LearningPlan.PROF_BASIC
+                ).values('songon_kredit')[:1]
+            ),
+            professional_lesson=Subquery(
+                Profession_SongonKredit.objects.filter(
+                    profession=OuterRef('pk'), lesson_level=LearningPlan.PROFESSION
+                ).values('songon_kredit')[:1]
+            ),
         )
 
         if pk:
@@ -543,7 +608,7 @@ class ProfessionDefinitionAPIView(
     @has_permission(must_permissions=['lms-study-profession-create'])
     @transaction.atomic
     def post(self, request):
-        "  Мэргэжлийн тодорхойлолт шинээр үүсгэх "
+        "Мэргэжлийн тодорхойлолт шинээр үүсгэх"
 
         request_data = request.data
         # with_start = '001'
@@ -580,7 +645,7 @@ class ProfessionDefinitionAPIView(
     @has_permission(must_permissions=['lms-study-profession-update'])
     @transaction.atomic
     def put(self, request, pk=None):
-        "  Мэргэжлийн тодорхойлолт  засах "
+        "Мэргэжлийн тодорхойлолт  засах"
 
         request_data = request.data
         general_base = request_data.get('general_base')
@@ -600,27 +665,20 @@ class ProfessionDefinitionAPIView(
                 ss = Profession_SongonKredit.objects.update_or_create(
                     profession_id=profession,
                     lesson_level=LearningPlan.BASIC,
-                    defaults={
-                        'songon_kredit': general_base
-                    }
+                    defaults={'songon_kredit': general_base},
                 )
             if professional_base:
                 ss = Profession_SongonKredit.objects.update_or_create(
                     profession_id=profession,
                     lesson_level=LearningPlan.PROF_BASIC,
-                    defaults={
-                        'songon_kredit': professional_base
-                    }
+                    defaults={'songon_kredit': professional_base},
                 )
             if professional_lesson:
                 ss = Profession_SongonKredit.objects.update_or_create(
                     profession_id=profession,
                     lesson_level=LearningPlan.PROFESSION,
-                    defaults={
-                        'songon_kredit': professional_lesson
-                    }
+                    defaults={'songon_kredit': professional_lesson},
                 )
-
 
             self.perform_create(serializer)
 
@@ -632,7 +690,7 @@ class ProfessionDefinitionAPIView(
 
     @has_permission(must_permissions=['lms-study-profession-delete'])
     def delete(self, request, pk=None):
-        " Мэргэжлийн тодорхойлолт устгах "
+        "Мэргэжлийн тодорхойлолт устгах"
 
         data = request.data
         degree = data.get("degree")
@@ -644,14 +702,16 @@ class ProfessionDefinitionAPIView(
 
         # Анги бүлэг устгах
         if group:
-            return request.send_error("ERR_003", "Анги бүлгийн бүртгэлд холбогдсон учраас устгах боломжгүй.")
+            return request.send_error(
+                "ERR_003", "Анги бүлгийн бүртгэлд холбогдсон учраас устгах боломжгүй."
+            )
 
         with transaction.atomic():
             # Сургалтын төлөвлөгөө
             if lear_qs:
                 lear_qs.delete()
 
-            if prof_songon or  prof:
+            if prof_songon or prof:
                 prof_songon.delete()
 
             if prof:
@@ -662,14 +722,13 @@ class ProfessionDefinitionAPIView(
         return request.send_info("INF_003")
 
 
-
 @permission_classes([IsAuthenticated])
 class ProfessionIntroductionFileAPIView(
     generics.GenericAPIView,
 ):
     @has_permission(must_permissions=['lms-study-profession-update'])
     def post(self, request):
-        """ Мэргэжлийн тодорхойлолтын танилцуулга хэсэгт файл нэмэх """
+        """Мэргэжлийн тодорхойлолтын танилцуулга хэсэгт файл нэмэх"""
 
         data = request.data
         file = data.get('file')
@@ -706,25 +765,24 @@ class ProfessionIntroductionFileAPIView(
 class StudentNoticeFileAPIView(
     generics.GenericAPIView,
     mixins.DestroyModelMixin,
-    ):
-        queryset = ProfessionDefinition.objects.all()
-
-        def delete(self, request, pk=None):
-
-            # NOTE: Файл засаж байгаа үед хуучин файлыг устгана
-            remove_file = os.path.join(settings.PROFESSION, str(pk))
-            if remove_file:
-                remove_folder(remove_file)
-
-            self.destroy(request, pk)
-
-            return request.send_info("INF_003")
-@permission_classes([IsAuthenticated])
-class ProfessionDefinitionListAPIView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin
 ):
-    """ Мэргэжлийн тодорхойлолтын жагсаалт """
+    queryset = ProfessionDefinition.objects.all()
+
+    def delete(self, request, pk=None):
+
+        # NOTE: Файл засаж байгаа үед хуучин файлыг устгана
+        remove_file = os.path.join(settings.PROFESSION, str(pk))
+        if remove_file:
+            remove_folder(remove_file)
+
+        self.destroy(request, pk)
+
+        return request.send_info("INF_003")
+
+
+@permission_classes([IsAuthenticated])
+class ProfessionDefinitionListAPIView(generics.GenericAPIView, mixins.ListModelMixin):
+    """Мэргэжлийн тодорхойлолтын жагсаалт"""
 
     queryset = ProfessionDefinition.objects
     serializer_class = ProfessionDefinitionSerializer
@@ -758,6 +816,7 @@ class ProfessionDefinitionListAPIView(
         all_list = self.list(request).data
         return request.send_data(all_list)
 
+
 @permission_classes([IsAuthenticated])
 class LearningPlanAPIView(
     mixins.CreateModelMixin,
@@ -765,20 +824,26 @@ class LearningPlanAPIView(
     mixins.DestroyModelMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
-    generics.GenericAPIView
+    generics.GenericAPIView,
 ):
-    """  Сургалтын төлөвлөгөө """
+    """Сургалтын төлөвлөгөө"""
 
     queryset = LearningPlan.objects.all()
     serializer_class = LearningPlanSerializer
 
     pagination_class = CustomPagination
     filter_backends = [SearchFilter]
-    search_fields = ['profession__name', 'lesson__name', 'lesson_level__level_name', 'lesson_type__type_name', 'season__season_name']
+    search_fields = [
+        'profession__name',
+        'lesson__name',
+        'lesson_level__level_name',
+        'lesson_type__type_name',
+        'season__season_name',
+    ]
 
     @has_permission(must_permissions=['lms-study-learningplan-read'])
     def get(self, request, pk=None):
-        "  Сургалтын төлөвлөгөөны жагсаалт "
+        "Сургалтын төлөвлөгөөны жагсаалт"
 
         self.serializer_class = LearningPlanListSerializer
 
@@ -791,7 +856,7 @@ class LearningPlanAPIView(
 
     @has_permission(must_permissions=['lms-study-learningplan-create'])
     def post(self, request):
-        "  Сургалтын төлөвлөгөө шинээр үүсгэх "
+        "Сургалтын төлөвлөгөө шинээр үүсгэх"
 
         request_data = request.data
         profession = request_data.get('profession')
@@ -817,19 +882,18 @@ class LearningPlanAPIView(
                 qs = self.queryset.filter(profession=profession, lesson=lesson)
 
                 if qs:
-                    return request.send_error("ERR_002", "Тухайн мэргэжлийн сургалтын төлөвлөгөөн дээр энэ хичээл бүртгэгдсэн байна.")
+                    return request.send_error(
+                        "ERR_002",
+                        "Тухайн мэргэжлийн сургалтын төлөвлөгөөн дээр энэ хичээл бүртгэгдсэн байна.",
+                    )
 
-            error_obj = {
-                "error": serializer.errors,
-                "msg": "Код давхцаж байна"
-            }
+            error_obj = {"error": serializer.errors, "msg": "Код давхцаж байна"}
 
             return request.send_error("ERR_003", error_obj)
 
-
     @has_permission(must_permissions=['lms-study-learningplan-update'])
     def put(self, request, pk=None):
-        "  Сургалтын төлөвлөгөөн засах "
+        "Сургалтын төлөвлөгөөн засах"
 
         request_data = request.data
         profession = request_data.get('profession')
@@ -844,17 +908,21 @@ class LearningPlanAPIView(
                 qs = self.queryset.filter(profession=profession, lesson=lesson)
 
                 if qs:
-                    return request.send_error("ERR_002", "Тухайн мэргэжлийн сургалтын төлөвлөгөөн дээр энэ хичээл бүртгэгдсэн байна.")
+                    return request.send_error(
+                        "ERR_002",
+                        "Тухайн мэргэжлийн сургалтын төлөвлөгөөн дээр энэ хичээл бүртгэгдсэн байна.",
+                    )
 
         self.update(request, pk)
         return request.send_info("INF_002")
 
     @has_permission(must_permissions=['lms-study-learningplan-delete'])
     def delete(self, request, pk=None):
-        " Сургалтын төлөвлөгөө устгах "
+        "Сургалтын төлөвлөгөө устгах"
 
         self.destroy(request, pk)
         return request.send_info("INF_003")
+
 
 @permission_classes([IsAuthenticated])
 class LearningPlanListAPIView(
@@ -863,49 +931,60 @@ class LearningPlanListAPIView(
     mixins.DestroyModelMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
-    generics.GenericAPIView
+    generics.GenericAPIView,
 ):
-    """  Сургалтын төлөвлөгөө """
+    """Сургалтын төлөвлөгөө"""
 
     queryset = LearningPlan.objects.all()
     serializer_class = LearningPlanSerializer
 
     pagination_class = CustomPagination
     filter_backends = [SearchFilter]
-    search_fields = ['profession__name', 'lesson__name', 'lesson_level__level_name', 'lesson_type__type_name', 'season__season_name']
+    search_fields = [
+        'profession__name',
+        'lesson__name',
+        'lesson_level__level_name',
+        'lesson_type__type_name',
+        'season__season_name',
+    ]
 
     def get(self, request, salbar=None, level=None, type=None, profession=None):
-        "  Сургалтын төлөвлөгөөны жагсаалт "
+        "Сургалтын төлөвлөгөөны жагсаалт"
 
         self.serializer_class = LearningPlanListSerializer
 
-        self.queryset = self.queryset.filter(profession=profession, lesson_level=level, department=salbar, lesson_type=type)
+        self.queryset = self.queryset.filter(
+            profession=profession,
+            lesson_level=level,
+            department=salbar,
+            lesson_type=type,
+        )
 
         learn_plan_list = self.list(request).data
         return request.send_data(learn_plan_list)
 
 
 @permission_classes([IsAuthenticated])
-class ConfirmYearListAPIView(
-    mixins.ListModelMixin,
-    generics.GenericAPIView
-):
-    """  Хөтөлбөр батлагдсан оны жагсаалт авах """
+class ConfirmYearListAPIView(mixins.ListModelMixin, generics.GenericAPIView):
+    """Хөтөлбөр батлагдсан оны жагсаалт авах"""
+
     queryset = ProfessionDefinition.objects.all()
 
     def get(self, request):
 
-        conf_year = list(self.queryset.filter(confirm_year__isnull=False).values('confirm_year').annotate(cnt=Count('confirm_year')).order_by('confirm_year'))
+        conf_year = list(
+            self.queryset.filter(confirm_year__isnull=False)
+            .values('confirm_year')
+            .annotate(cnt=Count('confirm_year'))
+            .order_by('confirm_year')
+        )
 
         return request.send_data(conf_year)
 
 
 @permission_classes([IsAuthenticated])
-class LessonStandartStudentListAPIView(
-    mixins.ListModelMixin,
-    generics.GenericAPIView
-):
-    """ Тухайн оюутны төгсөлтийн хичээлийн жагсаалт """
+class LessonStandartStudentListAPIView(mixins.ListModelMixin, generics.GenericAPIView):
+    """Тухайн оюутны төгсөлтийн хичээлийн жагсаалт"""
 
     queryset = LessonStandart.objects
     serializer_class = LessonStandartSerializer
@@ -919,7 +998,9 @@ class LessonStandartStudentListAPIView(
             if qs_student:
                 qs_group = Group.objects.filter(id=qs_student.group.id).last()
                 if qs_group:
-                    lesson_ids = LearningPlan.objects.filter(profession=qs_group.profession, lesson_level=LearningPlan.DIPLOM).values_list('lesson', flat=True)
+                    lesson_ids = LearningPlan.objects.filter(
+                        profession=qs_group.profession, lesson_level=LearningPlan.DIPLOM
+                    ).values_list('lesson', flat=True)
 
                     queryset = queryset.filter(id__in=lesson_ids)
 
@@ -931,7 +1012,6 @@ class LessonStandartStudentListAPIView(
         return request.send_data(lesson_list)
 
 
-
 @permission_classes([IsAuthenticated])
 class ProfessionPlanListAPIView(
     mixins.CreateModelMixin,
@@ -939,9 +1019,9 @@ class ProfessionPlanListAPIView(
     mixins.DestroyModelMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
-    generics.GenericAPIView
+    generics.GenericAPIView,
 ):
-    """ Тухайн мэргэжлийн сургалтын төлөвлөгөө """
+    """Тухайн мэргэжлийн сургалтын төлөвлөгөө"""
 
     queryset = LearningPlan.objects
     serializer_class = LearningPlanSerializer
@@ -982,7 +1062,7 @@ class ProfessionPlanListAPIView(
 
     @has_permission(must_permissions=['lms-study-learningplan-create'])
     def post(self, request):
-        "  Сургалтын төлөвлөгөө шинээр үүсгэх "
+        "Сургалтын төлөвлөгөө шинээр үүсгэх"
 
         school = request.data.get('school')
         department = request.data.get('department')
@@ -1000,7 +1080,16 @@ class ProfessionPlanListAPIView(
             group_lesson = datas.get('group_lesson')
             is_check_score = datas.get('is_check_score')
 
-            return plan_id, lesson, previous_lesson, season, lesson_level, lesson_type, group_lesson, is_check_score
+            return (
+                plan_id,
+                lesson,
+                previous_lesson,
+                season,
+                lesson_level,
+                lesson_type,
+                group_lesson,
+                is_check_score,
+            )
 
         # list ээс key болон value гаар нь тухайн element байгаа эсэхийг шалгаж element-ийн утгыг авах
         def find_data_from_list_by_key(list, key, value):
@@ -1041,36 +1130,58 @@ class ProfessionPlanListAPIView(
                         season = None
                         group_lesson = None
 
-                        update_data = find_data_from_list_by_key(update_list, 'id', update_qs.id)
+                        update_data = find_data_from_list_by_key(
+                            update_list, 'id', update_qs.id
+                        )
 
                         if update_data:
-                            plan_id, lesson, previous_lesson, season, lesson_level, lesson_type, group_lesson, is_check_score = get_datas_by_key(update_data)
+                            (
+                                plan_id,
+                                lesson,
+                                previous_lesson,
+                                season,
+                                lesson_level,
+                                lesson_type,
+                                group_lesson,
+                                is_check_score,
+                            ) = get_datas_by_key(update_data)
 
                         old_profession = update_qs.profession.id
                         old_lesson = update_qs.lesson.id
 
                         # хичээлийн бүртгэл шалгах бүртгэлтэй бол алдаа буцаах
                         # Хичээл зассан бол хичээлийн давхцалыг шалгана
-                        if old_profession != int(profession_id) or (lesson and int(lesson) != old_lesson):
-                            qs = self.queryset.filter(profession=profession_id, lesson=lesson).first()
+                        if old_profession != int(profession_id) or (
+                            lesson and int(lesson) != old_lesson
+                        ):
+                            qs = self.queryset.filter(
+                                profession=profession_id, lesson=lesson
+                            ).first()
 
                             if qs:
                                 profession_name = qs.profession.name
                                 lesson_name = qs.lesson.name
                                 lesson_code = qs.lesson.code
-                                msg = "`{profession}` мэргэжлийн сургалтын төлөвлөгөөн дээр `{lesson_code} {lesson_name}` хичээл бүртгэгдсэн байна." \
-                                    .format(
-                                        profession=profession_name,
-                                        lesson_name=lesson_name,
-                                        lesson_code=lesson_code,
-                                    )
+                                msg = "`{profession}` мэргэжлийн сургалтын төлөвлөгөөн дээр `{lesson_code} {lesson_name}` хичээл бүртгэгдсэн байна.".format(
+                                    profession=profession_name,
+                                    lesson_name=lesson_name,
+                                    lesson_code=lesson_code,
+                                )
 
                                 return request.send_error("ERR_002", msg)
 
                         if lesson:
                             # тухайн queryset-ийн датаг өөрчилж updated_data_list жагсаалтанд нэмэх нь
-                            update_qs.group_lesson = LessonStandart.objects.get(id=group_lesson) if group_lesson else None
-                            update_qs.previous_lesson = LessonStandart.objects.get(id=previous_lesson) if previous_lesson else None
+                            update_qs.group_lesson = (
+                                LessonStandart.objects.get(id=group_lesson)
+                                if group_lesson
+                                else None
+                            )
+                            update_qs.previous_lesson = (
+                                LessonStandart.objects.get(id=previous_lesson)
+                                if previous_lesson
+                                else None
+                            )
                             update_qs.lesson = LessonStandart.objects.get(id=lesson)
                             update_qs.season = season
                             update_qs.is_check_score = is_check_score
@@ -1079,22 +1190,32 @@ class ProfessionPlanListAPIView(
 
                 if len(create_list) > 0:
                     for create_data in create_list:
-                        plan_id, lesson, previous_lesson, season, lesson_level, lesson_type, group_lesson, is_check_score = get_datas_by_key(create_data)
+                        (
+                            plan_id,
+                            lesson,
+                            previous_lesson,
+                            season,
+                            lesson_level,
+                            lesson_type,
+                            group_lesson,
+                            is_check_score,
+                        ) = get_datas_by_key(create_data)
 
                         # хичээлийн бүртгэл шалгах бүртгэлтэй бол алдаа буцаах
                         if lesson:
-                            qs = self.queryset.filter(profession=profession_id, lesson=lesson).first()
+                            qs = self.queryset.filter(
+                                profession=profession_id, lesson=lesson
+                            ).first()
 
                             if qs:
                                 profession_name = qs.profession.name
                                 lesson_name = qs.lesson.name
                                 lesson_code = qs.lesson.code
-                                msg = "`{profession}` мэргэжлийн сургалтын төлөвлөгөөн дээр `{lesson_code} {lesson_name}` хичээл бүртгэгдсэн байна." \
-                                    .format(
-                                        profession=profession_name,
-                                        lesson_name=lesson_name,
-                                        lesson_code=lesson_code,
-                                    )
+                                msg = "`{profession}` мэргэжлийн сургалтын төлөвлөгөөн дээр `{lesson_code} {lesson_name}` хичээл бүртгэгдсэн байна.".format(
+                                    profession=profession_name,
+                                    lesson_name=lesson_name,
+                                    lesson_code=lesson_code,
+                                )
 
                                 return request.send_error("ERR_002", msg)
 
@@ -1103,10 +1224,24 @@ class ProfessionPlanListAPIView(
                                 LearningPlan(
                                     school=SubOrgs.objects.get(id=school),
                                     lesson=LessonStandart.objects.get(id=lesson),
-                                    department=Salbars.objects.get(id=department) if department else None,
-                                    profession=ProfessionDefinition.objects.get(id=profession_id),
-                                    previous_lesson=LessonStandart.objects.get(id=previous_lesson) if previous_lesson else None,
-                                    group_lesson = LessonStandart.objects.get(id=group_lesson) if group_lesson else None,
+                                    department=(
+                                        Salbars.objects.get(id=department)
+                                        if department
+                                        else None
+                                    ),
+                                    profession=ProfessionDefinition.objects.get(
+                                        id=profession_id
+                                    ),
+                                    previous_lesson=(
+                                        LessonStandart.objects.get(id=previous_lesson)
+                                        if previous_lesson
+                                        else None
+                                    ),
+                                    group_lesson=(
+                                        LessonStandart.objects.get(id=group_lesson)
+                                        if group_lesson
+                                        else None
+                                    ),
                                     season=season if season else None,
                                     lesson_level=lesson_level,
                                     lesson_type=lesson_type,
@@ -1116,7 +1251,16 @@ class ProfessionPlanListAPIView(
 
                 # bulk_create, bulk_update
                 self.queryset.bulk_create(create_learninPlan_list)
-                self.queryset.bulk_update(updated_data_list, ['group_lesson', 'previous_lesson', 'lesson', 'season', 'is_check_score'])
+                self.queryset.bulk_update(
+                    updated_data_list,
+                    [
+                        'group_lesson',
+                        'previous_lesson',
+                        'lesson',
+                        'season',
+                        'is_check_score',
+                    ],
+                )
 
             except Exception as e:
                 print(e.__str__())
@@ -1126,23 +1270,23 @@ class ProfessionPlanListAPIView(
 
     @has_permission(must_permissions=['lms-study-learningplan-delete'])
     def delete(self, request, pk=None):
-        " Сургалтын төлөвлөгөө устгах "
+        "Сургалтын төлөвлөгөө устгах"
 
         self.destroy(request, pk)
         return request.send_info("INF_003")
 
 
 @permission_classes([IsAuthenticated])
-class LessonStandartBagtsAPIView(
-    generics.GenericAPIView
-):
+class LessonStandartBagtsAPIView(generics.GenericAPIView):
 
     def get(self, request, pk=None):
-        """ Нэг хичээлийн багц цагийн мэдээлэл авах """
+        """Нэг хичээлийн багц цагийн мэдээлэл авах"""
 
         return_values = []
         if pk:
-            values = LessonStandart.objects.filter(id=pk).values('lecture_kr', 'seminar_kr', 'laborator_kr', 'practic_kr', 'biedaalt_kr')
+            values = LessonStandart.objects.filter(id=pk).values(
+                'lecture_kr', 'seminar_kr', 'laborator_kr', 'practic_kr', 'biedaalt_kr'
+            )
 
             for value in values:
                 obj = {}
@@ -1186,10 +1330,8 @@ class LessonStandartBagtsAPIView(
 
 
 @permission_classes([IsAuthenticated])
-class LearningPlanProfessionDefinitionAPIView(
-    generics.GenericAPIView
-):
-    """ Мэргэжлээс сургалтын төлөвлөгөөний хичээл авах """
+class LearningPlanProfessionDefinitionAPIView(generics.GenericAPIView):
+    """Мэргэжлээс сургалтын төлөвлөгөөний хичээл авах"""
 
     def get(self, request, profession=None):
 
@@ -1204,11 +1346,21 @@ class LearningPlanProfessionDefinitionAPIView(
         if profession:
             get_object_or_404(ProfessionDefinition, id=profession)
 
-            lesson_ids = queryset.filter(profession=profession).values_list('lesson', flat=True).distinct('lesson')
+            lesson_ids = (
+                queryset.filter(profession=profession)
+                .values_list('lesson', flat=True)
+                .distinct('lesson')
+            )
 
-            all_list = list(LessonStandart.objects.filter(id__in=lesson_ids).values('id', 'name', 'code', 'kredit'))
+            all_list = list(
+                LessonStandart.objects.filter(id__in=lesson_ids).values(
+                    'id', 'name', 'code', 'kredit'
+                )
+            )
 
-            seasons = queryset.filter(lesson__in=lesson_ids, profession=profession).values('lesson', 'season')
+            seasons = queryset.filter(
+                lesson__in=lesson_ids, profession=profession
+            ).values('lesson', 'season')
             for clist in all_list:
 
                 full_name = ''
@@ -1225,7 +1377,7 @@ class LearningPlanProfessionDefinitionAPIView(
                 if code:
                     full_name += code
                 if name:
-                    full_name +=  ' ' + name
+                    full_name += ' ' + name
 
                 clist['full_name'] = full_name
 
@@ -1233,10 +1385,8 @@ class LearningPlanProfessionDefinitionAPIView(
 
 
 @permission_classes([IsAuthenticated])
-class ProfessionPrintPlanAPIView(
-    generics.GenericAPIView
-):
-    """ Мэргэжлээс сургалтын төлөвлөгөөний хичээл авах """
+class ProfessionPrintPlanAPIView(generics.GenericAPIView):
+    """Мэргэжлээс сургалтын төлөвлөгөөний хичээл авах"""
 
     def get(self, request):
 
@@ -1247,8 +1397,14 @@ class ProfessionPrintPlanAPIView(
         student = request.query_params.get('student')
         season = request.query_params.get('season')
 
-        profession_qs = ProfessionDefinition.objects.filter(id=profession).values('id', 'dep_name', 'name').last()
-        group_queryset = Group.objects.filter(profession=profession, is_finish=False).order_by('id')
+        profession_qs = (
+            ProfessionDefinition.objects.filter(id=profession)
+            .values('id', 'dep_name', 'name')
+            .last()
+        )
+        group_queryset = Group.objects.filter(
+            profession=profession, is_finish=False
+        ).order_by('id')
 
         # анги байгаа үед л ангиар шүүх
         if group:
@@ -1258,7 +1414,11 @@ class ProfessionPrintPlanAPIView(
 
         # student байгаа эсэх шалгах
         if student:
-            student_qs = Student.objects.filter(id=student).values('id', 'code', 'first_name', 'last_name', 'register_num').first()
+            student_qs = (
+                Student.objects.filter(id=student)
+                .values('id', 'code', 'first_name', 'last_name', 'register_num')
+                .first()
+            )
 
         all_data['group'] = group_data
 
@@ -1284,8 +1444,12 @@ class ProfessionPrintPlanAPIView(
             year_diff = int(season) % 2
 
             # тэгш эсвэл сондгой улиралаар хайх
-            odd_or_even_seasons = [f"[{season}]" for season in range(1, 9) if season % 2 == year_diff % 2]
-            learning_plan_queryset = learning_plan_queryset.filter(season__in=odd_or_even_seasons)
+            odd_or_even_seasons = [
+                f"[{season}]" for season in range(1, 9) if season % 2 == year_diff % 2
+            ]
+            learning_plan_queryset = learning_plan_queryset.filter(
+                season__in=odd_or_even_seasons
+            )
 
         all_levels_data = list()
         total_studied_credits = 0
@@ -1296,7 +1460,9 @@ class ProfessionPrintPlanAPIView(
             if level_data:
                 one_lesson_datas = dict()
                 one_lesson_datas['level'] = lesson_level[1]
-                one_lesson_datas['count'] = level_data.aggregate(Sum('lesson__kredit')).get('lesson__kredit__sum')
+                one_lesson_datas['count'] = level_data.aggregate(
+                    Sum('lesson__kredit')
+                ).get('lesson__kredit__sum')
                 one_lesson_datas['total_studied_credits'] = 0
                 one_type_datas = list()
 
@@ -1306,10 +1472,14 @@ class ProfessionPrintPlanAPIView(
 
                     if type_datas:
                         lesson_datas = dict()
-                        type_data = LearningPlanPrintSerializer(type_datas, context={ "request": request }, many=True).data
+                        type_data = LearningPlanPrintSerializer(
+                            type_datas, context={"request": request}, many=True
+                        ).data
                         lesson_datas['type'] = lesson_type[1]
                         lesson_datas['lessons'] = type_data
-                        lesson_datas['count'] = type_datas.aggregate(Sum('lesson__kredit')).get('lesson__kredit__sum')
+                        lesson_datas['count'] = type_datas.aggregate(
+                            Sum('lesson__kredit')
+                        ).get('lesson__kredit__sum')
                         one_type_datas.append(lesson_datas)
 
                         # lesson_type болгонд хэдэн хичээл үзсэн тоолох
@@ -1318,7 +1488,9 @@ class ProfessionPrintPlanAPIView(
                                 for study in lesson['lesson']['student_study']:
                                     # хичээлийг үзсэн бол кредитийг тоолох
                                     if study['value'] == 2:
-                                        one_lesson_datas['total_studied_credits'] += lesson['lesson']['kredit']
+                                        one_lesson_datas[
+                                            'total_studied_credits'
+                                        ] += lesson['lesson']['kredit']
 
                 one_lesson_datas['data'] = one_type_datas
 
@@ -1330,6 +1502,7 @@ class ProfessionPrintPlanAPIView(
 
         return request.send_data(all_data)
 
+
 @permission_classes([IsAuthenticated])
 class AdmissionBottomScoreAPIView(
     mixins.CreateModelMixin,
@@ -1337,10 +1510,9 @@ class AdmissionBottomScoreAPIView(
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
-    generics.GenericAPIView
+    generics.GenericAPIView,
 ):
-
-    """ Элсэлтийн шалгалтын хичээл ба босго оноо мэргэжлээр """
+    """Элсэлтийн шалгалтын хичээл ба босго оноо мэргэжлээр"""
 
     queryset = AdmissionBottomScore.objects
     serializer_class = AdmissionBottomScoreSerializer
@@ -1349,18 +1521,17 @@ class AdmissionBottomScoreAPIView(
 
         self.serializer_class = AdmissionBottomScoreListSerializer
 
-        #Өнөөдрөөс хойших датаг авна
+        # Өнөөдрөөс хойших датаг авна
         self.queryset = self.queryset.filter(profession=pk)
 
         return_datas = self.list(request).data
 
         return request.send_data(return_datas)
 
-
     # @has_permission(must_permissions=['lms-role-teacher-score-update'])
     def put(self, request, pk=None):
-        """ ЭЕШ оноо засах
-            мэргэжлийн id = pk
+        """ЭЕШ оноо засах
+        мэргэжлийн id = pk
         """
         datas = request.data
         self.create(request, datas)
@@ -1378,12 +1549,12 @@ class AdmissionBottomScoreAPIView(
 
         return request.send_info("INF_003")
 
+
 @permission_classes([IsAuthenticated])
 class LessonStandartTimetableListAPIView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin
+    generics.GenericAPIView, mixins.ListModelMixin
 ):
-    """ Хичээлийн хуваарьт зориулж хичээлийн лист авах """
+    """Хичээлийн хуваарьт зориулж хичээлийн лист авах"""
 
     queryset = LessonStandart.objects.all()
     serializer_class = LessonStandartSerialzier
@@ -1403,12 +1574,11 @@ class LessonStandartTimetableListAPIView(
         even_i = []
         odd_i = []
 
-        for i in range(1,13):
+        for i in range(1, 13):
             if i % 2 == 0:
                 even_i.append(i)
             else:
                 odd_i.append(i)
-
 
         # Идэвхтэй улиралд байгаа хичээлүүдийг авах
         # if season == '1':
@@ -1438,11 +1608,8 @@ class LessonStandartTimetableListAPIView(
 
 
 @permission_classes([IsAuthenticated])
-class LessonStandartDiplomaListAPIView(
-    mixins.ListModelMixin,
-    generics.GenericAPIView
-):
-    """ Тухайн оюутны төгсөлтийн хичээлийн жагсаалт """
+class LessonStandartDiplomaListAPIView(mixins.ListModelMixin, generics.GenericAPIView):
+    """Тухайн оюутны төгсөлтийн хичээлийн жагсаалт"""
 
     queryset = LessonStandart.objects
     serializer_class = LessonStandartSerializer
@@ -1456,7 +1623,15 @@ class LessonStandartDiplomaListAPIView(
             if qs_student:
                 qs_group = Group.objects.filter(pk=qs_student.group.id).first()
                 if qs_group:
-                    lesson_ids = LearningPlan.objects.filter(Q(Q(profession=qs_group.profession) & Q(Q(lesson_level=LearningPlan.DIPLOM) | Q(lesson_level=LearningPlan.MAG_DIPLOM)))).values_list('lesson', flat=True)
+                    lesson_ids = LearningPlan.objects.filter(
+                        Q(
+                            Q(profession=qs_group.profession)
+                            & Q(
+                                Q(lesson_level=LearningPlan.DIPLOM)
+                                | Q(lesson_level=LearningPlan.MAG_DIPLOM)
+                            )
+                        )
+                    ).values_list('lesson', flat=True)
                     queryset = queryset.filter(id__in=lesson_ids)
 
         return queryset
@@ -1469,10 +1644,9 @@ class LessonStandartDiplomaListAPIView(
 
 @permission_classes([IsAuthenticated])
 class LessonStandartProfessionListAPIView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin
+    generics.GenericAPIView, mixins.ListModelMixin
 ):
-    ''' Нэг мэггэжлийн сургалтын төлөвлөгөөнд байгаа хичээлүүд '''
+    '''Нэг мэггэжлийн сургалтын төлөвлөгөөнд байгаа хичээлүүд'''
 
     queryset = LessonStandart.objects.all()
     serializer_class = LessonStandartSerialzier
@@ -1481,7 +1655,9 @@ class LessonStandartProfessionListAPIView(
         all_list = []
 
         if profession:
-            learningplan_lesson_ids = LearningPlan.objects.filter(profession=profession).values_list('lesson', flat=True)
+            learningplan_lesson_ids = LearningPlan.objects.filter(
+                profession=profession
+            ).values_list('lesson', flat=True)
 
             self.queryset = self.queryset.filter(id__in=list(learningplan_lesson_ids))
 
@@ -1489,15 +1665,16 @@ class LessonStandartProfessionListAPIView(
 
         return request.send_data(all_list)
 
+
 @permission_classes([IsAuthenticated])
 class ChallengeAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin
+    mixins.DestroyModelMixin,
 ):
-    """ Өөрийгөө сорих тест """
+    """Өөрийгөө сорих тест"""
 
     queryset = Challenge.objects.all().order_by("-created_at")
     serializer_class = ChallengeSerializer
@@ -1572,11 +1749,15 @@ class ChallengeAPIView(
 
         lesson = LessonStandart.objects.get(id=lesson_id)
 
-        general_datas = remove_key_from_dict(general_datas, [ 'scope', 'scopeName', 'selected', 'select', 'lesson'])
+        general_datas = remove_key_from_dict(
+            general_datas, ['scope', 'scopeName', 'selected', 'select', 'lesson']
+        )
 
         # Өмнөх шалгалтын мэдээллээс сонгож хадгалсан үед дараах serializer-аар  дамжиж ирсэн утгуудыг хасна
         if general_datas.get('id'):
-            general_datas = remove_key_from_dict(general_datas, ['group', 'student', 'startAt', 'endAt', 'id'])
+            general_datas = remove_key_from_dict(
+                general_datas, ['group', 'student', 'startAt', 'endAt', 'id']
+            )
 
         if 'question_ids' in general_datas:
             del general_datas['question_ids']
@@ -1592,23 +1773,36 @@ class ChallengeAPIView(
         general_datas['created_by'] = teacher
 
         # Тухайн хичээлийн хуваарь
-        timetable_qs = TimeTable.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season, lesson=lesson_id, teacher=teacher)
+        timetable_qs = TimeTable.objects.filter(
+            lesson_year=lesson_year,
+            lesson_season=lesson_season,
+            lesson=lesson_id,
+            teacher=teacher,
+        )
         timetable_ids = timetable_qs.values_list('id', flat=True)
 
         # Хичээлийн хуваариас хасалт хийлгэсэн оюутнууд
-        exclude_student_ids = TimeTable_to_student.objects.filter(timetable_id__in=timetable_ids, add_flag=False).values_list('student', flat=True)
+        exclude_student_ids = TimeTable_to_student.objects.filter(
+            timetable_id__in=timetable_ids, add_flag=False
+        ).values_list('student', flat=True)
 
         kind = Challenge.KIND_LESSON
 
         # Хамрах хүрээ
         if scope == 'all':
-            all_lesson_students = get_lesson_choice_student(lesson_id, teacher.id, '', lesson_year, lesson_season)
-            student_ids = qs_student.filter(id__in=all_lesson_students).values_list('id', flat=True)
+            all_lesson_students = get_lesson_choice_student(
+                lesson_id, teacher.id, '', lesson_year, lesson_season
+            )
+            student_ids = qs_student.filter(id__in=all_lesson_students).values_list(
+                'id', flat=True
+            )
 
         elif scope == 'group':
             kind = Challenge.KIND_GROUP
 
-            all_student_ids = qs_student.filter(group_id__in=selected_ids).values_list('id', flat=True)
+            all_student_ids = qs_student.filter(group_id__in=selected_ids).values_list(
+                'id', flat=True
+            )
 
             student_ids = set(all_student_ids) - set(list(exclude_student_ids))
 
@@ -1661,26 +1855,52 @@ class ChallengeAPIView(
         scope = general_datas.get('scope')
         lesson_id = general_datas.get('lesson')
 
-        general_datas = remove_key_from_dict(general_datas, ['group', 'student', 'scopeName', 'startAt', 'endAt', 'question_ids', 'questions', 'selected', 'created_by'])
+        general_datas = remove_key_from_dict(
+            general_datas,
+            [
+                'group',
+                'student',
+                'scopeName',
+                'startAt',
+                'endAt',
+                'question_ids',
+                'questions',
+                'selected',
+                'created_by',
+            ],
+        )
 
         # Тухайн хичээлийн хуваарь
-        timetable_qs = TimeTable.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season, lesson=lesson_id, teacher=teacher)
+        timetable_qs = TimeTable.objects.filter(
+            lesson_year=lesson_year,
+            lesson_season=lesson_season,
+            lesson=lesson_id,
+            teacher=teacher,
+        )
         timetable_ids = timetable_qs.values_list('id', flat=True)
 
         # Хичээлийн хуваариас хасалт хийлгэсэн оюутнууд
-        exclude_student_ids = TimeTable_to_student.objects.filter(timetable_id__in=timetable_ids, add_flag=False).values_list('student', flat=True)
+        exclude_student_ids = TimeTable_to_student.objects.filter(
+            timetable_id__in=timetable_ids, add_flag=False
+        ).values_list('student', flat=True)
 
         kind = Challenge.KIND_LESSON
 
         # Хамрах хүрээ
         if scope == 'all':
-            all_lesson_students = get_lesson_choice_student(lesson_id, teacher.id, '',  lesson_year, lesson_season)
-            student_ids = qs_student.filter(id__in=all_lesson_students).values_list('id', flat=True)
+            all_lesson_students = get_lesson_choice_student(
+                lesson_id, teacher.id, '', lesson_year, lesson_season
+            )
+            student_ids = qs_student.filter(id__in=all_lesson_students).values_list(
+                'id', flat=True
+            )
 
         elif scope == 'group':
             kind = Challenge.KIND_GROUP
 
-            all_student_ids = qs_student.filter(group_id__in=selected_ids).values_list('id', flat=True)
+            all_student_ids = qs_student.filter(group_id__in=selected_ids).values_list(
+                'id', flat=True
+            )
 
             student_ids = set(all_student_ids) - set(list(exclude_student_ids))
 
@@ -1725,17 +1945,21 @@ class ChallengeAPIView(
 
         try:
             if challenge_obj:
-               challenge_obj.questions.clear()
-               challenge_obj.student.clear()
-               challenge_obj.save()
+                challenge_obj.questions.clear()
+                challenge_obj.student.clear()
+                challenge_obj.save()
 
             # Шалгалтад хариулсан сурагчид
-            challenge_students = ChallengeStudents.objects.filter(challenge=challenge_obj)
+            challenge_students = ChallengeStudents.objects.filter(
+                challenge=challenge_obj
+            )
             if challenge_students:
                 challenge_students.delete()
 
             # Шалгалтад хариулсан сурагчид
-            challenge_elsegch = ChallengeElseltUser.objects.filter(challenge=challenge_obj)
+            challenge_elsegch = ChallengeElseltUser.objects.filter(
+                challenge=challenge_obj
+            )
             if challenge_elsegch:
                 challenge_elsegch.delete()
 
@@ -1747,13 +1971,12 @@ class ChallengeAPIView(
 
         return request.send_info("INF_003")
 
+
 @permission_classes([IsAuthenticated])
 class ChallengeAllAPIView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin
+    generics.GenericAPIView, mixins.ListModelMixin, mixins.RetrieveModelMixin
 ):
-    """ Өөрийгөө сорих шалгалт бүх жагсаалт """
+    """Өөрийгөө сорих шалгалт бүх жагсаалт"""
 
     queryset = Challenge.objects.all()
     serializer_class = ChallengeListSerializer
@@ -1772,10 +1995,9 @@ class ChallengeAllAPIView(
 
         return request.send_data(datas)
 
+
 @permission_classes([IsAuthenticated])
-class ChallengeSelectAPIView(
-    generics.GenericAPIView
-):
+class ChallengeSelectAPIView(generics.GenericAPIView):
     def get(self, request):
 
         lesson = ''
@@ -1788,7 +2010,9 @@ class ChallengeSelectAPIView(
         ctype = request.query_params.get('type')
 
         user = request.user
-        teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
+        teacher = get_object_or_404(
+            Teachers, user_id=user, action_status=Teachers.APPROVED
+        )
 
         quesyset = TimeTable.objects.all()
 
@@ -1804,7 +2028,9 @@ class ChallengeSelectAPIView(
 
         if ctype == 'group':
 
-            group_ids = TimeTable_to_group.objects.filter(timetable_id__in=timetable_ids).values_list('group', flat=True)
+            group_ids = TimeTable_to_group.objects.filter(
+                timetable_id__in=timetable_ids
+            ).values_list('group', flat=True)
 
             qroup_qs = Group.objects.filter(id__in=group_ids)
 
@@ -1814,7 +2040,9 @@ class ChallengeSelectAPIView(
 
             all_student = get_lesson_choice_student(lesson, teacher, '', year, season)
 
-            student_list = Student.objects.filter(id__in=all_student).values_list('id', flat=True)
+            student_list = Student.objects.filter(id__in=all_student).values_list(
+                'id', flat=True
+            )
 
             for student_id in student_list:
                 obj = {}
@@ -1834,10 +2062,10 @@ class QuestionsAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin
+    mixins.DestroyModelMixin,
 ):
     """
-        Асуултын хэсэг
+    Асуултын хэсэг
     """
 
     queryset = ChallengeQuestions.objects.all().order_by('-created_at')
@@ -1848,7 +2076,6 @@ class QuestionsAPIView(
     filter_backends = [SearchFilter]
     search_fields = ['question', 'subject__title']
 
-
     @has_permission(must_permissions=['lms-exam-question-read'])
     def get(self, request, pk=None):
 
@@ -1856,7 +2083,9 @@ class QuestionsAPIView(
         subject = request.query_params.get('subject')
 
         user = request.user
-        teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
+        teacher = get_object_or_404(
+            Teachers, user_id=user, action_status=Teachers.APPROVED
+        )
 
         self.queryset = self.queryset.filter(created_by=teacher)
 
@@ -1873,7 +2102,6 @@ class QuestionsAPIView(
         all_list = self.list(request).data
 
         return request.send_data(all_list)
-
 
     # @has_permission(must_permissions=['lms-exam-question-update'])
     # def put(self, request, pk):
@@ -2041,7 +2269,7 @@ class QuestionsAPIView(
 
         if type == "question":
             question_img = request_data['image']
-            request_data = remove_key_from_dict(request_data, [ 'image'])
+            request_data = remove_key_from_dict(request_data, ['image'])
             with transaction.atomic():
                 question_obj = ChallengeQuestions.objects.filter(id=pk).first()
 
@@ -2055,7 +2283,6 @@ class QuestionsAPIView(
                     question_obj.save()
                     if old_image:
                         remove_folder(str(old_image))
-
 
                 if isinstance(question_img, str) == True and question_img == '':
                     old_image = question_obj.image
@@ -2101,10 +2328,14 @@ class QuestionsAPIView(
                     if old_image:
                         remove_folder(str(old_image))
 
-                updated_rows = QuestionChoices.objects.filter(id=answer_id).update(**request_data)
+                updated_rows = QuestionChoices.objects.filter(id=answer_id).update(
+                    **request_data
+                )
                 data = None
                 if updated_rows > 0:
-                    updated_answer = QuestionChoices.objects.filter(id=answer_id).first()
+                    updated_answer = QuestionChoices.objects.filter(
+                        id=answer_id
+                    ).first()
                     ser = dynamic_serializer(QuestionChoices, "__all__")
                     data = ser(updated_answer).data
                 return request.send_info('INF_002', data)
@@ -2136,7 +2367,7 @@ class QuestionsAPIView(
                     image_name = question.get('imageName')
                     yes_or_no = question.get('yes_or_no')
 
-                    score = question.get('score') # Асуултын оноо
+                    score = question.get('score')  # Асуултын оноо
 
                     question['created_by'] = teacher
                     question['subject'] = subject
@@ -2155,14 +2386,13 @@ class QuestionsAPIView(
                             question_img = img
                             break
 
-                    question = remove_key_from_dict(question, [ 'image', 'choices'])
+                    question = remove_key_from_dict(question, ['image', 'choices'])
 
                     if 'imageName' in question:
                         del question['imageName']
 
                     if 'imageUrl' in question:
                         del question['imageUrl']
-
 
                     if not question.get('max_choice_count'):
                         question['max_choice_count'] = 0
@@ -2174,9 +2404,7 @@ class QuestionsAPIView(
 
                     question = null_to_none(question)
 
-                    question_obj = ChallengeQuestions.objects.create(
-                        **question
-                    )
+                    question_obj = ChallengeQuestions.objects.create(**question)
 
                     # Асуултанд зураг байвал хадгалах хэсэг
                     if question_img:
@@ -2190,7 +2418,10 @@ class QuestionsAPIView(
                     choice_ids = list()
 
                     # Асуултын сонголтуудыг үүсгэх нь
-                    if int(qkind) in [ChallengeQuestions.KIND_MULTI_CHOICE, ChallengeQuestions.KIND_ONE_CHOICE]:
+                    if int(qkind) in [
+                        ChallengeQuestions.KIND_MULTI_CHOICE,
+                        ChallengeQuestions.KIND_ONE_CHOICE,
+                    ]:
 
                         # Олон сонголттой үед асуултын оноог хувааж тавина
                         if int(qkind) == ChallengeQuestions.KIND_MULTI_CHOICE:
@@ -2224,9 +2455,7 @@ class QuestionsAPIView(
                             if 'imageUrl' in choice:
                                 del choice['imageUrl']
 
-                            choice_obj = QuestionChoices.objects.create(
-                                **choice
-                            )
+                            choice_obj = QuestionChoices.objects.create(**choice)
 
                             # Асуултанд зураг байвал хадгалах хэсэг
                             if choice_img:
@@ -2296,7 +2525,7 @@ class PsychologicalTestQuestionsAPIView(
     mixins.ListModelMixin,
     mixins.DestroyModelMixin,
     mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin
+    mixins.UpdateModelMixin,
 ):
     queryset = PsychologicalTestQuestions.objects.all().order_by('id')
     serializer_class = dynamic_serializer(PsychologicalTestQuestions, "__all__")
@@ -2357,8 +2586,15 @@ class PsychologicalTestQuestionsAPIView(
 
                     choice_ids = []
 
-                    if int(qkind) in [PsychologicalTestQuestions.KIND_MULTI_CHOICE, PsychologicalTestQuestions.KIND_ONE_CHOICE, PsychologicalTestQuestions.KIND_BOOLEAN]:
-                        if int(qkind) == PsychologicalTestQuestions.KIND_MULTI_CHOICE and score:
+                    if int(qkind) in [
+                        PsychologicalTestQuestions.KIND_MULTI_CHOICE,
+                        PsychologicalTestQuestions.KIND_ONE_CHOICE,
+                        PsychologicalTestQuestions.KIND_BOOLEAN,
+                    ]:
+                        if (
+                            int(qkind) == PsychologicalTestQuestions.KIND_MULTI_CHOICE
+                            and score
+                        ):
                             max_choice_count = int(question.get('max_choice_count'))
                             score = float(score) / max_choice_count
 
@@ -2367,11 +2603,16 @@ class PsychologicalTestQuestionsAPIView(
 
                             choice_img = None
                             for image in files:
-                                if hasattr(image, "name") and choice['image'] == image.name:
+                                if (
+                                    hasattr(image, "name")
+                                    and choice['image'] == image.name
+                                ):
                                     choice_img = image
 
                             choice = remove_key_from_dict(choice, ['image'])
-                            choice_obj = PsychologicalQuestionChoices.objects.create(**choice)
+                            choice_obj = PsychologicalQuestionChoices.objects.create(
+                                **choice
+                            )
 
                             if choice_img:
                                 choice_img_path = get_choice_image_path(choice_obj)
@@ -2408,14 +2649,20 @@ class PsychologicalTestQuestionsAPIView(
                 question_obj = PsychologicalTestQuestions.objects.filter(id=pk).first()
 
                 # Хариулт нь хоосон биш мөн оноотой үед ажилна
-                if answers_list and request_data['score'] != 'null' and answers != 'undefined':
+                if (
+                    answers_list
+                    and request_data['score'] != 'null'
+                    and answers != 'undefined'
+                ):
 
                     # Зөв хариултуудыг авна
                     correct_choice_ids = set()
 
                     # Орж ирсэн хариулт болгоныг авч өөрчлөн
                     for answer in answers_list:
-                        answer_object = PsychologicalQuestionChoices.objects.filter(id=answer).first()
+                        answer_object = PsychologicalQuestionChoices.objects.filter(
+                            id=answer
+                        ).first()
 
                         if answer_object:
                             answer_object.is_correct = True
@@ -2423,7 +2670,9 @@ class PsychologicalTestQuestionsAPIView(
                             correct_choice_ids.add(answer_object.id)
 
                     # Үлдсэн хариуг худал болгох
-                    question_obj.choices.exclude(id__in=correct_choice_ids).update(is_correct=False)
+                    question_obj.choices.exclude(id__in=correct_choice_ids).update(
+                        is_correct=False
+                    )
 
                 # Хэрэв оноо орж ирсэн тохиолдолд тухайн object-ийн has_score field-ийг true болгоно
                 if 'score' in request_data:
@@ -2442,9 +2691,9 @@ class PsychologicalTestQuestionsAPIView(
                 request_data = remove_key_from_dict(request_data, ['level'])
 
                 # Тухайн data-г base дээр update хийнэ
-                updated_question_rows = PsychologicalTestQuestions.objects.filter(id=pk).update(
-                    **request_data
-                )
+                updated_question_rows = PsychologicalTestQuestions.objects.filter(
+                    id=pk
+                ).update(**request_data)
 
                 if isinstance(question_img, str) != True:
                     question_img_path = get_image_path(question_obj)
@@ -2468,7 +2717,9 @@ class PsychologicalTestQuestionsAPIView(
 
                 data = None
                 if updated_question_rows > 0:
-                    updated_question = PsychologicalTestQuestions.objects.filter(id=pk).first()
+                    updated_question = PsychologicalTestQuestions.objects.filter(
+                        id=pk
+                    ).first()
                     ser = dynamic_serializer(PsychologicalTestQuestions, "__all__", 1)
                     data = ser(updated_question).data
                 return request.send_info('INF_002', data)
@@ -2488,9 +2739,13 @@ class PsychologicalTestQuestionsAPIView(
 
             request_data = remove_key_from_dict(request_data, ['image', 'id', 'score'])
             with transaction.atomic():
-                answer_obj = PsychologicalQuestionChoices.objects.filter(id=answer_id).first()
+                answer_obj = PsychologicalQuestionChoices.objects.filter(
+                    id=answer_id
+                ).first()
                 question_obj = PsychologicalTestQuestions.objects.filter(id=pk).first()
-                updated_rows = PsychologicalQuestionChoices.objects.filter(id=answer_id).update(**request_data)
+                updated_rows = PsychologicalQuestionChoices.objects.filter(
+                    id=answer_id
+                ).update(**request_data)
                 if isinstance(answer_img, str) != True:
                     answer_img_path = get_choice_image_path(answer_obj)
                     file_path = save_file(answer_img, answer_img_path)
@@ -2510,13 +2765,14 @@ class PsychologicalTestQuestionsAPIView(
 
                 data = None
                 if updated_rows > 0:
-                    updated_answer = PsychologicalQuestionChoices.objects.filter(id=answer_id).first()
+                    updated_answer = PsychologicalQuestionChoices.objects.filter(
+                        id=answer_id
+                    ).first()
                     ser = dynamic_serializer(PsychologicalQuestionChoices, "__all__")
                     updated_answer.value = updated_value
                     updated_answer.save()
                     data = ser(updated_answer).data
                 return request.send_info('INF_002', data)
-
 
     def delete(self, request):
 
@@ -2558,14 +2814,17 @@ class PsychologicalTestQuestionsAPIView(
 
 
 class PsychologicalQuestionTitleListAPIView(APIView):
-
-    """ Шалгалтын Гарчиг"""
+    """Шалгалтын Гарчиг"""
 
     def get_queryset(self, user):
         if user.is_superuser:
-            question_titles = PsychologicalTestQuestions.objects.all().values_list("title", flat=True)
+            question_titles = PsychologicalTestQuestions.objects.all().values_list(
+                "title", flat=True
+            )
         else:
-            question_titles = PsychologicalTestQuestions.objects.filter(created_by=user).values_list("title", flat=True)
+            question_titles = PsychologicalTestQuestions.objects.filter(
+                created_by=user
+            ).values_list("title", flat=True)
         return PsychologicalQuestionTitle.objects.filter(id__in=question_titles)
 
     def get(self, request):
@@ -2580,11 +2839,10 @@ class PsychologicalQuestionTitleAPIView(
     mixins.ListModelMixin,
     mixins.DestroyModelMixin,
     mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin
-
+    mixins.UpdateModelMixin,
 ):
-    """ Шалгалтын асуултууд Гарчигаар
-    """
+    """Шалгалтын асуултууд Гарчигаар"""
+
     queryset = PsychologicalQuestionTitle.objects.all()
     serializer_class = dynamic_serializer(PsychologicalQuestionTitle, "__all__")
 
@@ -2594,7 +2852,9 @@ class PsychologicalQuestionTitleAPIView(
         user = request.user.id
         user_obj = User.objects.filter(pk=user).first()
         if user_obj.is_superuser:
-            challenge_qs = PsychologicalTestQuestions.objects.all().order_by('question_number')
+            challenge_qs = PsychologicalTestQuestions.objects.all().order_by(
+                'question_number'
+            )
             if title_id:
                 challenge_qs = challenge_qs.filter(title=title_id)
 
@@ -2602,48 +2862,60 @@ class PsychologicalQuestionTitleAPIView(
             data = ser(challenge_qs, many=True)
             count = challenge_qs.count()
 
-            result = {
-                "count": count,
-                "results": data.data
-            }
+            result = {"count": count, "results": data.data}
             return request.send_data(result)
 
         if pk:
             data = self.retrieve(request, pk).data
-            questions = PsychologicalTestQuestions.objects.filter(title=pk, created_by=user)
-            other_questions = PsychologicalTestQuestions.objects.filter(created_by=user).exclude(id__in=questions.values_list('id', flat=True)).values("id", "question", "title__name").order_by('question_number')
+            questions = PsychologicalTestQuestions.objects.filter(
+                title=pk, created_by=user
+            )
+            other_questions = (
+                PsychologicalTestQuestions.objects.filter(created_by=user)
+                .exclude(id__in=questions.values_list('id', flat=True))
+                .values("id", "question", "title__name")
+                .order_by('question_number')
+            )
 
             questions = questions.values("id", "question", "title__name")
-            return request.send_data({"title": data, "questions": list(questions), "other_questions": list(other_questions)})
+            return request.send_data(
+                {
+                    "title": data,
+                    "questions": list(questions),
+                    "other_questions": list(other_questions),
+                }
+            )
 
         # 0  Бүх асуулт
         if title_id == 0 and not user_obj.is_superuser:
             challenge_qs = PsychologicalTestQuestions.objects.filter(created_by=user)
         # -1  Сэдэвгүй асуултууд
         elif title_id == -1:
-            challenge_qs = PsychologicalTestQuestions.objects.filter(Q(created_by=user) & Q(title__isnull=True))
+            challenge_qs = PsychologicalTestQuestions.objects.filter(
+                Q(created_by=user) & Q(title__isnull=True)
+            )
         else:
-            challenge_qs = PsychologicalTestQuestions.objects.filter(created_by=user, title=title_id)
+            challenge_qs = PsychologicalTestQuestions.objects.filter(
+                created_by=user, title=title_id
+            )
 
         ser = dynamic_serializer(PsychologicalTestQuestions, "__all__", 1)
         challenge_qs = challenge_qs.order_by('question_number')
         data = ser(challenge_qs, many=True)
         count = challenge_qs.count()
 
-        result = {
-            "count": count,
-            "results": data.data
-        }
+        result = {"count": count, "results": data.data}
         return request.send_data(result)
-
 
     def post(self, request):
         request_data = request.data
         question_ids = request.data.pop("questions")
         serializer = self.get_serializer(data=request_data)
         if serializer.is_valid(raise_exception=True):
-            saved_obj =  serializer.save()
-            questions_to_update = PsychologicalTestQuestions.objects.filter(id__in=question_ids)
+            saved_obj = serializer.save()
+            questions_to_update = PsychologicalTestQuestions.objects.filter(
+                id__in=question_ids
+            )
             for question in questions_to_update:
                 question.title.add(saved_obj)
             data = self.serializer_class(saved_obj).data
@@ -2651,7 +2923,6 @@ class PsychologicalQuestionTitleAPIView(
         else:
             print(serializer.errors)
         return request.send_info("ERR_001")
-
 
     def put(self, request, pk=None):
         request_data = request.data
@@ -2661,8 +2932,12 @@ class PsychologicalQuestionTitleAPIView(
         serializer = self.get_serializer(qs, data=request_data, partial=True)
         if serializer.is_valid(raise_exception=False):
             self.perform_update(serializer)
-            questions_to_update = PsychologicalTestQuestions.objects.filter(id__in=question_ids)
-            other_questions = PsychologicalTestQuestions.objects.filter(id__in=other_question_ids)
+            questions_to_update = PsychologicalTestQuestions.objects.filter(
+                id__in=question_ids
+            )
+            other_questions = PsychologicalTestQuestions.objects.filter(
+                id__in=other_question_ids
+            )
             for question in questions_to_update:
                 question.title.add(qs)
             for question in other_questions:
@@ -2671,30 +2946,26 @@ class PsychologicalQuestionTitleAPIView(
 
         return request.send_info("ERR_001")
 
-
     def delete(self, request, pk=None):
         self.destroy(request, pk)
         return request.send_info("INF_003")
 
 
-class PsychologicalTestOptionsAPIView(
-    mixins.ListModelMixin,
-    generics.GenericAPIView
-):
+class PsychologicalTestOptionsAPIView(mixins.ListModelMixin, generics.GenericAPIView):
     def get(self, request):
 
         # PsychologicalTest model-ийн scope_kind-ийн val-ийг авна
         set_of_scope = PsychologicalTest.SCOPE_CHOICES
         # Ирсэн set data-г [{}] болгон хөрвүүлнэ
-        scope_options = [{'id':id, 'name':name} for id, name in set_of_scope]
+        scope_options = [{'id': id, 'name': name} for id, name in set_of_scope]
 
         # type_option-ийг гараараа бичээд явуулчихлаа
-        type_options = [{'id':1, 'name':'Оноогүй'},{'id':2, 'name':'Асуултаас шалтгаалах'}]
+        type_options = [
+            {'id': 1, 'name': 'Оноогүй'},
+            {'id': 2, 'name': 'Асуултаас шалтгаалах'},
+        ]
 
-        return_datas ={
-            'scope_options':scope_options,
-            'type_options':type_options
-        }
+        return_datas = {'scope_options': scope_options, 'type_options': type_options}
         return request.send_data(return_datas)
 
 
@@ -2705,10 +2976,9 @@ class PsychologicalTestAPIView(
     mixins.DestroyModelMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
-    generics.GenericAPIView
+    generics.GenericAPIView,
 ):
-
-    """ Сэтгэл зүйн шалгалт сорил """
+    """Сэтгэл зүйн шалгалт сорил"""
 
     queryset = PsychologicalTest.objects.all().order_by('id')
     serializer_class = PsychologicalTestSerializer
@@ -2789,9 +3059,9 @@ class PsychologicalTestOneAPIView(
     mixins.DestroyModelMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
-    generics.GenericAPIView
+    generics.GenericAPIView,
 ):
-    """ Сэтгэл зүйн сорилд хамаарагдах багц асуултууд """
+    """Сэтгэл зүйн сорилд хамаарагдах багц асуултууд"""
 
     queryset = PsychologicalTestQuestions.objects.all().order_by('id')
     serializer_class = PsychologicalTestQuestionsSerializer
@@ -2803,7 +3073,9 @@ class PsychologicalTestOneAPIView(
         test_id = self.request.query_params.get('test_id')
 
         # Тухайн сорилын асуултуудын id
-        question_ids = PsychologicalTest.objects.filter(id=test_id).values_list('questions', flat=True)
+        question_ids = PsychologicalTest.objects.filter(id=test_id).values_list(
+            'questions', flat=True
+        )
 
         # Асуултуудынхаа id-г ашиглан асуултуудаа аваад дараа нь serializer ашиглан буцаана
         if question_ids:
@@ -2824,7 +3096,9 @@ class PsychologicalTestOneAPIView(
             question_title_ids.append(value['id'])
 
         # Тус багцад хамаарах асуултуудыг, багцын id-г ашиглан хадгална
-        question_ids = self.queryset.filter(title__in=question_title_ids).values_list('id', flat=True)
+        question_ids = self.queryset.filter(title__in=question_title_ids).values_list(
+            'id', flat=True
+        )
 
         with transaction.atomic():
             try:
@@ -2834,7 +3108,9 @@ class PsychologicalTestOneAPIView(
                     queryset.save()
                     return request.send_info("INF_001")
                 else:
-                    return request.send_error('ERR_002', "Тухайн багцад хамаарах асуултууд олдсонгүй")
+                    return request.send_error(
+                        'ERR_002', "Тухайн багцад хамаарах асуултууд олдсонгүй"
+                    )
             except Exception as e:
                 print(e)
                 return request.send_error('ERR_002')
@@ -2884,12 +3160,14 @@ class PsychologicalTestScopesAPIView(
         scope_to_model_serializer = {
             1: (Teachers, TeachersSerializer, ['first_name', 'last_name', 'register']),
             2: (ElseltUser, ElsegchSerializer, ['first_name', 'last_name', 'code']),
-            3: (Student, StudentSerializer, ['first_name', 'last_name', 'code'])
+            3: (Student, StudentSerializer, ['first_name', 'last_name', 'code']),
         }
 
         # scope-өөс шалтгаалан ашиглах model, serializer өөр, өөр байна
         # None, none гэсэн нь шууд байгаа утгыг нь авна
-        model_class, serializer_class, search_fields = scope_to_model_serializer.get(scope, (None, None, None))
+        model_class, serializer_class, search_fields = scope_to_model_serializer.get(
+            scope, (None, None, None)
+        )
 
         # scope-д тохирсон model байвал
         if model_class is not None:
@@ -2899,17 +3177,20 @@ class PsychologicalTestScopesAPIView(
             self.serializer_class = serializer_class
             # Хайх утгуудын өгнө
             if search_value:
-                self.queryset = _filter_queries(self.queryset, search_value, search_fields)
+                self.queryset = _filter_queries(
+                    self.queryset, search_value, search_fields
+                )
 
             datas = self.list(request).data
         return request.send_data(datas)
+
 
 @permission_classes([IsAuthenticated])
 class PsychologicalTestScopeOptionsAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
 ):
-    """ Сэтгэл зүйн сорилын хамрах хүрээг сонгох """
+    """Сэтгэл зүйн сорилын хамрах хүрээг сонгох"""
 
     def get(self, request):
         scope = self.request.query_params.get('scope')
@@ -2929,7 +3210,9 @@ class PsychologicalTestScopeOptionsAPIView(
 
         # to avoid not assigned errors on return
         return_data = {}
-        admission_options = department_options = group_options = teacher_options = elselt_user_options = student_options = []
+        admission_options = department_options = group_options = teacher_options = (
+            elselt_user_options
+        ) = student_options = []
 
         # partial loading of participants on startup and ondemand
         if mode in ['start'] or mode in ['participants'] and not search_query:
@@ -2963,7 +3246,12 @@ class PsychologicalTestScopeOptionsAPIView(
                 teacher_options = teacher_options.filter(search_vector)
 
         # load by scroll if search by string is not performed
-        if mode in ['start'] or mode in ['participants'] and scope == '1' and not search_query:
+        if (
+            mode in ['start']
+            or mode in ['participants']
+            and scope == '1'
+            and not search_query
+        ):
             teacher_options = teacher_options[qs_start:qs_filter]
 
         # building output data fields
@@ -2974,23 +3262,37 @@ class PsychologicalTestScopeOptionsAPIView(
             only_mapped_fields = {
                 'id': 'id',
                 'register': 'code',
-                'full_name': 'full_name'
+                'full_name': 'full_name',
             }
-            teacher_options = [{only_mapped_fields.get(key, key): item[key] for key in item if key in only_mapped_fields} for item in teacher_options]
+            teacher_options = [
+                {
+                    only_mapped_fields.get(key, key): item[key]
+                    for key in item
+                    if key in only_mapped_fields
+                }
+                for item in teacher_options
+            ]
 
         # Elselt users
         if mode in ['start'] or mode in ['participants'] and scope == '2':
             # Бие бялдар тэнцсэн элсэгч
-            elselt_user_options = ElseltUser.objects.filter(physqueuser__state=AdmissionUserProfession.STATE_APPROVE, admissionuserprofession__user=F('id')).order_by('id')
+            elselt_user_options = ElseltUser.objects.filter(
+                physqueuser__state=AdmissionUserProfession.STATE_APPROVE,
+                admissionuserprofession__user=F('id'),
+            ).order_by('id')
 
         # filter elselt users by select inputs
         if mode in ['participants'] and scope == '2':
             if select1:
-                elselt_user_options = elselt_user_options.filter(admissionuserprofession__profession__admission=select1)
+                elselt_user_options = elselt_user_options.filter(
+                    admissionuserprofession__profession__admission=select1
+                )
 
             if select2:
                 select2 = [int(item) for item in select2.split(',')]
-                elselt_user_options = elselt_user_options.filter(admissionuserprofession__profession__profession__in=select2)
+                elselt_user_options = elselt_user_options.filter(
+                    admissionuserprofession__profession__profession__in=select2
+                )
 
             if search_query:
                 search_vector = Q()
@@ -3001,7 +3303,12 @@ class PsychologicalTestScopeOptionsAPIView(
                 elselt_user_options = elselt_user_options.filter(search_vector)
 
         # load by scroll if search by string is not performed
-        if mode in ['start'] or mode in ['participants'] and scope == '2' and not search_query:
+        if (
+            mode in ['start']
+            or mode in ['participants']
+            and scope == '2'
+            and not search_query
+        ):
             elselt_user_options = elselt_user_options[qs_start:qs_filter]
 
         # building output data fields
@@ -3013,7 +3320,15 @@ class PsychologicalTestScopeOptionsAPIView(
             for ordered_dict in elselt_user_options:
                 filtered_dict = {}
                 filtered_dict['id'] = ordered_dict['id']
-                filtered_dict['code'] = ordered_dict['code'] if ordered_dict['code'] and '@' not in ordered_dict['code'] else ordered_dict['register'] if '@' not in ordered_dict['register'] else ''
+                filtered_dict['code'] = (
+                    ordered_dict['code']
+                    if ordered_dict['code'] and '@' not in ordered_dict['code']
+                    else (
+                        ordered_dict['register']
+                        if '@' not in ordered_dict['register']
+                        else ''
+                    )
+                )
                 filtered_dict['full_name'] = ordered_dict['full_name']
 
                 # Append the new OrderedDict to the new_data list
@@ -3045,7 +3360,12 @@ class PsychologicalTestScopeOptionsAPIView(
                 student_options = student_options.filter(search_vector)
 
         # load by scroll if search by string is not performed
-        if mode in ['start'] or mode in ['participants'] and scope == '3' and not search_query:
+        if (
+            mode in ['start']
+            or mode in ['participants']
+            and scope == '3'
+            and not search_query
+        ):
             student_options = student_options[qs_start:qs_filter]
 
         # building output data fields
@@ -3053,12 +3373,15 @@ class PsychologicalTestScopeOptionsAPIView(
             student_options = StudentSerializer(student_options, many=True).data
 
             # getting only specified keys
-            only_mapped_fields = {
-                'id': 'id',
-                'code': 'code',
-                'full_name': 'full_name'
-            }
-            student_options = [{only_mapped_fields.get(key, key): item[key] for key in item if key in only_mapped_fields} for item in student_options]
+            only_mapped_fields = {'id': 'id', 'code': 'code', 'full_name': 'full_name'}
+            student_options = [
+                {
+                    only_mapped_fields.get(key, key): item[key]
+                    for key in item
+                    if key in only_mapped_fields
+                }
+                for item in student_options
+            ]
 
         if mode in ['start']:
             # Teachers and students departments
@@ -3067,12 +3390,16 @@ class PsychologicalTestScopeOptionsAPIView(
                 department_options = department_options.filter(sub_orgs=school)
 
             # get only required fields after all filters
-            department_options =  department_options.values('id', 'name')
+            department_options = department_options.values('id', 'name')
 
             # Elselt users admissions
-            admission_options = AdmissionRegisterProfession.objects.annotate(
-                admission_name = F('admission__name'),
-            ).values('admission_name', 'admission').distinct('admission')
+            admission_options = (
+                AdmissionRegisterProfession.objects.annotate(
+                    admission_name=F('admission__name'),
+                )
+                .values('admission_name', 'admission')
+                .distinct('admission')
+            )
 
         # Students groups
         if mode in ['start', 'group']:
@@ -3096,7 +3423,7 @@ class PsychologicalTestScopeOptionsAPIView(
             'group_options': list(group_options),
             'teacher_options': teacher_options,
             'elselt_user_options': elselt_user_options,
-            'student_options': student_options
+            'student_options': student_options,
         }
 
         return request.send_data(return_data)
@@ -3127,9 +3454,16 @@ class PsychologicalTestScopeOptionsAPIView(
             PsychologicalTest.objects.filter(id=pk).update(scope_kind=scope)
 
             # if atleast 1 filter is not selected then do not put anything
-            if (not department_teacher and not teacher and
-                not admission and not profession and not elselt_user and
-                not department_student and not group and not student):
+            if (
+                not department_teacher
+                and not teacher
+                and not admission
+                and not profession
+                and not elselt_user
+                and not department_student
+                and not group
+                and not student
+            ):
                 return request.send_info("INF_002")
 
             # Хэрвээ багшаа сорил авах бол
@@ -3142,7 +3476,9 @@ class PsychologicalTestScopeOptionsAPIView(
 
                 if department_teacher:
                     department_teacher = [item['id'] for item in department_teacher]
-                    participant_ids = participant_ids.filter(salbar__in=department_teacher)
+                    participant_ids = participant_ids.filter(
+                        salbar__in=department_teacher
+                    )
 
                 if school_id:
                     participant_ids = participant_ids.filter(sub_org=school_id)
@@ -3150,7 +3486,10 @@ class PsychologicalTestScopeOptionsAPIView(
             # Хэрвээ элсэгчдээс сорил авах бол
             elif scope == 2:
                 # Бие бялдар тэнцсэн элсэгч
-                participant_ids = ElseltUser.objects.filter(physqueuser__state=AdmissionUserProfession.STATE_APPROVE, admissionuserprofession__user=F('id'))
+                participant_ids = ElseltUser.objects.filter(
+                    physqueuser__state=AdmissionUserProfession.STATE_APPROVE,
+                    admissionuserprofession__user=F('id'),
+                )
 
                 if elselt_user:
                     elselt_user = [item['id'] for item in elselt_user]
@@ -3158,10 +3497,16 @@ class PsychologicalTestScopeOptionsAPIView(
 
                 if profession:
                     profession = [item['prof_id'] for item in profession]
-                    participant_ids = participant_ids.filter(admissionuserprofession__profession__profession__in=profession)
+                    participant_ids = participant_ids.filter(
+                        admissionuserprofession__profession__profession__in=profession
+                    )
 
                 if admission:
-                    participant_ids = participant_ids.filter(admissionuserprofession__profession__admission=admission['admission'])
+                    participant_ids = participant_ids.filter(
+                        admissionuserprofession__profession__admission=admission[
+                            'admission'
+                        ]
+                    )
 
             # Хэрвээ оюутанаас сорил авах бол
             elif scope == 3:
@@ -3176,7 +3521,9 @@ class PsychologicalTestScopeOptionsAPIView(
                     participant_ids = participant_ids.filter(group__in=group)
 
                 if department_student:
-                    participant_ids = participant_ids.filter(department=department_student['id'])
+                    participant_ids = participant_ids.filter(
+                        department=department_student['id']
+                    )
 
                 if school_id:
                     participant_ids = participant_ids.filter(school=school_id)
@@ -3201,7 +3548,9 @@ class PsychologicalTestScopeOptionsAPIView(
             old_new_participants = old_participants + unique_parts
 
             # Тэгээд эцэст нь бааздаа хадгална
-            PsychologicalTest.objects.filter(id=pk).update(participants=list(old_new_participants))
+            PsychologicalTest.objects.filter(id=pk).update(
+                participants=list(old_new_participants)
+            )
 
         return request.send_info("INF_002")
 
@@ -3223,11 +3572,8 @@ class PsychologicalTestScopeOptionsAPIView(
         return request.send_info("INF_003")
 
 
-class PsychologicalTestResultAPIView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin
-):
-    """ Сэтгэлзүйн сорилын үр дүн """
+class PsychologicalTestResultAPIView(generics.GenericAPIView, mixins.ListModelMixin):
+    """Сэтгэлзүйн сорилын үр дүн"""
 
     queryset = PsychologicalTest.objects.all()
     serializer_class = PsychologicalTestResultSerializer
@@ -3248,10 +3594,9 @@ class PsychologicalTestResultAPIView(
 
 
 class PsychologicalTestResultParticipantsAPIView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin
+    generics.GenericAPIView, mixins.ListModelMixin
 ):
-    """ Сэтгэлзүйн сорилд оролцогчид """
+    """Сэтгэлзүйн сорилд оролцогчид"""
 
     queryset = PsychologicalTest.objects.all()
 
@@ -3278,44 +3623,56 @@ class PsychologicalTestResultParticipantsAPIView(
         # Хамрах хүрээний боломжит утгууд
         scope_to_model_serializer = {
             1: (Teachers, TeachersSerializer, ['first_name', 'last_name', 'register']),
-            2: (MentalUser, MentalUserSerializer, ['user__first_name', 'user__last_name', 'user__code']),
-            3: (Student, StudentSerializer, ['first_name', 'last_name', 'code'])
+            2: (
+                MentalUser,
+                MentalUserSerializer,
+                ['user__first_name', 'user__last_name', 'user__code'],
+            ),
+            3: (Student, StudentSerializer, ['first_name', 'last_name', 'code']),
         }
 
         # scope-өөс шалтгаалан ашиглах model, serializer өөр, өөр байна
         # None, none гэсэн нь шууд байгаа утгыг нь авна
-        model_class, serializer_class, search_fields = scope_to_model_serializer.get(scope, (None, None, None))
+        model_class, serializer_class, search_fields = scope_to_model_serializer.get(
+            scope, (None, None, None)
+        )
 
         # scope-д тохирсон model байвал
         if model_class is not None:
             if model_class == MentalUser:
-                self.queryset = model_class.objects.filter(user__in=participants, challenge=test_id).annotate(
-                    first_name = F('user__first_name'),
-                    last_name = F('user__last_name'),
-                    code = F('user__code'),
+                self.queryset = model_class.objects.filter(
+                    user__in=participants, challenge=test_id
+                ).annotate(
+                    first_name=F('user__first_name'),
+                    last_name=F('user__last_name'),
+                    code=F('user__code'),
                 )
             else:
                 # Оролцогчдоороо filter-ээд
-                self.queryset = model_class.objects.filter(id__in=participants, challenge=test_id)
+                self.queryset = model_class.objects.filter(
+                    id__in=participants, challenge=test_id
+                )
             # Serializer-г нь заагаад
             self.serializer_class = serializer_class
             # Хайх утгуудын өгнө
             if search_value:
-                self.queryset = _filter_queries(self.queryset, search_value, search_fields)
+                self.queryset = _filter_queries(
+                    self.queryset, search_value, search_fields
+                )
 
             datas = self.list(request).data
         return request.send_data(datas)
 
+
 class PsychologicalTestResultShowAPIView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin
+    generics.GenericAPIView, mixins.ListModelMixin
 ):
     """Сорилийн оноо асуулт хариултыг харах API"""
 
     queryset = PsychologicalTestQuestions.objects.all()
     serializer_class = PsychologicalTestQuestionsSerializer
 
-    def post(self,request):
+    def post(self, request):
 
         datas = request.data
         question_ids = []
@@ -3362,22 +3719,17 @@ class PsychologicalTestResultShowAPIView(
                     data['chosen_choice'] = 'Тийм' if choice_id == 1 else 'Үгүй'
 
                 # Тухайн өгсөн шалгалтийн нийт оноо
-                if(data['has_score']):
+                if data['has_score']:
                     totalscore += data['score']
 
                 big_data.append(data)
 
-        return_data ={
-            'question':big_data,
-            'total_score':totalscore
-        }
+        return_data = {'question': big_data, 'total_score': totalscore}
         return request.send_data(return_data)
 
 
-class PsychologicalTestResultExcelAPIView(
-    generics.GenericAPIView
-):
-    """ Сэтгэлзүйн шалгалтын үр дүн тайлан excel """
+class PsychologicalTestResultExcelAPIView(generics.GenericAPIView):
+    """Сэтгэлзүйн шалгалтын үр дүн тайлан excel"""
 
     # Оноо бүрд if нөхцөл ашиглахгүйн тулд function ашигласан
     def classify_score(self, score, thresholds, labels):
@@ -3392,9 +3744,15 @@ class PsychologicalTestResultExcelAPIView(
     # Асуулга ялгаж өгөх function
     def find_question_type(self, all_questions, type):
         # type-аас шалтгаалан Асуулга 3 эсвэл 4 гэсэн үг асуултын нэр дотор байвал тэр шүүсэн асуултуудаа аваад
-        question_type = PsychologicalTestQuestions.objects.filter(question__icontains=f'Асуулга-{type}')
+        question_type = PsychologicalTestQuestions.objects.filter(
+            question__icontains=f'Асуулга-{type}'
+        )
         # Хэрэглэгчийн хариулсан бүх асуулт дунд шүүсэн асуултуудтай ижил id-тай асуулт байвал тэднийг dict дотор багцлаад буцаана
-        return {str(question.id): all_questions[str(question.id)] for question in question_type if str(question.id) in all_questions}
+        return {
+            str(question.id): all_questions[str(question.id)]
+            for question in question_type
+            if str(question.id) in all_questions
+        }
 
     # DASS21 нэг бүрчилсэн өгөгдөл
     def dass21(self, user, questions):
@@ -3403,14 +3761,18 @@ class PsychologicalTestResultExcelAPIView(
         datas = {}
 
         # Нэг dict дотор key-нь асуултын id value-нь тухайн асуултын obj байхаар авна
-        questions_qs_dass21 = PsychologicalTestQuestions.objects.filter(id__in=question_ids).in_bulk(field_name='id')
+        questions_qs_dass21 = PsychologicalTestQuestions.objects.filter(
+            id__in=question_ids
+        ).in_bulk(field_name='id')
 
         # Асуултууд дотроо loop гүйлгээд ---> {1:QuestionObj(1)}
         for key, value in questions_qs_dass21.items():
             # Хэрэглэгчийн хариулсан асуултуудын id дунд questions_qs_dass21-ийн key-нь байвал
             if str(key) in question_ids:
                 # Тухайн асуултанд хариулсан хариултын id-аар PsychologicalQuestionChoices-модел-с шүүд obj-ийш авна
-                choice = PsychologicalQuestionChoices.objects.filter(id=questions[f'{key}']).first()
+                choice = PsychologicalQuestionChoices.objects.filter(
+                    id=questions[f'{key}']
+                ).first()
                 # Дараа нь буцаах дата дотроо тухайн асуултын question_number-ийг key болгоод
                 # value-д нь сонгосон хариултын value-г өгнө
                 datas[f'{value.question_number}'] = int(choice.value)
@@ -3420,7 +3782,7 @@ class PsychologicalTestResultExcelAPIView(
         datas['last_name'] = user.last_name
         datas['register'] = user.register
 
-        return datas # Буцаана
+        return datas  # Буцаана
 
     # Сурах сэдэл нэг бүрчилсэн өгөгдөл
     def motivation(self, user, questions, all_score_questions):
@@ -3429,7 +3791,9 @@ class PsychologicalTestResultExcelAPIView(
         datas = {}
 
         # Нэг dict дотор key-нь асуултын id value-нь тухайн асуултын obj байхаар авна
-        question_qs_dict = PsychologicalTestQuestions.objects.filter(id__in=question_ids).in_bulk(field_name='id')
+        question_qs_dict = PsychologicalTestQuestions.objects.filter(
+            id__in=question_ids
+        ).in_bulk(field_name='id')
 
         # Ийм question_number-тай асуултанд тийм гэж хариулсан бол 1 оноо
         group_true = {4, 17, 26, 9, 31, 33, 43, 48, 49, 24, 35, 38, 44}
@@ -3466,17 +3830,21 @@ class PsychologicalTestResultExcelAPIView(
                     # Асуултанд хариулсан байдлаас шалтгаалан оноог өгнө
                     if question_number in group_true:
                         # group_true дотор байгаа асуултан Тийм гэж хариулсан бол 1 оноо өгнө гэх мэт
-                        datas[f'score_{question_number}'] = score if response is True else 0
+                        datas[f'score_{question_number}'] = (
+                            score if response is True else 0
+                        )
                     elif question_number in group_false:
-                        datas[f'score_{question_number}'] = score if response is False else 0
-                    else: # function-ээ дуудах үед зөв датагаа өгсөн болохоор else-рүү ерөнхийдөө орохгүй
+                        datas[f'score_{question_number}'] = (
+                            score if response is False else 0
+                        )
+                    else:  # function-ээ дуудах үед зөв датагаа өгсөн болохоор else-рүү ерөнхийдөө орохгүй
                         pass
         # Сүүлд нь хэрэглэгчийнхээ мэдээллийг өгөөд
         datas['first_name'] = user.first_name
         datas['last_name'] = user.last_name
         datas['register'] = user.register
 
-        return datas # Буцаана
+        return datas  # Буцаана
 
     # Прогноз нэг бүрчилсэн өгөгдөл
     def prognoz(self, user, questions):
@@ -3485,14 +3853,73 @@ class PsychologicalTestResultExcelAPIView(
         datas = {}
 
         # Нэг dict дотор key-нь асуултын id value-нь тухайн асуултын obj байхаар авна
-        questions_qs_prognoz = PsychologicalTestQuestions.objects.filter(id__in=question_ids).in_bulk(field_name='id')
+        questions_qs_prognoz = PsychologicalTestQuestions.objects.filter(
+            id__in=question_ids
+        ).in_bulk(field_name='id')
 
         # Ийм question_number-тай асуултууд яаж хариулснаас шалтгаалан оноотой байна
         mental_true = [
-            2, 3, 5, 7, 9, 11, 13, 14, 16, 18, 20, 22, 23, 25, 27, 28,
-            29, 31, 32, 33, 34, 36, 37, 39, 40, 42, 43, 45, 47, 48, 51,
-            53, 54, 56, 57, 59, 60, 62, 63, 65, 66, 67, 68, 69, 70, 71,
-            72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86
+            2,
+            3,
+            5,
+            7,
+            9,
+            11,
+            13,
+            14,
+            16,
+            18,
+            20,
+            22,
+            23,
+            25,
+            27,
+            28,
+            29,
+            31,
+            32,
+            33,
+            34,
+            36,
+            37,
+            39,
+            40,
+            42,
+            43,
+            45,
+            47,
+            48,
+            51,
+            53,
+            54,
+            56,
+            57,
+            59,
+            60,
+            62,
+            63,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            83,
+            84,
+            85,
+            86,
         ]
         mental_false = [4, 8, 17, 24, 30, 35, 41, 46, 50, 55, 64]
         # Энэ асуултанд Үгүй гэж хариулсан бол оноо өгнө, нөгөө 2 нь хувьсагчийн нэрээрээ тодорхой
@@ -3530,17 +3957,16 @@ class PsychologicalTestResultExcelAPIView(
                     # Тийм үед оноо өгөх асуултуудыг яг response-оор нь л value-д утгыг нь оноож өгнө
                     datas[f'score_{question_number}'] = int(response)
 
-
         # Сүүлд нь хэрэглэгчийнхээ мэдээллийг өгөөд
         datas['first_name'] = user.first_name
         datas['last_name'] = user.last_name
         datas['register'] = user.register
 
-        return datas # Буцаана
+        return datas  # Буцаана
 
     def get(self, request):
         try:
-            adm = request.query_params.get('adm') # Элсэлтээр хайх
+            adm = request.query_params.get('adm')  # Элсэлтээр хайх
 
             test_id = request.query_params.get('testId')
             psychologicaltest_qs = PsychologicalTest.objects.filter(id=test_id)
@@ -3553,10 +3979,16 @@ class PsychologicalTestResultExcelAPIView(
             motivation_datas = list()
             prognoz_datas = list()
 
-            user_ids = AdmissionUserProfession.objects.all().values_list('user', flat=True)
+            user_ids = AdmissionUserProfession.objects.all().values_list(
+                'user', flat=True
+            )
             if adm:
-                prod_ids = AdmissionRegisterProfession.objects.filter(admission=adm).values_list('id', flat=True)
-                user_ids = AdmissionUserProfession.objects.filter(profession__in=prod_ids).values_list('user', flat=True)
+                prod_ids = AdmissionRegisterProfession.objects.filter(
+                    admission=adm
+                ).values_list('id', flat=True)
+                user_ids = AdmissionUserProfession.objects.filter(
+                    profession__in=prod_ids
+                ).values_list('user', flat=True)
 
             queryset = MentalUser.objects.filter(user__in=user_ids)
 
@@ -3564,26 +3996,39 @@ class PsychologicalTestResultExcelAPIView(
             mental_users = queryset.filter(challenge=test_id).select_related('user')
 
             # Сэтгэл гутралын асуултууд
-            depression_questions = set(psychologicaltest_qs.filter(
-                questions__question_number__in=[3, 5, 10, 13, 16, 17, 21]
-            ).values_list('questions__id', flat=True))
+            depression_questions = set(
+                psychologicaltest_qs.filter(
+                    questions__question_number__in=[3, 5, 10, 13, 16, 17, 21]
+                ).values_list('questions__id', flat=True)
+            )
 
             # Түгшүүрийн асуултууд
-            anxiety_questions = set(psychologicaltest_qs.filter(
-                questions__question_number__in=[2, 4, 7, 9, 15, 19, 20]
-            ).values_list('questions__id', flat=True))
+            anxiety_questions = set(
+                psychologicaltest_qs.filter(
+                    questions__question_number__in=[2, 4, 7, 9, 15, 19, 20]
+                ).values_list('questions__id', flat=True)
+            )
 
             # Стрессийн асуултууд
-            stress_questions = set(psychologicaltest_qs.filter(
-                questions__question_number__in=[1, 6, 8, 11, 12, 14, 18]
-            ).values_list('questions__id', flat=True))
+            stress_questions = set(
+                psychologicaltest_qs.filter(
+                    questions__question_number__in=[1, 6, 8, 11, 12, 14, 18]
+                ).values_list('questions__id', flat=True)
+            )
 
             # Бүх асуултын хариултуудыг нэг dict дотор key-д нь id-г нь өгөөд value-д нь obj-ын өгөөд авна
             # Энэ нь асуултуудаа ялгаж авхад хялбар бас хурдан
-            question_choices = PsychologicalQuestionChoices.objects.in_bulk(field_name='id')
+            question_choices = PsychologicalQuestionChoices.objects.in_bulk(
+                field_name='id'
+            )
 
             # user-үүдээ бас өмнөхтэй ижил format-аар авсан
-            elselt_users = {user.id: user for user in ElseltUser.objects.filter(id__in=mental_users.values_list('user_id', flat=True))}
+            elselt_users = {
+                user.id: user
+                for user in ElseltUser.objects.filter(
+                    id__in=mental_users.values_list('user_id', flat=True)
+                )
+            }
 
             # Нийт сорил өгсөн хэрэглэгчид дотроо loop гүйлгээд
             for user in mental_users:
@@ -3605,14 +4050,30 @@ class PsychologicalTestResultExcelAPIView(
                     type_question_4 = self.find_question_type(answer, '4')
                     # dass21-ийн асуултууд function ашиглах шаардлагагүй. Хариултууд нь boolean утгатай биш л байвал тэр нь
                     # dass21-т харьялагдах асуултууд гэсэн үг
-                    dass21_answers = {key: value for key, value in answer.items() if not isinstance(value, bool)}
+                    dass21_answers = {
+                        key: value
+                        for key, value in answer.items()
+                        if not isinstance(value, bool)
+                    }
 
                     # Үүнээс доошоо END хүртэл excel-ийн нийт гэсэн sheet-д хамаарагдах өгөгдлийн зохицуулалтууд явна
                     # Асуулга-2 буюу DASS21 -------------------------------------------------------------------------------------------------------------------->
                     # dass21-д харьялагдах асуултууд дунд түүний key-нь дээр ялгаж авсан асуултуудын id-тай таарвал тэр асуултуудын value-гийн нийлбэрийг авна
-                    total_depression_score = sum(int(question_choices[value].value) for key, value in dass21_answers.items() if int(key) in depression_questions)
-                    total_anxiety_score = sum(int(question_choices[value].value) for key, value in dass21_answers.items() if int(key) in anxiety_questions)
-                    total_stress_score = sum(int(question_choices[value].value) for key, value in dass21_answers.items() if int(key) in stress_questions)
+                    total_depression_score = sum(
+                        int(question_choices[value].value)
+                        for key, value in dass21_answers.items()
+                        if int(key) in depression_questions
+                    )
+                    total_anxiety_score = sum(
+                        int(question_choices[value].value)
+                        for key, value in dass21_answers.items()
+                        if int(key) in anxiety_questions
+                    )
+                    total_stress_score = sum(
+                        int(question_choices[value].value)
+                        for key, value in dass21_answers.items()
+                        if int(key) in stress_questions
+                    )
 
                     # Олж авсан онооны нийлбэрүүдээ user_data-д store хийнэ
                     user_data['depression_score'] = total_depression_score
@@ -3626,10 +4087,15 @@ class PsychologicalTestResultExcelAPIView(
                     labels = ['Хэвийн', 'Хөнгөн', 'Дунд зэрэг', 'Хүчтэй', 'Маш хүчтэй']
 
                     # classify_score function-ийг ашиглан мэдэж аваад user_data-д нэмнэ
-                    user_data['depression'] = self.classify_score(total_depression_score, depression_thresholds, labels)
-                    user_data['anxiety'] = self.classify_score(total_anxiety_score, anxiety_thresholds, labels)
-                    user_data['stress'] = self.classify_score(total_stress_score, stress_thresholds, labels)
-
+                    user_data['depression'] = self.classify_score(
+                        total_depression_score, depression_thresholds, labels
+                    )
+                    user_data['anxiety'] = self.classify_score(
+                        total_anxiety_score, anxiety_thresholds, labels
+                    )
+                    user_data['stress'] = self.classify_score(
+                        total_stress_score, stress_thresholds, labels
+                    )
 
                     # Асуулга-3
                     if type_question_3:
@@ -3638,28 +4104,51 @@ class PsychologicalTestResultExcelAPIView(
 
                         # Ийм dict-үүдийн key-тэй ижил question_number-тай асуултууд л оноо авна
                         # Оноо нь value-ууд
-                        knowledge_score_map = {4: 3.6, 17: 3.6, 26: 2.4, 28: 1.2, 42: 1.2}
+                        knowledge_score_map = {
+                            4: 3.6,
+                            17: 3.6,
+                            26: 2.4,
+                            28: 1.2,
+                            42: 1.2,
+                        }
                         skill_score_map = {9: 1, 31: 2, 33: 2, 43: 3, 48: 1, 49: 1}
                         diplom_score_map = {24: 2.5, 35: 1.5, 38: 1.5, 44: 1, 11: 3.5}
 
                         # Дээрх 3-н асуултуудын question_number-ийг нэгтгэнэ
-                        all_question_numbers = {**knowledge_score_map, **skill_score_map, **diplom_score_map}.keys()
+                        all_question_numbers = {
+                            **knowledge_score_map,
+                            **skill_score_map,
+                            **diplom_score_map,
+                        }.keys()
                         # Энэ харин бүх юмтай нь нэгтгэнэ
-                        all_score_questions = {**knowledge_score_map, **skill_score_map, **diplom_score_map}
+                        all_score_questions = {
+                            **knowledge_score_map,
+                            **skill_score_map,
+                            **diplom_score_map,
+                        }
 
                         # Бааз дээр хадгалагдаж байгаа оноо бүх Асуулга-3 ийн асуултууд
-                        all_questions_type_3 = PsychologicalTestQuestions.objects.filter(
-                            question__icontains='Асуулга-3',
-                            question_number__in=all_question_numbers
-                        ).in_bulk(field_name='id')
+                        all_questions_type_3 = (
+                            PsychologicalTestQuestions.objects.filter(
+                                question__icontains='Асуулга-3',
+                                question_number__in=all_question_numbers,
+                            ).in_bulk(field_name='id')
+                        )
 
                         # Оноотой асуултуудын question_number-ууд dict дотор байвал тохирох оноонуудын нийлбэрийг олно
                         knowledge_score = sum(
                             knowledge_score_map[question.question_number]
                             for key, question in all_questions_type_3.items()
-                            if str(key) in type_question_3_keys and (
-                                (question.question_number in {4, 17, 26} and type_question_3[f'{key}']) or
-                                (question.question_number in {28, 42} and not type_question_3[f'{key}'])
+                            if str(key) in type_question_3_keys
+                            and (
+                                (
+                                    question.question_number in {4, 17, 26}
+                                    and type_question_3[f'{key}']
+                                )
+                                or (
+                                    question.question_number in {28, 42}
+                                    and not type_question_3[f'{key}']
+                                )
                             )
                         )
                         # skill_score-ийн оноотой байх нөхцөл нь оноотой асуултууд нь бүгд Тийм байх үед учираас
@@ -3667,14 +4156,23 @@ class PsychologicalTestResultExcelAPIView(
                         skill_score = sum(
                             skill_score_map[question.question_number]
                             for key, question in all_questions_type_3.items()
-                            if str(key) in type_question_3_keys and question.question_number in skill_score_map and type_question_3[f'{key}']
+                            if str(key) in type_question_3_keys
+                            and question.question_number in skill_score_map
+                            and type_question_3[f'{key}']
                         )
                         diplom_score = sum(
                             diplom_score_map[question.question_number]
                             for key, question in all_questions_type_3.items()
-                            if str(key) in type_question_3_keys and (
-                                (question.question_number in {24, 35, 38, 44} and type_question_3[f'{key}']) or
-                                (question.question_number == 11 and not type_question_3[f'{key}'])
+                            if str(key) in type_question_3_keys
+                            and (
+                                (
+                                    question.question_number in {24, 35, 38, 44}
+                                    and type_question_3[f'{key}']
+                                )
+                                or (
+                                    question.question_number == 11
+                                    and not type_question_3[f'{key}']
+                                )
                             )
                         )
 
@@ -3690,36 +4188,124 @@ class PsychologicalTestResultExcelAPIView(
 
                         # Оноо авах question_number-уудтай асуултууд
                         # Нөхцөл нь л таарвар бүгд 1 оноотой учир dict байх шаардлагагүй
-                        true_false = [1, 6, 10, 12, 15, 19, 21, 26, 33, 38, 44, 49, 52, 58, 61]
+                        true_false = [
+                            1,
+                            6,
+                            10,
+                            12,
+                            15,
+                            19,
+                            21,
+                            26,
+                            33,
+                            38,
+                            44,
+                            49,
+                            52,
+                            58,
+                            61,
+                        ]
                         mental_true = [
-                            2, 3, 5, 7, 9, 11, 13, 14, 16, 18, 20, 22, 23, 25, 27, 28,
-                            29, 31, 32, 33, 34, 36, 37, 39, 40, 42, 43, 45, 47, 48, 51,
-                            53, 54, 56, 57, 59, 60, 62, 63, 65, 66, 67, 68, 69, 70, 71,
-                            72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86
+                            2,
+                            3,
+                            5,
+                            7,
+                            9,
+                            11,
+                            13,
+                            14,
+                            16,
+                            18,
+                            20,
+                            22,
+                            23,
+                            25,
+                            27,
+                            28,
+                            29,
+                            31,
+                            32,
+                            33,
+                            34,
+                            36,
+                            37,
+                            39,
+                            40,
+                            42,
+                            43,
+                            45,
+                            47,
+                            48,
+                            51,
+                            53,
+                            54,
+                            56,
+                            57,
+                            59,
+                            60,
+                            62,
+                            63,
+                            65,
+                            66,
+                            67,
+                            68,
+                            69,
+                            70,
+                            71,
+                            72,
+                            73,
+                            74,
+                            75,
+                            76,
+                            77,
+                            78,
+                            79,
+                            80,
+                            81,
+                            82,
+                            83,
+                            84,
+                            85,
+                            86,
                         ]
                         mental_false = [4, 8, 17, 24, 30, 35, 41, 46, 50, 55, 64]
 
                         # Дээрх 3-н асуултуудын question_number-ийг нэгтгэнэ
-                        all_question_numbers_type_4 = mental_true + mental_false + true_false
+                        all_question_numbers_type_4 = (
+                            mental_true + mental_false + true_false
+                        )
 
                         # Нэгтгэсэн question_number-уудаа ашиглан бааз дээр байгаа Асуулга-4-ийн бүх
                         # obj-уудыг id-тай нь харгалзуулcан нэг dict авна
-                        all_questions_type_4 = PsychologicalTestQuestions.objects.filter(
-                            question__icontains='Асуулга-4',
-                            question_number__in=all_question_numbers_type_4
-                        ).in_bulk(field_name='id')
+                        all_questions_type_4 = (
+                            PsychologicalTestQuestions.objects.filter(
+                                question__icontains='Асуулга-4',
+                                question_number__in=all_question_numbers_type_4,
+                            ).in_bulk(field_name='id')
+                        )
 
                         # Оноотой асуултуудын question_number-ууд dict дотор байвал тохирох оноонуудын нийлбэрийг олно
                         true_false_score = sum(
-                            1 for key, question in all_questions_type_4.items()
-                            if str(key) in type_question_4_keys and question.question_number in true_false and not type_question_4[f'{key}']
+                            1
+                            for key, question in all_questions_type_4.items()
+                            if str(key) in type_question_4_keys
+                            and question.question_number in true_false
+                            and not type_question_4[f'{key}']
                         )
                         # Бүгдэнд нь сайхан 1 гэсэн оноо өгөөл sum-ийн олчино
                         mental_score = sum(
-                            1 for key, question in all_questions_type_4.items()
-                            if str(key) in type_question_4_keys and (
-                                (question.question_number in mental_true and type_question_4[f'{key}']) or
-                                (question.question_number in mental_false and not type_question_4[f'{key}'])
+                            1
+                            for key, question in all_questions_type_4.items()
+                            if str(key) in type_question_4_keys
+                            and (
+                                (
+                                    question.question_number in mental_true
+                                    and type_question_4[f'{key}']
+                                )
+                                or (
+                                    question.question_number in mental_false
+                                    and not type_question_4[f'{key}']
+                                )
                             )
                         )
 
@@ -3730,7 +4316,9 @@ class PsychologicalTestResultExcelAPIView(
                         # classify_score function-ийг ашиглан шинж тэмдгийг мэдэж авна
                         overall_review_thresholds = [6, 13, 28, 16]
                         overall_labels = ['өндөр', 'сайн', 'дунд', 'муу']
-                        user_data['overall_review'] = self.classify_score(mental_score, overall_review_thresholds, overall_labels)
+                        user_data['overall_review'] = self.classify_score(
+                            mental_score, overall_review_thresholds, overall_labels
+                        )
                     # END ------------------------------------------------------------------------------------------------------------------------>
 
                     # Нэг бүрчилсэн өгөгдлүүдийг function-ууд шийднэ өгнө
@@ -3744,7 +4332,9 @@ class PsychologicalTestResultExcelAPIView(
                     dass21_data['stress'] = user_data['stress']
 
                     # Сурах сэдэл
-                    motivation_data = self.motivation(user_obj, type_question_3, all_score_questions)
+                    motivation_data = self.motivation(
+                        user_obj, type_question_3, all_score_questions
+                    )
                     motivation_data['knowledge_score'] = knowledge_score
                     motivation_data['skill_score'] = skill_score
                     motivation_data['diplom_score'] = diplom_score
@@ -3764,10 +4354,10 @@ class PsychologicalTestResultExcelAPIView(
 
             # Иймэрдүү хэлбэртэй датаг буцаана
             return_datas = {
-                'overall_datas':datas,
-                'dass21_datas':dass21_datas,
-                'motivation_datas':motivation_datas,
-                'prognoz_datas':prognoz_datas
+                'overall_datas': datas,
+                'dass21_datas': dass21_datas,
+                'motivation_datas': motivation_datas,
+                'prognoz_datas': prognoz_datas,
             }
         except Exception:
             traceback.print_exc()
@@ -3775,10 +4365,8 @@ class PsychologicalTestResultExcelAPIView(
         return request.send_data(return_datas)
 
 
-class PsychologicalTestResultExcelByScopeAPIView(
-    generics.GenericAPIView
-):
-    """ Сэтгэлзүйн шалгалтын үр дүн тайлан excel """
+class PsychologicalTestResultExcelByScopeAPIView(generics.GenericAPIView):
+    """Сэтгэлзүйн шалгалтын үр дүн тайлан excel"""
 
     # Оноо бүрд if нөхцөл ашиглахгүйн тулд function ашигласан
     def classify_score(self, score, thresholds, labels):
@@ -3793,9 +4381,15 @@ class PsychologicalTestResultExcelByScopeAPIView(
     # Асуулга ялгаж өгөх function
     def find_question_type(self, all_questions, type):
         # type-аас шалтгаалан Асуулга 3 эсвэл 4 гэсэн үг асуултын нэр дотор байвал тэр шүүсэн асуултуудаа аваад
-        question_type = PsychologicalTestQuestions.objects.filter(question__icontains=f'Асуулга-{type}')
+        question_type = PsychologicalTestQuestions.objects.filter(
+            question__icontains=f'Асуулга-{type}'
+        )
         # Хэрэглэгчийн хариулсан бүх асуулт дунд шүүсэн асуултуудтай ижил id-тай асуулт байвал тэднийг dict дотор багцлаад буцаана
-        return {str(question.id): all_questions[str(question.id)] for question in question_type if str(question.id) in all_questions}
+        return {
+            str(question.id): all_questions[str(question.id)]
+            for question in question_type
+            if str(question.id) in all_questions
+        }
 
     # DASS21 нэг бүрчилсэн өгөгдөл
     def dass21(self, user, questions):
@@ -3804,14 +4398,18 @@ class PsychologicalTestResultExcelByScopeAPIView(
         datas = {}
 
         # Нэг dict дотор key-нь асуултын id value-нь тухайн асуултын obj байхаар авна
-        questions_qs_dass21 = PsychologicalTestQuestions.objects.filter(id__in=question_ids).in_bulk(field_name='id')
+        questions_qs_dass21 = PsychologicalTestQuestions.objects.filter(
+            id__in=question_ids
+        ).in_bulk(field_name='id')
 
         # Асуултууд дотроо loop гүйлгээд ---> {1:QuestionObj(1)}
         for key, value in questions_qs_dass21.items():
             # Хэрэглэгчийн хариулсан асуултуудын id дунд questions_qs_dass21-ийн key-нь байвал
             if str(key) in question_ids:
                 # Тухайн асуултанд хариулсан хариултын id-аар PsychologicalQuestionChoices-модел-с шүүд obj-ийш авна
-                choice = PsychologicalQuestionChoices.objects.filter(id=questions[f'{key}']).first()
+                choice = PsychologicalQuestionChoices.objects.filter(
+                    id=questions[f'{key}']
+                ).first()
                 # Дараа нь буцаах дата дотроо тухайн асуултын question_number-ийг key болгоод
                 # value-д нь сонгосон хариултын value-г өгнө
                 datas[f'{value.question_number}'] = int(choice.value)
@@ -3821,7 +4419,7 @@ class PsychologicalTestResultExcelByScopeAPIView(
         datas['last_name'] = user.last_name
         datas['register'] = user.register_num
 
-        return datas # Буцаана
+        return datas  # Буцаана
 
     # Сурах сэдэл нэг бүрчилсэн өгөгдөл
     def motivation(self, user, questions, all_score_questions):
@@ -3830,7 +4428,9 @@ class PsychologicalTestResultExcelByScopeAPIView(
         datas = {}
 
         # Нэг dict дотор key-нь асуултын id value-нь тухайн асуултын obj байхаар авна
-        question_qs_dict = PsychologicalTestQuestions.objects.filter(id__in=question_ids).in_bulk(field_name='id')
+        question_qs_dict = PsychologicalTestQuestions.objects.filter(
+            id__in=question_ids
+        ).in_bulk(field_name='id')
 
         # Ийм question_number-тай асуултанд тийм гэж хариулсан бол 1 оноо
         group_true = {4, 17, 26, 9, 31, 33, 43, 48, 49, 24, 35, 38, 44}
@@ -3867,17 +4467,21 @@ class PsychologicalTestResultExcelByScopeAPIView(
                     # Асуултанд хариулсан байдлаас шалтгаалан оноог өгнө
                     if question_number in group_true:
                         # group_true дотор байгаа асуултан Тийм гэж хариулсан бол 1 оноо өгнө гэх мэт
-                        datas[f'score_{question_number}'] = score if response is True else 0
+                        datas[f'score_{question_number}'] = (
+                            score if response is True else 0
+                        )
                     elif question_number in group_false:
-                        datas[f'score_{question_number}'] = score if response is False else 0
-                    else: # function-ээ дуудах үед зөв датагаа өгсөн болохоор else-рүү ерөнхийдөө орохгүй
+                        datas[f'score_{question_number}'] = (
+                            score if response is False else 0
+                        )
+                    else:  # function-ээ дуудах үед зөв датагаа өгсөн болохоор else-рүү ерөнхийдөө орохгүй
                         pass
         # Сүүлд нь хэрэглэгчийнхээ мэдээллийг өгөөд
         datas['first_name'] = user.first_name
         datas['last_name'] = user.last_name
         datas['register'] = user.register_num
 
-        return datas # Буцаана
+        return datas  # Буцаана
 
     # Прогноз нэг бүрчилсэн өгөгдөл
     def prognoz(self, user, questions):
@@ -3886,14 +4490,73 @@ class PsychologicalTestResultExcelByScopeAPIView(
         datas = {}
 
         # Нэг dict дотор key-нь асуултын id value-нь тухайн асуултын obj байхаар авна
-        questions_qs_prognoz = PsychologicalTestQuestions.objects.filter(id__in=question_ids).in_bulk(field_name='id')
+        questions_qs_prognoz = PsychologicalTestQuestions.objects.filter(
+            id__in=question_ids
+        ).in_bulk(field_name='id')
 
         # Ийм question_number-тай асуултууд яаж хариулснаас шалтгаалан оноотой байна
         mental_true = [
-            2, 3, 5, 7, 9, 11, 13, 14, 16, 18, 20, 22, 23, 25, 27, 28,
-            29, 31, 32, 33, 34, 36, 37, 39, 40, 42, 43, 45, 47, 48, 51,
-            53, 54, 56, 57, 59, 60, 62, 63, 65, 66, 67, 68, 69, 70, 71,
-            72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86
+            2,
+            3,
+            5,
+            7,
+            9,
+            11,
+            13,
+            14,
+            16,
+            18,
+            20,
+            22,
+            23,
+            25,
+            27,
+            28,
+            29,
+            31,
+            32,
+            33,
+            34,
+            36,
+            37,
+            39,
+            40,
+            42,
+            43,
+            45,
+            47,
+            48,
+            51,
+            53,
+            54,
+            56,
+            57,
+            59,
+            60,
+            62,
+            63,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            83,
+            84,
+            85,
+            86,
         ]
 
         mental_false = [4, 8, 17, 24, 30, 35, 41, 46, 50, 55, 64]
@@ -3937,12 +4600,14 @@ class PsychologicalTestResultExcelByScopeAPIView(
         datas['last_name'] = user.last_name
         datas['register'] = user.register_num
 
-        return datas # Буцаана
+        return datas  # Буцаана
 
     def get(self, request):
         scope_kind = request.query_params.get('scope')
         scope_kind = int(scope_kind)
-        is_scope_kind_exists = any(scope_kind == choice[0] for choice in PsychologicalTest.SCOPE_CHOICES)
+        is_scope_kind_exists = any(
+            scope_kind == choice[0] for choice in PsychologicalTest.SCOPE_CHOICES
+        )
 
         if not is_scope_kind_exists:
             return request.send_data(None)
@@ -3957,33 +4622,46 @@ class PsychologicalTestResultExcelByScopeAPIView(
         motivation_datas = list()
         prognoz_datas = list()
 
-        user_ids = Student.objects.filter(status__name__icontains='Суралцаж буй',).values_list('id', flat=True)
+        user_ids = Student.objects.filter(
+            status__name__icontains='Суралцаж буй',
+        ).values_list('id', flat=True)
         queryset = MentalStudent.objects.filter(user__in=user_ids)
 
         # Шалгалт өгсөн элсэлгчдийн шалгалтын хариу
         mental_users = queryset.filter(challenge=test_id).select_related('user')
 
         # Сэтгэл гутралын асуултууд
-        depression_questions = set(psychologicaltest_qs.filter(
-            questions__question_number__in=[3, 5, 10, 13, 16, 17, 21]
-        ).values_list('questions__id', flat=True))
+        depression_questions = set(
+            psychologicaltest_qs.filter(
+                questions__question_number__in=[3, 5, 10, 13, 16, 17, 21]
+            ).values_list('questions__id', flat=True)
+        )
 
         # Түгшүүрийн асуултууд
-        anxiety_questions = set(psychologicaltest_qs.filter(
-            questions__question_number__in=[2, 4, 7, 9, 15, 19, 20]
-        ).values_list('questions__id', flat=True))
+        anxiety_questions = set(
+            psychologicaltest_qs.filter(
+                questions__question_number__in=[2, 4, 7, 9, 15, 19, 20]
+            ).values_list('questions__id', flat=True)
+        )
 
         # Стрессийн асуултууд
-        stress_questions = set(psychologicaltest_qs.filter(
-            questions__question_number__in=[1, 6, 8, 11, 12, 14, 18]
-        ).values_list('questions__id', flat=True))
+        stress_questions = set(
+            psychologicaltest_qs.filter(
+                questions__question_number__in=[1, 6, 8, 11, 12, 14, 18]
+            ).values_list('questions__id', flat=True)
+        )
 
         # Бүх асуултын хариултуудыг нэг dict дотор key-д нь id-г нь өгөөд value-д нь obj-ын өгөөд авна
         # Энэ нь асуултуудаа ялгаж авхад хялбар бас хурдан
         question_choices = PsychologicalQuestionChoices.objects.in_bulk(field_name='id')
 
         # user-үүдээ бас өмнөхтэй ижил format-аар авсан
-        elselt_users = {user.id: user for user in Student.objects.filter(id__in=mental_users.values_list('user_id', flat=True))}
+        elselt_users = {
+            user.id: user
+            for user in Student.objects.filter(
+                id__in=mental_users.values_list('user_id', flat=True)
+            )
+        }
 
         # Нийт сорил өгсөн хэрэглэгчид дотроо loop гүйлгээд
         for user in mental_users:
@@ -4005,14 +4683,30 @@ class PsychologicalTestResultExcelByScopeAPIView(
                 type_question_4 = self.find_question_type(answer, '4')
                 # dass21-ийн асуултууд function ашиглах шаардлагагүй. Хариултууд нь boolean утгатай биш л байвал тэр нь
                 # dass21-т харьялагдах асуултууд гэсэн үг
-                dass21_answers = {key: value for key, value in answer.items() if not isinstance(value, bool)}
+                dass21_answers = {
+                    key: value
+                    for key, value in answer.items()
+                    if not isinstance(value, bool)
+                }
 
                 # Үүнээс доошоо END хүртэл excel-ийн нийт гэсэн sheet-д хамаарагдах өгөгдлийн зохицуулалтууд явна
                 # Асуулга-2 буюу DASS21 -------------------------------------------------------------------------------------------------------------------->
                 # dass21-д харьялагдах асуултууд дунд түүний key-нь дээр ялгаж авсан асуултуудын id-тай таарвал тэр асуултуудын value-гийн нийлбэрийг авна
-                total_depression_score = sum(int(question_choices[value].value) for key, value in dass21_answers.items() if int(key) in depression_questions)
-                total_anxiety_score = sum(int(question_choices[value].value) for key, value in dass21_answers.items() if int(key) in anxiety_questions)
-                total_stress_score = sum(int(question_choices[value].value) for key, value in dass21_answers.items() if int(key) in stress_questions)
+                total_depression_score = sum(
+                    int(question_choices[value].value)
+                    for key, value in dass21_answers.items()
+                    if int(key) in depression_questions
+                )
+                total_anxiety_score = sum(
+                    int(question_choices[value].value)
+                    for key, value in dass21_answers.items()
+                    if int(key) in anxiety_questions
+                )
+                total_stress_score = sum(
+                    int(question_choices[value].value)
+                    for key, value in dass21_answers.items()
+                    if int(key) in stress_questions
+                )
 
                 # Олж авсан онооны нийлбэрүүдээ user_data-д store хийнэ
                 user_data['depression_score'] = total_depression_score
@@ -4026,9 +4720,15 @@ class PsychologicalTestResultExcelByScopeAPIView(
                 labels = ['Хэвийн', 'Хөнгөн', 'Дунд зэрэг', 'Хүчтэй', 'Маш хүчтэй']
 
                 # classify_score function-ийг ашиглан мэдэж аваад user_data-д нэмнэ
-                user_data['depression'] = self.classify_score(total_depression_score, depression_thresholds, labels)
-                user_data['anxiety'] = self.classify_score(total_anxiety_score, anxiety_thresholds, labels)
-                user_data['stress'] = self.classify_score(total_stress_score, stress_thresholds, labels)
+                user_data['depression'] = self.classify_score(
+                    total_depression_score, depression_thresholds, labels
+                )
+                user_data['anxiety'] = self.classify_score(
+                    total_anxiety_score, anxiety_thresholds, labels
+                )
+                user_data['stress'] = self.classify_score(
+                    total_stress_score, stress_thresholds, labels
+                )
 
                 all_score_questions = None
                 knowledge_score = None
@@ -4049,23 +4749,38 @@ class PsychologicalTestResultExcelByScopeAPIView(
                     diplom_score_map = {24: 2.5, 35: 1.5, 38: 1.5, 44: 1, 11: 3.5}
 
                     # Дээрх 3-н асуултуудын question_number-ийг нэгтгэнэ
-                    all_question_numbers = {**knowledge_score_map, **skill_score_map, **diplom_score_map}.keys()
+                    all_question_numbers = {
+                        **knowledge_score_map,
+                        **skill_score_map,
+                        **diplom_score_map,
+                    }.keys()
                     # Энэ харин бүх юмтай нь нэгтгэнэ
-                    all_score_questions = {**knowledge_score_map, **skill_score_map, **diplom_score_map}
+                    all_score_questions = {
+                        **knowledge_score_map,
+                        **skill_score_map,
+                        **diplom_score_map,
+                    }
 
                     # Бааз дээр хадгалагдаж байгаа оноо бүх Асуулга-3 ийн асуултууд
                     all_questions_type_3 = PsychologicalTestQuestions.objects.filter(
                         question__icontains='Асуулга-3',
-                        question_number__in=all_question_numbers
+                        question_number__in=all_question_numbers,
                     ).in_bulk(field_name='id')
 
                     # Оноотой асуултуудын question_number-ууд dict дотор байвал тохирох оноонуудын нийлбэрийг олно
                     knowledge_score = sum(
                         knowledge_score_map[question.question_number]
                         for key, question in all_questions_type_3.items()
-                        if str(key) in type_question_3_keys and (
-                            (question.question_number in {4, 17, 26} and type_question_3[f'{key}']) or
-                            (question.question_number in {28, 42} and not type_question_3[f'{key}'])
+                        if str(key) in type_question_3_keys
+                        and (
+                            (
+                                question.question_number in {4, 17, 26}
+                                and type_question_3[f'{key}']
+                            )
+                            or (
+                                question.question_number in {28, 42}
+                                and not type_question_3[f'{key}']
+                            )
                         )
                     )
                     # skill_score-ийн оноотой байх нөхцөл нь оноотой асуултууд нь бүгд Тийм байх үед учираас
@@ -4073,14 +4788,23 @@ class PsychologicalTestResultExcelByScopeAPIView(
                     skill_score = sum(
                         skill_score_map[question.question_number]
                         for key, question in all_questions_type_3.items()
-                        if str(key) in type_question_3_keys and question.question_number in skill_score_map and type_question_3[f'{key}']
+                        if str(key) in type_question_3_keys
+                        and question.question_number in skill_score_map
+                        and type_question_3[f'{key}']
                     )
                     diplom_score = sum(
                         diplom_score_map[question.question_number]
                         for key, question in all_questions_type_3.items()
-                        if str(key) in type_question_3_keys and (
-                            (question.question_number in {24, 35, 38, 44} and type_question_3[f'{key}']) or
-                            (question.question_number == 11 and not type_question_3[f'{key}'])
+                        if str(key) in type_question_3_keys
+                        and (
+                            (
+                                question.question_number in {24, 35, 38, 44}
+                                and type_question_3[f'{key}']
+                            )
+                            or (
+                                question.question_number == 11
+                                and not type_question_3[f'{key}']
+                            )
                         )
                     )
 
@@ -4096,36 +4820,122 @@ class PsychologicalTestResultExcelByScopeAPIView(
 
                     # Оноо авах question_number-уудтай асуултууд
                     # Нөхцөл нь л таарвар бүгд 1 оноотой учир dict байх шаардлагагүй
-                    true_false = [1, 6, 10, 12, 15, 19, 21, 26, 33, 38, 44, 49, 52, 58, 61]
+                    true_false = [
+                        1,
+                        6,
+                        10,
+                        12,
+                        15,
+                        19,
+                        21,
+                        26,
+                        33,
+                        38,
+                        44,
+                        49,
+                        52,
+                        58,
+                        61,
+                    ]
                     mental_true = [
-                        2, 3, 5, 7, 9, 11, 13, 14, 16, 18, 20, 22, 23, 25, 27, 28,
-                        29, 31, 32, 33, 34, 36, 37, 39, 40, 42, 43, 45, 47, 48, 51,
-                        53, 54, 56, 57, 59, 60, 62, 63, 65, 66, 67, 68, 69, 70, 71,
-                        72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86
+                        2,
+                        3,
+                        5,
+                        7,
+                        9,
+                        11,
+                        13,
+                        14,
+                        16,
+                        18,
+                        20,
+                        22,
+                        23,
+                        25,
+                        27,
+                        28,
+                        29,
+                        31,
+                        32,
+                        33,
+                        34,
+                        36,
+                        37,
+                        39,
+                        40,
+                        42,
+                        43,
+                        45,
+                        47,
+                        48,
+                        51,
+                        53,
+                        54,
+                        56,
+                        57,
+                        59,
+                        60,
+                        62,
+                        63,
+                        65,
+                        66,
+                        67,
+                        68,
+                        69,
+                        70,
+                        71,
+                        72,
+                        73,
+                        74,
+                        75,
+                        76,
+                        77,
+                        78,
+                        79,
+                        80,
+                        81,
+                        82,
+                        83,
+                        84,
+                        85,
+                        86,
                     ]
                     mental_false = [4, 8, 17, 24, 30, 35, 41, 46, 50, 55, 64]
 
                     # Дээрх 3-н асуултуудын question_number-ийг нэгтгэнэ
-                    all_question_numbers_type_4 = mental_true + mental_false + true_false
+                    all_question_numbers_type_4 = (
+                        mental_true + mental_false + true_false
+                    )
 
                     # Нэгтгэсэн question_number-уудаа ашиглан бааз дээр байгаа Асуулга-4-ийн бүх
                     # obj-уудыг id-тай нь харгалзуулcан нэг dict авна
                     all_questions_type_4 = PsychologicalTestQuestions.objects.filter(
                         question__icontains='Асуулга-4',
-                        question_number__in=all_question_numbers_type_4
+                        question_number__in=all_question_numbers_type_4,
                     ).in_bulk(field_name='id')
 
                     # Оноотой асуултуудын question_number-ууд dict дотор байвал тохирох оноонуудын нийлбэрийг олно
                     true_false_score = sum(
-                        1 for key, question in all_questions_type_4.items()
-                        if str(key) in type_question_4_keys and question.question_number in true_false and not type_question_4[f'{key}']
+                        1
+                        for key, question in all_questions_type_4.items()
+                        if str(key) in type_question_4_keys
+                        and question.question_number in true_false
+                        and not type_question_4[f'{key}']
                     )
                     # Бүгдэнд нь сайхан 1 гэсэн оноо өгөөл sum-ийн олчино
                     mental_score = sum(
-                        1 for key, question in all_questions_type_4.items()
-                        if str(key) in type_question_4_keys and (
-                            (question.question_number in mental_true and type_question_4[f'{key}']) or
-                            (question.question_number in mental_false and not type_question_4[f'{key}'])
+                        1
+                        for key, question in all_questions_type_4.items()
+                        if str(key) in type_question_4_keys
+                        and (
+                            (
+                                question.question_number in mental_true
+                                and type_question_4[f'{key}']
+                            )
+                            or (
+                                question.question_number in mental_false
+                                and not type_question_4[f'{key}']
+                            )
                         )
                     )
 
@@ -4136,7 +4946,9 @@ class PsychologicalTestResultExcelByScopeAPIView(
                     # classify_score function-ийг ашиглан шинж тэмдгийг мэдэж авна
                     overall_review_thresholds = [6, 13, 28, 16]
                     overall_labels = ['өндөр', 'сайн', 'дунд', 'муу']
-                    user_data['overall_review'] = self.classify_score(mental_score, overall_review_thresholds, overall_labels)
+                    user_data['overall_review'] = self.classify_score(
+                        mental_score, overall_review_thresholds, overall_labels
+                    )
                 # END ------------------------------------------------------------------------------------------------------------------------>
 
                 # Нэг бүрчилсэн өгөгдлүүдийг function-ууд шийднэ өгнө
@@ -4150,7 +4962,9 @@ class PsychologicalTestResultExcelByScopeAPIView(
                 dass21_data['stress'] = user_data['stress']
 
                 # Сурах сэдэл
-                motivation_data = self.motivation(user_obj, type_question_3, all_score_questions)
+                motivation_data = self.motivation(
+                    user_obj, type_question_3, all_score_questions
+                )
                 motivation_data['knowledge_score'] = knowledge_score
                 motivation_data['skill_score'] = skill_score
                 motivation_data['diplom_score'] = diplom_score
@@ -4170,19 +4984,16 @@ class PsychologicalTestResultExcelByScopeAPIView(
 
         # Иймэрдүү хэлбэртэй датаг буцаана
         return_datas = {
-            'overall_datas':datas,
-            'dass21_datas':dass21_datas,
-            'motivation_datas':motivation_datas,
-            'prognoz_datas':prognoz_datas
+            'overall_datas': datas,
+            'dass21_datas': dass21_datas,
+            'motivation_datas': motivation_datas,
+            'prognoz_datas': prognoz_datas,
         }
 
         return request.send_data(return_datas)
 
 
-class IQTestResultExcelAPIView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin
-):
+class IQTestResultExcelAPIView(generics.GenericAPIView, mixins.ListModelMixin):
     serializer_class = PsychologicalTestQuestionsSerializer
     """ IQ Test үр дүн тайлан excel """
 
@@ -4201,11 +5012,22 @@ class IQTestResultExcelAPIView(
             user_ids = AdmissionUserProfession.objects.values_list('user', flat=True)
 
             if adm:
-                prof_ids = AdmissionRegisterProfession.objects.filter(admission=adm).values_list('id', flat=True)
-                user_ids = AdmissionUserProfession.objects.filter(profession__in=prof_ids).values_list('user', flat=True)
+                prof_ids = AdmissionRegisterProfession.objects.filter(
+                    admission=adm
+                ).values_list('id', flat=True)
+                user_ids = AdmissionUserProfession.objects.filter(
+                    profession__in=prof_ids
+                ).values_list('user', flat=True)
             queryset_mental = MentalUser.objects.filter(user__in=user_ids)
-            mental_users = queryset_mental.filter(challenge=test_id, answer__isnull=False).select_related('user')
-            elselt_users = {user.id: user for user in ElseltUser.objects.filter(id__in=mental_users.values_list('user_id', flat=True))}
+            mental_users = queryset_mental.filter(
+                challenge=test_id, answer__isnull=False
+            ).select_related('user')
+            elselt_users = {
+                user.id: user
+                for user in ElseltUser.objects.filter(
+                    id__in=mental_users.values_list('user_id', flat=True)
+                )
+            }
 
             # Шалгалт өгсөн хүн бүр
             for user in mental_users:
@@ -4214,7 +5036,7 @@ class IQTestResultExcelAPIView(
                     'last_name': '',
                     'register': '',
                     'scores': [],
-                    'total_score': 0
+                    'total_score': 0,
                 }
 
                 user_obj = elselt_users[user.user.id]
@@ -4233,6 +5055,7 @@ class IQTestResultExcelAPIView(
                     question_id, choice_id = pair.split(':')
                     question_ids.append(question_id.strip().strip("'"))
                     chosen_choices.append(choice_id.strip().strip("'"))
+
                 def convert_to_int(value):
                     if value == 'True':
                         return 1
@@ -4240,18 +5063,23 @@ class IQTestResultExcelAPIView(
                         return 0
                     else:
                         return int(value)
+
                 question_ids = list(map(int, question_ids))
                 chosen_choices = list(map(convert_to_int, chosen_choices))
 
                 # TODO Энэ давталт доторх код л удаж байгаа шалтгаан байх
                 for question_id, choice_id in zip(question_ids, chosen_choices):
                     # TODO Хүүхэд бүрээр сорилын асуултыг авах шаардлагагүй байх 1 сорилын асуултууд хүүхэд бүр дээр өөрчлөгдөхгүй учраас
-                    queryset = PsychologicalTestQuestions.objects.filter(id=question_id).first()
+                    queryset = PsychologicalTestQuestions.objects.filter(
+                        id=question_id
+                    ).first()
                     if queryset:
 
                         # Хариулт зөв үгүйг шалгах
                         # TODO Шалгалтын асуулт хариулт бүрийг нэг л авчихвал энэ for дотор хүүхэд бүрийг тоогоор бааз руу ачааллах хурд сайжрах байх
-                        choice = PsychologicalQuestionChoices.objects.filter(id=choice_id).first()
+                        choice = PsychologicalQuestionChoices.objects.filter(
+                            id=choice_id
+                        ).first()
                         if choice:
                             score = queryset.score if choice.is_correct else 0
 
@@ -4259,25 +5087,19 @@ class IQTestResultExcelAPIView(
                             user_data['scores'].append(int(score))
                             user_data['total_score'] += score
                 big_data.append(user_data)
-            return_data = {
-                'question':question,
-                'user_data':big_data
-            }
+            return_data = {'question': question, 'user_data': big_data}
         except Exception:
             traceback.print_exc()
             return request.send_error('ERR_002')
         return request.send_data(return_data)
 
 
-class IQTestResultExcelByScopeAPIView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin
-):
+class IQTestResultExcelByScopeAPIView(generics.GenericAPIView, mixins.ListModelMixin):
     serializer_class = PsychologicalTestQuestionsSerializer
     """ IQ Test үр дүн тайлан excel. By scope """
 
     @staticmethod
-    def get_scope_users(scope_kind,test_id):
+    def get_scope_users(scope_kind, test_id):
         scope_users_qs = None
 
         if scope_kind == PsychologicalTest.SCOPE_STUDENTS:
@@ -4285,7 +5107,7 @@ class IQTestResultExcelByScopeAPIView(
                 status__name__icontains='Суралцаж буй',
                 mentalstudent__isnull=False,
                 mentalstudent__answer__isnull=False,
-                mentalstudent__challenge=test_id
+                mentalstudent__challenge=test_id,
             )
 
             scope_users_qs = scope_users_qs.annotate(
@@ -4294,10 +5116,7 @@ class IQTestResultExcelByScopeAPIView(
             )
 
             scope_users_qs = scope_users_qs.values(
-                'first_name',
-                'last_name',
-                'register',
-                'answer'
+                'first_name', 'last_name', 'register', 'answer'
             )
 
         return scope_users_qs
@@ -4306,7 +5125,9 @@ class IQTestResultExcelByScopeAPIView(
         try:
             scope_kind = request.query_params.get('scope')
             scope_kind = int(scope_kind)
-            is_scope_kind_exists = any(scope_kind == choice[0] for choice in PsychologicalTest.SCOPE_CHOICES)
+            is_scope_kind_exists = any(
+                scope_kind == choice[0] for choice in PsychologicalTest.SCOPE_CHOICES
+            )
 
             if not is_scope_kind_exists:
                 return request.send_data(None)
@@ -4316,7 +5137,7 @@ class IQTestResultExcelByScopeAPIView(
 
             if not test_obj:
                 return request.send_data(None)
-            mental_users = self.get_scope_users(scope_kind,test_id)
+            mental_users = self.get_scope_users(scope_kind, test_id)
 
             if not mental_users:
                 return request.send_data(None)
@@ -4329,7 +5150,7 @@ class IQTestResultExcelByScopeAPIView(
                     'last_name': '',
                     'register': '',
                     'scores': [],
-                    'total_score': 0
+                    'total_score': 0,
                 }
 
                 user_data['first_name'] = user.get('first_name')
@@ -4356,15 +5177,20 @@ class IQTestResultExcelByScopeAPIView(
                         return 0
                     else:
                         return int(value)
+
                 question_ids = list(map(int, question_ids))
                 chosen_choices = list(map(convert_to_int, chosen_choices))
 
                 for question_id, choice_id in zip(question_ids, chosen_choices):
-                    queryset = PsychologicalTestQuestions.objects.filter(id=question_id).first()
+                    queryset = PsychologicalTestQuestions.objects.filter(
+                        id=question_id
+                    ).first()
 
                     if queryset:
                         # Хариулт зөв үгүйг шалгах
-                        choice = PsychologicalQuestionChoices.objects.filter(id=choice_id).first()
+                        choice = PsychologicalQuestionChoices.objects.filter(
+                            id=choice_id
+                        ).first()
 
                         if choice:
                             score = queryset.score if choice.is_correct else 0
@@ -4375,10 +5201,7 @@ class IQTestResultExcelByScopeAPIView(
                 big_data.append(user_data)
             question_count = test_obj.questions.count()
 
-            return_data = {
-                'question':question_count,
-                'user_data':big_data
-            }
+            return_data = {'question': question_count, 'user_data': big_data}
         except Exception:
             traceback.print_exc()
             return request.send_error('ERR_002')
@@ -4387,11 +5210,8 @@ class IQTestResultExcelByScopeAPIView(
 
 
 @permission_classes([IsAuthenticated])
-class QuestionsListAPIView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin
-):
-    """ Шалгалт үүсгэхдээ асуулт сонгох хэсэг """
+class QuestionsListAPIView(generics.GenericAPIView, mixins.ListModelMixin):
+    """Шалгалт үүсгэхдээ асуулт сонгох хэсэг"""
 
     queryset = ChallengeQuestions.objects.all()
     serializer_class = ChallengeQuestionListSerializer
@@ -4435,10 +5255,8 @@ class QuestionsListAPIView(
 
 
 @permission_classes([IsAuthenticated])
-class ChallengeSendAPIView(
-    generics.GenericAPIView
-):
-    """ Шалгалтын материал батлуулах хүсэлт илгээх """
+class ChallengeSendAPIView(generics.GenericAPIView):
+    """Шалгалтын материал батлуулах хүсэлт илгээх"""
 
     def get(self, request, pk=None):
 
@@ -4451,13 +5269,9 @@ class ChallengeSendAPIView(
         return request.send_info('INF_019')
 
 
-
 @permission_classes([IsAuthenticated])
-class ChallengeApprovePIView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin
-):
-    """ ХБА батлах шалгалтын хүсэлтүүд """
+class ChallengeApprovePIView(generics.GenericAPIView, mixins.ListModelMixin):
+    """ХБА батлах шалгалтын хүсэлтүүд"""
 
     queryset = Challenge.objects.all()
     serializer_class = ChallengeListSerializer
@@ -4517,10 +5331,7 @@ class ChallengeApprovePIView(
 
         with transaction.atomic():
 
-            qs.update(
-                send_type=send_type,
-                comment=comment
-            )
+            qs.update(send_type=send_type, comment=comment)
 
         return request.send_info('INF_018')
 
@@ -4531,7 +5342,7 @@ class StudentHomeworkListAPIView(
     mixins.DestroyModelMixin,
     mixins.UpdateModelMixin,
     generics.GenericAPIView,
-    mixins.RetrieveModelMixin
+    mixins.RetrieveModelMixin,
 ):
 
     queryset = Lesson_assignment_student.objects.all().order_by('created_at')
@@ -4567,7 +5378,7 @@ class StudentHomeworkListAPIView(
         data['status'] = Lesson_assignment_student.CHECKED
 
         try:
-            """ Нэгээр дүгнэхэд """
+            """Нэгээр дүгнэхэд"""
             serializer = self.get_serializer(instance, data=data)
 
             if serializer.is_valid(raise_exception=False):
@@ -4583,7 +5394,6 @@ class StudentHomeworkListAPIView(
         return request.send_info("INF_002")
 
 
-
 @permission_classes([IsAuthenticated])
 class StudentHomeworkMultiEditAPIView(
     mixins.UpdateModelMixin,
@@ -4594,7 +5404,7 @@ class StudentHomeworkMultiEditAPIView(
     serializer_class = LessonAssignmentAssigmentSerializer
 
     def put(self, request):
-        """ Даалгаварт олноор үнэлгээ өгөхөд """
+        """Даалгаварт олноор үнэлгээ өгөхөд"""
 
         data = request.data
 
@@ -4606,8 +5416,10 @@ class StudentHomeworkMultiEditAPIView(
 
         try:
             if students and len(students) > 0:
-                """ Олноор дүгнэхэд """
-                student_assignment_qs = Lesson_assignment_student.objects.filter(student__in=students, assignment=assignment)
+                """Олноор дүгнэхэд"""
+                student_assignment_qs = Lesson_assignment_student.objects.filter(
+                    student__in=students, assignment=assignment
+                )
 
                 if student_assignment_qs:
                     for student_assignment in student_assignment_qs:
@@ -4616,7 +5428,9 @@ class StudentHomeworkMultiEditAPIView(
                         all_update_datas.append(student_assignment)
 
                 if len(all_update_datas) > 0:
-                    Lesson_assignment_student.objects.bulk_update(all_update_datas, ['score', 'status'])
+                    Lesson_assignment_student.objects.bulk_update(
+                        all_update_datas, ['score', 'status']
+                    )
 
         except Exception as e:
             print(e)
@@ -4647,26 +5461,32 @@ class HomeworkStudentsListAPIView(
 
         self.queryset = self.queryset.filter(
             assignment__lesson_material__lesson=lesson,
-            assignment__lesson_material__teacher=teacher.id
+            assignment__lesson_material__teacher=teacher.id,
         )
 
-        lesson_data = get_lesson_choice_student(lesson, teacher.id, '', lesson_year, lesson_season)
+        lesson_data = get_lesson_choice_student(
+            lesson, teacher.id, '', lesson_year, lesson_season
+        )
 
         if assignment:
             filters['assignment'] = assignment
 
         students = (
-            Student
-            .objects
-            .filter(
-                id__in=lesson_data
-            )
+            Student.objects.filter(id__in=lesson_data)
             .annotate(
                 unelgee=Subquery(
-                    Lesson_assignment_student.objects.filter(student=OuterRef('id'), assignment__lesson_material__lesson=lesson, **filters).values('score')[:1]
+                    Lesson_assignment_student.objects.filter(
+                        student=OuterRef('id'),
+                        assignment__lesson_material__lesson=lesson,
+                        **filters,
+                    ).values('score')[:1]
                 ),
                 homework_status=Subquery(
-                    Lesson_assignment_student.objects.filter(student=OuterRef('id'), assignment__lesson_material__lesson=lesson, **filters).values('status')[:1]
+                    Lesson_assignment_student.objects.filter(
+                        student=OuterRef('id'),
+                        assignment__lesson_material__lesson=lesson,
+                        **filters,
+                    ).values('status')[:1]
                 ),
             )
             .values()
@@ -4674,33 +5494,52 @@ class HomeworkStudentsListAPIView(
 
         assignment_list = self.list(request).data
 
-        return request.send_data({
-            'students': list(students),
-            'assignment': assignment_list
-        })
+        return request.send_data(
+            {'students': list(students), 'assignment': assignment_list}
+        )
 
 
 @permission_classes([IsAuthenticated])
 class LessonsTeacher(
     generics.GenericAPIView,
 ):
-    ''' Тухайн багшийн зааж байгаа хичээл  '''
+    '''Тухайн багшийн зааж байгаа хичээл'''
 
     def get(self, request, pk=None):
         stype = request.query_params.get('stype')
 
         user = request.user
 
-        teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
+        teacher = get_object_or_404(
+            Teachers, user_id=user, action_status=Teachers.APPROVED
+        )
 
         year, season = get_active_year_season()
 
-        lesson_ids = TimeTable.objects.filter(lesson_year=year, lesson_season=season, teacher=teacher).values_list('lesson', flat=True).distinct('lesson')
+        lesson_ids = (
+            TimeTable.objects.filter(
+                lesson_year=year, lesson_season=season, teacher=teacher
+            )
+            .values_list('lesson', flat=True)
+            .distinct('lesson')
+        )
 
         if stype == 'one':
-            sort_list = LessonStandart.objects.filter(id__in=lesson_ids).values('id', 'name').order_by('name')
+            sort_list = (
+                LessonStandart.objects.filter(id__in=lesson_ids)
+                .values('id', 'name')
+                .order_by('name')
+            )
         else:
-            all_list = LessonStandart.objects.filter(id__in=lesson_ids).values('id', 'name', 'code', 'category__category_name', 'definition', 'updated_at', 'kredit')
+            all_list = LessonStandart.objects.filter(id__in=lesson_ids).values(
+                'id',
+                'name',
+                'code',
+                'category__category_name',
+                'definition',
+                'updated_at',
+                'kredit',
+            )
 
             for lesson in all_list:
                 is_active = False
@@ -4710,7 +5549,9 @@ class LessonsTeacher(
                 lesson_id = lesson.get('id')
                 updated = lesson.get('updated_at')
 
-                lesson_teacher = Lesson_to_teacher.objects.filter(lesson=lesson_id, teacher=teacher).first()
+                lesson_teacher = Lesson_to_teacher.objects.filter(
+                    lesson=lesson_id, teacher=teacher
+                ).first()
 
                 if lesson_teacher:
                     file = lesson_teacher.file
@@ -4722,16 +5563,24 @@ class LessonsTeacher(
 
                 fixed_date = fix_format_date(updated)
 
-                timetable_qs_count = TimeTable.objects.filter(lesson_year=year, lesson_season=season, lesson=lesson_id).count()
+                timetable_qs_count = TimeTable.objects.filter(
+                    lesson_year=year, lesson_season=season, lesson=lesson_id
+                ).count()
 
                 if timetable_qs_count >= 1:
                     is_active = True
                     is_active_num = 1
 
-                lesson_materials_qs = Lesson_materials.objects.filter(lesson=lesson_id, teacher=teacher, material_type=Lesson_materials.PPTX)
+                lesson_materials_qs = Lesson_materials.objects.filter(
+                    lesson=lesson_id,
+                    teacher=teacher,
+                    material_type=Lesson_materials.PPTX,
+                )
                 material_count = lesson_materials_qs.count()
 
-                lesson_title_plan_qs = Lesson_title_plan.objects.filter(lesson=lesson_id, lesson_type=Lesson_title_plan.LECT)
+                lesson_title_plan_qs = Lesson_title_plan.objects.filter(
+                    lesson=lesson_id, lesson_type=Lesson_title_plan.LECT
+                )
                 lesson_title_count = lesson_title_plan_qs.count()
 
                 lesson['active'] = is_active
@@ -4740,18 +5589,18 @@ class LessonsTeacher(
                 lesson['file'] = file_path if file else ''
                 lesson['count'] = material_count + lesson_title_count
 
-            sort_list = sorted(list(all_list), key=lambda item: (-item['is_active_num']) )
+            sort_list = sorted(
+                list(all_list), key=lambda item: (-item['is_active_num'])
+            )
 
         return request.send_data(list(sort_list))
 
 
 @permission_classes([IsAuthenticated])
 class LessonOneApiView(
-    generics.GenericAPIView,
-    mixins.RetrieveModelMixin,
-    mixins.ListModelMixin
+    generics.GenericAPIView, mixins.RetrieveModelMixin, mixins.ListModelMixin
 ):
-    """ Хичээлийн стандарт мэдээлэл """
+    """Хичээлийн стандарт мэдээлэл"""
 
     queryset = LessonStandart.objects.all()
     serializer_class = LessonStandartSerializer
@@ -4770,19 +5619,18 @@ class LessonOneApiView(
         return request.send_data(datas)
 
 
-
 @permission_classes([IsAuthenticated])
-class LessonKreditApiView(
-    generics.GenericAPIView
-):
+class LessonKreditApiView(generics.GenericAPIView):
 
     def get(self, request, pk=None):
-        """ Нэг хичээлийн багц цагийн мэдээлэл авах """
+        """Нэг хичээлийн багц цагийн мэдээлэл авах"""
 
         return_values = []
         qs_title_plan = Lesson_title_plan.objects.all()
         if pk:
-            values = LessonStandart.objects.filter(id=pk).values('lecture_kr', 'seminar_kr', 'laborator_kr', 'practic_kr', 'biedaalt_kr')
+            values = LessonStandart.objects.filter(id=pk).values(
+                'lecture_kr', 'seminar_kr', 'laborator_kr', 'practic_kr', 'biedaalt_kr'
+            )
 
             for value in values:
                 obj = {}
@@ -4794,7 +5642,9 @@ class LessonKreditApiView(
                 bd = value.get('biedaalt_kr')
 
                 if lk:
-                    sedev_data = qs_title_plan.filter(lesson=pk, lesson_type=Lesson_title_plan.LECT).values()
+                    sedev_data = qs_title_plan.filter(
+                        lesson=pk, lesson_type=Lesson_title_plan.LECT
+                    ).values()
                     obj['id'] = Lesson_title_plan.LECT
                     obj['name'] = 'Лекц'
                     obj['data'] = list(sedev_data)
@@ -4803,7 +5653,9 @@ class LessonKreditApiView(
                     obj = {}
 
                 if sem:
-                    sedev_data = qs_title_plan.filter(lesson=pk, lesson_type=Lesson_title_plan.SEM).values()
+                    sedev_data = qs_title_plan.filter(
+                        lesson=pk, lesson_type=Lesson_title_plan.SEM
+                    ).values()
                     obj['id'] = Lesson_title_plan.SEM
                     obj['name'] = 'Семинар'
                     obj['data'] = list(sedev_data)
@@ -4812,7 +5664,9 @@ class LessonKreditApiView(
                     obj = {}
 
                 if lab:
-                    sedev_data = qs_title_plan.filter(lesson=pk, lesson_type=Lesson_title_plan.LAB).values()
+                    sedev_data = qs_title_plan.filter(
+                        lesson=pk, lesson_type=Lesson_title_plan.LAB
+                    ).values()
                     obj['id'] = Lesson_title_plan.LAB
                     obj['name'] = 'Лаборатор'
                     obj['data'] = list(sedev_data)
@@ -4821,7 +5675,9 @@ class LessonKreditApiView(
                     obj = {}
 
                 if pr:
-                    sedev_data = qs_title_plan.filter(lesson=pk, lesson_type=Lesson_title_plan.PRACTIC).values()
+                    sedev_data = qs_title_plan.filter(
+                        lesson=pk, lesson_type=Lesson_title_plan.PRACTIC
+                    ).values()
                     obj['id'] = Lesson_title_plan.PRACTIC
                     obj['name'] = 'Практик'
                     obj['data'] = list(sedev_data)
@@ -4830,7 +5686,9 @@ class LessonKreditApiView(
                     obj = {}
 
                 if bd:
-                    sedev_data = qs_title_plan.filter(lesson=pk, lesson_type=Lesson_title_plan.BIY_DAALT).values()
+                    sedev_data = qs_title_plan.filter(
+                        lesson=pk, lesson_type=Lesson_title_plan.BIY_DAALT
+                    ).values()
                     obj['id'] = Lesson_title_plan.BIY_DAALT
                     obj['name'] = 'Бие даалт'
                     obj['data'] = list(sedev_data)
@@ -4841,15 +5699,14 @@ class LessonKreditApiView(
         return request.send_data(list(return_values))
 
 
-
 @permission_classes([IsAuthenticated])
 class LessonSedevApiView(
     generics.GenericAPIView,
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin,
-    mixins.ListModelMixin
+    mixins.ListModelMixin,
 ):
-    """ Хичээлийн сэдэвчилсэн төлөвлөгөө хадгалах """
+    """Хичээлийн сэдэвчилсэн төлөвлөгөө хадгалах"""
 
     queryset = Lesson_title_plan.objects.all()
     serializer_class = LessonTitleSerializer
@@ -4875,7 +5732,9 @@ class LessonSedevApiView(
             lesson_type = data.get('lesson_type')
             data['lesson'] = pk
 
-            week_obj = Lesson_title_plan.objects.filter(lesson=pk, week=data.get('week'), lesson_type=lesson_type).first()
+            week_obj = Lesson_title_plan.objects.filter(
+                lesson=pk, week=data.get('week'), lesson_type=lesson_type
+            ).first()
 
             if week_obj:
                 is_created = True
@@ -4889,8 +5748,8 @@ class LessonSedevApiView(
 
                 with transaction.atomic():
                     try:
-                       serializer.save()
-                       created_weeks.append(data.get('week'))
+                        serializer.save()
+                        created_weeks.append(data.get('week'))
                     except Exception as e:
                         print(e)
 
@@ -4898,26 +5757,22 @@ class LessonSedevApiView(
             else:
                 for key in serializer.errors:
 
-                    return_error = {
-                        "field": key,
-                        "msg": serializer.errors[key]
-                    }
+                    return_error = {"field": key, "msg": serializer.errors[key]}
 
                     errors.append(return_error)
 
                 return request.send_error("ERR_003", errors)
 
         # Хадгалсан датанаас устгах
-        Lesson_title_plan.objects.filter(lesson=pk, lesson_type=int(lesson_type)).exclude(week__in=created_weeks).delete()
+        Lesson_title_plan.objects.filter(
+            lesson=pk, lesson_type=int(lesson_type)
+        ).exclude(week__in=created_weeks).delete()
         return request.send_info('INF_013')
 
 
 @permission_classes([IsAuthenticated])
-class LessonAllApiView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin
-):
-    """ Тухайн тэнхимийн хичээлийг авах """
+class LessonAllApiView(generics.GenericAPIView, mixins.ListModelMixin):
+    """Тухайн тэнхимийн хичээлийг авах"""
 
     queryset = LessonStandart.objects.all().order_by('name')
     serializer_class = LessonStandartSerializer
@@ -4932,7 +5787,9 @@ class LessonAllApiView(
 
         search_teacher = request.query_params.get('teacher')
         if search_teacher:
-            lesson_teacher_ids = Lesson_to_teacher.objects.filter(teacher=search_teacher).values_list('lesson', flat=True)
+            lesson_teacher_ids = Lesson_to_teacher.objects.filter(
+                teacher=search_teacher
+            ).values_list('lesson', flat=True)
             self.queryset = self.queryset.filter(id__in=lesson_teacher_ids)
 
         all_list = self.list(request).data
@@ -4946,9 +5803,9 @@ class LessonMaterialApiView(
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin,
     mixins.ListModelMixin,
-    mixins.DestroyModelMixin
+    mixins.DestroyModelMixin,
 ):
-    """ Хичээлийн материал хадгалах хэсэг """
+    """Хичээлийн материал хадгалах хэсэг"""
 
     queryset = Lesson_materials.objects.all()
     serializer_class = LessonMaterialSerializer
@@ -4960,7 +5817,9 @@ class LessonMaterialApiView(
         week = request.query_params.get('week')
 
         user = request.user
-        teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
+        teacher = get_object_or_404(
+            Teachers, user_id=user, action_status=Teachers.APPROVED
+        )
 
         lesson = LessonStandart.objects.filter(id=pk).first()
 
@@ -4975,16 +5834,13 @@ class LessonMaterialApiView(
 
         all_list = self.list(request).data
 
-        datas = {
-            'datas': all_list,
-            'name': lesson.code_name if lesson else ''
-        }
+        datas = {'datas': all_list, 'name': lesson.code_name if lesson else ''}
 
         return request.send_data(datas)
 
     def post(self, request, pk=None):
-        """ pk: Хичээлийн ID
-            Файлтай хэсгүүдийг хадгалах хэсэг
+        """pk: Хичээлийн ID
+        Файлтай хэсгүүдийг хадгалах хэсэг
         """
 
         datas = request.data.dict()
@@ -4992,7 +5848,9 @@ class LessonMaterialApiView(
         files = request.FILES.getlist('files')
 
         user = request.user
-        teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
+        teacher = get_object_or_404(
+            Teachers, user_id=user, action_status=Teachers.APPROVED
+        )
 
         # Файл мэдээлэл устгах
         if datas.get('files'):
@@ -5009,7 +5867,7 @@ class LessonMaterialApiView(
             sid = transaction.savepoint()
             try:
 
-                serializer =  self.get_serializer(data=datas)
+                serializer = self.get_serializer(data=datas)
 
                 if serializer.is_valid(raise_exception=True):
                     serializer.save()
@@ -5035,17 +5893,18 @@ class LessonMaterialApiView(
 
         return request.send_info('INF_001')
 
-
     def put(self, request, pk=None):
         # Энд засах үйлдэл хийгдэнэ ирж байгааг датаг харж байгаад хийе
         return request.send_info('INF_002')
 
     def delete(self, request, pk=None):
-        """ Хичээлийн материал устгах """
+        """Хичээлийн материал устгах"""
 
         with transaction.atomic():
             try:
-                files = Lesson_material_file.objects.filter(material=pk).values_list('file', flat=True)
+                files = Lesson_material_file.objects.filter(material=pk).values_list(
+                    'file', flat=True
+                )
 
                 # Файлуудыг устгах
                 for file in files:
@@ -5059,13 +5918,19 @@ class LessonMaterialApiView(
                 Lesson_material_file.objects.filter(material=pk).delete()
 
                 # Даалгаврыг устгах
-                lesson_assignment = Lesson_assignment.objects.filter(lesson_material=pk).values_list('id', flat=True)
+                lesson_assignment = Lesson_assignment.objects.filter(
+                    lesson_material=pk
+                ).values_list('id', flat=True)
 
                 # Тухайн хичээл дээр холбоотой бүх даалгаврын хариуг устгана
-                lesson_assignmend_students = Lesson_assignment_student.objects.filter(assignment__in=lesson_assignment).values_list('id', flat=True)
+                lesson_assignmend_students = Lesson_assignment_student.objects.filter(
+                    assignment__in=lesson_assignment
+                ).values_list('id', flat=True)
 
                 # Тухайн хичээл дээр багш руу илгээсэн файлууд
-                student_files = Lesson_assignment_student_file.objects.filter(student_assignment__in=lesson_assignmend_students).values_list('file', flat=True)
+                student_files = Lesson_assignment_student_file.objects.filter(
+                    student_assignment__in=lesson_assignmend_students
+                ).values_list('file', flat=True)
                 for file in student_files:
 
                     full_path = os.path.join(settings.MEDIA_ROOT, str(file))
@@ -5074,7 +5939,9 @@ class LessonMaterialApiView(
                         os.remove(full_path)
 
                 # Хичээлийн материал устгах
-                Lesson_assignment_student.objects.filter(id__in=lesson_assignmend_students).delete()
+                Lesson_assignment_student.objects.filter(
+                    id__in=lesson_assignmend_students
+                ).delete()
 
                 self.destroy(request, pk)
 
@@ -5086,11 +5953,8 @@ class LessonMaterialApiView(
 
 
 @permission_classes([IsAuthenticated])
-class LessonMaterialGeneralApiView(
-    generics.GenericAPIView,
-    mixins.CreateModelMixin
-):
-    """ Хичээлийн ерөнхий мэдээлэл """
+class LessonMaterialGeneralApiView(generics.GenericAPIView, mixins.CreateModelMixin):
+    """Хичээлийн ерөнхий мэдээлэл"""
 
     queryset = Lesson_materials.objects.all()
     serializer_class = LessonMaterialSerializer
@@ -5100,7 +5964,9 @@ class LessonMaterialGeneralApiView(
         data = request.data.dict()
 
         user = request.user
-        teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
+        teacher = get_object_or_404(
+            Teachers, user_id=user, action_status=Teachers.APPROVED
+        )
 
         data['teacher'] = teacher.id
 
@@ -5115,10 +5981,7 @@ class LessonMaterialGeneralApiView(
             errors = []
             for key in serializer.errors:
 
-                return_error = {
-                    "field": key,
-                    "msg": serializer.errors[key]
-                }
+                return_error = {"field": key, "msg": serializer.errors[key]}
 
                 errors.append(return_error)
 
@@ -5128,12 +5991,9 @@ class LessonMaterialGeneralApiView(
         return request.send_info("INF_001")
 
 
-
 @permission_classes([IsAuthenticated])
-class LessonEditorImage(
-    generics.GenericAPIView
-):
-    """ Editor зураг хадгалах """
+class LessonEditorImage(generics.GenericAPIView):
+    """Editor зураг хадгалах"""
 
     def post(self, request, pk):
 
@@ -5151,19 +6011,16 @@ class LessonEditorImage(
         return request.send_data(return_url)
 
 
-
 @permission_classes([IsAuthenticated])
-class LessonMaterialAssignmentApiView(
-    generics.GenericAPIView
-):
-    """ Даалгавар үүсгэх хэсэг"""
+class LessonMaterialAssignmentApiView(generics.GenericAPIView):
+    """Даалгавар үүсгэх хэсэг"""
 
     queryset = Lesson_materials.objects.all()
     serializer_class = LessonMaterialSerializer
 
     def post(self, request, pk):
         """
-            pk: Хичээлийн ID
+        pk: Хичээлийн ID
         """
 
         datas = request.data.dict()
@@ -5176,7 +6033,9 @@ class LessonMaterialAssignmentApiView(
         files = request.FILES.getlist('files')
 
         user = request.user
-        teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
+        teacher = get_object_or_404(
+            Teachers, user_id=user, action_status=Teachers.APPROVED
+        )
 
         # Файл мэдээлэл устгах
         if len(files) > 0:
@@ -5193,7 +6052,7 @@ class LessonMaterialAssignmentApiView(
             sid = transaction.savepoint()
             try:
 
-                serializer =  self.get_serializer(data=datas)
+                serializer = self.get_serializer(data=datas)
 
                 if serializer.is_valid(raise_exception=True):
                     serializer.save()
@@ -5213,10 +6072,10 @@ class LessonMaterialAssignmentApiView(
 
                     # Хичээлийн даалгавар үүсгэх хэсэг
                     Lesson_assignment.objects.create(
-                        lesson_material_id =  lesson_material_id,
-                        score =  int(score),
-                        start_date = start_date,
-                        finish_date = finish_date
+                        lesson_material_id=lesson_material_id,
+                        score=int(score),
+                        start_date=start_date,
+                        finish_date=finish_date,
                     )
 
             except Exception as e:
@@ -5228,11 +6087,10 @@ class LessonMaterialAssignmentApiView(
 
         return request.send_info('INF_001')
 
+
 @permission_classes([IsAuthenticated])
-class LessonImage(
-    generics.GenericAPIView
-):
-    """ Тухайн багш хичээлдээ зураг оруулах """
+class LessonImage(generics.GenericAPIView):
+    """Тухайн багш хичээлдээ зураг оруулах"""
 
     queryset = Lesson_to_teacher.objects.all()
     serializer_class = LessonTeacherSerializer
@@ -5242,7 +6100,9 @@ class LessonImage(
         data = request.data.dict()
 
         user = request.user
-        teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
+        teacher = get_object_or_404(
+            Teachers, user_id=user, action_status=Teachers.APPROVED
+        )
 
         instance = self.queryset.filter(lesson=pk, teacher=teacher).first()
 
@@ -5258,10 +6118,7 @@ class LessonImage(
             error_obj = []
             for key in serializer.errors:
 
-                return_error = {
-                    "field": key,
-                    "msg": serializer.errors[key]
-                }
+                return_error = {"field": key, "msg": serializer.errors[key]}
 
                 error_obj.append(return_error)
 
@@ -5271,21 +6128,19 @@ class LessonImage(
         return request.send_info("INF_002")
 
 
-
 @permission_classes([IsAuthenticated])
-class LessonMaterialSendApiView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin
-):
-    ''' Хичээлийн материал ХБА руу илгээх '''
+class LessonMaterialSendApiView(generics.GenericAPIView, mixins.ListModelMixin):
+    '''Хичээлийн материал ХБА руу илгээх'''
 
     queryset = Lesson_materials.objects.all().order_by('created_at', 'week')
     serializer_class = LessonMaterialListSerializer
 
     def get(self, request, lesson=None):
-        """ Хичээлийн бүр лекцийн материал авах """
+        """Хичээлийн бүр лекцийн материал авах"""
 
-        self.queryset = self.queryset.filter(lesson=lesson, material_type=Lesson_materials.PPTX)
+        self.queryset = self.queryset.filter(
+            lesson=lesson, material_type=Lesson_materials.PPTX
+        )
 
         all_list = self.list(request).data
 
@@ -5298,22 +6153,20 @@ class LessonMaterialSendApiView(
 
         queryset = Lesson_materials.objects.filter(lesson=lesson)
 
-        send_ids = queryset.filter(send_type=Lesson_materials.SEND).values_list('id', flat=True)
+        send_ids = queryset.filter(send_type=Lesson_materials.SEND).values_list(
+            'id', flat=True
+        )
 
-        remove_sends =  list(set(send_ids) - set(checked_ids))
+        remove_sends = list(set(send_ids) - set(checked_ids))
 
         qs = queryset.filter(id__in=checked_ids)
         remove_qs = queryset.filter(id__in=remove_sends)
 
         with transaction.atomic():
             try:
-                qs.update(
-                    send_type = Lesson_materials.SEND
-                )
+                qs.update(send_type=Lesson_materials.SEND)
 
-                remove_qs.update(
-                    send_type = None
-                )
+                remove_qs.update(send_type=None)
 
             except Exception as e:
                 print(e)
@@ -5323,19 +6176,26 @@ class LessonMaterialSendApiView(
 
 
 @permission_classes([IsAuthenticated])
-class LessonMaterialApproveApiView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin
-):
-    """ ХБА батлах хичээлийн материал """
+class LessonMaterialApproveApiView(generics.GenericAPIView, mixins.ListModelMixin):
+    """ХБА батлах хичээлийн материал"""
 
-    queryset = Lesson_materials.objects.filter(material_type=Lesson_materials.PPTX).order_by('created_at', 'teacher', 'week')
+    queryset = Lesson_materials.objects.filter(
+        material_type=Lesson_materials.PPTX
+    ).order_by('created_at', 'teacher', 'week')
     serializer_class = LessonMaterialListSerializer
 
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['title', 'teacher__first_name', 'end_date', 'teacher__last_name', 'lesson__name', 'lesson__code', 'week']
+    search_fields = [
+        'title',
+        'teacher__first_name',
+        'end_date',
+        'teacher__last_name',
+        'lesson__name',
+        'lesson__code',
+        'week',
+    ]
 
     def get(self, request):
 
@@ -5365,7 +6225,6 @@ class LessonMaterialApproveApiView(
         if lesson:
             self.queryset = self.queryset.filter(lesson=lesson)
 
-
         all_list = self.list(request).data
 
         return request.send_data(all_list)
@@ -5386,45 +6245,50 @@ class LessonMaterialApproveApiView(
 
         with transaction.atomic():
 
-            qs.update(
-                send_type=send_type,
-                comment=comment
-            )
+            qs.update(send_type=send_type, comment=comment)
 
         return request.send_info('INF_018')
 
 
 @permission_classes([IsAuthenticated])
-class LessonStandartGroupAPIView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin
-):
-    """ Тухайн ангийн хичээлүүд """
+class LessonStandartGroupAPIView(generics.GenericAPIView, mixins.ListModelMixin):
+    """Тухайн ангийн хичээлүүд"""
 
     queryset = LessonStandart.objects.all()
     serializer_class = LessonStandartSerializer
+
     def get(self, request, group=None):
 
         group_obj = get_object_or_404(Group, pk=group)
 
-        lessons = LearningPlan.objects.filter(profession=group_obj.profession).annotate(full_name=Concat("lesson__code", Value("-"), "lesson__name", output_field=CharField())).values('lesson__id', 'full_name').order_by('lesson_level', 'lesson__name')
-        students = Student.objects.filter(group=group).annotate(full_name=Concat("last_name", Value(". "), "first_name", output_field=CharField())).values('id', 'code', 'full_name')
+        lessons = (
+            LearningPlan.objects.filter(profession=group_obj.profession)
+            .annotate(
+                full_name=Concat(
+                    "lesson__code", Value("-"), "lesson__name", output_field=CharField()
+                )
+            )
+            .values('lesson__id', 'full_name')
+            .order_by('lesson_level', 'lesson__name')
+        )
+        students = (
+            Student.objects.filter(group=group)
+            .annotate(
+                full_name=Concat(
+                    "last_name", Value(". "), "first_name", output_field=CharField()
+                )
+            )
+            .values('id', 'code', 'full_name')
+        )
 
-        return_datas = {
-            'lessons': list(lessons),
-            'students': list(students)
-        }
+        return_datas = {'lessons': list(lessons), 'students': list(students)}
 
         return request.send_data(return_datas)
 
 
 @permission_classes([IsAuthenticated])
-class CopyProfesisonAPIView(
-    generics.GenericAPIView,
-    mixins.CreateModelMixin
-):
-
-    ''' Өгөгдсөн хөтөлбөрийн сургалтын төлөвлөгөөний хичээлүүдийг өөр хөтөлбөрийн сургалтын төлөвлөгөөний хичээл рүү хуулах '''
+class CopyProfesisonAPIView(generics.GenericAPIView, mixins.CreateModelMixin):
+    '''Өгөгдсөн хөтөлбөрийн сургалтын төлөвлөгөөний хичээлүүдийг өөр хөтөлбөрийн сургалтын төлөвлөгөөний хичээл рүү хуулах'''
 
     queryset = LearningPlan.objects.all()
 
@@ -5451,16 +6315,16 @@ class CopyProfesisonAPIView(
         for value in main_learning_plan:
             cloned_lessons.append(
                 LearningPlan(
-                    lesson = value.lesson,
-                    previous_lesson = value.previous_lesson,
-                    group_lesson = value.group_lesson,
-                    lesson_level = value.lesson_level,
-                    lesson_type = value.lesson_type,
-                    season = value.season,
-                    is_check_score = value.is_check_score,
-                    department = value.department,
-                    school = value.school,
-                    profession = chosen_prof
+                    lesson=value.lesson,
+                    previous_lesson=value.previous_lesson,
+                    group_lesson=value.group_lesson,
+                    lesson_level=value.lesson_level,
+                    lesson_type=value.lesson_type,
+                    season=value.season,
+                    is_check_score=value.is_check_score,
+                    department=value.department,
+                    school=value.school,
+                    profession=chosen_prof,
                 )
             )
 
@@ -5472,12 +6336,9 @@ class CopyProfesisonAPIView(
 
 
 @permission_classes([IsAuthenticated])
-class ProfessionJustProfessionAPIView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin
-):
+class ProfessionJustProfessionAPIView(generics.GenericAPIView, mixins.ListModelMixin):
     '''
-        Сургалтын төлөвлөгөөний хүснэгтэд хадгалагдсан мэргэжлүүдийг авах
+    Сургалтын төлөвлөгөөний хүснэгтэд хадгалагдсан мэргэжлүүдийг авах
     '''
 
     queryset = ProfessionDefinition.objects.all()
@@ -5496,11 +6357,9 @@ class ProfessionJustProfessionAPIView(
 
 
 @permission_classes([IsAuthenticated])
-class ProfessionPosterFile(
-    generics.GenericAPIView,
-    mixins.UpdateModelMixin
-):
-    """ Постер зураг"""
+class ProfessionPosterFile(generics.GenericAPIView, mixins.UpdateModelMixin):
+    """Постер зураг"""
+
     queryset = ProfessionDefinition.objects.all()
     serializer_class = ProfessionDefinitionSerializer
 
@@ -5509,13 +6368,11 @@ class ProfessionPosterFile(
         profession = datas.get('profession')
         file = request.FILES.get('file')
 
-        datas = {
-            'poster_image': file
-        }
+        datas = {'poster_image': file}
 
         instance = ProfessionDefinition.objects.get(id=profession)
         with transaction.atomic():
-            serializer =  self.get_serializer(instance, datas, partial=True)
+            serializer = self.get_serializer(instance, datas, partial=True)
             if serializer.is_valid(raise_exception=False):
                 self.perform_update(serializer)
             else:
@@ -5524,7 +6381,7 @@ class ProfessionPosterFile(
         return request.send_info('INF_001')
 
     def delete(self, request, pk=None):
-        ''' Poster зураг устгах '''
+        '''Poster зураг устгах'''
 
         with transaction.atomic():
             instance = ProfessionDefinition.objects.get(id=pk)
@@ -5533,10 +6390,9 @@ class ProfessionPosterFile(
 
         return request.send_info('INF_003')
 
-class ProfessionAPIView(
-    generics.GenericAPIView
-):
-    """ Хөтөлбөрийн багаас хамаарч мэргэжлийн жагсаалт авах нь  """
+
+class ProfessionAPIView(generics.GenericAPIView):
+    """Хөтөлбөрийн багаас хамаарч мэргэжлийн жагсаалт авах нь"""
 
     queryset = ProfessionDefinition.objects.all()
 
@@ -5546,10 +6402,9 @@ class ProfessionAPIView(
             dep_list = self.queryset.filter(department_id=depId).values("id", "name")
             return request.send_data(list(dep_list))
 
-class GroupAPIView(
-    generics.GenericAPIView
-):
-    """ Мэргэжлээс хамаарч ангийн жагсаалт авах нь """
+
+class GroupAPIView(generics.GenericAPIView):
+    """Мэргэжлээс хамаарч ангийн жагсаалт авах нь"""
 
     queryset = Group.objects.all()
 
@@ -5559,10 +6414,11 @@ class GroupAPIView(
             group_list = self.queryset.filter(profession_id=profId).values("id", "name")
             return request.send_data(list(group_list))
 
+
 class SubOrgDepartListAPIView(
     generics.GenericAPIView,
 ):
-    """ Сургуулиас хамаарч хөтөлбөрийн багийн жагсаалт авах нь """
+    """Сургуулиас хамаарч хөтөлбөрийн багийн жагсаалт авах нь"""
 
     queryset = Salbars.objects
 
@@ -5571,6 +6427,7 @@ class SubOrgDepartListAPIView(
         if sub_org:
             list_data = self.queryset.filter(sub_orgs_id=sub_org).values('id', 'name')
             return request.send_data(list(list_data))
+
 
 # import pandas as pd
 # import math
@@ -5588,6 +6445,7 @@ class SubOrgDepartListAPIView(
 #         obj = PsychologicalTestQuestions.objects.filter(id=row_data.get('id')).update(question_number=int(row_data.get('question_number')))
 #         print(obj)
 
+
 @permission_classes([IsAuthenticated])
 class QuestionsTitleAPIView(
     generics.GenericAPIView,
@@ -5595,11 +6453,10 @@ class QuestionsTitleAPIView(
     mixins.ListModelMixin,
     mixins.DestroyModelMixin,
     mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin
-
+    mixins.UpdateModelMixin,
 ):
-    """ Шалгалтын асуултууд Гарчигаар
-    """
+    """Шалгалтын асуултууд Гарчигаар"""
+
     queryset = QuestionTitle.objects.all()
     serializer_class = dynamic_serializer(QuestionTitle, "__all__")
 
@@ -5630,7 +6487,9 @@ class QuestionsTitleAPIView(
         # -1  Сэдэвгүй асуултууд
         elif title_id == -1:
             if str2bool(is_elselt):
-                challenge_qs = challenge_qs.filter(title__isnull=True, is_admission=True)
+                challenge_qs = challenge_qs.filter(
+                    title__isnull=True, is_admission=True
+                )
                 user = request.user
                 if not user.is_superuser:
                     challenge_qs = challenge_qs.filter(created_by=teacher)
@@ -5643,7 +6502,9 @@ class QuestionsTitleAPIView(
                 challenge_qs = challenge_qs.filter(title__created_by=teacher)
 
                 if is_elselt == 'true':
-                    challenge_qs = challenge_qs.filter(title=title_id, title__is_admission=True)
+                    challenge_qs = challenge_qs.filter(
+                        title=title_id, title__is_admission=True
+                    )
                 else:
                     challenge_qs = challenge_qs.filter(title=title_id)
 
@@ -5658,10 +6519,11 @@ class QuestionsTitleAPIView(
         result = {
             "count": count,
             "results": data.data,
-            "lesson_id": self.queryset.filter(id=title_id).values_list('lesson',flat=True).first()
+            "lesson_id": self.queryset.filter(id=title_id)
+            .values_list('lesson', flat=True)
+            .first(),
         }
         return request.send_data(result)
-
 
     def post(self, request):
         question_ids = []
@@ -5675,10 +6537,12 @@ class QuestionsTitleAPIView(
         serializer = self.get_serializer(data=request_data)
 
         if serializer.is_valid(raise_exception=False):
-            saved_obj =  serializer.save()
+            saved_obj = serializer.save()
 
             if question_ids:
-                questions_to_update = ChallengeQuestions.objects.filter(id__in=question_ids)
+                questions_to_update = ChallengeQuestions.objects.filter(
+                    id__in=question_ids
+                )
 
                 for question in questions_to_update:
                     question.title.add(saved_obj)
@@ -5689,7 +6553,6 @@ class QuestionsTitleAPIView(
 
         return request.send_info("ERR_001")
 
-
     def put(self, request, pk=None):
         request_data = request.data
         question_ids = request.data.pop("questions")
@@ -5699,7 +6562,9 @@ class QuestionsTitleAPIView(
         if serializer.is_valid(raise_exception=False):
             self.perform_update(serializer)
             questions_to_update = ChallengeQuestions.objects.filter(id__in=question_ids)
-            other_questions = ChallengeQuestions.objects.filter(id__in=other_question_ids)
+            other_questions = ChallengeQuestions.objects.filter(
+                id__in=other_question_ids
+            )
             for question in questions_to_update:
                 question.title.add(qs)
             for question in other_questions:
@@ -5707,7 +6572,6 @@ class QuestionsTitleAPIView(
             return request.send_info("INF_002")
 
         return request.send_info("ERR_001")
-
 
     def delete(self, request, pk=None):
         challenge_questions = ChallengeQuestions.objects.filter(title=pk)
@@ -5721,12 +6585,12 @@ class QuestionsTitleListAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
 ):
-    """ Шалгалтын Гарчиг
-    """
+    """Шалгалтын Гарчиг"""
+
     queryset = QuestionTitle.objects.all()
     serializer_class = dynamic_serializer(QuestionTitle, "__all__")
 
-    def get(self, request,pk):
+    def get(self, request, pk):
         teacher = None
 
         # in admin WEB teacher ID not passed (0 passed means falsy value), so may be it supposed to get titles by all teachers
@@ -5753,13 +6617,24 @@ class QuestionsTitleListAPIView(
 
         if not challenge_type:
             self.queryset = self.queryset.filter(
-                is_admission=False,
-                is_graduate=False,
-                is_season=False
+                is_admission=False, is_graduate=False, is_season=False
             )
 
-        question_sub = ChallengeQuestions.objects.filter(title=OuterRef('id')).values('title').annotate(count=Count('id')).values('count')
-        data = self.queryset.annotate(question_count=Subquery(question_sub)).values("id", "name", 'lesson__name', 'lesson__code', 'lesson__id', 'question_count', 'is_open')
+        question_sub = (
+            ChallengeQuestions.objects.filter(title=OuterRef('id'))
+            .values('title')
+            .annotate(count=Count('id'))
+            .values('count')
+        )
+        data = self.queryset.annotate(question_count=Subquery(question_sub)).values(
+            "id",
+            "name",
+            'lesson__name',
+            'lesson__code',
+            'lesson__id',
+            'question_count',
+            'is_open',
+        )
 
         return request.send_data(list(data))
 
@@ -5769,10 +6644,10 @@ class QuestionsLevelListAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
 ):
-    """ Шалгалтын түвшнээр групп хийв
-    """
+    """Шалгалтын түвшнээр групп хийв"""
 
     queryset = QuestionTitle.objects.all().filter(is_season=True)
+
     def get(self, request):
         lesson = request.query_params.get('lesson')
         lesson_year = request.query_params.get('lesson_year')
@@ -5790,10 +6665,11 @@ class QuestionsLevelListAPIView(
             question_queryset = question_queryset.filter(lesson_season=lesson_season)
 
         datas = (
-            question_queryset
-            .values('level')
+            question_queryset.values('level')
             .annotate(question_count=Count('id'))
-            .annotate(type_name=WithChoices(ChallengeQuestions.DIFFICULTY_LEVELS, 'level'))
+            .annotate(
+                type_name=WithChoices(ChallengeQuestions.DIFFICULTY_LEVELS, 'level')
+            )
             .values('type_name', 'question_count', 'level')
         )
 
@@ -5805,10 +6681,10 @@ class QuestionsYearListAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
 ):
-    """ Шалгалтын хичээлийн групп хийв
-    """
+    """Шалгалтын хичээлийн групп хийв"""
 
     queryset = QuestionTitle.objects.all().filter(is_season=True)
+
     def get(self, request):
         lesson = request.query_params.get('lesson')
 
@@ -5817,8 +6693,7 @@ class QuestionsYearListAPIView(
 
         question_queryset = ChallengeQuestions.objects.filter(title__in=self.queryset)
         datas = (
-            question_queryset
-            .values('lesson_year')
+            question_queryset.values('lesson_year')
             .distinct('lesson_year')
             .annotate(name=F("lesson_year"), id=F('lesson_year'))
             .values('name', 'id')
@@ -5826,14 +6701,15 @@ class QuestionsYearListAPIView(
 
         return request.send_data(list(datas))
 
+
 class TestQuestionsAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin
+    mixins.DestroyModelMixin,
 ):
     """
-        Асуултын хэсэг
+    Асуултын хэсэг
     """
 
     queryset = ChallengeQuestions.objects.all().order_by('-created_at')
@@ -5850,7 +6726,9 @@ class TestQuestionsAPIView(
         subject = request.query_params.get('subject')
 
         user = request.user
-        teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
+        teacher = get_object_or_404(
+            Teachers, user_id=user, action_status=Teachers.APPROVED
+        )
 
         self.queryset = self.queryset.filter(created_by=teacher)
 
@@ -5876,7 +6754,7 @@ class TestQuestionsAPIView(
 
             if type == "question":
                 question_img = request_data['image']
-                request_data = remove_key_from_dict(request_data, [ 'image'])
+                request_data = remove_key_from_dict(request_data, ['image'])
                 with transaction.atomic():
                     question_obj = ChallengeQuestions.objects.filter(id=pk).first()
 
@@ -5892,7 +6770,6 @@ class TestQuestionsAPIView(
                         if old_image:
                             remove_folder(str(old_image))
 
-
                     if isinstance(question_img, str) == True and question_img == '':
                         old_image = question_obj.image
                         question_img_path = get_image_path(question_obj)
@@ -5902,12 +6779,14 @@ class TestQuestionsAPIView(
                         if old_image:
                             remove_folder(str(old_image))
 
-                    updated_question_rows = ChallengeQuestions.objects.filter(id=pk).update(
-                        **request_data
-                    )
+                    updated_question_rows = ChallengeQuestions.objects.filter(
+                        id=pk
+                    ).update(**request_data)
                     data = None
                     if updated_question_rows > 0:
-                        updated_question = ChallengeQuestions.objects.filter(id=pk).first()
+                        updated_question = ChallengeQuestions.objects.filter(
+                            id=pk
+                        ).first()
                         ser = dynamic_serializer(ChallengeQuestions, "__all__", 1)
                         data = ser(updated_question).data
                     return request.send_info('INF_002', data)
@@ -5940,10 +6819,14 @@ class TestQuestionsAPIView(
                         if old_image:
                             remove_file_from_cdn(str(old_image))
 
-                    updated_rows = QuestionChoices.objects.filter(id=answer_id).update(**request_data)
+                    updated_rows = QuestionChoices.objects.filter(id=answer_id).update(
+                        **request_data
+                    )
                     data = None
                     if updated_rows > 0:
-                        updated_answer = QuestionChoices.objects.filter(id=answer_id).first()
+                        updated_answer = QuestionChoices.objects.filter(
+                            id=answer_id
+                        ).first()
                         ser = dynamic_serializer(QuestionChoices, "__all__")
                         data = ser(updated_answer).data
                     return request.send_info('INF_002', data)
@@ -5973,7 +6856,7 @@ class TestQuestionsAPIView(
                     question = json.loads(question)
                     qkind = question.get("kind")
                     question_img = question.get('image')
-                    score = question.get('score') # Асуултын оноо
+                    score = question.get('score')  # Асуултын оноо
                     answers = question.get('answers')
                     question['created_by'] = teacher
                     question['yes_or_no'] = None
@@ -5997,19 +6880,19 @@ class TestQuestionsAPIView(
                     # Асуултын сонголтууд
                     choices = answers
 
-                    question = remove_key_from_dict(question, ['image','answers'])
+                    question = remove_key_from_dict(question, ['image', 'answers'])
                     question = null_to_none(question)
 
-                    question_obj = ChallengeQuestions.objects.create(
-                        **question
-                    )
+                    question_obj = ChallengeQuestions.objects.create(**question)
 
                     # Улирлын шалгалтынг хувьд
                     if title and title != '-1':
                         question_obj.title.add(QuestionTitle.objects.get(pk=title))
 
                     if graduate_title:
-                        question_obj.graduate_title.add(QuestioSubTitle.objects.get(pk=graduate_title))
+                        question_obj.graduate_title.add(
+                            QuestioSubTitle.objects.get(pk=graduate_title)
+                        )
 
                     # Асуултанд зураг байвал хадгалах хэсэг
                     if question_img:
@@ -6024,7 +6907,11 @@ class TestQuestionsAPIView(
                     choice_ids = list()
 
                     # Асуултын сонголтуудыг үүсгэх нь
-                    if int(qkind) in [ChallengeQuestions.KIND_MULTI_CHOICE, ChallengeQuestions.KIND_ONE_CHOICE, ChallengeQuestions.KIND_BOOLEAN]:
+                    if int(qkind) in [
+                        ChallengeQuestions.KIND_MULTI_CHOICE,
+                        ChallengeQuestions.KIND_ONE_CHOICE,
+                        ChallengeQuestions.KIND_BOOLEAN,
+                    ]:
 
                         # Олон сонголттой үед асуултын оноог хувааж тавина
                         if int(qkind) == ChallengeQuestions.KIND_MULTI_CHOICE:
@@ -6041,21 +6928,25 @@ class TestQuestionsAPIView(
                             choice_img = None
                             choice['choices'] = choice['value']
                             for image in files:
-                                if hasattr(image, "name") and choice['image'] == image.name:
+                                if (
+                                    hasattr(image, "name")
+                                    and choice['image'] == image.name
+                                ):
                                     choice_img = image
 
-                            choice = remove_key_from_dict(choice, ['image', 'is_correct', 'value'])
-
-
-                            choice_obj = QuestionChoices.objects.create(
-                                **choice
+                            choice = remove_key_from_dict(
+                                choice, ['image', 'is_correct', 'value']
                             )
+
+                            choice_obj = QuestionChoices.objects.create(**choice)
 
                             # Асуултанд зураг байвал хадгалах хэсэг
                             if choice_img:
                                 choice_img_path = 'challenge'
 
-                                file_path = create_file_to_cdn(choice_img_path, choice_img)
+                                file_path = create_file_to_cdn(
+                                    choice_img_path, choice_img
+                                )
                                 cdn_urls_to_rollback.append(file_path)
 
                                 choice_obj.image = file_path.get('full_path')
@@ -6074,11 +6965,8 @@ class TestQuestionsAPIView(
         return request.send_info('INF_001')
 
 
-class TestQuestionsListAPIView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin
-):
-    """ Шалгалт үүсгэхдээ асуулт сонгох хэсэг """
+class TestQuestionsListAPIView(generics.GenericAPIView, mixins.ListModelMixin):
+    """Шалгалт үүсгэхдээ асуулт сонгох хэсэг"""
 
     queryset = ChallengeQuestions.objects.all()
     serializer_class = ChallengeQuestionListSerializer
@@ -6101,12 +6989,12 @@ class TestQuestionsListAPIView(
         data = ser(questions_qs, many=True).data
         return request.send_data(data)
 
+
 class TeacherExaminationScheduleAPIView(
-    mixins.RetrieveModelMixin,
-    mixins.ListModelMixin,
-    generics.GenericAPIView
+    mixins.RetrieveModelMixin, mixins.ListModelMixin, generics.GenericAPIView
 ):
-    " Шалгалтын хуваарь "
+    "Шалгалтын хуваарь"
+
     queryset = ExamTimeTable.objects.all()
     serializer_class = TeacherExamTimeTableSerializer
 
@@ -6124,6 +7012,7 @@ class TeacherExaminationScheduleAPIView(
         datas = self.list(request).data
         return request.send_data(datas)
 
+
 class QuestionExcelAPIView(generics.GenericAPIView, mixins.ListModelMixin):
     KIND_MAP = {
         'Нэг сонголт': 1,
@@ -6135,7 +7024,7 @@ class QuestionExcelAPIView(generics.GenericAPIView, mixins.ListModelMixin):
         'Харгалзуулах, жиших': 7,
         'Тооцоолж бодох': 8,
         'Төсөл боловсруулах': 9,
-        'Товч хариулт': 10
+        'Товч хариулт': 10,
     }
 
     LEVEL_MAP = {
@@ -6173,14 +7062,28 @@ class QuestionExcelAPIView(generics.GenericAPIView, mixins.ListModelMixin):
         data_dicts = [dict(zip(headers, row)) for row in data[1:]]
 
         for entry in data_dicts:
-            self.process_entry(entry, teacher, graduate_title, is_admission, title, is_ywts)
+            self.process_entry(
+                entry, teacher, graduate_title, is_admission, title, is_ywts
+            )
 
         return request.send_info("INF_001")
 
-    def process_entry(self, entry, teacher, graduate_title, is_admission, title, is_ywts):
+    def process_entry(
+        self, entry, teacher, graduate_title, is_admission, title, is_ywts
+    ):
         question = entry.get('Асуулт')
 
-        if question in {"Жишээ 1","Жишээ 2","Жишээ 3", 'Жишээ 4', 'Жишээ 5', 'Жишээ 6', 'Жишээ 7', 'Жишээ 8', 'Жишээ 9'}:
+        if question in {
+            "Жишээ 1",
+            "Жишээ 2",
+            "Жишээ 3",
+            'Жишээ 4',
+            'Жишээ 5',
+            'Жишээ 6',
+            'Жишээ 7',
+            'Жишээ 8',
+            'Жишээ 9',
+        }:
             return
 
         level_str = entry.get('Асуултын түвшин').strip()
@@ -6207,7 +7110,7 @@ class QuestionExcelAPIView(generics.GenericAPIView, mixins.ListModelMixin):
             level=level,
             max_choice_count=max_choice_count,
             created_by=teacher,
-            is_admission=str2bool(is_admission) if is_admission else False
+            is_admission=str2bool(is_admission) if is_admission else False,
         )
         challenge.save()
         # Төгсөлтйин шалгалт бол
@@ -6217,12 +7120,23 @@ class QuestionExcelAPIView(generics.GenericAPIView, mixins.ListModelMixin):
         if title:
             challenge.title.add(QuestionTitle.objects.get(pk=title))
 
-        choice_keys = ['Хариулт 1', 'Хариулт 2', 'Хариулт 3', 'Хариулт 4', 'Хариулт 5', 'Хариулт 6']
-        choice_ids = self.process_choices(entry, teacher, choice_keys, kind, score, correct_answer_index)
+        choice_keys = [
+            'Хариулт 1',
+            'Хариулт 2',
+            'Хариулт 3',
+            'Хариулт 4',
+            'Хариулт 5',
+            'Хариулт 6',
+        ]
+        choice_ids = self.process_choices(
+            entry, teacher, choice_keys, kind, score, correct_answer_index
+        )
 
         challenge.choices.set(choice_ids)
 
-    def process_choices(self, entry, teacher, choice_keys, kind, score, correct_answer_index):
+    def process_choices(
+        self, entry, teacher, choice_keys, kind, score, correct_answer_index
+    ):
         choice_ids = []
 
         if kind in {1, 3}:  # Single choice or true/false
@@ -6243,7 +7157,9 @@ class QuestionExcelAPIView(generics.GenericAPIView, mixins.ListModelMixin):
                 if choice_text:
                     is_correct = 1 if (index + 1) in correct_answer_indices else 0
                     choice = QuestionChoices(choices=choice_text, created_by=teacher)
-                    choice.score = score / len(correct_answer_indices) if is_correct else 0
+                    choice.score = (
+                        score / len(correct_answer_indices) if is_correct else 0
+                    )
                     choice.save()
                     choice_ids.append(choice.id)
 
@@ -6252,11 +7168,9 @@ class QuestionExcelAPIView(generics.GenericAPIView, mixins.ListModelMixin):
 
 @permission_classes([IsAuthenticated])
 class TestTeacherApiView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin
+    generics.GenericAPIView, mixins.ListModelMixin, mixins.RetrieveModelMixin
 ):
-    """ Багшийн жагсаалт """
+    """Багшийн жагсаалт"""
 
     queryset = Teachers.objects.all()
     serializer_class = TeacherNameSerializer
@@ -6267,7 +7181,7 @@ class TestTeacherApiView(
     search_fields = ['first_name', 'last_name']
 
     def get_queryset(self):
-        "Багшийн мэдээллийг сургууль, Хөтөлбөрийн багаар харуулах "
+        "Багшийн мэдээллийг сургууль, Хөтөлбөрийн багаар харуулах"
 
         queryset = self.queryset
         sub_org = self.request.query_params.get('sub_org')
@@ -6293,7 +7207,9 @@ class TestTeacherApiView(
 
         # Албан тушаалаар хайх
         if position:
-            user_ids = Employee.objects.filter(org_position=position, state=Employee.STATE_WORKING).values_list('user', flat=True)
+            user_ids = Employee.objects.filter(
+                org_position=position, state=Employee.STATE_WORKING
+            ).values_list('user', flat=True)
             queryset = queryset.filter(user_id__in=user_ids)
 
         # Sort хийх үед ажиллана
@@ -6305,20 +7221,30 @@ class TestTeacherApiView(
 
         if is_season == 'true':
             if stype and stype == 'graduate':
-                title_teachers = QuestionTitle.objects.filter(is_graduate=True).values_list('created_by', flat=True)
+                title_teachers = QuestionTitle.objects.filter(
+                    is_graduate=True
+                ).values_list('created_by', flat=True)
             else:
-                title_teachers = QuestionTitle.objects.filter(is_season=True).values_list('created_by', flat=True)
+                title_teachers = QuestionTitle.objects.filter(
+                    is_season=True
+                ).values_list('created_by', flat=True)
 
             queryset = queryset.filter(id__in=title_teachers)
         else:
-            title_ids = QuestionTitle.objects.filter(is_season=False).values_list('id', flat=True)
-            teacher_ids = ChallengeQuestions.objects.filter(title__in=title_ids).values_list('created_by', flat=True).distinct()
+            title_ids = QuestionTitle.objects.filter(is_season=False).values_list(
+                'id', flat=True
+            )
+            teacher_ids = (
+                ChallengeQuestions.objects.filter(title__in=title_ids)
+                .values_list('created_by', flat=True)
+                .distinct()
+            )
             queryset = queryset.filter(id__in=teacher_ids)
 
         return queryset
 
     def get(self, request):
-        " нийт багшийн жагсаалт"
+        "нийт багшийн жагсаалт"
 
         teach_info = self.list(request).data
         return request.send_data(teach_info)
@@ -6326,11 +7252,10 @@ class TestTeacherApiView(
 
 @permission_classes([IsAuthenticated])
 class TestLessonTeacherApiView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin
+    generics.GenericAPIView, mixins.ListModelMixin, mixins.RetrieveModelMixin
 ):
-    """ Багшийн хичээлийн жагсаалт """
+    """Багшийн хичээлийн жагсаалт"""
+
     pagination_class = CustomPagination
     filter_backends = [SearchFilter]
     search_fields = ['first_name', 'last_name']
@@ -6341,16 +7266,20 @@ class TestLessonTeacherApiView(
             return request.send_error("ERR_002", "Багш олдсонгүй.")
 
         exam_type = request.query_params.get('exam_type')
-        obj = ChallengeQuestions.objects.filter(created_by_id=teacher).prefetch_related('title').filter(title__is_season=exam_type == '1')
+        obj = (
+            ChallengeQuestions.objects.filter(created_by_id=teacher)
+            .prefetch_related('title')
+            .filter(title__is_season=exam_type == '1')
+        )
         titles = set()
         for q in obj:
             titles.update(q.title.all())
         serialized_data = QuestionTitleSerializer(titles, many=True).data
 
         return_data = {
-            "count":len(serialized_data),
-            "name":teacher.full_name,
-            "data" :serialized_data
+            "count": len(serialized_data),
+            "name": teacher.full_name,
+            "data": serialized_data,
         }
 
         return request.send_data(return_data)
@@ -6363,7 +7292,7 @@ class ChallengeSedevCountAPIView(
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin,
     mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin
+    mixins.DestroyModelMixin,
 ):
 
     def post(self, request):
@@ -6371,7 +7300,7 @@ class ChallengeSedevCountAPIView(
         challenge_id = data.get("challenge")
         title = data.get("subject")
         level = data.get("level_of_question")
-        subInfo = data.get("subInfo") # Төгсөлтийн шалгалт
+        subInfo = data.get("subInfo")  # Төгсөлтийн шалгалт
         number_of_questions = data.get('number_questions')
         lesson_year = data.get('lesson_year')
         lesson_season = data.get('lesson_season')
@@ -6395,36 +7324,55 @@ class ChallengeSedevCountAPIView(
                         level=level,
                     )
                 else:
-                    if challenge.challenge_type not in [Challenge.SORIL1,Challenge.ADMISSION]:
+                    if challenge.challenge_type not in [
+                        Challenge.SORIL1,
+                        Challenge.ADMISSION,
+                    ]:
                         level = challenge.level
 
                     challenge_questions = ChallengeQuestions.objects.filter(
                         title=lesson_title,
                         level=level,
                         title__lesson=challenge.lesson,
-                        title__is_season=(challenge.challenge_type == Challenge.SEMESTR_EXAM)
+                        title__is_season=(
+                            challenge.challenge_type == Challenge.SEMESTR_EXAM
+                        ),
                     )
 
                 if lesson_year:
-                    challenge_questions = challenge_questions.filter(lesson_year=lesson_year)
+                    challenge_questions = challenge_questions.filter(
+                        lesson_year=lesson_year
+                    )
 
                 if lesson_season:
-                    challenge_questions = challenge_questions.filter(lesson_season=lesson_season)
+                    challenge_questions = challenge_questions.filter(
+                        lesson_season=lesson_season
+                    )
 
                 random_questions = None
                 if number_of_questions:
                     if challenge.has_shuffle:
-                        random_questions = challenge_questions.order_by('?')[:int(number_of_questions)]
+                        random_questions = challenge_questions.order_by('?')[
+                            : int(number_of_questions)
+                        ]
                     else:
-                        random_questions = challenge_questions.order_by('id')[:int(number_of_questions)]
+                        random_questions = challenge_questions.order_by('id')[
+                            : int(number_of_questions)
+                        ]
                 elif number_of_questions_percentage:
                     total_questions = challenge_questions.count()
-                    question_count = int(total_questions * (int(number_of_questions_percentage) /  100))
+                    question_count = int(
+                        total_questions * (int(number_of_questions_percentage) / 100)
+                    )
 
                     if challenge.has_shuffle:
-                        random_questions = challenge_questions.order_by('?')[:question_count]
+                        random_questions = challenge_questions.order_by('?')[
+                            :question_count
+                        ]
                     else:
-                        random_questions = challenge_questions.order_by('id')[:question_count]
+                        random_questions = challenge_questions.order_by('id')[
+                            :question_count
+                        ]
                 else:
                     if challenge.has_shuffle:
                         random_questions = challenge_questions.order_by('?')
@@ -6441,7 +7389,7 @@ class ChallengeSedevCountAPIView(
         try:
             question_ids = request.query_params.get('questions')
 
-            if not isinstance(question_ids,list):
+            if not isinstance(question_ids, list):
                 question_ids = question_ids.split(',')
             challenge = Challenge.objects.get(id=pk)
             question_objs = challenge.questions.filter(id__in=question_ids)
@@ -6460,7 +7408,7 @@ class ChallengeLevelCountAPIView(
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin,
     mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin
+    mixins.DestroyModelMixin,
 ):
 
     def post(self, request):
@@ -6486,17 +7434,23 @@ class ChallengeLevelCountAPIView(
                 )
 
                 if number_of_questions:
-                    random_questions = challenge_questions.order_by('?')[:int(number_of_questions)]
+                    random_questions = challenge_questions.order_by('?')[
+                        : int(number_of_questions)
+                    ]
 
                 elif number_of_questions_percentage:
                     total_questions = challenge.question_count or 0
-                    question_count = int(total_questions * (int(number_of_questions_percentage) /  100))
+                    question_count = int(
+                        total_questions * (int(number_of_questions_percentage) / 100)
+                    )
 
                     # Бодогдож байгаа асуултын тоо 0-ээс бага байх үед
                     if question_count == 0:
                         question_count = total_questions
 
-                    random_questions = challenge_questions.order_by('?')[:question_count]
+                    random_questions = challenge_questions.order_by('?')[
+                        :question_count
+                    ]
                 else:
                     random_questions = challenge_questions.order_by('?')
 
@@ -6524,7 +7478,7 @@ class ChallengeAddStudentAPIView(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin
+    mixins.DestroyModelMixin,
 ):
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
@@ -6536,7 +7490,11 @@ class ChallengeAddStudentAPIView(
 
     def get(self, request):
         challenge = request.query_params.get('challenge')
-        challenge_student_all = Challenge.objects.get(id=challenge).student.all().values_list('id', flat=True)
+        challenge_student_all = (
+            Challenge.objects.get(id=challenge)
+            .student.all()
+            .values_list('id', flat=True)
+        )
 
         self.queryset = self.queryset.filter(id__in=list(challenge_student_all))
 
@@ -6561,7 +7519,10 @@ class ChallengeAddStudentAPIView(
                     check = challenge.student.filter(id=student.id)
 
                     if check:
-                        return request.send_error("ERR_003",f'"{student_code}" кодтой оюутан шалгалтанд үүссэн байна.')
+                        return request.send_error(
+                            "ERR_003",
+                            f'"{student_code}" кодтой оюутан шалгалтанд үүссэн байна.',
+                        )
 
                     challenge.student.add(student)
                     challenge.save()
@@ -6569,7 +7530,9 @@ class ChallengeAddStudentAPIView(
                 else:
                     return request.send_error("ERR_002")
             else:
-                return request.send_error("ERR_003",f'"{student_code}" кодтой оюутан олдсонгүй!')
+                return request.send_error(
+                    "ERR_003", f'"{student_code}" кодтой оюутан олдсонгүй!'
+                )
         except Exception as e:
             print(e)
             return request.send_error("ERR_002")
@@ -6597,7 +7560,7 @@ class ChallengeAddStudentDeleteAPIView(
 
     def post(self, request):
         """
-            Асуултын олноор устгах хэсэг
+        Асуултын олноор устгах хэсэг
         """
 
         data = request.data
@@ -6635,7 +7598,9 @@ class ChallengeQuestionsAPIView(
             for backend_filter in list(self.filter_backends):
                 all_data = backend_filter().filter_queryset(request, all_data, self)
             paginator = self.pagination_class()
-            paginated_all_data = paginator.paginate_queryset(all_data, request, view=self)
+            paginated_all_data = paginator.paginate_queryset(
+                all_data, request, view=self
+            )
             serializer = self.get_serializer(paginated_all_data, many=True)
 
             response_data = {
@@ -6643,7 +7608,7 @@ class ChallengeQuestionsAPIView(
                 'next': paginator.get_next_link(),
                 'previous': paginator.get_previous_link(),
                 "questions": serializer.data,
-                "challenge_question_count": challenge.question_count
+                "challenge_question_count": challenge.question_count,
             }
         return request.send_data(response_data)
 
@@ -6657,13 +7622,13 @@ class TestQuestionsAllAPIView(
     "Шалгалтын асуулт"
 
     queryset = ChallengeQuestions.objects.all()
-    serializer_class= ChallengeQuestionListSerializer
+    serializer_class = ChallengeQuestionListSerializer
 
     def get(self, request, pk=None):
 
         if pk:
             test = Challenge.objects.get(id=pk)
-            questions= test.questions.order_by('id')
+            questions = test.questions.order_by('id')
 
         serializer = self.serializer_class(questions, many=True)
         data = serializer.data
@@ -6679,7 +7644,10 @@ class TestQuestionsDifficultyLevelsAPIView(
     queryset = ChallengeQuestions.objects.all()
 
     def get(self, request):
-        data = [{'value': key, 'label': label} for key, label in self.queryset.model._meta.get_field('level').choices]
+        data = [
+            {'value': key, 'label': label}
+            for key, label in self.queryset.model._meta.get_field('level').choices
+        ]
 
         return request.send_data(data)
 
@@ -6699,7 +7667,9 @@ class ChallengeStudentsScoreAPIView(
             return request.send_error("ERR_002")
 
         challenge_students_qs = ChallengeStudents.objects.filter(challenge=exam)
-        question_count_actual = ChallengeQuestions.objects.filter(challenge__id=exam).count()
+        question_count_actual = ChallengeQuestions.objects.filter(
+            challenge__id=exam
+        ).count()
         changed_values = {}
 
         # to update question count field (i am not sure why this field needed) if questions collection is changed. For example: to calculate proper percents values in reports (if this field is used)
@@ -6709,7 +7679,7 @@ class ChallengeStudentsScoreAPIView(
             changed_values['Challenge'] = {
                 'question_count': {
                     'old': challenge_qs.question_count,
-                    'new': question_count_actual
+                    'new': question_count_actual,
                 }
             }
 
@@ -6719,12 +7689,16 @@ class ChallengeStudentsScoreAPIView(
         changed_values['ChallengeStudents'] = {}
 
         for challenge_student in challenge_students_qs:
-            changed_values['ChallengeStudents'][f'{challenge_student.id}-{challenge_student.student.code}'] = {}
+            changed_values['ChallengeStudents'][
+                f'{challenge_student.id}-{challenge_student.student.code}'
+            ] = {}
 
             if challenge_student.take_score != question_count_actual:
-                changed_values['ChallengeStudents'][f'{challenge_student.id}-{challenge_student.student.code}']['take_score'] = {
+                changed_values['ChallengeStudents'][
+                    f'{challenge_student.id}-{challenge_student.student.code}'
+                ]['take_score'] = {
                     'old': challenge_student.take_score,
-                    'new': question_count_actual
+                    'new': question_count_actual,
                 }
 
                 # to get total possible score. 1 question counted as 1 point of score (may be summary of values of "QuestionChoices,score" field should be used instead, i am not sure)
@@ -6749,25 +7723,27 @@ class ChallengeStudentsScoreAPIView(
             # to detect attempt. attempt counted only if any choice was given (i am not sure is it correct detect way or not)
             if answers_choices:
                 if challenge_student.tried != True:
-                    changed_values['ChallengeStudents'][f'{challenge_student.id}-{challenge_student.student.code}']['tried'] = {
-                        'old': challenge_student.tried,
-                        'new': True
-                    }
+                    changed_values['ChallengeStudents'][
+                        f'{challenge_student.id}-{challenge_student.student.code}'
+                    ]['tried'] = {'old': challenge_student.tried, 'new': True}
 
                     challenge_student.tried = True
             # to get correct answers count. any value of "QuestionChoices,score" greater than 0 counted as 1 point of score (may be summary of values of "QuestionChoices,score" field should be used instead, i am not sure)
-            score = QuestionChoices.objects.filter(id__in=answers_choices, score__gt=0).count()
+            score = QuestionChoices.objects.filter(
+                id__in=answers_choices, score__gt=0
+            ).count()
 
             if challenge_student.score != score:
-                changed_values['ChallengeStudents'][f'{challenge_student.id}-{challenge_student.student.code}']['old_score'] = {
+                changed_values['ChallengeStudents'][
+                    f'{challenge_student.id}-{challenge_student.student.code}'
+                ]['old_score'] = {
                     'old': challenge_student.old_score,
-                    'new': challenge_student.score
+                    'new': challenge_student.score,
                 }
 
-                changed_values['ChallengeStudents'][f'{challenge_student.id}-{challenge_student.student.code}']['score'] = {
-                    'old': challenge_student.score,
-                    'new': score
-                }
+                changed_values['ChallengeStudents'][
+                    f'{challenge_student.id}-{challenge_student.student.code}'
+                ]['score'] = {'old': challenge_student.score, 'new': score}
 
                 challenge_student.old_score = challenge_student.score
                 challenge_student.score = score
@@ -6805,8 +7781,7 @@ class ChallengeReportAPIView(
 
             # to get last title because title field is manytomany type
             questions = (
-                ChallengeQuestions.objects
-                .filter(challenge__id=challenge_id)
+                ChallengeQuestions.objects.filter(challenge__id=challenge_id)
                 .order_by('id')
                 .annotate(last_title_id=Max('title__id'))
                 .filter(title__id=F('last_title_id'))
@@ -6828,13 +7803,15 @@ class ChallengeReportAPIView(
                         if choice_obj.score > 0:
                             is_right = True
 
-                answers.append({
-                    'question_id': question.get('id'),
-                    'question_text': question.get('question'),
-                    'is_answered_right': is_right,
-                    'choice_id': choice_id,
-                    'question_title': question.get('title__name'),
-                })
+                answers.append(
+                    {
+                        'question_id': question.get('id'),
+                        'question_text': question.get('question'),
+                        'is_answered_right': is_right,
+                        'choice_id': choice_id,
+                        'question_title': question.get('title__name'),
+                    }
+                )
 
         except Exception:
             traceback.print_exc()
@@ -6851,7 +7828,11 @@ class ChallengeReportAPIView(
             question_id = res["question_id"]
 
             if question_id not in question_stats:
-                question_stats[question_id] = {"correct": 0, "total": 0, 'question_text': res['question_text']}
+                question_stats[question_id] = {
+                    "correct": 0,
+                    "total": 0,
+                    'question_text': res['question_text'],
+                }
 
             question_stats[question_id]["total"] += 1
 
@@ -6875,16 +7856,28 @@ class ChallengeReportAPIView(
         queryset = None
         exam_qs = ExamTimeTable.objects.all()
         if lesson_year and lesson_season:
-            exam_qs = ExamTimeTable.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season)
+            exam_qs = ExamTimeTable.objects.filter(
+                lesson_year=lesson_year, lesson_season=lesson_season
+            )
             exam_ids = exam_qs.values_list('id', flat=True)
-            group_ids  = Exam_to_group.objects.filter(exam__in=exam_ids).values_list('group', flat=True)
+            group_ids = Exam_to_group.objects.filter(exam__in=exam_ids).values_list(
+                'group', flat=True
+            )
 
             if start_date and end_date:
-                exam_ids = ExamTimeTable.objects.filter(begin_date__gte=start_date, end_date__lte=end_date).values_list('id', flat=True)
-                group_ids  = Exam_to_group.objects.filter(exam__in=exam_ids).values_list('group', flat=True)
+                exam_ids = ExamTimeTable.objects.filter(
+                    begin_date__gte=start_date, end_date__lte=end_date
+                ).values_list('id', flat=True)
+                group_ids = Exam_to_group.objects.filter(exam__in=exam_ids).values_list(
+                    'group', flat=True
+                )
 
             if school_id:
-                exam_ids = Exam_to_group.objects.filter(exam__lesson_year=lesson_year, exam__lesson_season=lesson_season, group__school=school_id).values_list('exam', flat=True)
+                exam_ids = Exam_to_group.objects.filter(
+                    exam__lesson_year=lesson_year,
+                    exam__lesson_season=lesson_season,
+                    group__school=school_id,
+                ).values_list('exam', flat=True)
 
             exam_qs = exam_qs.filter(id__in=exam_ids)
 
@@ -6896,103 +7889,128 @@ class ChallengeReportAPIView(
                 lesson_season_id=lesson_season,
                 score__gt=0,
                 score_type__lesson_teacher__lesson__in=lesson_ids,
-                student__group__in=group_ids
+                student__group__in=group_ids,
             )
 
         if report_type == 'students':
             queryset = (
                 # this is "group by" part of sql query
-                queryset
-                .filter(student__group__in=group_ids)
+                queryset.filter(student__group__in=group_ids)
                 .values(
                     student_idnum=F('student_id'),
                     student_first_name=F('student__first_name'),
                     student_last_name=F('student__last_name'),
                     student_code=F('student__code'),
-                    group_name=F('student__group__name')
-
-                ).annotate(
-                    scored_lesson_count = Count('score_type__lesson_teacher__lesson__name', distinct=True),
-                    exam_type_scored_lesson_count = Count(
+                    group_name=F('student__group__name'),
+                )
+                .annotate(
+                    scored_lesson_count=Count(
+                        'score_type__lesson_teacher__lesson__name', distinct=True
+                    ),
+                    exam_type_scored_lesson_count=Count(
                         Case(
                             When(
                                 score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
-                                then='score_type__lesson_teacher__lesson__name'
+                                then='score_type__lesson_teacher__lesson__name',
                             )
                         ),
-                        distinct=True
+                        distinct=True,
                     ),
                     success_scored_lesson_count=Count(
                         Case(
                             # Шууд нийт оноог оруулсан бол
                             When(
-                                Q(score_type__score_type=Lesson_teacher_scoretype.BUSAD) &
-                                Q(score__gt=70),
-                                then='score_type__lesson_teacher__lesson__name'
+                                Q(score_type__score_type=Lesson_teacher_scoretype.BUSAD)
+                                & Q(score__gt=70),
+                                then='score_type__lesson_teacher__lesson__name',
                             ),
                             When(
-                                Q(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO) &
-                                Q(score__gte=18),
-                                then='score_type__lesson_teacher__lesson__name'
-                            )
+                                Q(
+                                    score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO
+                                )
+                                & Q(score__gte=18),
+                                then='score_type__lesson_teacher__lesson__name',
+                            ),
                         ),
-                        distinct=True
+                        distinct=True,
                     ),
-                    failed_scored_lesson_count=F('scored_lesson_count') - F('success_scored_lesson_count')
-                ).order_by('-failed_scored_lesson_count')
+                    failed_scored_lesson_count=F('scored_lesson_count')
+                    - F('success_scored_lesson_count'),
+                )
+                .order_by('-failed_scored_lesson_count')
             )
 
         elif report_type == 'students_detail':
             student_id = request.query_params.get('student')
-            lesson_ids = ExamTimeTable.objects.filter(lesson_year=lesson_year, lesson_season_id=lesson_season).values_list('lesson', flat=True)
+            lesson_ids = ExamTimeTable.objects.filter(
+                lesson_year=lesson_year, lesson_season_id=lesson_season
+            ).values_list('lesson', flat=True)
 
             if student_id:
                 queryset = (
-                    queryset.filter(student_id=student_id, score_type__lesson_teacher__lesson__in=lesson_ids).values(
+                    queryset.filter(
+                        student_id=student_id,
+                        score_type__lesson_teacher__lesson__in=lesson_ids,
+                    )
+                    .values(
                         student_first_name=F('student__first_name'),
                         student_last_name=F('student__last_name'),
                         student_code=F('student__code'),
-                        lesson_name=F('score_type__lesson_teacher__lesson__name')
-                    ).annotate(
-                        exam_score = Max(Case(
-                            When(
-                                score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
-                                then='score',
-                            ),
-                                default=Value(0), output_field=FloatField(),
+                        lesson_name=F('score_type__lesson_teacher__lesson__name'),
+                    )
+                    .annotate(
+                        exam_score=Max(
+                            Case(
+                                When(
+                                    score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
+                                    then='score',
+                                ),
+                                default=Value(0),
+                                output_field=FloatField(),
                             )
                         ),
-                        exam_teacher_first_name = Max(Case(
-                            When(
-                                score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
-                                then='score_type__lesson_teacher__teacher__first_name'
-                            ))
+                        exam_teacher_first_name=Max(
+                            Case(
+                                When(
+                                    score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
+                                    then='score_type__lesson_teacher__teacher__first_name',
+                                )
+                            )
                         ),
-                        exam_teacher_last_name = Max(Case(
-                            When(
-                                score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
-                                then='score_type__lesson_teacher__teacher__last_name'
-                            ))
+                        exam_teacher_last_name=Max(
+                            Case(
+                                When(
+                                    score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
+                                    then='score_type__lesson_teacher__teacher__last_name',
+                                )
+                            )
                         ),
-                        teach_score = Max(Case(
-                            When(
-                                score_type__score_type=Lesson_teacher_scoretype.BUSAD,
-                                then='score'
-                            ))
+                        teach_score=Max(
+                            Case(
+                                When(
+                                    score_type__score_type=Lesson_teacher_scoretype.BUSAD,
+                                    then='score',
+                                )
+                            )
                         ),
-                        teach_teacher_first_name = Max(Case(
-                            When(
-                                score_type__score_type=Lesson_teacher_scoretype.BUSAD,
-                                then='score_type__lesson_teacher__teacher__first_name'
-                            ))
+                        teach_teacher_first_name=Max(
+                            Case(
+                                When(
+                                    score_type__score_type=Lesson_teacher_scoretype.BUSAD,
+                                    then='score_type__lesson_teacher__teacher__first_name',
+                                )
+                            )
                         ),
-                        teach_teacher_last_name = Max(Case(
-                            When(
-                                score_type__score_type=Lesson_teacher_scoretype.BUSAD,
-                                then='score_type__lesson_teacher__teacher__last_name'
-                            ))
+                        teach_teacher_last_name=Max(
+                            Case(
+                                When(
+                                    score_type__score_type=Lesson_teacher_scoretype.BUSAD,
+                                    then='score_type__lesson_teacher__teacher__last_name',
+                                )
+                            )
                         ),
-                    ).order_by('-exam_score')
+                    )
+                    .order_by('-exam_score')
                 )
 
         else:
@@ -7003,7 +8021,7 @@ class ChallengeReportAPIView(
             if lesson_year and lesson_season:
                 queryset = queryset.filter(
                     challenge__lesson_year=lesson_year,
-                    challenge__lesson_season=lesson_season
+                    challenge__lesson_season=lesson_season,
                 )
 
             exam = request.query_params.get('exam')
@@ -7041,15 +8059,18 @@ class ChallengeReportAPIView(
                 stats = answers_stats.get(question_obj.id)
 
                 if stats:
-                    question_obj.reliability = ((stats['correct'] * 100) / stats['total']) if stats['total'] > 0 else 0
+                    question_obj.reliability = (
+                        ((stats['correct'] * 100) / stats['total'])
+                        if stats['total'] > 0
+                        else 0
+                    )
 
             queryset = questions_qs
 
-        elif (
-            report_type == 'groups' or
-            report_type == 'professions'
-        ):
-            assessments = Score.objects.all().values('score_min','score_max','assesment')
+        elif report_type == 'groups' or report_type == 'professions':
+            assessments = Score.objects.all().values(
+                'score_min', 'score_max', 'assesment'
+            )
             assessment_dict = {}
 
             for assessment in assessments:
@@ -7068,126 +8089,172 @@ class ChallengeReportAPIView(
                 else:
                     assessment_dict[assesment_value] = {
                         'score_min': score_min,
-                        'score_max': score_max
+                        'score_max': score_max,
                     }
 
-            queryset = (
-                queryset
-                    .order_by() # to remove above sortings because it conflicts with "group by"
-                    .select_related('student')
+            queryset = queryset.order_by().select_related(  # to remove above sortings because it conflicts with "group by"
+                'student'
             )
 
             if report_type == 'groups':
                 queryset = (
-                    queryset
-                        .prefetch_related('student__group')
-                        .annotate(
-                            group_name=F('student__group__name'),
-                            score_percentage=Case(
-                                When(take_score__gt=0, then=(F('score') * 100 / F('take_score'))),
-                                default=Value(0),
-                                output_field=FloatField()
+                    queryset.prefetch_related('student__group')
+                    .annotate(
+                        group_name=F('student__group__name'),
+                        score_percentage=Case(
+                            When(
+                                take_score__gt=0,
+                                then=(F('score') * 100 / F('take_score')),
                             ),
-                        )
-                        .values('group_name') # to group students by group_name
+                            default=Value(0),
+                            output_field=FloatField(),
+                        ),
+                    )
+                    .values('group_name')  # to group students by group_name
                 )
 
             elif report_type == 'professions':
                 queryset = (
-                    queryset
-                        .prefetch_related('student__group__profession')
-                        .annotate(
-                            profession_name=F('student__group__profession__name'),
-                            score_percentage=Case(
-                                When(take_score__gt=0, then=(F('score') * 100 / F('take_score'))),
-                                default=Value(0),
-                                output_field=FloatField()
+                    queryset.prefetch_related('student__group__profession')
+                    .annotate(
+                        profession_name=F('student__group__profession__name'),
+                        score_percentage=Case(
+                            When(
+                                take_score__gt=0,
+                                then=(F('score') * 100 / F('take_score')),
                             ),
-                        )
-                        .values('profession_name') # to group students by profession_name
+                            default=Value(0),
+                            output_field=FloatField(),
+                        ),
+                    )
+                    .values('profession_name')  # to group students by profession_name
                 )
 
-            queryset = (
-                queryset
-                    .annotate(
-                        student_count=Count('student', distinct=True),
-                        A2_count=Count(
-                            Case(
-                                When(
-                                    score_percentage__gte=assessment_dict.get('A+').get('score_min'),
-                                    score_percentage__lte=assessment_dict.get('A+').get('score_max'),
-                                    then=Value(1)),
-                                output_field=IntegerField()
-                            )
+            queryset = queryset.annotate(
+                student_count=Count('student', distinct=True),
+                A2_count=Count(
+                    Case(
+                        When(
+                            score_percentage__gte=assessment_dict.get('A+').get(
+                                'score_min'
+                            ),
+                            score_percentage__lte=assessment_dict.get('A+').get(
+                                'score_max'
+                            ),
+                            then=Value(1),
                         ),
-                        A_count=Count(
-                            Case(
-                                When(
-                                    score_percentage__gte=assessment_dict.get('A').get('score_min'),
-                                    score_percentage__lte=assessment_dict.get('A').get('score_max'),
-                                    then=Value(1)),
-                                output_field=IntegerField()
-                            )
-                        ),
-                        B2_count=Count(
-                            Case(
-                                When(
-                                    score_percentage__gte=assessment_dict.get('B+').get('score_min'),
-                                    score_percentage__lte=assessment_dict.get('B+').get('score_max'),
-                                    then=Value(1)),
-                                output_field=IntegerField()
-                            )
-                        ),
-                        B_count=Count(
-                            Case(
-                                When(
-                                    score_percentage__gte=assessment_dict.get('B').get('score_min'),
-                                    score_percentage__lte=assessment_dict.get('B').get('score_max'),
-                                    then=Value(1)),
-                                output_field=IntegerField()
-                            )
-                        ),
-                        C2_count=Count(
-                            Case(
-                                When(
-                                    score_percentage__gte=assessment_dict.get('C+').get('score_min'),
-                                    score_percentage__lte=assessment_dict.get('C+').get('score_max'),
-                                    then=Value(1)),
-                                output_field=IntegerField()
-                            )
-                        ),
-                        C_count=Count(
-                            Case(
-                                When(
-                                    score_percentage__gte=assessment_dict.get('C').get('score_min'),
-                                    score_percentage__lte=assessment_dict.get('C').get('score_max'),
-                                    then=Value(1)),
-                                output_field=IntegerField()
-                            )
-                        ),
-                        D_count=Count(
-                            Case(
-                                When(
-                                    score_percentage__gte=assessment_dict.get('D').get('score_min'),
-                                    score_percentage__lte=assessment_dict.get('D').get('score_max'),
-                                    then=Value(1)),
-                                output_field=IntegerField()
-                            )
-                        ),
-                        F_count=Count(
-                            Case(
-                                When(
-                                    score_percentage__gte=assessment_dict.get('F').get('score_min'),
-                                    score_percentage__lte=assessment_dict.get('F').get('score_max'),
-                                    then=Value(1)),
-                                output_field=IntegerField()
-                            )
-                        )
+                        output_field=IntegerField(),
                     )
+                ),
+                A_count=Count(
+                    Case(
+                        When(
+                            score_percentage__gte=assessment_dict.get('A').get(
+                                'score_min'
+                            ),
+                            score_percentage__lte=assessment_dict.get('A').get(
+                                'score_max'
+                            ),
+                            then=Value(1),
+                        ),
+                        output_field=IntegerField(),
+                    )
+                ),
+                B2_count=Count(
+                    Case(
+                        When(
+                            score_percentage__gte=assessment_dict.get('B+').get(
+                                'score_min'
+                            ),
+                            score_percentage__lte=assessment_dict.get('B+').get(
+                                'score_max'
+                            ),
+                            then=Value(1),
+                        ),
+                        output_field=IntegerField(),
+                    )
+                ),
+                B_count=Count(
+                    Case(
+                        When(
+                            score_percentage__gte=assessment_dict.get('B').get(
+                                'score_min'
+                            ),
+                            score_percentage__lte=assessment_dict.get('B').get(
+                                'score_max'
+                            ),
+                            then=Value(1),
+                        ),
+                        output_field=IntegerField(),
+                    )
+                ),
+                C2_count=Count(
+                    Case(
+                        When(
+                            score_percentage__gte=assessment_dict.get('C+').get(
+                                'score_min'
+                            ),
+                            score_percentage__lte=assessment_dict.get('C+').get(
+                                'score_max'
+                            ),
+                            then=Value(1),
+                        ),
+                        output_field=IntegerField(),
+                    )
+                ),
+                C_count=Count(
+                    Case(
+                        When(
+                            score_percentage__gte=assessment_dict.get('C').get(
+                                'score_min'
+                            ),
+                            score_percentage__lte=assessment_dict.get('C').get(
+                                'score_max'
+                            ),
+                            then=Value(1),
+                        ),
+                        output_field=IntegerField(),
+                    )
+                ),
+                D_count=Count(
+                    Case(
+                        When(
+                            score_percentage__gte=assessment_dict.get('D').get(
+                                'score_min'
+                            ),
+                            score_percentage__lte=assessment_dict.get('D').get(
+                                'score_max'
+                            ),
+                            then=Value(1),
+                        ),
+                        output_field=IntegerField(),
+                    )
+                ),
+                F_count=Count(
+                    Case(
+                        When(
+                            score_percentage__gte=assessment_dict.get('F').get(
+                                'score_min'
+                            ),
+                            score_percentage__lte=assessment_dict.get('F').get(
+                                'score_max'
+                            ),
+                            then=Value(1),
+                        ),
+                        output_field=IntegerField(),
+                    )
+                ),
             )
 
         # for reports where pagination is required
-        if report_type in ['students', 'students_detail', 'dt_reliability', 'report4', 'groups', 'professions']:
+        if report_type in [
+            'students',
+            'students_detail',
+            'dt_reliability',
+            'report4',
+            'groups',
+            'professions',
+        ]:
             sorting = self.request.query_params.get('sorting')
 
             # Sort хийх үед ажиллана
@@ -7221,8 +8288,12 @@ class ChallengeReportAPIView(
             # questions reliability ranges
             questions_reliability_ranges = {
                 "Маш хүнд": lambda question_reliability: question_reliability <= 20,
-                "Хүндэвтэр": lambda question_reliability: 21 <= question_reliability <= 40,
-                "Дунд зэрэг": lambda question_reliability: 41 <= question_reliability <= 60,
+                "Хүндэвтэр": lambda question_reliability: 21
+                <= question_reliability
+                <= 40,
+                "Дунд зэрэг": lambda question_reliability: 41
+                <= question_reliability
+                <= 60,
                 "Хялбар": lambda question_reliability: 61 <= question_reliability <= 80,
                 "Маш хялбар": lambda question_reliability: question_reliability >= 81,
             }
@@ -7236,11 +8307,13 @@ class ChallengeReportAPIView(
                 if stats["total"] > 0:
                     question_reliability = (stats["correct"] / stats["total"]) * 100
 
-                    questions_reliability.append({
-                        'question_id': question_id,
-                        'question_reliability': question_reliability,
-                        'question_text': stats['question_text']
-                    })
+                    questions_reliability.append(
+                        {
+                            'question_id': question_id,
+                            'question_reliability': question_reliability,
+                            'question_text': stats['question_text'],
+                        }
+                    )
 
             # to group questions and their reliabilities by reliability ranges
             grouped_questions = {key: [] for key in questions_reliability_ranges}
@@ -7252,7 +8325,13 @@ class ChallengeReportAPIView(
 
                 for range_name, condition in questions_reliability_ranges.items():
                     if condition(question_reliability):
-                        grouped_questions[range_name].append({"question_id": question_id, 'question_text': question_text, "question_reliability": question_reliability})
+                        grouped_questions[range_name].append(
+                            {
+                                "question_id": question_id,
+                                'question_text': question_text,
+                                "question_reliability": question_reliability,
+                            }
+                        )
 
                         break
 
@@ -7261,10 +8340,16 @@ class ChallengeReportAPIView(
 
             for key, questions in grouped_questions.items():
                 # to build dict for recharts format
-                rechart_data.append({
-                    "questions_reliability_name": key,
-                    "questions_count_percent": (len(questions) * 100 / total_questions_count) if total_questions_count else 0
-                })
+                rechart_data.append(
+                    {
+                        "questions_reliability_name": key,
+                        "questions_count_percent": (
+                            (len(questions) * 100 / total_questions_count)
+                            if total_questions_count
+                            else 0
+                        ),
+                    }
+                )
 
             get_result = rechart_data
 
@@ -7314,10 +8399,17 @@ class ChallengeReportAPIView(
 
             get_result = {
                 'questions': first_student_answers,
-                'questions_summary': question_stats
+                'questions_summary': question_stats,
             }
 
-        if report_type in ['students', 'students_detail', 'dt_reliability', 'report4', 'groups', 'professions']:
+        if report_type in [
+            'students',
+            'students_detail',
+            'dt_reliability',
+            'report4',
+            'groups',
+            'professions',
+        ]:
             get_result = self.list(request).data
         # endregion for datatable with pagination
 
@@ -7339,19 +8431,25 @@ class ChallengeDetailApiView(
 
     def get(self, request):
 
-        #Тухайн шалгалтын id
+        # Тухайн шалгалтын id
         test_id = request.query_params.get('test_id')
-        #Энэ шалгалтыг өгсөн оюутануудын id-г student_list-д хадгална
-        student_list = self.queryset.filter(challenge=test_id).values_list('student__id', flat=True)
-        #Нийт оюутануудаас шалгалт өгсөн оюутануудыг авна
+        # Энэ шалгалтыг өгсөн оюутануудын id-г student_list-д хадгална
+        student_list = self.queryset.filter(challenge=test_id).values_list(
+            'student__id', flat=True
+        )
+        # Нийт оюутануудаас шалгалт өгсөн оюутануудыг авна
         students_qs = Student.objects.filter(id__in=student_list)
         students_qs = self.filter_queryset(students_qs)
-        #Энийг мэддэг болоод бичнэ. Гэхдээ queryset-ээ serializer руу дамжуулаад энэ qs-ээ тохирсон дата-г аваад байх шиг байна.
-        #Бас context-оор test_id-г дамжуулж байна.
-        student_data = StudentChallengeSerializer(students_qs, many=True, context={'test_id': test_id}).data
+        # Энийг мэддэг болоод бичнэ. Гэхдээ queryset-ээ serializer руу дамжуулаад энэ qs-ээ тохирсон дата-г аваад байх шиг байна.
+        # Бас context-оор test_id-г дамжуулж байна.
+        student_data = StudentChallengeSerializer(
+            students_qs, many=True, context={'test_id': test_id}
+        ).data
 
         for student in student_data:
-            challenge_student = ChallengeStudents.objects.filter(student__id=student['id'], challenge=test_id).first()
+            challenge_student = ChallengeStudents.objects.filter(
+                student__id=student['id'], challenge=test_id
+            ).first()
             if challenge_student:
                 student['is_not_exam_failed'] = (challenge_student.score or 0) >= 18
 
@@ -7360,9 +8458,7 @@ class ChallengeDetailApiView(
 
 @permission_classes([IsAuthenticated])
 class ChallengeTestDetailApiView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin
+    generics.GenericAPIView, mixins.ListModelMixin, mixins.RetrieveModelMixin
 ):
     queryset = Challenge.objects.all()
     serializer_class = ChallengeDetailSerializer
@@ -7374,10 +8470,7 @@ class ChallengeTestDetailApiView(
 
 
 # @permission_classes([IsAuthenticated])
-class TestResultShowAPIView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin
-):
+class TestResultShowAPIView(generics.GenericAPIView, mixins.ListModelMixin):
     """Шалгалтын оноо асуулт хариултыг харах API"""
 
     queryset = ChallengeQuestions.objects.all()
@@ -7398,7 +8491,9 @@ class TestResultShowAPIView(
                 question_ids.append(int(question_id))
 
                 if isinstance(choice_id, list):  # It's a list
-                    chosen_choices.append([int(id) for id in choice_id if isinstance(id, int)])
+                    chosen_choices.append(
+                        [int(id) for id in choice_id if isinstance(id, int)]
+                    )
                 else:
                     chosen_choices.append(int(choice_id))
 
@@ -7414,16 +8509,17 @@ class TestResultShowAPIView(
                         data['chosen_choice'] = [int(id) for id in choice_ids]
                     else:
                         # Single choice
-                        data['chosen_choice'] = int(choice_ids) if choice_ids not in [0, 1] else ('Тийм' if choice_ids == 1 else 'Үгүй')
+                        data['chosen_choice'] = (
+                            int(choice_ids)
+                            if choice_ids not in [0, 1]
+                            else ('Тийм' if choice_ids == 1 else 'Үгүй')
+                        )
                     if data['score']:
                         totalscore += data['score']
 
                     big_data.append(data)
 
-        return_data = {
-            'question': big_data,
-            'total_score': totalscore
-        }
+        return_data = {'question': big_data, 'total_score': totalscore}
         return request.send_data(return_data)
 
 
@@ -7448,7 +8544,9 @@ class ChallengeAddInformationAPIView(
         user = request.user
         season = request.query_params.get('season')
         lesson_year, lesson_season = get_active_year_season()
-        teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
+        teacher = get_object_or_404(
+            Teachers, user_id=user, action_status=Teachers.APPROVED
+        )
         data['created_by'] = teacher.id if teacher else None
 
         if 'is_repeat' in data:
@@ -7468,7 +8566,9 @@ class ChallengeAddInformationAPIView(
         data['lesson_year'] = lesson_year
         try:
             with transaction.atomic():
-                saved_data, exception, serializer_errors = save_data_with_signals(self.queryset.model, self.serializer_class, True, None, data=data)
+                saved_data, exception, serializer_errors = save_data_with_signals(
+                    self.queryset.model, self.serializer_class, True, None, data=data
+                )
                 if serializer_errors:
                     return request.send_error_valid(serializer_errors)
 
@@ -7503,10 +8603,7 @@ class ChallengeAddInformationAPIView(
         else:
             error_fields = []
             for key in serializer.errors:
-                return_error = {
-                    "field": key,
-                    "msg": serializer.errors[key][0]
-                }
+                return_error = {"field": key, "msg": serializer.errors[key][0]}
                 error_fields.append(return_error)
             return request.send_error_valid(error_fields)
 
@@ -7560,17 +8657,30 @@ class ChallengeAddKindAPIView(
         qs_student = Student.objects.all()
         teacher = Teachers.objects.filter(user_id=user).first()
 
-        timetable_qs = TimeTable.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season, lesson=lesson_id, teacher=teacher)
+        timetable_qs = TimeTable.objects.filter(
+            lesson_year=lesson_year,
+            lesson_season=lesson_season,
+            lesson=lesson_id,
+            teacher=teacher,
+        )
         timetable_ids = timetable_qs.values_list('id', flat=True)
 
-        exclude_student_ids = TimeTable_to_student.objects.filter(timetable_id__in=timetable_ids, add_flag=False).values_list('student', flat=True)
+        exclude_student_ids = TimeTable_to_student.objects.filter(
+            timetable_id__in=timetable_ids, add_flag=False
+        ).values_list('student', flat=True)
 
         if scope == 'all':
-            all_lesson_students = get_lesson_choice_student(lesson_id, teacher.id, '', lesson_year, lesson_season)
-            student_ids = qs_student.filter(id__in=all_lesson_students).values_list('id', flat=True)
+            all_lesson_students = get_lesson_choice_student(
+                lesson_id, teacher.id, '', lesson_year, lesson_season
+            )
+            student_ids = qs_student.filter(id__in=all_lesson_students).values_list(
+                'id', flat=True
+            )
 
         elif scope == 'group':
-            all_student_ids = qs_student.filter(group_id__in=select_ids).values_list('id', flat=True)
+            all_student_ids = qs_student.filter(group_id__in=select_ids).values_list(
+                'id', flat=True
+            )
             student_ids = set(all_student_ids) - set(list(exclude_student_ids))
 
         students = Student.objects.filter(id__in=student_ids)
@@ -7589,11 +8699,8 @@ class ChallengeAddKindAPIView(
 
 
 @permission_classes([IsAuthenticated])
-class LessonChallengeApiView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin
-):
-    """ Хичээлийн жагсаалт """
+class LessonChallengeApiView(generics.GenericAPIView, mixins.ListModelMixin):
+    """Хичээлийн жагсаалт"""
 
     queryset = LessonStandart.objects.all()
 
@@ -7601,8 +8708,12 @@ class LessonChallengeApiView(
         lesson_year, lesson_season = get_active_year_season()
 
         # Тухайн жилийн дүн оруулсан хичээлийн мэдээлэл
-        score_type_ids = TeacherScore.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season).values_list('score_type', flat=True)
-        lesson_ids = Lesson_teacher_scoretype.objects.filter(id__in=score_type_ids).values_list('lesson_teacher__lesson', flat=True)
+        score_type_ids = TeacherScore.objects.filter(
+            lesson_year=lesson_year, lesson_season=lesson_season
+        ).values_list('score_type', flat=True)
+        lesson_ids = Lesson_teacher_scoretype.objects.filter(
+            id__in=score_type_ids
+        ).values_list('lesson_teacher__lesson', flat=True)
 
         data = self.queryset.filter(id__in=lesson_ids).values('id', 'code', 'name')
 
@@ -7610,9 +8721,7 @@ class LessonChallengeApiView(
 
 
 @permission_classes([IsAuthenticated])
-class LessonsApiView(
-    generics.GenericAPIView
-):
+class LessonsApiView(generics.GenericAPIView):
 
     def get(self, request):
 
@@ -7626,16 +8735,14 @@ class LessonsApiView(
             }
 
         if teacher:
-            teacher_of_lessons_qs = Lesson_to_teacher.objects.filter(teacher=teacher).values_list("lesson", flat=True)
+            teacher_of_lessons_qs = Lesson_to_teacher.objects.filter(
+                teacher=teacher
+            ).values_list("lesson", flat=True)
             extra_filter['id__in'] = teacher_of_lessons_qs
 
-        data = (
-            LessonStandart
-                .objects
-                .filter(
-                    **extra_filter
-                )
-                .values('id', fname=Concat(F("code"), Value(" "), F("name"), output_field=CharField()))
+        data = LessonStandart.objects.filter(**extra_filter).values(
+            'id',
+            fname=Concat(F("code"), Value(" "), F("name"), output_field=CharField()),
         )
         data_list = list(data)
 
@@ -7643,9 +8750,7 @@ class LessonsApiView(
 
 
 @permission_classes([IsAuthenticated])
-class AnalysisApiView(
-    generics.GenericAPIView
-):
+class AnalysisApiView(generics.GenericAPIView):
 
     def get(self, request):
 
@@ -7657,12 +8762,10 @@ class AnalysisApiView(
         teacher = request.GET.get("teacher")
 
         assesments = list(
-            Score
-                .objects
-                .values("assesment")
-                .annotate(count=Count("assesment"))
-                .order_by("assesment")
-                .values_list("assesment", flat=True)
+            Score.objects.values("assesment")
+            .annotate(count=Count("assesment"))
+            .order_by("assesment")
+            .values_list("assesment", flat=True)
         )
 
         if year:
@@ -7678,37 +8781,35 @@ class AnalysisApiView(
         #     extra_filters['score_type__lesson_teacher__teacher'] = teacher
 
         chart_data = (
-            TeacherScore
-                .objects
-                .filter(**extra_filters)
-                .annotate(
-                    total_score=Subquery(
-                        TeacherScore.objects.filter(**extra_filters)
-                        .filter(student=OuterRef('student'))
-                        .values('student')
-                        .annotate(total=Sum('score'))
-                        .values('total')
-                    )
+            TeacherScore.objects.filter(**extra_filters)
+            .annotate(
+                total_score=Subquery(
+                    TeacherScore.objects.filter(**extra_filters)
+                    .filter(student=OuterRef('student'))
+                    .values('student')
+                    .annotate(total=Sum('score'))
+                    .values('total')
                 )
-                .annotate(
-                    assessment=Subquery(
-                        Score.objects.filter(score_max__gte=OuterRef('total_score'), score_min__lte=OuterRef('total_score')).values('assesment')[:1]
-                    )
+            )
+            .annotate(
+                assessment=Subquery(
+                    Score.objects.filter(
+                        score_max__gte=OuterRef('total_score'),
+                        score_min__lte=OuterRef('total_score'),
+                    ).values('assesment')[:1]
                 )
-                .values("assessment", 'total_score')
-                # .annotate(
-                #     count=Count("assessment"),
-                # )
-                # .values('assessment', 'count')
+            )
+            .values("assessment", 'total_score')
+            # .annotate(
+            #     count=Count("assessment"),
+            # )
+            # .values('assessment', 'count')
         )
         print(chart_data)
 
         data = {
             "data": [
-                {
-                    "name": "Багшийн дүн",
-                    "data": list(chart_data)
-                },
+                {"name": "Багшийн дүн", "data": list(chart_data)},
                 {
                     "name": "Дээд дүн",
                     "data": settings.GPA_ANALYSIS_1_MAX,
@@ -7716,18 +8817,16 @@ class AnalysisApiView(
                 {
                     "name": "Доод дүн",
                     "data": settings.GPA_ANALYSIS_1_MIN,
-                }
+                },
             ],
             "names": assesments,
         }
 
         return request.send_data(data)
 
-@permission_classes([IsAuthenticated])
-class Analysis2ApiView(
-    generics.GenericAPIView
-):
 
+@permission_classes([IsAuthenticated])
+class Analysis2ApiView(generics.GenericAPIView):
 
     def get(self, request):
 
@@ -7754,60 +8853,67 @@ class Analysis2ApiView(
         # if teacher:
         #     extra_filters['score_type__lesson_teacher__teacher'] = teacher
 
-
         chart_data = list(
-            TeacherScore
-                .objects
-                .filter(**extra_filters)
-                .annotate(
-                    is_exam=Exists(
-                        TeacherScore.objects.filter(score_type__lesson_teacher__lesson=lesson, student=OuterRef('student'), score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO)
-                    ),
-                    exam_score=(
-                        Case(
-                            When(
-                                is_exam=True,
-                                then='score',
-                            ),
-                            When(
-                                is_exam=False,
-                                then=Value(0),
-                            ),
-                            default=Value(1001), output_field=IntegerField(),
-                        )
-                    ),
-                    teach_score=Subquery(
-                        TeacherScore.objects.filter(**extra_filters)
-                        .filter(student=OuterRef('student'))
-                        .exclude(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO)
-                        .values('student')
-                        .annotate(total=Sum('score'))
-                        .values('total')
+            TeacherScore.objects.filter(**extra_filters)
+            .annotate(
+                is_exam=Exists(
+                    TeacherScore.objects.filter(
+                        score_type__lesson_teacher__lesson=lesson,
+                        student=OuterRef('student'),
+                        score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
                     )
-                )
-                .values("teach_score", "exam_score")
-                .annotate(
-                    count=Count("teach_score"),
-                )
-                .values('count', "teach_score", "exam_score")
+                ),
+                exam_score=(
+                    Case(
+                        When(
+                            is_exam=True,
+                            then='score',
+                        ),
+                        When(
+                            is_exam=False,
+                            then=Value(0),
+                        ),
+                        default=Value(1001),
+                        output_field=IntegerField(),
+                    )
+                ),
+                teach_score=Subquery(
+                    TeacherScore.objects.filter(**extra_filters)
+                    .filter(student=OuterRef('student'))
+                    .exclude(
+                        score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO
+                    )
+                    .values('student')
+                    .annotate(total=Sum('score'))
+                    .values('total')
+                ),
+            )
+            .values("teach_score", "exam_score")
+            .annotate(
+                count=Count("teach_score"),
+            )
+            .values('count', "teach_score", "exam_score")
         )
 
         # Filter out None values
-        x = [item['teach_score'] for item in chart_data if item['teach_score'] is not None]
-        y = [item['exam_score'] for item in chart_data if item['exam_score'] is not None]
+        x = [
+            item['teach_score']
+            for item in chart_data
+            if item['teach_score'] is not None
+        ]
+        y = [
+            item['exam_score'] for item in chart_data if item['exam_score'] is not None
+        ]
 
         r = 0
         line = []
         if len(y) > 0 and len(x) > 0:
             r, line = pearson_corel(x, y)
 
-        data = {
-            "data": chart_data,
-            "r": r,
-            "line": line
-        }
+        data = {"data": chart_data, "r": r, "line": line}
 
         return request.send_data(data)
+
 
 @permission_classes([IsAuthenticated])
 class ChallengeDetailTableApiView(
@@ -7823,15 +8929,17 @@ class ChallengeDetailTableApiView(
     search_fields = ['student__code', 'student__first_name', 'student__register_num']
 
     def get(self, request):
-        self.queryset = self.queryset.filter(challenge__challenge_type=Challenge.SEMESTR_EXAM)
+        self.queryset = self.queryset.filter(
+            challenge__challenge_type=Challenge.SEMESTR_EXAM
+        )
 
-        #Тухайн шалгалтын id
+        # Тухайн шалгалтын id
         test_id = request.query_params.get('test_id')
         department_id = request.query_params.get('department')
-        group_id =  request.query_params.get('group')
+        group_id = request.query_params.get('group')
 
         if test_id:
-            self.queryset= self.queryset.filter(challenge=test_id)
+            self.queryset = self.queryset.filter(challenge=test_id)
 
         if department_id:
             self.queryset = self.queryset.filter(student__department=department_id)
@@ -7843,13 +8951,14 @@ class ChallengeDetailTableApiView(
 
         return request.send_data(datas)
 
+
 @permission_classes([IsAuthenticated])
 class ChallengeStudentReportAPI(
     mixins.ListModelMixin,
     generics.GenericAPIView,
 ):
+    '''Оюутны бүртгэл тайлан'''
 
-    ''' Оюутны бүртгэл тайлан '''
     def get(self, request):
         school = request.query_params.get('school')
         challenge_id = request.query_params.get('test')
@@ -7925,12 +9034,11 @@ class ChallengeStudentReportAPI(
 
 
 @permission_classes([IsAuthenticated])
-class LessonStandartExamListAPIView(
-    generics.GenericAPIView
-):
-    """ Хичээлийн стандарт """
+class LessonStandartExamListAPIView(generics.GenericAPIView):
+    """Хичээлийн стандарт"""
 
     queryset = LessonStandart.objects.all()
+
     def get(self, request):
         lesson_year = request.query_params.get('lesson_year')
         lesson_season = request.query_params.get('lesson_season')
@@ -7941,19 +9049,19 @@ class LessonStandartExamListAPIView(
         if lesson_season:
             qs = qs.filter(lesson_season=lesson_season)
 
-        lesson_standarts = qs.values_list('score_type__lesson_teacher__lesson', flat=True)
+        lesson_standarts = qs.values_list(
+            'score_type__lesson_teacher__lesson', flat=True
+        )
 
-        all_data = self.queryset.filter(id__in=lesson_standarts).values('id', 'code', 'name')
+        all_data = self.queryset.filter(id__in=lesson_standarts).values(
+            'id', 'code', 'name'
+        )
         return request.send_data(list(all_data))
 
 
-
 @permission_classes([IsAuthenticated])
-class LessonStandartGroupScoreAPIView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin
-):
-    """ Дүн гарсан ангийн хичээлийг шинэчлэх """
+class LessonStandartGroupScoreAPIView(generics.GenericAPIView, mixins.ListModelMixin):
+    """Дүн гарсан ангийн хичээлийг шинэчлэх"""
 
     queryset = LessonStandart.objects.all()
     serializer_class = LessonStandartSerializer
@@ -7972,26 +9080,21 @@ class LessonStandartGroupScoreAPIView(
         group_ids = score_req.values_list('student__group_id', flat=True)
 
         count_qs = (
-            score_req
-            .filter(
+            score_req.filter(
                 Q(student__group=OuterRef('pk')),
                 Q(
-                    Q(student__status__name__icontains='Суралцаж буй') |
-                    Q(student__status__name__icontains='Суралцаж байгаа')
+                    Q(student__status__name__icontains='Суралцаж буй')
+                    | Q(student__status__name__icontains='Суралцаж байгаа')
                 ),
             )
             .values('student__group')
             .order_by('student__group')
-            .annotate(
-                totals=Count('student__group')
-            )
+            .annotate(totals=Count('student__group'))
             .values('totals')
         )
 
         group_datas = (
-            Group
-            .objects
-            .filter(pk__in=group_ids, **filters)
+            Group.objects.filter(pk__in=group_ids, **filters)
             .annotate(
                 active_student_count=Subquery(count_qs),
             )
@@ -7999,8 +9102,16 @@ class LessonStandartGroupScoreAPIView(
         )
 
         return_datas = {
-            "groups": list(group_datas.values('id', 'name', 'active_student_count', 'level')) if group_datas.exists() else [],
-            "levels": list(group_datas.values_list('level', flat=True).distinct()) if group_datas.exists() else [],
+            "groups": (
+                list(group_datas.values('id', 'name', 'active_student_count', 'level'))
+                if group_datas.exists()
+                else []
+            ),
+            "levels": (
+                list(group_datas.values_list('level', flat=True).distinct())
+                if group_datas.exists()
+                else []
+            ),
         }
 
         return request.send_data(return_datas)
@@ -8026,24 +9137,13 @@ class LessonStandartGroupScoreAPIView(
                 level_filters |= Q(student__group__level=cource)
 
         try:
-            score_register_qs = (
-                ScoreRegister
-                .objects
-                .filter(
-                    Q(
-                        lesson=pk,
-                        **filters
-                    ),
-                    level_filters
-                )
+            score_register_qs = ScoreRegister.objects.filter(
+                Q(lesson=pk, **filters), level_filters
             )
 
             if score_register_qs.exists():
                 user = request.user
-                score_register_qs.update(
-                    lesson=new_lesson,
-                    updated_user=user
-                )
+                score_register_qs.update(lesson=new_lesson, updated_user=user)
 
             return request.send_info("INF_002", score_register_qs.count())
 
@@ -8052,16 +9152,12 @@ class LessonStandartGroupScoreAPIView(
 
 
 @permission_classes([IsAuthenticated])
-class LessonSearchAPIView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin
-):
+class LessonSearchAPIView(generics.GenericAPIView, mixins.ListModelMixin):
     queryset = LessonStandart.objects
     serializer_class = LessonStandartSerialzier
 
     def get(self, request):
-        """ Оюутны жагсаалт
-        """
+        """Оюутны жагсаалт"""
         school = request.query_params.get('school')
         state = request.query_params.get('state')
 
@@ -8082,17 +9178,14 @@ class LessonSearchAPIView(
 
 
 @permission_classes([IsAuthenticated])
-class LessonSearchStudentAPIView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin
-):
+class LessonSearchStudentAPIView(generics.GenericAPIView, mixins.ListModelMixin):
     queryset = LessonStandart.objects
     serializer_class = LessonStandartSerialzier
     filter_backends = [SearchFilter]
     search_fields = ['code', 'name']
+
     def get(self, request):
-        """ Оюутны жагсаалт
-        """
+        """Оюутны жагсаалт"""
         school = request.query_params.get('school')
         search = request.query_params.get('search')
 
@@ -8109,16 +9202,18 @@ class GraduateTitleApiView(
     generics.GenericAPIView,
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin
+    mixins.DestroyModelMixin,
 ):
-    """ Төгсөлтийн бүлэг """
+    """Төгсөлтийн бүлэг"""
 
     queryset = QuestionMainTitle.objects.all()
     serializer_class = dynamic_serializer(QuestionMainTitle, "__all__", 1)
 
     def get(self, request):
         user = request.user
-        teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
+        teacher = get_object_or_404(
+            Teachers, user_id=user, action_status=Teachers.APPROVED
+        )
         if not user.is_superuser:
             self.queryset = self.queryset.filter(created_by=teacher)
         datas = self.queryset.values('id', 'name')
@@ -8127,7 +9222,9 @@ class GraduateTitleApiView(
     def post(self, request):
         ser = dynamic_serializer(QuestionMainTitle, "__all__")
         user_id = request.user
-        teacher = get_object_or_404(Teachers, user_id=user_id, action_status=Teachers.APPROVED)
+        teacher = get_object_or_404(
+            Teachers, user_id=user_id, action_status=Teachers.APPROVED
+        )
         datas = request.data
         datas['created_by'] = teacher.id
 
@@ -8139,11 +9236,13 @@ class GraduateTitleApiView(
             return request.send_error_valid(serializer.errors)
 
     def put(self, request, pk=None):
-        ""
+        """"""
         datas = request.data
         instance = self.queryset.filter(id=pk).first()
         user = request.user
-        teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
+        teacher = get_object_or_404(
+            Teachers, user_id=user, action_status=Teachers.APPROVED
+        )
         datas['created_by'] = teacher.id
 
         ser = dynamic_serializer(QuestionMainTitle, "__all__", 1)
@@ -8165,9 +9264,9 @@ class GraduateSubTitleApiView(
     generics.GenericAPIView,
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin
+    mixins.DestroyModelMixin,
 ):
-    """ Төгсөлтийн дэд бүлэг """
+    """Төгсөлтийн дэд бүлэг"""
 
     queryset = QuestioSubTitle.objects.all()
     serializer_class = dynamic_serializer(QuestioSubTitle, "__all__", 1)
@@ -8177,19 +9276,30 @@ class GraduateSubTitleApiView(
         if main:
             self.queryset = self.queryset.filter(main=main)
 
-        question_sub = ChallengeQuestions.objects.filter(graduate_title=OuterRef('id')).values('graduate_title').annotate(count=Count('id')).values('count')
+        question_sub = (
+            ChallengeQuestions.objects.filter(graduate_title=OuterRef('id'))
+            .values('graduate_title')
+            .annotate(count=Count('id'))
+            .values('count')
+        )
 
         user = request.user
-        teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
+        teacher = get_object_or_404(
+            Teachers, user_id=user, action_status=Teachers.APPROVED
+        )
         if not user.is_superuser:
             self.queryset = self.queryset.filter(created_by=teacher)
 
-        datas = self.queryset.annotate(main_name=F('main__name'), question_count=Subquery(question_sub)).values('id', 'name', 'main_name', 'question_count')
+        datas = self.queryset.annotate(
+            main_name=F('main__name'), question_count=Subquery(question_sub)
+        ).values('id', 'name', 'main_name', 'question_count')
         return request.send_data(list(datas))
 
     def post(self, request):
         user_id = request.user
-        teacher = get_object_or_404(Teachers, user_id=user_id, action_status=Teachers.APPROVED)
+        teacher = get_object_or_404(
+            Teachers, user_id=user_id, action_status=Teachers.APPROVED
+        )
         datas = request.data
         datas['created_by'] = teacher.id
 
@@ -8202,11 +9312,13 @@ class GraduateSubTitleApiView(
             return request.send_error_valid(serializer.errors)
 
     def put(self, request, pk=None):
-        ""
+        """"""
         datas = request.data
         instance = self.queryset.filter(id=pk).first()
         user_id = request.user
-        teacher = get_object_or_404(Teachers, user_id=user_id, action_status=Teachers.APPROVED)
+        teacher = get_object_or_404(
+            Teachers, user_id=user_id, action_status=Teachers.APPROVED
+        )
         datas['created_by'] = teacher.id
 
         ser = dynamic_serializer(QuestioSubTitle, "__all__")
@@ -8223,20 +9335,26 @@ class GraduateSubTitleApiView(
         return request.send_info("INF_003")
 
 
-class GraduateQuestionApiView(
-    generics.GenericAPIView
-):
-    """ Төгсөлтийн шалгалтын асуулт"""
+class GraduateQuestionApiView(generics.GenericAPIView):
+    """Төгсөлтийн шалгалтын асуулт"""
 
     queryset = QuestioSubTitle.objects.all()
     serializer_class = dynamic_serializer(QuestioSubTitle, "__all__")
+
     def get(self, request):
         title = request.query_params.get('title')
         if title:
             self.queryset = self.queryset.filter(id=title)
 
-        question_sub = ChallengeQuestions.objects.filter(graduate_title=OuterRef('id')).values('graduate_title').annotate(count=Count('id')).values('count')
-        data = self.queryset.annotate(question_count=Subquery(question_sub)).values("id", "name", 'question_count')
+        question_sub = (
+            ChallengeQuestions.objects.filter(graduate_title=OuterRef('id'))
+            .values('graduate_title')
+            .annotate(count=Count('id'))
+            .values('count')
+        )
+        data = self.queryset.annotate(question_count=Subquery(question_sub)).values(
+            "id", "name", 'question_count'
+        )
 
         return request.send_data(list(data))
 
@@ -8248,7 +9366,7 @@ class ChallengeAddAdmissionUserAPIView(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin
+    mixins.DestroyModelMixin,
 ):
     queryset = ElseltUser.objects.all()
     serializer_class = ElsegchSerializer
@@ -8260,7 +9378,11 @@ class ChallengeAddAdmissionUserAPIView(
 
     def get(self, request):
         challenge = request.query_params.get('challenge')
-        challenge_student_all = Challenge.objects.get(id=challenge).elselt_user.all().values_list('id', flat=True)
+        challenge_student_all = (
+            Challenge.objects.get(id=challenge)
+            .elselt_user.all()
+            .values_list('id', flat=True)
+        )
         self.queryset = self.queryset.filter(id__in=list(challenge_student_all))
         datas = self.list(request).data
         return request.send_data(datas)
@@ -8275,7 +9397,9 @@ class ChallengeAddAdmissionUserAPIView(
             return request.send_error("ERR_003", 'Элсэгчийн код хоосон байна!')
 
         try:
-            student = ElseltUser.objects.filter(register=student_code, created__year=this_year).first()
+            student = ElseltUser.objects.filter(
+                register=student_code, created__year=this_year
+            ).first()
             print(student)
 
             if student:
@@ -8285,7 +9409,10 @@ class ChallengeAddAdmissionUserAPIView(
                     check = challenge.elselt_user.filter(id=student.id)
 
                     if check:
-                        return request.send_error("ERR_003",f'"{student_code}" кодтой элсэгч шалгалтанд үүссэн байна.')
+                        return request.send_error(
+                            "ERR_003",
+                            f'"{student_code}" кодтой элсэгч шалгалтанд үүссэн байна.',
+                        )
 
                     challenge.elselt_user.add(student)
                     challenge.save()
@@ -8293,7 +9420,9 @@ class ChallengeAddAdmissionUserAPIView(
                 else:
                     return request.send_error("ERR_002")
             else:
-                return request.send_error("ERR_003",f'"{student_code}" кодтой элсэгч олдсонгүй!')
+                return request.send_error(
+                    "ERR_003", f'"{student_code}" кодтой элсэгч олдсонгүй!'
+                )
         except Exception as e:
             print(e)
             return request.send_error("ERR_002")
@@ -8338,10 +9467,12 @@ class AdmissionChallengeAddKindAPIView(
                     return request.send_error("ERR_003", 'Элсэлтийг сонгоно уу!')
                 qs_admission_user = ElseltUser.objects.filter(
                     admissionuserprofession__profession__admission__is_store=False,
-                    admissionuserprofession__state=AdmissionUserProfession.STATE_SEND
+                    admissionuserprofession__state=AdmissionUserProfession.STATE_SEND,
                 )
 
-                qs_admission_user = qs_admission_user.filter(admissionuserprofession__profession__admission__in=select_admission_ids)
+                qs_admission_user = qs_admission_user.filter(
+                    admissionuserprofession__profession__admission__in=select_admission_ids
+                )
             elif select_name == 'profession':
                 select_profession_ids = datas.get('profession')
 
@@ -8351,7 +9482,9 @@ class AdmissionChallengeAddKindAPIView(
                     admissionuserprofession__state=AdmissionUserProfession.STATE_SEND
                 )
 
-                qs_admission_user = qs_admission_user.filter(admissionuserprofession__profession__profession__in=select_profession_ids)
+                qs_admission_user = qs_admission_user.filter(
+                    admissionuserprofession__profession__profession__in=select_profession_ids
+                )
             else:
                 return request.send_error("ERR_002")
 
@@ -8376,7 +9509,11 @@ class AdmissionChallengeDetailApiView(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['elselt_user__register', 'elselt_user__first_name', 'elselt_user__last_name']
+    search_fields = [
+        'elselt_user__register',
+        'elselt_user__first_name',
+        'elselt_user__last_name',
+    ]
 
     def get(self, request):
         test_id = request.query_params.get('test_id')
@@ -8384,6 +9521,8 @@ class AdmissionChallengeDetailApiView(
         student_data = self.list(request).data
 
         return request.send_data(student_data)
+
+
 # endregion
 
 
