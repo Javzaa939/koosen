@@ -13,4 +13,6 @@ def get_current_request():
 
 class RequestMiddleware(MiddlewareMixin):
     def process_request(self, request):
+        is_student = request.session.get('_is_student') or False
+        request.is_student = is_student
         _requests[current_thread()] = request

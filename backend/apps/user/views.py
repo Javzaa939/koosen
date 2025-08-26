@@ -164,6 +164,9 @@ class UserAPILoginView(
 ):
     """ User login api view """
 
+    # to avoid error: "AssertionError("'UserAPILoginView' should either include a serializer_class attribute, or override the get_serializer_class() method.")"
+    serializer_class = UserInfoSerializer
+
     # region to reduce code duplication
     @staticmethod
     def save_log(is_logged, user_id, request, log_user_field):
@@ -278,7 +281,7 @@ class UserAPILoginView(
 
         # check password
         password = datas.get("password").strip() if datas.get("password") else None
-        auth_user = user if check_password(password, user.password) else None
+        auth_user = auth.authenticate(request, username=user.username, password=password, backend='main.auth_backends.StudentBackend')
         UserAPILoginView.check_user_password(auth_user, ending_data, request)
 
         # Оюутны эрх хязгаарлав
@@ -339,9 +342,9 @@ class UserAPILoginView(
         serializer_data = None
 
         if login_type == 'student' or is_student == True:
-            user = StudentLogin.objects.filter(id=request.user).first()
+            user = request.user
 
-            if not user:
+            if not isinstance(user, StudentLogin):
                 return request.send_data({})
 
             serializer_data = StudentLoginSerializer(user).data

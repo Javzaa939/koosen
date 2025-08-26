@@ -126,6 +126,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -135,7 +136,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django_user_agents.middleware.UserAgentMiddleware',
 
-    "corsheaders.middleware.CorsMiddleware",
     "main.middleware.check_org.check_org",
     'main.middleware.success_rp.success_rp',
     'main.middleware.error_handler.ErrorHandlerMiddleware',
@@ -232,6 +232,10 @@ CORS_ORIGIN_WHITELIST = []
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_COOKIE_AGE = 60 * 60 * 1
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'main.auth_backends.StudentBackend',
+]
 
 # Хугацаа
 START_DAY = 29
