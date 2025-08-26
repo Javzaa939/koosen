@@ -399,6 +399,7 @@ class UserAPILogoutView(
 
         user_id = request.user.id
 
+        # NOTE this can work wrong for example if many devices are used by same user to login. May be need to save sessionId to AccessHistoryLms table and use it to remove correct record, etc
         # Нэвтрэлт дууссан цагийг нэвтрэлтийн хэсэгт update хэсэгт хийж хадгалах
         access_id = self.queryset.filter(user=user_id).first().id if self.queryset.filter(user=user_id).exists() else None
 
