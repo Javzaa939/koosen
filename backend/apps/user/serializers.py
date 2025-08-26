@@ -258,13 +258,15 @@ class StudentLoginSerializer(serializers.ModelSerializer):
 		result = (
 			obj.student.school_id or
 			obj.student.group.school_id or
-            obj.student.group.department.sub_orgs_id if obj.student.group.department else None or
-            obj.student.group.profession.school_id if obj.student.group.profession else None or
-            obj.student.group.profession.department.sub_orgs_id
-				if (
-					obj.student.group.profession and
-					obj.student.group.profession.department
-				) else None
+            (obj.student.group.department.sub_orgs_id if obj.student.group.department else None) or
+            (obj.student.group.profession.school_id if obj.student.group.profession else None) or
+            (
+                obj.student.group.profession.department.sub_orgs_id
+					if (
+						obj.student.group.profession and
+						obj.student.group.profession.department
+					) else None
+			)
 		)
 
 		return result
