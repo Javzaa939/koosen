@@ -906,6 +906,7 @@ class StudentLogin(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # region to avoid circular conflict
     groups = models.ManyToManyField(
         AbstractGroup,
         related_name="abstract_group",
@@ -918,6 +919,7 @@ class StudentLogin(AbstractUser):
         blank=True,
         help_text="Specific permissions for this user."
     )
+    # endregion
 
 
 class Lesson_assignment_student(models.Model):
