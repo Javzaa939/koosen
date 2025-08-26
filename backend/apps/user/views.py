@@ -9,7 +9,6 @@ from django.db import transaction
 from django.db.models import Q, F
 from django.contrib import auth
 from django.contrib.auth import get_user_model
-from django.contrib.auth.hashers import check_password
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.core.exceptions import ValidationError
@@ -47,11 +46,20 @@ class UserDetailAPI(
     def get(self, request):
         """ Нэвтэрсэн хэрэглэгчийн мэдээллийг авах """
 
-        user = User.objects.filter(email=request.user).first()
+        user = None
+        qs = None
+
+        if request.is_student:
+            user = request.user
+            qs = AccessHistoryLms.objects.filter(student=user)
+
+        else:
+            user = User.objects.filter(email=request.user).first()
+            qs = AccessHistoryLms.objects.filter(user=user)
+
         if not user:
             return request.send_data({})
 
-        qs = AccessHistoryLms.objects.filter(user=user)
         serializer = self.get_serializer(qs, many=True)
         return request.send_data(serializer.data)
 
@@ -62,6 +70,10 @@ class AccessHistoryLmsStudentAPI(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
 ):
+    """
+    to see StudentWeb project logins (maybe)
+    """
+
     queryset = AccessHistoryLms.objects.filter(system_type=AccessHistoryLms.STUDENT)
     serializer_class = AccessHistoryLmsStudentSerializer
 
@@ -398,13 +410,18 @@ class UserAPILogoutView(
     def get(self, request):
 
         user_id = request.user.id
+        conditions = { 'user': user_id }
+
+        if request.is_student:
+            conditions = { 'student': user_id }
 
         # NOTE this can work wrong for example if many devices are used by same user to login. May be need to save sessionId to AccessHistoryLms table and use it to remove correct record, etc
         # Нэвтрэлт дууссан цагийг нэвтрэлтийн хэсэгт update хэсэгт хийж хадгалах
-        access_id = self.queryset.filter(user=user_id).first().id if self.queryset.filter(user=user_id).exists() else None
+        access_obj = self.queryset.filter(**conditions, out_time__isnull=True, system_type=AccessHistoryLms.LMS, is_logged=True).first()
 
-        if access_id:
-            self.queryset.filter(pk=access_id).update(out_time=datetime.now())
+        if access_obj:
+            access_obj.out_time=datetime.now()
+            access_obj.save()
 
         auth.logout(request)
 
@@ -417,6 +434,9 @@ class UserMenuAPI(
     """ Тухайн цэсний шийдвэрлэх эрхтэй нэгжүүд болон хэрэглэгч шийдвэрлэх эрхтэй эсэх """
 
     def get(self, request):
+
+        if request.is_student:
+            return request.send_data([])
 
         c_units = []
         c_menu_list = []
