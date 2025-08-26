@@ -62,7 +62,6 @@ const StudentLogin = () => {
         const { success, data } = await fetchData(userApi.login(datas))
 		if (success) {
 			setSchool(data.school_id)
-            setIsStudentUser(true)
 			setUser(data)
             navigate(HomeRoute)
 		}
