@@ -105,7 +105,7 @@ from .serializers import UserInfoSerializer
 from .serializers import EmployeeSerializer, UserSerializer, PermissionSerializer, OrgPositionPostSerializer
 
 from .serializers import UserInfoSerializer, UserSaveSerializer
-from .serializers import EmployeeSerializer, UserSerializer, UserFirstRegisterSerializer
+from .serializers import EmployeeSerializer, UserSerializer, UserFirstRegisterSerializer, OrgPositionPutSerializer
 
 
 from lms.models import ProfessionDefinition
@@ -1194,21 +1194,20 @@ class OrgPositionListAPIView(
             self.queryset = self.queryset.filter(org=org)
 
         if pk:
-            group = self.retrieve(request, pk).data
-            return request.send_data(group)
+            datas = self.retrieve(request, pk).data
+            return request.send_data(datas)
 
         datas = self.list(request).data
         return request.send_data(datas)
 
     @login_required()
     def post(self, request):
-        # org = getattr(request, 'org_filter', {}).get('org')
-        # if not org:
-        #     return request.send_error("ERR_002", "Албан тушаал нэмэх эрхгүй байна")
+        org = getattr(request, 'org_filter', {}).get('org')
+        if not org:
+            return request.send_error("ERR_002", "Албан тушаал нэмэх эрхгүй байна")
 
         self.serializer_class = OrgPositionPostSerializer
-        # request.data["org"] = org.id
-        request.data["org"] = 2
+        request.data["org"] = org.id
 
         try:
             with transaction.atomic():
@@ -1220,13 +1219,17 @@ class OrgPositionListAPIView(
 
     @login_required()
     def put(self, request, pk=None):
-        self.serializer_class = OrgPositionPostSerializer
+        self.serializer_class = OrgPositionPutSerializer
 
         request_data = request.data
         instance = self.queryset.filter(id=pk).first()
-        print('request_data,request_data', request_data)
 
         try:
+            org = getattr(request, 'org_filter', {}).get('org')
+            if not org:
+                return request.send_error("ERR_002", "Албан тушаал нэмэх эрхгүй байна")
+
+            request.data["org"] = org.id
             serializer = self.get_serializer(instance, data=request_data)
 
             if serializer.is_valid(raise_exception=False):

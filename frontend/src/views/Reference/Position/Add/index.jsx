@@ -56,7 +56,7 @@ const AddModal = ({ open, handleModal, refreshDatas, permission_option, mainPosi
 
         cdata['org'] = school_id
 
-        console.log('cdata', cdata)
+        console.log('cdata', cdata,permissionId)
         const { success, error } = await postFetch(orgPositionApi.post(cdata))
         if(success) {
             reset()
@@ -268,7 +268,9 @@ const AddModal = ({ open, handleModal, refreshDatas, permission_option, mainPosi
                                             noOptionsMessage={() => t('Хоосон байна.')}
                                             onChange={(val) => {
                                                 onChange(val.id || '')
-                                                setRemovePermissionId(val || [])
+                                                setPermissionId(val || [])
+
+                                                // setRemovePermissionId(val || [])
                                                 }}
                                             //     onChange={(selected) => {
                                             //        const selectedIds = selected ? selected.map((item) => item.id) : [];

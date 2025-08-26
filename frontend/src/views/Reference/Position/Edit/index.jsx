@@ -42,18 +42,7 @@ const UpdateModal = ({ open, editId, handleEdit, refreshDatas,editData , permiss
                 // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
                 if(data === null) return
                 for(let key in data) {
-                    if(data[key] !== null){
-                        setValue(key, data[key])
-                    }
-                    // else setValue(key,'')
-                    // if(key === "removed_perms") {
-                    //     setValue(key, data[key]?.id)
-                    // }
-                    // if(key === "permissions") {
-                    //     console.log("data", data[key])
-
-                    // }
-                    else if(data[key] !== null)
+                    if(data[key] !== null)
                         setValue(key, data[key])
                     else setValue(key, '')
                 }
@@ -68,12 +57,21 @@ const UpdateModal = ({ open, editId, handleEdit, refreshDatas,editData , permiss
     async function onSubmit(cdata) {
         if(editId) {
             cdata = convertDefaultValue(cdata)
-            cdata['permissions'] = permissionId.map((c)=> c.id)
-            cdata['removed_perms'] = removepermissionId.map((c)=> c.id)
-            // cdata['permissions'] = permissionId
-            // cdata['removed_perms'] = removepermissionId
-            console.log('cadata', cdata)
-            const { success, error } = await fetchData(getPositionApi.put(cdata, editId))
+
+            const necessary_cdata = {
+                permissions: cdata.permissions,
+                removed_perms: cdata.removed_perms,
+                name: cdata.name,
+                is_hr: cdata.is_hr,
+                is_director: cdata.is_director,
+                is_teacher: cdata.is_teacher,
+                description: cdata.description,
+            }
+
+            necessary_cdata['permissions'] = necessary_cdata['permissions']?.map((c)=> c.id)
+            necessary_cdata['removed_perms'] = necessary_cdata['removed_perms']?.map((c)=> c.id)
+
+            const { success, errors } = await fetchData(getPositionApi.put(necessary_cdata, editId))
             if(success) {
                 refreshDatas()
                 handleEdit()
@@ -81,14 +79,15 @@ const UpdateModal = ({ open, editId, handleEdit, refreshDatas,editData , permiss
             }
             else {
                 /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in error) {
-                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
+                for (let key in errors) {
+                    setError(key, { type: 'custom', message:  errors[key]});
                 }
+                console.log('errors', errors)
             }
         }
 	}
-    console.log('fff', errors)
-	return (
+
+    return (
         <Fragment>
             <Modal
                 isOpen={open}
@@ -247,11 +246,11 @@ const UpdateModal = ({ open, editId, handleEdit, refreshDatas,editData , permiss
                                             isLoading={isLoading}
                                             placeholder={t(`-- Сонгоно уу --`)}
                                             options={permission_option || []}
-                                            value={permission_option.find((c) => c.id===value)}
+                                            value={value}
                                             noOptionsMessage={() => t('Хоосон байна.')}
                                             onChange={(val) => {
                                                 if(val){
-                                                    onChange(val.id || '')
+                                                    onChange(val || [])
                                                     setPermissionId(val)
                                                 }
                                             }}
@@ -283,11 +282,11 @@ const UpdateModal = ({ open, editId, handleEdit, refreshDatas,editData , permiss
                                             isLoading={isLoading}
                                             placeholder={t(`-- Сонгоно уу --`)}
                                             options={permission_option || []}
-                                            value={permission_option.find((c) => c.id===value)}
+                                            value={value}
                                             noOptionsMessage={() => t('Хоосон байна.')}
                                             onChange={(val) => {
                                                 if (val){
-                                                    onChange(val.id || '')
+                                                    onChange(val || [])
                                                     setRemovePermissionId(val)
                                                 }
                                             }}

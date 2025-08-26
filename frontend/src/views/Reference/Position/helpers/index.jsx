@@ -30,7 +30,13 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, h
 			minWidth: "30px",
 			center: true,
 		},
-		    {
+		{
+			name: `${t("Тайлбар")}`,
+			selector: (row) => row?.description,
+			minWidth: "30px",
+			center: true,
+		},
+		{
 			name: `${t("Үүсгэсэн огноо")}`,
 			selector: (row) => row?.created_at,
 			minWidth: "30px",
