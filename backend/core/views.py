@@ -501,15 +501,30 @@ class TeacherExcel(
             gender = (
                 Teachers.GENDER_MALE if data["gender"] == 0 else Teachers.GENDER_FEMALE
             )
-            # user_data = {
-            #     "email": email,
-            #     "password": make_password(data.get("register")[-8:]),
-            #     "username": email,
-            # }
-            # user = User.objects.create(**user_data)
+            user_data = {
+                "password": make_password(data.get("register")[-8:]),
+                "username": data.get("code"),
+            }
+            user = User.objects.create(**user_data)
             salbar_code = data.pop("salbar_code")
             salbar = Salbars.objects.get(code=salbar_code)
-            teacher_data = {**data, "gender": gender, "salbar": salbar}
+
+            sub_org = salbar.sub_orgs
+            employee = {
+                "salbar": salbar,
+                "sub_org": sub_org,
+                "org": salbar.org,
+                "user": user,
+                "org_position": OrgPosition.objects.get(id=14),
+            }
+            Employee.objects.create(**employee)
+            teacher_data = {
+                **data,
+                "gender": gender,
+                "user": user,
+                "salbar": salbar,
+                "sub_org": sub_org,
+            }
             teacher = Teachers.objects.create(
                 **teacher_data,
             )
@@ -923,10 +938,10 @@ class TeacherApiView(
         teacher_queryset = queryset.all().values_list("user", flat=True)
         qs_employee_user = Employee.objects.filter(user__in=list(teacher_queryset))
 
-        org = getattr(self.request, "org_filter", {}).get("org")
-
-        if org:
-            self.queryset = self.queryset.filter(org=org)
+        # org = getattr(self.request, "org_filter", {}).get("org")
+        #
+        # if org:
+        #     self.queryset = self.queryset.filter(org=org)
 
         # Төлвөөр хайх
         if state:
@@ -965,10 +980,10 @@ class TeacherApiView(
     def get(self, request):
         "нийт багшийн жагсаалт"
 
-        org = getattr(request, "org_filter", {}).get("org")
-
-        if org:
-            self.queryset = self.queryset.filter(org=org)
+        # org = getattr(request, "org_filter", {}).get("org")
+        #
+        # if org:
+        #     self.queryset = self.queryset.filter(org=org)
 
         teach_info = self.list(request).data
 

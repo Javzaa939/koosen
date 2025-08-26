@@ -352,7 +352,7 @@ class User(AbstractUser):
         verbose_name="Хэрэглэгчийн төлөв",
     )
 
-    USERNAME_FIELD = "email"
+    USERNAME_FIELD = "username"
     REQUIRED_FIELDS = []
 
     @property
@@ -642,6 +642,13 @@ class Teachers(models.Model):
         default="", null=True, max_length=256, verbose_name="НДД-ийн дугаар", blank=True
     )
 
+    # org = models.ForeignKey(
+    #     Schools,
+    #     on_delete=models.CASCADE,
+    #     null=True,
+    #     blank=True,
+    #     verbose_name="Харьяалагдах алба нэгж",
+    # )
     sub_org = models.ForeignKey(
         SubOrgs,
         on_delete=models.CASCADE,
@@ -769,7 +776,7 @@ class Employee(models.Model):
     salbar = models.ForeignKey(
         Salbars, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Салбар"
     )
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Хэрэглэгч")
+    user = models.ForeignKey(User, null=True, on_delete=models.CASCADE, verbose_name="Хэрэглэгч")
     org_position = models.ForeignKey(
         OrgPosition,
         blank=True,

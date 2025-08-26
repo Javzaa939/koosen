@@ -381,7 +381,12 @@ const VerticalLayout = (props) => {
                     );
 
                     /** Эрх */
-                    childrenDatas = checkPerm(childrenDatas, menus, user.is_superuser, 'settingsLevel15');
+                    childrenDatas = checkPerm(
+                        childrenDatas,
+                        menus,
+                        user.is_superuser,
+                        'settingsLevel15',
+                    );
                     /** Role */
                     childrenDatas = checkPerm(childrenDatas, menus, user.is_hr, 'settingsLevel16');
 
