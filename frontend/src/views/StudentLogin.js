@@ -39,7 +39,7 @@ const StudentLogin = () => {
 	const userApi = useApi().user
 	const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true })
 
-    const { setUser, setIsStudentUser } = useContext(AuthContext)
+    const { setUser } = useContext(AuthContext)
 	const { setSchool } = useContext(SchoolContext)
 
     const SignupSchema = yup.object().shape({
