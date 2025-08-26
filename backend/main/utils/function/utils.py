@@ -268,6 +268,10 @@ def has_permission(allowed_permissions=[], must_permissions=[], back_url=None):
     def decorator(view_func):
 
         def wrap(self, request, *args, **kwargs):
+            StudentLogin = apps.get_model("lms", 'StudentLogin')
+
+            if isinstance(request.user, StudentLogin):
+                return request.send_error("ERR_011", "Хэрэглэгч эрхгүй байна.")
 
             permissions = []
             if request.user:
