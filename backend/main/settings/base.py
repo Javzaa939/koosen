@@ -12,163 +12,128 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 import os
 import sys
-
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
+sys.path.insert(0, os.path.join(BASE_DIR, "apps"))
 
-PUBLIC_ROOT = os.path.join(BASE_DIR, 'main', 'public')
-MAIN_ROOT = os.path.join(BASE_DIR, 'main')
+PUBLIC_ROOT = os.path.join(BASE_DIR, "main", "public")
+MAIN_ROOT = os.path.join(BASE_DIR, "main")
 
-MEDIA_URL = '/files/'
-MEDIA_ROOT = os.path.join(MAIN_ROOT, 'files')
+MEDIA_URL = "/files/"
+MEDIA_ROOT = os.path.join(MAIN_ROOT, "files")
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(MAIN_ROOT, 'static')
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(MAIN_ROOT, "static")
 
-INV_OLD = 'inventory/image_old/'
-INV_NEW = 'inventory/image_new/'
+INV_OLD = "inventory/image_old/"
+INV_NEW = "inventory/image_new/"
 
 STUDENTS = "students/"
 STIPEND = "stipend/"
 DORMITORY = "dormitory/"
 NEWS = "news/"
-EFILE ="efile/"
+EFILE = "efile/"
 CHAT = "chat/"
 CLUB = "club/"
-PROFESSION = 'profession/'
+PROFESSION = "profession/"
 STIPEND_FILE = "stipend_files/"
-ONLINE_LESSON = 'online_lesson/'
+ONLINE_LESSON = "online_lesson/"
 
-TIMETABLE = 'timetable/'
+TIMETABLE = "timetable/"
 
-CORRESPOND = 'correspond/'
-ASSIGNMENT = 'assignment/'
-HOMEWORK = 'homework/'
-SRTUCTURE = 'structure/'
+CORRESPOND = "correspond/"
+ASSIGNMENT = "assignment/"
+HOMEWORK = "homework/"
+SRTUCTURE = "structure/"
 
-MUIS_HR_MEDIA_URL = 'http://hr.utilitysolution.mn/media/'
+MUIS_HR_MEDIA_URL = "http://hr.utilitysolution.mn/media/"
 
-GPT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.kc3xuhFLonTzyzu4WzKlJETwuQaNPdX6hKeOuXHywWU'
+GPT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.kc3xuhFLonTzyzu4WzKlJETwuQaNPdX6hKeOuXHywWU"
 
 ALLOWED_HOSTS = []
 
 GPA_ANALYSIS_1_MIN = [
-    {
-        "count": 0,
-        "name": "A"
-    },
-    {
-        "count": 15,
-        "name": "B"
-    },
-    {
-        "count": 20,
-        "name": "C"
-    },
-    {
-        "count": 15,
-        "name": "D"
-    },
-    {
-        "count": 0,
-        "name": "F"
-    },
+    {"count": 0, "name": "A"},
+    {"count": 15, "name": "B"},
+    {"count": 20, "name": "C"},
+    {"count": 15, "name": "D"},
+    {"count": 0, "name": "F"},
 ]
 
 GPA_ANALYSIS_1_MAX = [
-    {
-        "count": 25,
-        "name": "A"
-    },
-    {
-        "count": 30,
-        "name": "B"
-    },
-    {
-        "count": 40,
-        "name": "C"
-    },
-    {
-        "count": 30,
-        "name": "D"
-    },
-    {
-        "count": 25,
-        "name": "F"
-    },
+    {"count": 25, "name": "A"},
+    {"count": 30, "name": "B"},
+    {"count": 40, "name": "C"},
+    {"count": 30, "name": "D"},
+    {"count": 25, "name": "F"},
 ]
 
 # Application definition
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-
-    'rest_framework',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "rest_framework",
     "corsheaders",
-
-    'core',
-    'lms',
+    "core",
+    "lms",
     "apps.user",
-    'apps.permissions.apps.PermissionsConfig',
-    'django_cleanup.apps.CleanupConfig',
-    'elselt',
-    'django_user_agents',
-
-    'django_crontab',
+    "apps.permissions.apps.PermissionsConfig",
+    "django_cleanup.apps.CleanupConfig",
+    "elselt",
+    "esis",
+    "django_user_agents",
+    "django_crontab",
 ]
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django_user_agents.middleware.UserAgentMiddleware',
-
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django_user_agents.middleware.UserAgentMiddleware",
     "main.middleware.check_org.check_org",
-    'main.middleware.success_rp.success_rp',
-    'main.middleware.error_handler.ErrorHandlerMiddleware',
-    'main.middleware.requestLog.RequestLogMiddleware',
+    "main.middleware.success_rp.success_rp",
+    "main.middleware.error_handler.ErrorHandlerMiddleware",
+    "main.middleware.requestLog.RequestLogMiddleware",
     "main.middleware.request_utiles.RequestMiddleware",
 ]
 
-ROOT_URLCONF = 'main.urls'
+ROOT_URLCONF = "main.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'backend','apps','user', 'templates')],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [os.path.join(BASE_DIR, "backend", "apps", "user", "templates")],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'main.wsgi.application'
-AUTH_USER_MODEL = 'core.User'
+WSGI_APPLICATION = "main.wsgi.application"
+AUTH_USER_MODEL = "core.User"
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-DATABASES = {
-}
+DATABASES = {}
 
 
 # Password validation
@@ -176,16 +141,16 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -193,9 +158,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
-LANGUAGE_CODE = 'mn'
+LANGUAGE_CODE = "mn"
 
-TIME_ZONE = 'Asia/Ulaanbaatar'
+TIME_ZONE = "Asia/Ulaanbaatar"
 
 USE_I18N = True
 
@@ -230,7 +195,7 @@ CORS_ORIGIN_WHITELIST = []
 
 # Хүсэлт илгээх бүрт session хадгалах
 SESSION_SAVE_EVERY_REQUEST = True
-SESSION_COOKIE_AGE = 60 * 60 * 1
+SESSION_COOKIE_AGE = 60 * 60 * 4
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
@@ -243,67 +208,68 @@ END_DAY = 28
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 
-STUDENT_DOMAIN_URL = 'http://student.mnun.edu.mn/'
+STUDENT_DOMAIN_URL = "http://student.mnun.edu.mn/"
 
 # doc https://pypi.org/project/django-crontab/
 # шинээр crontab үүсгэх нь ./manage.py crontab add
 # Server-н цагт тохируулсан болно
 CRONJOBS = [
-    ('0 10 * * *', 'main.utils.cronjobs.dbCreateBackup'),                                        # 06:00 минутанд backup хийнэ
-    ('0 6 * * *', 'main.utils.cronjobs.dbCreateBackup'),                                         # 14:00 минутанд backup хийнэ
+    ("0 10 * * *", "main.utils.cronjobs.dbCreateBackup"),  # 06:00 минутанд backup хийнэ
+    ("0 6 * * *", "main.utils.cronjobs.dbCreateBackup"),  # 14:00 минутанд backup хийнэ
 ]
 
 # QUERY DEBUG хийхэд хэрэгтэй LOGGING=1 ./manage.py runserver
 # гэж асаавал server дээр ажиллаж query -г буцаана
 if os.environ.get("LOGGING") == "1":
     LOGGING = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'formatters': {
-            'console': {
-                'format': '%(asctime)s %(levelname)s [%(name)s:%(lineno)s] %(module)s %(process)d %(thread)d %(message)s',
-                'datefmt': "%H:%M:%S"
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "console": {
+                "format": "%(asctime)s %(levelname)s [%(name)s:%(lineno)s] %(module)s %(process)d %(thread)d %(message)s",
+                "datefmt": "%H:%M:%S",
             },
-            'sql': {
-                'format': (
-                        ''
-                        # '%(asctime)s %(levelname)s [%(name)s:%(lineno)s] %(module)s %(process)d %(thread)d \n'
-                        # '%(duration).3f %(sql)s\n'
-                        # '%(sql)s\n'
-                        # 'args=%(params)s\n'
-                    ),
-                'datefmt': "%H:%M:%S"
-            },
-        },
-        'handlers': {
-            'console': {
-                'class': 'logging.StreamHandler',
-                'formatter': 'console',
-            },
-            'sql': {
-                'class': 'logging.StreamHandler',
-                'class': 'logging.FileHandler',
-                'filename': './debug.log',
-                'formatter': 'sql',
+            "sql": {
+                "format": (
+                    ""
+                    # '%(asctime)s %(levelname)s [%(name)s:%(lineno)s] %(module)s %(process)d %(thread)d \n'
+                    # '%(duration).3f %(sql)s\n'
+                    # '%(sql)s\n'
+                    # 'args=%(params)s\n'
+                ),
+                "datefmt": "%H:%M:%S",
             },
         },
-        'loggers': {
-            'django.db.backends': {
-                'handlers': ['sql'],
-                'level': 'DEBUG',
-                'propagate': False,
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",
+                "formatter": "console",
             },
-            '': {
-                'handlers': ['console'],
-                'level': 'INFO',
+            "sql": {
+                "class": "logging.StreamHandler",
+                "class": "logging.FileHandler",
+                "filename": "./debug.log",
+                "formatter": "sql",
+            },
+        },
+        "loggers": {
+            "django.db.backends": {
+                "handlers": ["sql"],
+                "level": "DEBUG",
+                "propagate": False,
+            },
+            "": {
+                "handlers": ["console"],
+                "level": "INFO",
             },
         },
     }
 
 
 # Тухайн сургууль бүрт зориулсан cdn folder
-CDN_MAIN_FOLDER = 'dxis/'
+CDN_MAIN_FOLDER = "dxis/"
 
 # CDN файл байршиж бай
-CDN_MAIN_DOMAIN = 'https://sis.uia.gov.mn/cdn/'
-CDN_FILE_URL = 'https://sis.uia.gov.mn/cdn/files/'
+CDN_MAIN_DOMAIN = "https://sis.uia.gov.mn/cdn/"
+CDN_FILE_URL = "https://sis.uia.gov.mn/cdn/files/"
+

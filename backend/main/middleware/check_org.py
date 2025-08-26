@@ -2,7 +2,7 @@ from django.apps import apps
 
 
 def check_org(get_response):
-    """ Ямар түвшиний байгууллагын хүн нэвтэрч орсоныг шалгах нь """
+    """Ямар түвшиний байгууллагын хүн нэвтэрч орсоныг шалгах нь"""
 
     def find_child_salbar_ids(salbar):
         ids = [salbar.id]
@@ -11,7 +11,11 @@ def check_org(get_response):
         finish = True
         last_ids = [salbar.id]
         while finish:
-            branch_ids = list(Salbars.objects.filter(parent_id__in=last_ids).values_list("id", flat=True))
+            branch_ids = list(
+                Salbars.objects.filter(parent_id__in=last_ids).values_list(
+                    "id", flat=True
+                )
+            )
             if not branch_ids:
                 finish = False
             else:
@@ -22,7 +26,7 @@ def check_org(get_response):
 
     class DefaultHr:
         def __init__(self):
-            self.is_hr = False #  employee байхгүй байх үеийн false hr
+            self.is_hr = False  #  employee байхгүй байх үеийн false hr
             return None
 
         def __bool__(self):
@@ -36,8 +40,8 @@ def check_org(get_response):
         #  Байгууллагын мэдээллээр шүүхэд хэрэгтэй
         #  filter ийг энэчээ оруулах
         org_filter = {}
-        exactly_org_filter = {} #  бүх түвшин нь яг өөрийнхөө мэдээллийг авах бол
-        org_lvl = 0 # ямар түвшиний байгууллага эсэх нь
+        exactly_org_filter = {}  #  бүх түвшин нь яг өөрийнхөө мэдээллийг авах бол
+        org_lvl = 0  # ямар түвшиний байгууллага эсэх нь
         salbar_pos = -1  #  салбар нь хэддэх бранч
         salbar_child_ids = {}
         request.employee = None
@@ -54,8 +58,16 @@ def check_org(get_response):
 
         if request.user.is_authenticated:
 
-            employee = Employee.objects.filter(user=request.user, state=Employee.STATE_WORKING, check_super=request.user.is_superuser).first()
-            teachers = Teachers.objects.filter(user=request.user, action_status=Teachers.APPROVED, action_status_type=Teachers.ACTION_TYPE_ALL).first()
+            employee = Employee.objects.filter(
+                user=request.user,
+                state=Employee.STATE_WORKING,
+                check_super=request.user.is_superuser,
+            ).first()
+            teachers = Teachers.objects.filter(
+                user=request.user,
+                action_status=Teachers.APPROVED,
+                action_status_type=Teachers.ACTION_TYPE_ALL,
+            ).first()
             is_employee = True
 
             if not employee:
@@ -67,7 +79,11 @@ def check_org(get_response):
             request.user.is_employee = is_employee
 
         # Нэвтэрсэн хэрэглэгч нь ямар нэг байгуулгын ажилтан биш бол defualt эрхүүдийг онооно
-        if request.user.is_authenticated and not request.employee and not request.teachers:
+        if (
+            request.user.is_authenticated
+            and not request.employee
+            and not request.teachers
+        ):
             request.org_filter = org_filter
             request.org_lvl = org_lvl
             request.salbar_pos = salbar_pos
@@ -78,42 +94,15 @@ def check_org(get_response):
 
         # Нэвтэрсэн хэрэглэгч нь ямар нэг байгуулгын ажилтан бол байгуулгын эрхүүдийг онооно
         elif request.employee:
-            org_filter.update({ "org": request.employee.org })
-            exactly_org_filter.update({ "org": request.employee.org })
+            org_filter.update({"org": request.employee.org})
+            exactly_org_filter.update({"org": request.employee.org})
             org_lvl = 3
 
         elif request.teachers:
-            org_filter.update({ "org": request.teachers.org })
-            exactly_org_filter.update({ "org": request.teachers.org })
-            org_lvl = 3
-
-            # if (request.employee.org_position and request.employee.org_position.is_hr):
-            #     org_filter.update({ "org": request.employee.org })
-            #     exactly_org_filter.update({ "org": request.employee.org })
-            #     org_lvl = 3
-
-            # else:
-
-            #     if request.employee.org:
-            #         org_filter.update({ "org": request.employee.org })
-            #         exactly_org_filter.update({ "org": request.employee.org })
-            #         org_lvl = 3
-
-            #     if request.employee.sub_org:
-            #         org_filter.update({ "sub_org": request.employee.sub_org })
-            #         exactly_org_filter.update({ "sub_org": request.employee.sub_org })
-            #         org_lvl = 2
-            #     else:
-            #         exactly_org_filter.update({ "sub_org": None })
-
-            #     if request.employee.salbar:
-            #         org_filter.update({ "salbar": request.employee.salbar })
-            #         exactly_org_filter.update({ "salbar": request.employee.salbar })
-            #         salbar_child_ids = find_child_salbar_ids(request.employee.salbar)
-            #         salbar_pos = request.employee.salbar.branch_pos
-            #         org_lvl = 1
-            #     else:
-            #         exactly_org_filter.update({ "salbar": None })
+            if request.teachers.sub_org:
+                org_filter.update({"org": request.teachers.sub_org.org})
+                exactly_org_filter.update({"org": request.teachers.sub_org.org})
+                org_lvl = 3
 
             #  салбар нь exactly өөрөө бол ашиглана
         request.org_filter = org_filter
