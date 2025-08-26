@@ -29,9 +29,7 @@ def check_org(get_response):
             return False
 
     def middleware(request):
-        StudentLogin = apps.get_model("lms", 'StudentLogin')
-
-        if isinstance(request.user, StudentLogin):
+        if request.session.get('_is_student'):
             response = get_response(request)
             return response
 
