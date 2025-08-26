@@ -412,7 +412,7 @@ class UserAPILogoutView(
         user_id = request.user.id
         conditions = { 'user': user_id }
 
-        if request.is_student:
+        if request.session.get('_is_student'):
             conditions = { 'student': user_id }
 
         # NOTE this can work wrong for example if many devices are used by same user to login. May be need to save sessionId to AccessHistoryLms table and use it to remove correct record, etc
