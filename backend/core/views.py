@@ -1188,6 +1188,8 @@ class OrgPositionListAPIView(
 
     @login_required()
     def get(self, request, pk=None):
+        """ Албан тушаалын жагсаалт """
+
         org = getattr(request, 'org_filter', {}).get('org')
 
         if org:
@@ -1202,6 +1204,7 @@ class OrgPositionListAPIView(
 
     @login_required()
     def post(self, request):
+        """ Албан тушаал нэмэх """
         org = getattr(request, 'org_filter', {}).get('org')
         if not org:
             return request.send_error("ERR_002", "Албан тушаал нэмэх эрхгүй байна")
@@ -1219,17 +1222,19 @@ class OrgPositionListAPIView(
 
     @login_required()
     def put(self, request, pk=None):
-        self.serializer_class = OrgPositionPutSerializer
+        """ Албан тушаалын засах """
 
+        self.serializer_class = OrgPositionPutSerializer
+        org = getattr(request, 'org_filter', {}).get('org')
+        if not org:
+            return request.send_error("ERR_002", "Албан тушаал нэмэх эрхгүй байна")
+
+        request.data["org"] = org.id
         request_data = request.data
         instance = self.queryset.filter(id=pk).first()
 
         try:
-            org = getattr(request, 'org_filter', {}).get('org')
-            if not org:
-                return request.send_error("ERR_002", "Албан тушаал нэмэх эрхгүй байна")
 
-            request.data["org"] = org.id
             serializer = self.get_serializer(instance, data=request_data)
 
             if serializer.is_valid(raise_exception=False):
@@ -1246,6 +1251,8 @@ class OrgPositionListAPIView(
 
     @login_required()
     def delete(self, request, pk=None):
+        """ Албан тушаалын устгах """
+
         if pk:
             self.destroy(request, pk)
 

@@ -39,7 +39,7 @@ const AddModal = ({ open, handleModal, refreshDatas, permission_option, mainPosi
     const { control, handleSubmit, reset, setError, formState: { errors }, setValue } = useForm(validate(validateSchema));
 
     const [is_loading, setLoader] = useState(false)
-    // const [mainPositionData, setMainPositionData] = useState([])
+    const [mainPositionId, setMainPositionId] = useState('')
     const [permissionId, setPermissionId] = useState([])
     const [removepermissionId, setRemovePermissionId] = useState([])
     const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
@@ -56,7 +56,6 @@ const AddModal = ({ open, handleModal, refreshDatas, permission_option, mainPosi
 
         cdata['org'] = school_id
 
-        console.log('cdata', cdata,permissionId)
         const { success, error } = await postFetch(orgPositionApi.post(cdata))
         if(success) {
             reset()
@@ -70,7 +69,7 @@ const AddModal = ({ open, handleModal, refreshDatas, permission_option, mainPosi
             }
         }
 	}
-    console.log('err', errors)
+
     return (
         <Fragment>
             <Modal
@@ -225,19 +224,19 @@ const AddModal = ({ open, handleModal, refreshDatas, permission_option, mainPosi
                                             id="main_position"
                                             classNamePrefix='select'
                                             isClearable
-                                            isMulti
                                             className={classnames('react-select', { 'is-invalid': errors.main_position })}
                                             isLoading={postLoading}
                                             placeholder={t(`-- Сонгоно уу --`)}
                                             options={mainPositionData || []}
-                                            value={mainPositionData.find((c) => c.id === value)}
+                                            value={mainPositionData.find((c) => c.id === mainPositionId)}
                                             noOptionsMessage={() => t('Хоосон байна.')}
                                             onChange={(val) => {
                                                 onChange(val?.id || '')
+                                                setMainPositionId(val?.id || '')
                                             }}
                                             styles={ReactSelectStyles}
                                             getOptionValue={(option) => option.id}
-                                            getOptionLabel={(option) => option.description}
+                                            getOptionLabel={(option) => option.name}
                                         />
                                     )
                                 }}
@@ -263,19 +262,11 @@ const AddModal = ({ open, handleModal, refreshDatas, permission_option, mainPosi
                                             isLoading={postLoading}
                                             placeholder={t(`-- Сонгоно уу --`)}
                                             options={permission_option || []}
-                                            // value={permission_option.find((c) => c.id===value)}
-                                            // value={permission_option.filter((c) => value.includes(c.id))}
                                             noOptionsMessage={() => t('Хоосон байна.')}
                                             onChange={(val) => {
                                                 onChange(val.id || '')
                                                 setPermissionId(val || [])
-
-                                                // setRemovePermissionId(val || [])
                                                 }}
-                                            //     onChange={(selected) => {
-                                            //        const selectedIds = selected ? selected.map((item) => item.id) : [];
-                                            //        onChange(selectedIds);  // Send selected permission ids
-                                            //    }}
                                             styles={ReactSelectStyles}
                                             getOptionValue={(option) => option.id}
                                             getOptionLabel={(option) => option.description}

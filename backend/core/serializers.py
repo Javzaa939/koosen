@@ -653,8 +653,7 @@ class OrgPositionSerializer(serializers.ModelSerializer):
     permissions = PermissionSerializer(many=True)
     removed_perms = PermissionSerializer(many=True)
     created_at = serializers.SerializerMethodField()
-
-    # permissions_name = serializers.SerializerMethodField()
+    main_position = MainPositionSerializer(many=False)
     class Meta:
         model = OrgPosition
         fields = ["id", "name", "is_teacher", "name", "description", "org", "is_director", "is_hr", "created_at", "updated_at", "permissions", "removed_perms", "main_position"]
@@ -665,9 +664,6 @@ class OrgPositionSerializer(serializers.ModelSerializer):
         fixed_date = fix_format_date(obj.created_at, format='%Y-%m-%d %H:%M:%S')
         return fixed_date
 
-    # def get_permissions_name(self, obj):
-    #     Permissions.objects.filter(id__in=obj.permissions.all())
-    #     return PermissionSerializer(Permissions.objects.filter(id__in=obj.permissions.all()), many=True).data
 
 # --------------------- Багшийн мэдээлэл -------------------------
 

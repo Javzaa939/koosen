@@ -200,7 +200,7 @@ const Position = () => {
                 }
             </Card>
             { add_modal && <AddModal open={add_modal} handleModal={handleModal} refreshDatas={getDatas} permission_option={permission_option} mainPositionData={mainPositionData}/> }
-			{ update_modal && <UpdateModal open={update_modal} editId={edit_id}  handleEdit={handleEdit} refreshDatas={getDatas} editData={editData} permission_option={permission_option} mainPositionData={mainPositionData}/> }
+			{ update_modal && <UpdateModal open={update_modal} editId={edit_id}  handleEdit={handleEdit} refreshDatas={getDatas} permission_option={permission_option} mainPositionData={mainPositionData}/> }
         </Fragment>
     )
 }

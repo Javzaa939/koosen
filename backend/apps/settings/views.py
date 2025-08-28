@@ -25,7 +25,7 @@ from lms.models import Country
 from lms.models import TimeTable
 from lms.models import DefinitionSignature
 from core.models import Permissions
-from core.models import Roles
+from core.models import Roles, MainPosition
 from lms.models import AdmissionBottomScore
 from lms.models import PrintSettings
 from lms.models import ScoreRegister
@@ -56,6 +56,7 @@ from .serializers import PrintSettingsListSerializer
 from .serializers import PrintSettingsSerializer
 from .serializers import OrgPosition
 from .serializers import GradeLetterSerializer
+from .serializers import MainPositionSerializer
 
 
 from django.db import transaction
@@ -2228,6 +2229,65 @@ class GradeLetterAPIView(
 
     def delete(self, request, pk=None):
         "Дүнгийн үсгэн үнэлгээ устгах "
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
+
+
+@permission_classes([IsAuthenticated])
+class MainPositionAPIView(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView
+):
+
+    """ Үндсэн албан тушаалын төрөл """
+
+    queryset = MainPosition.objects
+    serializer_class = MainPositionSerializer
+
+    def get(self, request, pk=None):
+        """ Үндсэн албан тушаалын төрлийн жагсаалт """
+
+        # org = getattr(request, 'org_filter', {}).get('org')
+
+        # if org:
+        #     self.queryset = self.queryset.filter(org=org)
+        # else:
+        #     return request.send_error("ERR_002", "Таньд үндсэн албан тушаалын төрөл нэмэх эрх байхгүй байна")
+
+        if pk:
+            data = self.retrieve(request, pk).data
+            return request.send_data(data)
+
+        datas = self.list(request).data
+        return request.send_data(datas)
+
+    @login_required()
+    @transaction.atomic
+    def post(self, request):
+        """ үндсэн албан тушаалын төрөл шинээр үүсгэх """
+
+        # org = getattr(request, 'org_filter', {}).get('org')
+
+        # if not org:
+        #     return request.send_error("ERR_002", "Таньд үндсэн албан тушаалын төрөл эрх байхгүй байна")
+
+        # request.data["org"] = org.id
+        request.data["org"] = 2
+        return post_put_action(self, request, 'post', request.data)
+
+    @login_required()
+    @transaction.atomic
+    def put(self, request, pk=None):
+        "үндсэн албан тушаалын төрөл засах"
+        return post_put_action(self, request, 'put', request.data, pk)
+
+    def delete(self, request, pk=None):
+        "үндсэн албан тушаалын төрөл устгах "
 
         self.destroy(request, pk)
         return request.send_info("INF_003")

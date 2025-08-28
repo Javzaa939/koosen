@@ -21,7 +21,7 @@ from lms.models import StudentGrade, OrgPosition
 from lms.models import GradeLetter
 
 from core.models import Permissions
-from core.models import Roles
+from core.models import Roles, MainPosition
 
 from main.utils.function.utils import get_file_full_cdn_url, get_week_num_from_date
 
@@ -292,4 +292,11 @@ class GradeLetterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GradeLetter
+        fields = "__all__"
+
+class MainPositionSerializer(serializers.ModelSerializer):
+    """ Үндсэн албан тушаалын төрөл """
+
+    class Meta:
+        model = MainPosition
         fields = "__all__"

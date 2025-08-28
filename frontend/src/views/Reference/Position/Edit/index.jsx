@@ -21,7 +21,7 @@ import { X } from "react-feather";
 import Select from "react-select";
 import classnames from "classnames"
 
-const UpdateModal = ({ open, editId, handleEdit, refreshDatas,editData , permission_option, mainPositionData}) => {
+const UpdateModal = ({ open, editId, handleEdit, refreshDatas, permission_option, mainPositionData}) => {
     const CloseBtn = (
         <X className="cursor-pointer" size={15} onClick={handleEdit} />
     )
@@ -30,8 +30,7 @@ const UpdateModal = ({ open, editId, handleEdit, refreshDatas,editData , permiss
     const {isLoading, fetchData } = useLoader({})
 
     const { control, handleSubmit, setValue, reset, setError, formState: { errors } } = useForm();
-    const [permissionId, setPermissionId] = useState([])
-    const [removepermissionId, setRemovePermissionId] = useState([])
+    const [mainPositionId, setMainPositionId] = useState('')
 
     // Api
     const getPositionApi = useApi().hrms.position
@@ -45,6 +44,10 @@ const UpdateModal = ({ open, editId, handleEdit, refreshDatas,editData , permiss
                     if(data[key] !== null)
                         setValue(key, data[key])
                     else setValue(key, '')
+                    if(key === 'main_position'){
+                        setValue(key, data[key]?.id)
+                    }
+
                 }
             }
         }
@@ -66,6 +69,7 @@ const UpdateModal = ({ open, editId, handleEdit, refreshDatas,editData , permiss
                 is_director: cdata.is_director,
                 is_teacher: cdata.is_teacher,
                 description: cdata.description,
+                main_position: cdata.main_position || null,
             }
 
             necessary_cdata['permissions'] = necessary_cdata['permissions']?.map((c)=> c.id)
@@ -225,7 +229,38 @@ const UpdateModal = ({ open, editId, handleEdit, refreshDatas,editData , permiss
                             />
                             {errors.description && <FormFeedback className='d-block'>{errors.description.message}</FormFeedback>}
                         </Col>
-
+                        <Col md={12}>
+                            <Label className="form-label" for="main_position">
+                                {t('Үндсэн албан тушаалын төрлүүд')}
+                            </Label>
+                            <Controller
+                                defaultValue=''
+                                control={control}
+                                name="main_position"
+                                render={({ field: { value, onChange} }) => {
+                                    return (
+                                        <Select
+                                            name="main_position"
+                                            id="main_position"
+                                            classNamePrefix='select'
+                                            isClearable={false}
+                                            className={classnames('react-select', { 'is-invalid': errors.main_position })}
+                                            isLoading={isLoading}
+                                            placeholder={t(`-- Сонгоно уу --`)}
+                                            options={mainPositionData || []}
+                                            value={mainPositionData.find((c) => c.id === value)}
+                                            noOptionsMessage={() => t('Хоосон байна.')}
+                                            onChange={(val) => {
+                                                onChange(val?.id || '')
+                                            }}
+                                            styles={ReactSelectStyles}
+                                            getOptionValue={(option) => option.id}
+                                            getOptionLabel={(option) => option.name}
+                                        />
+                                    )
+                                }}
+                            />
+                        </Col>
                          <Col md={12}>
                             <Label className="form-label" for="permissions">
                                 {t('Эрх нэмэх')}
@@ -251,7 +286,6 @@ const UpdateModal = ({ open, editId, handleEdit, refreshDatas,editData , permiss
                                             onChange={(val) => {
                                                 if(val){
                                                     onChange(val || [])
-                                                    setPermissionId(val)
                                                 }
                                             }}
                                             styles={ReactSelectStyles}
@@ -287,7 +321,6 @@ const UpdateModal = ({ open, editId, handleEdit, refreshDatas,editData , permiss
                                             onChange={(val) => {
                                                 if (val){
                                                     onChange(val || [])
-                                                    setRemovePermissionId(val)
                                                 }
                                             }}
                                             styles={ReactSelectStyles}
