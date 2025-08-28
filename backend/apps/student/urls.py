@@ -142,4 +142,9 @@ urlpatterns = [
     # Уйгаржин хөрвүүлэх
     path('graduation/uigarjin/convert/', GraduationLessonConvertAPIView.as_view()),
     path('graduation/english/convert/', GraduationEnglishConvertAPIView.as_view()),
+
+    #region for student login
+    # Оюутны санал болгох төлөвлөгөө
+    path('user-student/plan/', StudentPlanAPIView.as_view()),
+    #endregion for student login
 ]

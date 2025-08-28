@@ -5,7 +5,7 @@ import requests
 from googletrans import Translator
 import openpyxl_dictreader
 
-from datetime import date
+from datetime import date, datetime
 
 from rest_framework import mixins
 from rest_framework import generics
@@ -13,7 +13,7 @@ import pandas as pd
 
 from django.conf import settings
 from django.db import transaction
-from django.db.models import Max, Sum, F, FloatField, Q, Value, Count, OuterRef, Subquery, Func
+from django.db.models import Max, Sum, F, FloatField, Q, Value, Count, OuterRef, Subquery, Func, Exists
 from django.db.models.functions import Replace, Upper, Coalesce
 from django.contrib.auth.hashers import make_password
 from django.db import connection
@@ -33,7 +33,7 @@ from main.utils.function.utils import (
 )
 # from main.khur.XypClient import citizen_regnum, highschool_regnum
 from main.utils.file import save_file, remove_folder
-from lms.models import Learning, Payment, ProfessionalDegree, Student, StudentAdmissionScore, StudentEducation, StudentLeave, StudentLogin, TimeTable
+from lms.models import Learning, Payment, PermissionsOtherInterval, ProfessionalDegree, SeasonChoose, Student, StudentAdmissionScore, StudentEducation, StudentLeave, StudentLogin, TimeTable
 from lms.models import StudentMovement
 from lms.models import Group
 from lms.models import StudentFamily
@@ -64,7 +64,7 @@ from lms.models import Country, ProfessionAverageScore, AttachmentConfig, Profes
 
 from core.models import SubOrgs, AimagHot, SumDuureg, User, Salbars
 
-from .serializers import StudentListSerializer
+from .serializers import LearningPlanSerializer, StudentListSerializer
 from .serializers import StudentRegisterSerializer
 from .serializers import StudentRegisterListSerializer
 from .serializers import StudentMovementSerializer
@@ -4730,3 +4730,59 @@ class GraduationEnglishConvertAPIView(
         count = add_student_eng_name(group)
 
         return request.send_info('INF_002')
+
+
+# region for student login
+# NOTE if @permission_classes([IsAuthenticated]) is used then @login_required() is not required, it is just repeats sql query to get user object again
+@permission_classes([IsAuthenticated])
+class StudentPlanAPIView(
+    mixins.ListModelMixin,
+    generics.GenericAPIView
+):
+    "Оюутны санал болгох төлөвлөгөөний жагсаалт"
+
+    queryset = LearningPlan.objects.all()
+    serializer_class = LearningPlanSerializer
+
+    def get(self, request):
+
+        student_login = request.user
+        student = student_login.student.id
+
+        student_obj = Student.objects.get(id=student)
+        profession= student_obj.group.profession
+        lesson_year, lesson_season = get_active_year_season()
+        today = datetime.today()
+
+        # оюутны мэргэжил дэх заавал үзэх хичээлүүд
+        self.queryset = self.queryset.filter(profession_id=profession).annotate(
+            total_score=Subquery(
+                ScoreRegister.objects.filter(
+                    student=student,
+                    lesson=OuterRef('lesson'),
+                    is_delete=False
+                ).annotate(
+                    total_score=Coalesce(F('exam_score'), Value(0.0)) + Coalesce(F('teach_score'), Value(0.0))
+                ).order_by('-created_at').values('total_score')[:1]
+            ),
+            last_retake_year_season=Exists(
+                PermissionsOtherInterval.objects.filter(
+                    permission_type=PermissionsOtherInterval.STUDENT_TIMETABLE,
+                    lesson_year=lesson_year,
+                    lesson_season=lesson_season,
+                    start_date__gt=today,
+                    finish_date__lte=today
+                )
+            ),
+            is_taken=Exists(
+                SeasonChoose.objects.filter(
+                    student=student,
+                    lesson=OuterRef('lesson')
+                )
+            )
+        )
+
+        learnplan = self.list(request).data
+
+        return request.send_data(learnplan)
+# endregion for student login

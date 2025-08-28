@@ -2921,7 +2921,8 @@ class PermissionsOtherInterval(models.Model):
     EXAM_QUESTION = 8
     EXAM = 9
     TEACHER_TIME = 10
-    PRACTICE = 10
+    PRACTICE = 11
+    STUDENT_TIMETABLE = 12
 
     PERMISSION_TYPE=(
         (TIMETABLE, "Хичээлийн хуваарийн эрх"),
@@ -2934,7 +2935,8 @@ class PermissionsOtherInterval(models.Model):
         (EXAM_QUESTION, "Шалгалтын даалгавар оруулах хугацаа"),
         (EXAM, "Шалгалтын хуваарь үүсгэх хугацаа"),
         (TEACHER_TIME, "Багш багц цагт тооцох мэдээлэл оруулах хугацаа"),
-        (PRACTICE, "Дадлагын оноо байршуулах хугацаа")
+        (PRACTICE, "Дадлагын оноо байршуулах хугацаа"),
+        (STUDENT_TIMETABLE, "Оюутны хичээл сонголтын эрх"),
     )
 
     org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
@@ -4907,3 +4909,15 @@ class MentalStudent(models.Model):
 
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+# region for student login
+class SeasonChoose(models.Model):
+    """ Өвөл зуны сургалт"""
+
+    lesson = models.ForeignKey(LessonStandart, on_delete=models.PROTECT, verbose_name='хичээл')
+    student = models.ForeignKey(Student, on_delete=models.PROTECT, verbose_name='Оюутан')
+    created_at = models.DateTimeField(auto_now_add=True)
+    lesson_year = models.CharField( max_length=20, verbose_name='Хичээлийн жил', null=True)
+    lesson_season = models.ForeignKey(Season, verbose_name='Идэвхтэй улирал', on_delete=models.PROTECT, null=True)
+# endregion for student login

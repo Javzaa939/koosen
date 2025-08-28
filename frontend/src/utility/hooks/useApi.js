@@ -2291,6 +2291,16 @@ function useApi(isDisplay=false) {
 			},
 		},
 
+		// for student login
+		userStudent: {
+			student: {
+				/** санал болгох төлөвлөгөө */
+				learningplan: {
+					get:() => instance.get(`/student/user-student/plan/?year=${cyear_name}&season=${cseason_id}`),
+					retake: ({lesson_id, data}) => instance.post(`/student/user-student/plan/retake/${lesson_id}/`, data)
+				},
+			},
+		},
 	}
 }
 

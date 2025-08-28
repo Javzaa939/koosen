@@ -30,7 +30,7 @@ import ActiveYearContext from '@src/utility/context/ActiveYearContext'
 
 const StudyPlan = () => {
 
-    const studentPlanApi = useApi().student.learningplan
+    const studentPlanApi = useApi().userStudent.student.learningplan
     const getLessonApi = useApi().student.lessondetail
 
     const { t } = useTranslation()

@@ -11,7 +11,7 @@ from django.db.models.functions import Cast, ExtractYear
 from django.db.models import Avg, PositiveIntegerField
 from django.db.models import F, Sum
 
-from lms.models import Payment, Student, StudentAdmissionScore, StudentLeave
+from lms.models import Payment, Student, StudentAdmissionScore, StudentLeave, StudentLogin, TimeTable_to_group, TimeTable_to_student
 from lms.models import StudentRegister
 from lms.models import Group
 from lms.models import StudentMovement
@@ -1330,3 +1330,104 @@ class StudentDefinitionListLiteSerializer(serializers.ModelSerializer):
         school_data = SchoolSerializer(school_qs, many=False).data
 
         return school_data
+
+
+# region for student login
+class LessonListSerializer(serializers.ModelSerializer):
+    '''  Хичээлийн жагсаалт '''
+
+    class Meta:
+        model = LessonStandart
+        fields = "id", "code", "name", "kredit"
+
+
+class LearningPlanPrevLessonSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = LessonStandart
+        fields = "__all__"
+
+
+# Оюутны санал болгох төлөвлөгөө
+class LearningPlanSerializer(serializers.ModelSerializer):
+    lesson = LessonListSerializer(many=False)
+    status = serializers.SerializerMethodField()
+    season = serializers.SerializerMethodField()
+    previous_lesson = LearningPlanPrevLessonSerializer()
+    total_score = serializers.FloatField()
+    last_retake_year_season = serializers.BooleanField()
+    is_taken = serializers.BooleanField()
+
+    class Meta:
+        model = LearningPlan
+        fields = "__all__"
+
+    def get_status(self, obj):
+        " үзсэн or үзэж байгаа or үзээгүй хичээл"
+
+        request = self.context['request']
+
+        student_login = request.user
+        student_obj = student_login.student
+
+        params = request.query_params
+
+        lesson_year = params.get('year')
+        lesson_season = params.get('season')
+
+        if not lesson_year  and not lesson_season:
+            lesson_year, lesson_season = get_active_year_season()
+
+        status = 2  # Үзээгүй
+
+        lesson_id = obj.lesson
+
+        # student_obj = Student.objects.get(id=student)
+        group = student_obj.group
+
+        # хичээл хуваарьт шивэгдсэн эсэх
+        lesson_time = TimeTable.objects.filter(lesson=lesson_id, lesson_year=lesson_year, lesson_season=lesson_season)
+
+        # тухайн оюутны ангиараа үзэж байгаа хуваарь
+        group_timetable = TimeTable_to_group.objects.filter(timetable__in=lesson_time, group=group)
+
+        # тухайн оюутны үзэж байгаа хуваарь
+        timetable_student = TimeTable_to_student.objects.filter(timetable__in=lesson_time, student=student_obj)
+
+        # тухайн оюутны хуваарь дээр нэмэлт хийлгэсэн эсэх
+        add_student_timetable = timetable_student.filter(add_flag=True)
+
+        score = ''
+        # Дүнгийн мэдээлэл орсон л бол үзсэн гэж үзэж байгаа
+        score_qs = ScoreRegister.objects.filter(student=student_obj, lesson=lesson_id).first()
+
+        if score_qs:
+            score = score_qs.score_total
+
+        # Үзсэн эсэх status
+        if add_student_timetable or group_timetable:
+            status = 3  # Үзэж байгаа
+        if score:
+            status = 1 # үзсэн
+            if score < 60:
+                status = 4 # унасан
+        else:
+            if obj.is_taken:
+                print(obj.is_taken)
+                status = 5 # үзэхээр төлөвлсөн
+            else:
+                join_year = group.level
+                check_season = join_year * 2
+                if obj.season and float(obj.season) < check_season:
+                    status = 4 # унасан
+        return status
+
+    def get_season(self, obj):
+        season = None
+        if obj.season:
+            season = json_load(obj.season)
+            if isinstance(season, list) and len(season) > 0:
+                season = season[0]
+
+        return season
+# endregion for student login
