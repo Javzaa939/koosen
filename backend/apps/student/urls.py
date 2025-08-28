@@ -145,6 +145,9 @@ urlpatterns = [
 
     #region for student login
     # Оюутны санал болгох төлөвлөгөө
-    path('user-student/plan/', StudentPlanAPIView.as_view()),
+    path('user-student/plan/', UserStudentPlanAPIView.as_view()),
+
+    # Cургалт/Явцын дүн page
+    path('user-student/score-teacher/', UserStudentScoreTeacherAPIView.as_view()),
     #endregion for student login
 ]

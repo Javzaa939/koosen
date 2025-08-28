@@ -64,7 +64,7 @@ from lms.models import Country, ProfessionAverageScore, AttachmentConfig, Profes
 
 from core.models import SubOrgs, AimagHot, SumDuureg, User, Salbars
 
-from .serializers import LearningPlanSerializer, StudentListSerializer
+from .serializers import StudentListSerializer, UserStudentLearningPlanSerializer
 from .serializers import StudentRegisterSerializer
 from .serializers import StudentRegisterListSerializer
 from .serializers import StudentMovementSerializer
@@ -4735,17 +4735,16 @@ class GraduationEnglishConvertAPIView(
 # region for student login
 # NOTE if @permission_classes([IsAuthenticated]) is used then @login_required() is not required, it is just repeats sql query to get user object again
 @permission_classes([IsAuthenticated])
-class StudentPlanAPIView(
+class UserStudentPlanAPIView(
     mixins.ListModelMixin,
     generics.GenericAPIView
 ):
     "Оюутны санал болгох төлөвлөгөөний жагсаалт"
 
     queryset = LearningPlan.objects.all()
-    serializer_class = LearningPlanSerializer
+    serializer_class = UserStudentLearningPlanSerializer
 
     def get(self, request):
-
         student_login = request.user
         student = student_login.student.id
 
@@ -4785,4 +4784,53 @@ class StudentPlanAPIView(
         learnplan = self.list(request).data
 
         return request.send_data(learnplan)
+
+
+class UserStudentScoreTeacherAPIView(
+    generics.GenericAPIView
+):
+    """ Багшийн явцын тайлан """
+
+    @login_required()
+    def get(self, request):
+        student_login = request.user
+        student = student_login.student.id
+
+        lesson_year, lesson_season = get_active_year_season()
+        lesson_names = (
+            TeacherScore.objects
+            .filter(student=student, lesson_year=lesson_year, lesson_season=lesson_season)
+            .distinct('score_type__lesson_teacher__lesson__code', 'score_type__lesson_teacher__teacher')
+            .values('score_type__lesson_teacher__lesson__code', 'score_type__lesson_teacher__lesson__name', 'score_type__lesson_teacher__teacher__first_name', 'score_type__lesson_teacher__teacher__last_name', 'grade_letter__letter')
+        )
+
+        datas = []
+        for lesson in lesson_names:
+            obj = dict()
+            scores = (
+                TeacherScore.objects
+                    .filter(student=student, lesson_year=lesson_year, lesson_season=lesson_season, score_type__lesson_teacher__lesson__code=lesson.get('score_type__lesson_teacher__lesson__code'), score_type__lesson_teacher__teacher__first_name=lesson.get('score_type__lesson_teacher__teacher__first_name'))
+                    .annotate(
+                        type_name=F('score_type__name'),
+                        take_score=F('score_type__score')
+                    ).values('type_name', 'score', 'take_score')
+            )
+
+            # Нийт оноо
+            total = (
+                TeacherScore.objects
+                    .filter(student=student, lesson_year=lesson_year, lesson_season=lesson_season, score_type__lesson_teacher__lesson__code=lesson.get('score_type__lesson_teacher__lesson__code'), score_type__lesson_teacher__teacher__first_name=lesson.get('score_type__lesson_teacher__teacher__first_name'))
+                    .aggregate(total=Sum('score')).get('total')
+            )
+
+            obj = {
+                'lesson_name': lesson.get('score_type__lesson_teacher__lesson__name'),
+                'lesson_code': lesson.get('score_type__lesson_teacher__lesson__code'),
+                'total': total,
+                'teacher_name': get_fullName(lesson.get('score_type__lesson_teacher__teacher__last_name'),lesson.get('score_type__lesson_teacher__teacher__first_name'), True, True),
+                'scores': list(scores)
+            }
+            datas.append(obj)
+
+        return request.send_data(datas)
 # endregion for student login

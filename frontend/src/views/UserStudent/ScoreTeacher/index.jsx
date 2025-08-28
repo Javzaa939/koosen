@@ -7,7 +7,7 @@ import CTable from './Table';
 export default function ScoreTeacher() {
 
     const { fetchData } = useLoader({})
-    const scoreApi = useApi().student.score
+    const scoreApi = useApi().userStudent.student.score
     const [datas, setDatas] = useState([])
 
     async function getDatas() {

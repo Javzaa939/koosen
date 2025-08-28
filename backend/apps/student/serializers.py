@@ -1349,7 +1349,7 @@ class LearningPlanPrevLessonSerializer(serializers.ModelSerializer):
 
 
 # Оюутны санал болгох төлөвлөгөө
-class LearningPlanSerializer(serializers.ModelSerializer):
+class UserStudentLearningPlanSerializer(serializers.ModelSerializer):
     lesson = LessonListSerializer(many=False)
     status = serializers.SerializerMethodField()
     season = serializers.SerializerMethodField()
