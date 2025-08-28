@@ -9,7 +9,7 @@ import lms.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('lms', '0011_alter_learning_learn_code_and_more'),
+        ('lms', '0015_create_get_color_function'),
     ]
 
     operations = [

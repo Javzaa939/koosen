@@ -288,6 +288,8 @@ class UserAPILoginView(
             .first()
         )
 
+        print('user', user)
+
         UserAPILoginView.check_user_instance(user, ending_data, request)
         # endregion
 

@@ -127,7 +127,7 @@ const Login = () => {
 							Нэвтрэх
 						</Button>
 						<p className='text-center mt-2'>
-						<span className='me-25'>Оюутан үү ?</span>
+						<span className='me-25'>Оюутан уу ?</span>
 						<Link to='/student-login'>
 							<span>Оюутнаар нэвтрэх</span>
 						</Link>
