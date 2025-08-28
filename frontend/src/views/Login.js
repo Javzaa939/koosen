@@ -101,7 +101,7 @@ const Login = () => {
                                 control={control}
                                 id='email'
                                 name='email'
-                                render={({ field }) => <Input id="email" placeholder='Имэйл хаяг' invalid={errors.email && true} {...field} />}
+                                render={({ field }) => <Input id="email" placeholder='Имэйл хаяг' invalid={errors.email && true} autoComplete="username" {...field} />}
                             />
 							{errors.email && <FormFeedback>{errors.email.message}</FormFeedback>}
                         </div>
@@ -126,6 +126,12 @@ const Login = () => {
 						<Button color="primary" block type="submit" >
 							Нэвтрэх
 						</Button>
+						<p className='text-center mt-2'>
+						<span className='me-25'>Оюутан уу ?</span>
+						<Link to='/student-login'>
+							<span>Оюутнаар нэвтрэх</span>
+						</Link>
+						</p>
 					</Form>
 				</Col>
 			</Col>

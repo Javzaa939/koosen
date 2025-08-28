@@ -130,9 +130,11 @@ class GroupListSerializer(serializers.ModelSerializer):
     def get_name(self,obj):
         name = obj.name
         year = obj.join_year
+        return_name = None
 
-        #элссэн он дамжааны нэрийг нийлүүлсэн
-        return_name = name + ' ('+ year[0:4] + ')'
+        if year:
+            #элссэн он дамжааны нэрийг нийлүүлсэн
+            return_name = name + ' ('+ year[0:4] + ')'
 
         return return_name
 

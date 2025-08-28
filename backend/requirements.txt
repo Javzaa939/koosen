@@ -61,6 +61,7 @@ xlrd==2.0.1
 xmltodict==0.13.0
 zeep==4.2.1
 cyrtranslit==1.1.1
+colorama==0.4.6
 
 # Нэвтрэлтийн мэдээлэл авахтай холбоотой package
 django-user-agents==0.4.0

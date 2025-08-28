@@ -1,97 +1,100 @@
 // ** React imports
-import React, { Fragment, useState, useEffect, useContext } from 'react'
+import React, { Fragment, useState, useEffect, useContext } from 'react';
 
-import { X } from "react-feather";
+import { X } from 'react-feather';
 
-import Select from 'react-select'
+import Select from 'react-select';
 
-import useApi from "@hooks/useApi";
-import useLoader from "@hooks/useLoader";
+import useApi from '@hooks/useApi';
+import useLoader from '@hooks/useLoader';
 
-import { ReactSelectStyles } from "@utils"
+import { ReactSelectStyles } from '@utils';
 
-import classnames from "classnames";
+import classnames from 'classnames';
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller } from 'react-hook-form';
 
 import {
     Row,
     Col,
-	Form,
-	Modal,
-	Input,
-	Label,
-	Button,
+    Form,
+    Modal,
+    Input,
+    Label,
+    Button,
     Spinner,
-	ModalBody,
-	ModalHeader,
-	FormFeedback,
-} from "reactstrap";
+    ModalBody,
+    ModalHeader,
+    FormFeedback,
+} from 'reactstrap';
 
-import { validate, convertDefaultValue } from "@utils"
+import { validate, convertDefaultValue } from '@utils';
 
 import { t } from 'i18next';
 
-import AuthContext from '@context/AuthContext'
-import SchoolContext from "@context/SchoolContext"
+import AuthContext from '@context/AuthContext';
+import SchoolContext from '@context/SchoolContext';
 
 import { validateSchema } from './validateSchema';
 
-const AddModal = ({ open, handleModal, refreshDatas}) =>{
-    const CloseBtn = (
-        <X className="cursor-pointer" size={15} onClick={handleModal} />
-    )
-    const { user } = useContext(AuthContext)
-    const { school_id } = useContext(SchoolContext)
+const AddModal = ({ open, handleModal, refreshDatas }) => {
+    const CloseBtn = <X className="cursor-pointer" size={15} onClick={handleModal} />;
+    const { user } = useContext(AuthContext);
+    const { school_id } = useContext(SchoolContext);
 
     // ** Hook
-    const { control, handleSubmit, reset, setError, formState: { errors } } = useForm(validate(validateSchema));
+    const {
+        control,
+        handleSubmit,
+        reset,
+        setError,
+        formState: { errors },
+    } = useForm(validate(validateSchema));
     // states
-    const [is_loading, setLoader] = useState(false)
+    const [is_loading, setLoader] = useState(false);
     const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
-    const [leader_option, setLeaderOption] = useState([])
+    const [leader_option, setLeaderOption] = useState([]);
 
     // Loader
-	const { Loader, isLoading, fetchData } = useLoader({});
+    const { Loader, isLoading, fetchData } = useLoader({});
 
     // Api
-    const getLeaderApi = useApi().hrms.department
-    const departmentApi = useApi().hrms.department
+    const getLeaderApi = useApi().hrms.department;
+    const departmentApi = useApi().hrms.department;
 
     /* тэнхимийн эрхлэгч-н жагсаалт авах функц */
     async function getLeaderList() {
-        const { success, data } = await fetchData(getLeaderApi.leaderList())
+        const { success, data } = await fetchData(getLeaderApi.leaderList());
         if (success) {
-            setLeaderOption(data)
+            setLeaderOption(data);
         }
     }
 
     useEffect(() => {
-        getLeaderList()
-    },[])
+        getLeaderList();
+    }, []);
 
     async function onSubmit(cdata) {
-        cdata['created_user'] = user.id
-        cdata['updated_user'] = user.id
-        cdata['org'] = 1
-        cdata['sub_orgs'] = school_id
-        cdata = convertDefaultValue(cdata)
+        cdata['created_user'] = user.id;
+        cdata['updated_user'] = user.id;
+        cdata['org'] = 1;
+        cdata['sub_orgs'] = school_id;
+        cdata = convertDefaultValue(cdata);
 
-        const { success, error } = await postFetch(departmentApi.postRegister(cdata))
-        if(success) {
-            setLoader(false)
-            reset()
-            handleModal()
-            refreshDatas()
+        const { success, errors } = await postFetch(departmentApi.postRegister(cdata));
+        if (success) {
+            setLoader(false);
+            reset();
+            handleModal();
+            refreshDatas();
         } else {
-            setLoader(false)
+            setLoader(false);
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error) {
-                setError(error[key].field, { type: 'custom', message:  error[key].msg});
+            for (let key in errors) {
+                setError(key, { type: 'custom', message: errors[key]?.[0] });
             }
         }
-
-	}
+    }
 
     return (
         <Fragment>
@@ -99,25 +102,18 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                 isOpen={open}
                 toggle={handleModal}
                 className="sidebar-md"
-                modalClassName='modal-slide-in'
-                contentClassName='pt-0'
+                modalClassName="modal-slide-in"
+                contentClassName="pt-0"
             >
-                {
-                    is_loading &&
-                        <div className='suspense-loader'>
-                            <Spinner size='bg'/>
-                            <span className='ms-50'>Түр хүлээнэ үү...</span>
-                        </div>
-                }
+                {is_loading && (
+                    <div className="suspense-loader">
+                        <Spinner size="bg" />
+                        <span className="ms-50">Түр хүлээнэ үү...</span>
+                    </div>
+                )}
 
-                <ModalHeader
-                    className="mb-1"
-                    toggle={handleModal}
-                    close={CloseBtn}
-                    tag="div"
-                >
+                <ModalHeader className="mb-1" toggle={handleModal} close={CloseBtn} tag="div">
                     <h5 className="modal-title">{t('Тэнхимийн мэдээлэл нэмэх')}</h5>
-
                 </ModalHeader>
                 <ModalBody className="flex-grow-1">
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
@@ -126,13 +122,13 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                                 {t('Тэнхимийн нэр')}
                             </Label>
                             <Controller
-                                defaultValue=''
+                                defaultValue=""
                                 control={control}
                                 id="name"
                                 name="name"
                                 render={({ field }) => (
                                     <Input
-                                        id ="name"
+                                        id="name"
                                         bsSize="sm"
                                         placeholder={t('Тэнхимийн нэр')}
                                         {...field}
@@ -141,7 +137,37 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                                     />
                                 )}
                             />
-                            {errors.name && <FormFeedback className='d-block'>{t(errors.name.message)}</FormFeedback>}
+                            {errors.name && (
+                                <FormFeedback className="d-block">
+                                    {t(errors.name.message)}
+                                </FormFeedback>
+                            )}
+                        </Col>
+                        <Col md={12}>
+                            <Label className="form-label" for="code">
+                                {t('Тэнхимийн код')}
+                            </Label>
+                            <Controller
+                                defaultValue=""
+                                control={control}
+                                id="code"
+                                name="code"
+                                render={({ field }) => (
+                                    <Input
+                                        id="code"
+                                        bsSize="sm"
+                                        placeholder={t('Тэнхимийн код')}
+                                        {...field}
+                                        type="text"
+                                        invalid={errors.code && true}
+                                    />
+                                )}
+                            />
+                            {errors.code && (
+                                <FormFeedback className="d-block">
+                                    {t(errors.code.message)}
+                                </FormFeedback>
+                            )}
                         </Col>
                         <Col md={12}>
                             <Label className="form-label" for="leader">
@@ -149,33 +175,40 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                             </Label>
                             <Controller
                                 control={control}
-                                defaultValue=''
+                                defaultValue=""
                                 name="leader"
-                                render={({ field: { value, onChange} }) => {
+                                render={({ field: { value, onChange } }) => {
                                     return (
                                         <Select
                                             name="leader"
                                             id="leader"
-                                            classNamePrefix='select'
+                                            classNamePrefix="select"
                                             isClearable
-                                            className={classnames('react-select', { 'is-invalid': errors.leader })}
+                                            className={classnames('react-select', {
+                                                'is-invalid': errors.leader,
+                                            })}
                                             isLoading={isLoading}
                                             placeholder={t('-- Сонгоно уу --')}
                                             options={leader_option || []}
                                             value={leader_option.find((c) => c.id === value)}
-                                            noOptionsMessage={() => {t('Хоосон байна.')}}
+                                            noOptionsMessage={() => {
+                                                t('Хоосон байна.');
+                                            }}
                                             onChange={(val) => {
-                                                onChange(val?.id || '')
+                                                onChange(val?.id || '');
                                             }}
                                             styles={ReactSelectStyles}
                                             getOptionValue={(option) => option.id}
                                             getOptionLabel={(option) => option.full_name}
-
                                         />
-                                    )
+                                    );
                                 }}
                             />
-                            {errors.leader && <FormFeedback className='d-block'>{t(errors.leader.message)}</FormFeedback>}
+                            {errors.leader && (
+                                <FormFeedback className="d-block">
+                                    {t(errors.leader.message)}
+                                </FormFeedback>
+                            )}
                         </Col>
                         {/* <Col md={12}>
                             <Label className="form-label" for="social">
@@ -238,11 +271,16 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                             />
                         </Col> */}
                         <Col md={12}>
-                            <Button className="me-2" color="primary" type="submit" disabled={postLoading}>
-                                {postLoading &&<Spinner size='sm' className='me-1'/>}
+                            <Button
+                                className="me-2"
+                                color="primary"
+                                type="submit"
+                                disabled={postLoading}
+                            >
+                                {postLoading && <Spinner size="sm" className="me-1" />}
                                 {t('Хадгалах')}
                             </Button>
-                            <Button color="secondary" type="reset" outline  onClick={handleModal}>
+                            <Button color="secondary" type="reset" outline onClick={handleModal}>
                                 {t('Буцах')}
                             </Button>
                         </Col>
@@ -250,6 +288,6 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                 </ModalBody>
             </Modal>
         </Fragment>
-	);
+    );
 };
 export default AddModal;
