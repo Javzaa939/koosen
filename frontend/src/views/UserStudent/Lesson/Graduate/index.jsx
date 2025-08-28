@@ -223,7 +223,7 @@ export default function Graduate() {
 			</CardHeader>
 			<CardBody className='pt-2'>
 				{isLoading && Loader}
-				<Alert color='primary' className='p-1'>
+				<Alert color='primary' className='p-1' fade={false}>
 					<p>
 						Энэхүү мэдээлэл таны диплом дээр бичигдэх учир нарийн нягтлахыг хүсч байна.
 					</p>
