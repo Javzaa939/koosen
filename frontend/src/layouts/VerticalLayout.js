@@ -1001,7 +1001,7 @@ const VerticalLayout = (props) => {
 
 export default VerticalLayout;
 
-// to define menu just by id in this array
+// to define menu just by id in this array for student login in one place
 const studentMenuChildIds = [
     'lesson-schedule',
     'examination-schedule',
