@@ -4786,12 +4786,12 @@ class UserStudentPlanAPIView(
         return request.send_data(learnplan)
 
 
+@permission_classes([IsAuthenticated])
 class UserStudentScoreTeacherAPIView(
     generics.GenericAPIView
 ):
     """ Багшийн явцын тайлан """
 
-    @login_required()
     def get(self, request):
         student_login = request.user
         student = student_login.student.id
