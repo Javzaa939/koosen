@@ -9,7 +9,7 @@ export default function useScore({
 	const { fetchData, Loader, isLoading } = useLoader(loaderArgs)
 
 	// API
-	const studentApi = useApi().student
+	const studentApi = useApi().userStudent.student
 
 	const [data, setData] = useState()
 

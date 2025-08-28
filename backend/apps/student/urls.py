@@ -152,6 +152,7 @@ urlpatterns = [
 
     # оюутны дүнгийн мэдээлэл
     path('user-student/scoreregister/<int:student>/',UserStudentScoreInformationAPIView.as_view()),
+    path('user-student/score-register/', UserStudentStudentScoreRegisterAPIView.as_view()),
 
     # Оюутны дүнгийн дэлгэрэнгүй мэдээлэл
     path('user-student/allscore/<int:student>/', UserStudentDetailedScoreAPIView.as_view()),

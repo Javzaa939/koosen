@@ -1548,4 +1548,61 @@ class UserStudentRegisterIrtsTimeTableSerializer(serializers.ModelSerializer):
 
             ctypes.append(ctype)
         return ctypes
+
+
+class UserStudentStudentAttachmentSerializer(serializers.ModelSerializer):
+
+    score_code = serializers.SerializerMethodField(read_only=True)
+    graduation_work = serializers.SerializerMethodField(read_only=True)
+    full_name = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Student
+        fields = "__all__"
+
+    def get_full_name(self, obj):
+        return obj.code + " " + obj.full_name()
+
+    def get_graduation_work(self, obj):
+
+        data = dict()
+        graduation_work = GraduationWork.objects.filter(student__id=obj.id).first()
+        data = GraduationWorkSerializer(graduation_work, many=False).data
+
+        return data
+
+    def get_score_code(self, obj):
+        # Голч дүнгийн жагсаалт
+
+        score_assesment = ''
+        final_gpa = 0
+        stud_id = obj.id
+        scoreRegister = ScoreRegister.objects.filter(student=stud_id) \
+            .values(
+                "id",
+                "teach_score",
+                "exam_score",
+                "lesson__kredit"
+            )
+        max_kredit = 0
+        all_score = 0
+        count = 0
+        for scoreData in scoreRegister:
+            total_score = 0
+            if scoreData['teach_score']:
+                total_score = scoreData['teach_score']
+            if scoreData['exam_score']:
+                total_score = total_score + scoreData['exam_score']
+            if scoreData['lesson__kredit']:
+                all_score = all_score + total_score * scoreData['lesson__kredit']
+                max_kredit = max_kredit + scoreData['lesson__kredit']
+                count = count + 1
+
+        if all_score > 0:
+            if max_kredit != 0:
+                final_gpa = round((all_score / max_kredit), 2)
+                score_qs = Score.objects.filter(score_max__gte=final_gpa, score_min__lte=final_gpa).first()
+                if score_qs:
+                    score_assesment = score_qs.gpa
+        return { 'score_code': score_assesment, 'max_kredit': max_kredit }
 # endregion for student login

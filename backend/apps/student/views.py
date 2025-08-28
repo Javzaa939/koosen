@@ -64,7 +64,7 @@ from lms.models import Country, ProfessionAverageScore, AttachmentConfig, Profes
 
 from core.models import SubOrgs, AimagHot, SumDuureg, User, Salbars
 
-from .serializers import StudentListSerializer, UserStudentLearningPlanSerializer, UserStudentRegisterIrtsTimeTableSerializer, UserStudentScoreInformationListSerializer, UserStudentScoreRegisterPrintSerializer
+from .serializers import StudentListSerializer, UserStudentLearningPlanSerializer, UserStudentRegisterIrtsTimeTableSerializer, UserStudentScoreInformationListSerializer, UserStudentScoreRegisterPrintSerializer, UserStudentStudentAttachmentSerializer
 from .serializers import StudentRegisterSerializer
 from .serializers import StudentRegisterListSerializer
 from .serializers import StudentMovementSerializer
@@ -5161,4 +5161,31 @@ class UserStudentListStudentIrtsApiView(
         lessons = UserStudentRegisterIrtsTimeTableSerializer(timetable_qs, many=True, context={'request': request}).data
 
         return request.send_data(lessons)
+
+
+@permission_classes([IsAuthenticated])
+class UserStudentStudentScoreRegisterAPIView(
+    generics.GenericAPIView
+):
+    """ Төгсөлт """
+
+    def get(self, request):
+
+        all_data = dict()
+
+        student_id = request.user.student_id
+
+        student_qs = Student.objects.get(id=student_id)
+        student_data = UserStudentStudentAttachmentSerializer(student_qs, many=False).data
+
+        score_register_qs = ScoreRegister.objects.filter(student=student_qs, is_delete=False)
+        score_register_data = ScoreRegisterDefinitionSerializer(score_register_qs, many=True).data
+
+        calculated_gpa_qs_count = CalculatedGpaOfDiploma.objects.filter(student_id=student_id).count()
+
+        all_data['score_register'] = score_register_data
+        all_data['student'] = student_data
+        all_data['calculated_length'] = calculated_gpa_qs_count
+
+        return request.send_data(all_data)
 # endregion for student login
