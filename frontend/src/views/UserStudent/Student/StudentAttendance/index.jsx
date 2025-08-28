@@ -1,6 +1,6 @@
 import React,{ useContext, useEffect, useState } from 'react';
 import { Badge, Card, Spinner, } from 'reactstrap'
-import { AuthContext } from "@context/AuthContext"
+import AuthContext from "@context/AuthContext"
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader"
 import IrtsTable from './IrtsTable';

@@ -16,7 +16,7 @@ import CTable from "./Table"
 import { useTranslation } from 'react-i18next'
 import useApi from '@hooks/useApi'
 import useLoader from '@hooks/useLoader'
-import { AuthContext } from "@context/AuthContext"
+import AuthContext from "@context/AuthContext"
 
 const StudyPlan = () => {
 

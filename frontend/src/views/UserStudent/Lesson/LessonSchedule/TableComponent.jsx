@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
-import { AuthContext } from "@context/AuthContext"
+import AuthContext from "@context/AuthContext"
 
 import { useTranslation } from 'react-i18next';
 
