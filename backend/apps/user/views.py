@@ -333,7 +333,7 @@ class UserAPILoginView(
 
         # check password
         password = datas.get("password").strip() if datas.get("password") else None
-        auth_user = auth.authenticate(request, username=user.email, password=password)
+        auth_user = auth.authenticate(request, username=user.username, password=password)
         UserAPILoginView.check_user_password(auth_user, ending_data, request)
 
         # region Хэрэглэгч нэвтрэх үед LMS систем рүү нэвтрэх эрхтэйг шалгах
