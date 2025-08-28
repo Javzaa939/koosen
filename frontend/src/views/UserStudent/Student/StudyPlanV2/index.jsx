@@ -188,7 +188,7 @@ const StudyPlan = () => {
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
                     <CardTitle><Clock color="grey" className='me-1' />{t('Хичээлийн төлөвлөгөө')}</CardTitle>
                 </CardHeader>
-                <Alert className='p-1' color='primary'>
+                <Alert className='p-1' color='primary' fade={false}>
                     <span>Энэ жагсаалтаас унасан хичээлээ өвөл зуны сургалтад үзэх боломжтой болно.</span>
                     <br/>
                     <span>Унасан хичээл дээрээ дарж мэдээлэл цэс дээр дараад Дахин үзэх товч дээр дарж хүсэлт илгээх боломжтой.</span>
