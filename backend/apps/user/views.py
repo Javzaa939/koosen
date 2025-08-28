@@ -288,14 +288,12 @@ class UserAPILoginView(
             .first()
         )
 
-        print('user', user)
-
         UserAPILoginView.check_user_instance(user, ending_data, request)
         # endregion
 
         # check password
         password = datas.get("password").strip() if datas.get("password") else None
-        auth_user = auth.authenticate(request, username=user.username, password=password, backend='main.auth_backends.StudentBackend')
+        auth_user = auth.authenticate(request, **{StudentLogin.USERNAME_FIELD: getattr(user, StudentLogin.USERNAME_FIELD)}, password=password, backend='main.auth_backends.StudentBackend')
         UserAPILoginView.check_user_password(auth_user, ending_data, request)
 
         # Оюутны эрх хязгаарлав
@@ -333,7 +331,7 @@ class UserAPILoginView(
 
         # check password
         password = datas.get("password").strip() if datas.get("password") else None
-        auth_user = auth.authenticate(request, username=user.username, password=password)
+        auth_user = auth.authenticate(request, **{User.USERNAME_FIELD: getattr(user, User.USERNAME_FIELD)}, password=password)
         UserAPILoginView.check_user_password(auth_user, ending_data, request)
 
         # region Хэрэглэгч нэвтрэх үед LMS систем рүү нэвтрэх эрхтэйг шалгах
