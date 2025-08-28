@@ -464,7 +464,6 @@ class TeacherLongListSerializer(serializers.ModelSerializer):
             "org_position",
             "state",
             "full_name",
-            "rank_name",
         ]
 
     def get_code(self, obj):

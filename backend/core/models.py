@@ -642,13 +642,13 @@ class Teachers(models.Model):
         default="", null=True, max_length=256, verbose_name="НДД-ийн дугаар", blank=True
     )
 
-    # org = models.ForeignKey(
-    #     Schools,
-    #     on_delete=models.CASCADE,
-    #     null=True,
-    #     blank=True,
-    #     verbose_name="Харьяалагдах алба нэгж",
-    # )
+    org = models.ForeignKey(
+        Schools,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        verbose_name="Харьяалагдах алба нэгж",
+    )
     sub_org = models.ForeignKey(
         SubOrgs,
         on_delete=models.CASCADE,

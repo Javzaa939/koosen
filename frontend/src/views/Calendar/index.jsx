@@ -11,7 +11,7 @@ import { useRTL } from '@hooks/useRTL';
 
 // ** Calendar App Component Imports
 import Calendar from './Calendar';
-import SidebarLeft from './SidebarLeft'
+import SidebarLeft from './SidebarLeft';
 import AddEventSidebar from './Add';
 // import SwiperFade from './SwiperFade';
 // import AccessHistory from './AccessHistory';
