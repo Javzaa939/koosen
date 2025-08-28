@@ -70,7 +70,7 @@ const TableComponent = () => {
             {
                 isLoading &&
                 <div className='suspense-loader'>
-                    <Spinner size='bg'/>
+                    <Spinner size='sm'/>
                     <span className='ms-50'>{t('Түр хүлээнэ үү...')}</span>
                 </div>
             }
