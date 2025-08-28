@@ -192,15 +192,15 @@ const Teacher = () => {
                             <Plus size={15} />
                             <span className="align-middle ms-50">{t('Нэмэх')}</span>
                         </Button>
-                        <Input
-                            type="file"
-                            value={fileState}
-                            onChange={(e) => {
-                                if (e.target.files[0]) {
-                                    sendExcel(e.target.files[0]);
-                                }
-                            }}
-                        />
+                        {/* <Input */}
+                        {/*     type="file" */}
+                        {/*     value={fileState} */}
+                        {/*     onChange={(e) => { */}
+                        {/*         if (e.target.files[0]) { */}
+                        {/*             sendExcel(e.target.files[0]); */}
+                        {/*         } */}
+                        {/*     }} */}
+                        {/* /> */}
                     </div>
                 </CardHeader>
                 <Row className="justify-content-between mx-0 mb-1 mt-1">

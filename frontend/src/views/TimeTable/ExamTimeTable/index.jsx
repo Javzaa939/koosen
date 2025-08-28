@@ -450,7 +450,7 @@ const ExamTimeTable = () => {
                             }}
                             styles={ReactSelectStyles}
                             getOptionValue={(option) => option.id}
-                            getOptionLabel={(option) => option.rank_name + ' ' + option?.full_name}
+                            getOptionLabel={(option) => option?.full_name}
                         />
                     </Col>
                 </Row>

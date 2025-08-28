@@ -821,7 +821,7 @@ def get_active_year_season():
     qs_activeyear = qs_activeyear.first()
 
     year = qs_activeyear.active_lesson_year.strip() if qs_activeyear else None
-    season = qs_activeyear.active_lesson_season.id
+    season = qs_activeyear.active_lesson_season.id if qs_activeyear else None
 
     return year, season
 
@@ -1943,3 +1943,141 @@ def is_access_for_case_2(request, request_org_id):
     return True
 
 
+def strip_if_str(value):
+    """ to strip strings without raising error """
+    if isinstance(value, str):
+        value = value.strip()
+
+    return value
+
+
+def get_16week_start_date_mnums_version(lesson_year, lesson_season):
+    ''' Хичээл эхлэх өдрөөс 16н 7 хоногийг тооцоолох
+        return list
+    '''
+    week_list = []
+
+    SystemSettings = apps.get_model('lms', 'SystemSettings')
+    qs_activeyear = SystemSettings.objects.filter(active_lesson_year=lesson_year, active_lesson_season=lesson_season).first()
+
+    if qs_activeyear:
+        end_date = qs_activeyear.start_date
+        for x in range(25):
+            obj_datas = {}
+            start_date  = end_date
+
+            end_date = start_date + timedelta(days=7)
+            enddate = end_date - timedelta(days=1)
+            obj_datas['id'] = x + 1
+            obj_datas['start_date'] = start_date.strftime('%Y-%m-%d')
+            obj_datas['end_date'] = enddate.strftime('%Y-%m-%d')
+
+            week_list.append(obj_datas)
+
+    return week_list
+
+
+def get_weekday_kurats_date_mnums_version(kurats_start_date, kurats_end_date, lesson_year, lesson_season):
+    """ Курац хуваарийн эхлэх өдрөөс 7 хоногийн хэд дэх өдрийг авах
+        хичээлийн хэд дэх 7 хоног гэдгийг буцаана
+        return list
+    """
+
+    SystemSettings = apps.get_model('lms', 'SystemSettings')
+    # Тухайн хичээлийн жилийн 16 7 хоног
+    weeks = get_16week_start_date_mnums_version(lesson_year, lesson_season)
+    ksdatetime = datetime.strptime(kurats_start_date, '%Y-%m-%d')
+    kedatetime = datetime.strptime(kurats_end_date, '%Y-%m-%d')
+    is_before = False
+    qs_activeyear = SystemSettings.objects.filter(active_lesson_year=lesson_year, active_lesson_season=lesson_season).first()
+
+    # Хичээлийн эхдэх хугацаанаас өмнөх хуваарь бол
+    if qs_activeyear.start_date > ksdatetime.date():
+        is_before = True
+
+    # Курацын эхлэх дуусах өдрүүдийн хооронд дох өдрүүд
+    kdelta = kedatetime - ksdatetime
+    kurats_day_list = []
+
+    if not is_before:
+        for week in weeks:
+            start_date =  datetime.strptime(week.get('start_date'), '%Y-%m-%d')
+            end_date = datetime.strptime(week.get('end_date'), '%Y-%m-%d')
+
+            delta = end_date - start_date
+
+            for i in range(delta.days + 1):
+                day = start_date + timedelta(days=i)
+
+                for j in range(kdelta.days + 1):
+                    kweek_kurats = {}
+                    kday = ksdatetime + timedelta(days=j)
+                    weekday = kday.weekday() + 1
+
+                    # Амралтын өдрийн алгасаж хуваарь үүсгэх
+                    if weekday in [6, 7]:
+                        continue
+                    if day == kday:
+                        kweek_kurats['weekNum'] = week.get('id')
+                        kweek_kurats['weekday'] = weekday
+                        kurats_day_list.append(kweek_kurats)
+    else:
+        for j in range(kdelta.days + 1):
+            kweek_kurats = {}
+            kday = ksdatetime + timedelta(days=j)
+            weekday = kday.weekday() + 1
+
+            # Амралтын өдрийн алгасаж хуваарь үүсгэх
+            if weekday in [6, 7]:
+                continue
+
+            kweek_kurats['weekNum'] = 1
+            kweek_kurats['weekday'] = weekday
+            kurats_day_list.append(kweek_kurats)
+
+    return kurats_day_list
+
+
+def get_week_num_from_date_mnums_version(current_date=datetime.today().strftime('%Y-%m-%d')):
+    """ Хэддэх 7 хоног вэ гэдгийг буцаана
+        return int
+    """
+
+    lesson_year, lesson_season = get_active_year_season()
+    weeks = get_16week_start_date_mnums_version(lesson_year, lesson_season)
+
+    weekNum = 0
+
+    for week in weeks:
+        start_date =  datetime.strptime(week.get('start_date'), '%Y-%m-%d')
+        end_date = datetime.strptime(week.get('end_date'), '%Y-%m-%d')
+
+        delta = end_date - start_date
+
+        for i in range(delta.days + 1):
+            day = start_date + timedelta(days=i)
+            cday = day.strftime('%Y-%m-%d')
+            if cday == current_date:
+                weekNum = week.get('id')
+
+    return weekNum
+
+
+def get_dates_from_week_mnums_version():
+    lesson_year, lesson_season = get_active_year_season()
+    week = get_week_num_from_date_mnums_version()
+    weeks = get_16week_start_date_mnums_version(lesson_year, lesson_season)
+
+    SystemSettings = apps.get_model('lms', 'SystemSettings')
+    qs_activeyear = SystemSettings.objects.filter(season_type=SystemSettings.ACTIVE).first()
+
+    if week == 0 and qs_activeyear:
+        start_date = qs_activeyear.start_date
+        return {
+            'start_date': start_date,
+            'end_date':  start_date + timedelta(days=7)
+        }
+    else:
+        for day_week in weeks:
+            if day_week.get('id') == week:
+                return day_week

@@ -3,6 +3,42 @@ from django.urls import path
 from .views import *
 
 urlpatterns = [
+    # Цагийн ачааллаас хичээлийн хуваарь авах
+	# region NOTE these APIViews have only get() methods
+    # To get all timetable types except "kurats/date"
+    path('resource1/', TimeTableResource1.as_view()),
+    path('register-new/', TimeTableNewAPIView.as_view()),
+
+    # to get kurats/date timetable only
+    path('register1/kurats/', TimeTableKuratsAPIView.as_view()),
+	# endregion
+
+    # region "Add timetable" button
+	# post() method for "Add" button for "kurats" timetable only.
+    # NOTE APIView have all CRUD methods (D are not used)
+    path('register/', TimeTableAPIView.as_view()),
+
+    # here is only post() method for "Add" button for "simple" and "block" timetables only.
+    path('register/simple/', TimeTableSimpleAPIView.as_view()),
+
+    # here is only post() method for "Add" button for "date" timetable only.
+    path('date/', TimeTableDate.as_view()),
+	# endregion
+
+    # Цагийн хуваарь үүссэний дараа
+    # region to edit data
+	# get() method to edit all timetable types
+	# put() method to edit all timetable types for rest cases
+	# delete() method to delete all timetable types
+    path('register/<int:pk>/', TimeTableAPIView.as_view()),
+
+    # put() method to edit data for:
+	# - all types of timetable
+    # - lms-timetable-register-teacher-update permission
+    # - !user?.is_superuser && !cdata?.is_optional
+    path('register/edit/<int:pk>/',TimeTableEditAPIView.as_view()),
+	# endregion
+
     # Хичээлийн байр
     path('building/', BuildingAPIView.as_view()),
     path('building/<int:pk>/', BuildingAPIView.as_view()),
@@ -12,33 +48,37 @@ urlpatterns = [
     path('room/list/', RoomListAPIView.as_view()),
     path('room/<int:pk>/', RoomAPIView.as_view()),
 
-    # Цагийн ачааллаас хичээлийн хуваарь авах
-    path('resource1/', TimeTableResource1.as_view()),
-    path('register-new/', TimeTableNewAPIView.as_view()),
+    # Цагийн хуваарь File excel файл оруулсан датаг бааз руу хадгалах
+    path('register/excel-import/', TimeTableExcelImportAPIView.as_view()),
+
+    # Timetable multi delete modal
+    path('list/teacher/', TimeTableListAPIView.as_view()),
+    path('list/select-groups/', TimeTableSelectGroupsAPIView.as_view()),
+    path('list/select-lessons/', TimeTableSelectLessonsAPIView.as_view()),
+
+    # Button: "Хуваарь жагсаалтаар харах". Page: /timetable/teacher/
+    path('list/teacher/groups/', TimeTableGroupsAPIView.as_view()),
+    path('list/teacher/groups/<int:pk>/', TimeTableListGroupAPIView.as_view()),
+    path('list/teacher/<int:pk>/', TimeTableListAPIView.as_view()),
 
     # Цагийн ачааллаас
-    path('register/new/<int:pk>/', TimeTableNewAPIView.as_view()),
-
     path('print/', TimeTablePrint.as_view()),
-
-    # Цагийн хуваарь үүссэний дараа
-    path('register/', TimeTableAPIView.as_view()),
-    path('register/<int:pk>/', TimeTableAPIView.as_view()),
 
     # Цагийн хуваариас event зөөх үед үүссэний дараа
     path('event/<int:pk>/', TimeTableEvent.as_view()),
 
+    # FullCalendar's prop: "eventChange" (useapi.js - moveEvent)
+    path('register/new/<int:pk>/', TimeTableNewAPIView.as_view()),
+
     # Хичээлийн хуваарь шивэх V1
     # path('register1/', TimeTable1APIView.as_view()),
-    path('register1/kurats/', TimeTableKuratsAPIView.as_view()),
+	# NOTE this is commented in useApi.js
     path('resource/', TimeTableResource.as_view()),
 
     path('file/', TimeTableFile.as_view()),
 
     # Хичээлийн хуваарийн хайлтын select option авах
     path('resource/select/', TimeTableSelectOption.as_view()),
-
-    path('register/<int:pk>/', TimeTableAPIView.as_view()),
 
     # Поток хайлт
     path('list/', TimeTablePotok.as_view()),

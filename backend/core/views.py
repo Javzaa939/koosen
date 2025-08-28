@@ -1013,7 +1013,7 @@ class TeacherListApiView(
         org = getattr(request, "org_filter", {}).get("org")
 
         if org:
-            self.queryset = self.queryset.filter(org=org)
+            self.queryset = self.queryset.filter(sub_org__org=org)
 
         if school:
             self.queryset = self.queryset.filter(sub_org=school)
@@ -1841,7 +1841,6 @@ class AbleWorkerAPIView(
                     position_name = data.get("app_name")
 
                     rank_type = data.get("rank_type")
-                    rank_name = data.get("rank_name")
                     rank_rate = data.get("rank_rate")
 
                     personal_mail = data.get("personal_mail")
@@ -1859,7 +1858,6 @@ class AbleWorkerAPIView(
 
                     if teacher:
                         in_count += 1
-                        teacher.rank_name = rank_name
                         teacher.rank_type = rank_type
                         teacher.rank_rate = rank_rate
                         teacher.save()

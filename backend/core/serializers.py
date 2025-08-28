@@ -150,7 +150,7 @@ class LessonTeacherListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Teachers
-        fields = ["id", "last_name", "first_name", "full_name", "rank_name"]
+        fields = ["id", "last_name", "first_name", "full_name"]
 
     def get_full_name(self, obj):
         """Багшийн бүтэн нэр авах"""
@@ -464,7 +464,6 @@ class TeacherLongListSerializer(serializers.ModelSerializer):
             "org_position",
             "state",
             "full_name",
-            "rank_name",
         ]
 
     def get_code(self, obj):
@@ -537,7 +536,6 @@ class TeacherListSchoolFilterSerializer(serializers.ModelSerializer):
             "sub_org",
             "code",
             "full_name",
-            "rank_name",
         ]
         # fields = ["id", "last_name", "first_name", "salbar", "sub_org", "code", "org_position", "state", "full_name"]
 
