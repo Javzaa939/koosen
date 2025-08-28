@@ -1333,7 +1333,7 @@ class StudentDefinitionListLiteSerializer(serializers.ModelSerializer):
 
 
 # region for student login
-class LessonListSerializer(serializers.ModelSerializer):
+class UserStudentLessonListSerializer(serializers.ModelSerializer):
     '''  Хичээлийн жагсаалт '''
 
     class Meta:
@@ -1341,7 +1341,7 @@ class LessonListSerializer(serializers.ModelSerializer):
         fields = "id", "code", "name", "kredit"
 
 
-class LearningPlanPrevLessonSerializer(serializers.ModelSerializer):
+class UserStudentLearningPlanPrevLessonSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = LessonStandart
@@ -1350,10 +1350,10 @@ class LearningPlanPrevLessonSerializer(serializers.ModelSerializer):
 
 # Оюутны санал болгох төлөвлөгөө
 class UserStudentLearningPlanSerializer(serializers.ModelSerializer):
-    lesson = LessonListSerializer(many=False)
+    lesson = UserStudentLessonListSerializer(many=False)
     status = serializers.SerializerMethodField()
     season = serializers.SerializerMethodField()
-    previous_lesson = LearningPlanPrevLessonSerializer()
+    previous_lesson = UserStudentLearningPlanPrevLessonSerializer()
     total_score = serializers.FloatField()
     last_retake_year_season = serializers.BooleanField()
     is_taken = serializers.BooleanField()
