@@ -275,7 +275,7 @@ def has_permission(allowed_permissions=[], must_permissions=[], back_url=None):
                         traceback.print_stack()
                         class_name = None
 
-                        if self and hasattr(self, '__class__') and hasattr(self, '__name__'):
+                        if self and hasattr(self, '__class__') and hasattr(self.__class__, '__name__'):
                             class_name = self.__class__.__name__
 
                         print("ERR_011", "Хэрэглэгч эрхгүй байна.", 'Class:', class_name, 'Func:', view_func.__name__)
