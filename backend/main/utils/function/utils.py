@@ -269,6 +269,9 @@ def has_permission(allowed_permissions=[], must_permissions=[], back_url=None):
 
         def wrap(self, request, *args, **kwargs):
             if request.session.get('_is_student'):
+                if settings.DEBUG:
+                    traceback.print_exc()
+
                 return request.send_error("ERR_011", "Хэрэглэгч эрхгүй байна.")
 
             permissions = []
