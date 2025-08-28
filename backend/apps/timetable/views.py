@@ -4147,6 +4147,9 @@ class TimeTableResource1(
         # Calendar төрөл (энгийн, курац)
         stype = self.request.query_params.get('stype')
 
+        if not year or not season:
+            return request.send_data([])
+
         # if str2bool(is_volume):
         #     qs_tgroup = TeacherCreditVolumePlan_group.objects.filter(creditvolume__lesson_year=year, creditvolume__lesson_season=season)
         #     time_tablequeryset = TeacherCreditVolumePlan.objects.exclude(teacher__isnull=True).filter(lesson_year=year.strip(), lesson_season=season)

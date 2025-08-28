@@ -819,7 +819,7 @@ def get_active_year_season():
     qs_activeyear = qs_activeyear.first()
 
     year = qs_activeyear.active_lesson_year.strip() if qs_activeyear else None
-    season = qs_activeyear.active_lesson_season.id
+    season = qs_activeyear.active_lesson_season.id if qs_activeyear else None
 
     return year, season
 

@@ -35,7 +35,7 @@ drop_sql = "DROP FUNCTION IF EXISTS public.get_color(character varying);"
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('lms', '0012_remove_timetable_teacher constraint_and_more'),
+        ('lms', '0014_remove_timetable_teacher_constraint_and_more'),
     ]
 
     operations = [

@@ -1,118 +1,120 @@
-from contextlib import suppress
 import json
 import traceback
-import requests
+from contextlib import suppress
 from datetime import datetime, timedelta
+
+import pandas as pd
+import requests
 from dateutil.relativedelta import relativedelta
-from rest_framework import mixins
-from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import permission_classes
-from rest_framework.filters import SearchFilter
-
-from django.db import transaction
-from django.conf import settings
-from .help.roles import default_roles
-
-from main.decorators import login_required
-from rest_framework.exceptions import ErrorDetail
-
-from .serializers import (
-    generate_model_serializer
-)
-
-from main.utils.function.utils import create_file_to_cdn, remove_from_cdn_ignore_not_found_error, remove_file_from_cdn
-from main.utils.function.pagination import CustomPagination
-from main.utils.function.utils import get_teacher_queryset, null_to_none, calculate_birthday
-from main.utils.function.serializer import dynamic_serializer
-
 from django.apps import apps
+from django.conf import settings
+from django.contrib.auth.hashers import make_password
 from django.db import transaction
 from django.db.models import Q
+from rest_framework import generics, mixins
+from rest_framework.decorators import permission_classes
+from rest_framework.exceptions import ErrorDetail
+from rest_framework.filters import SearchFilter
+from rest_framework.permissions import IsAuthenticated
 
-from core.models import Schools
-from core.models import Salbars
-from core.models import SubOrgs
-from core.models import AimagHot
-from core.models import SumDuureg
-from core.models import BagHoroo
-from core.models import Teachers
-from core.models import Employee
-from core.models import OrgPosition
-from core.models import User
-from core.models import Permissions
+from core.models import (
+    AimagHot,
+    BagHoroo,
+    Employee,
+    OrgPosition,
+    Permissions,
+    Salbars,
+    Schools,
+    SubOrgs,
+    SumDuureg,
+    Teachers,
+    User,
+)
+from lms.models import (
+    AccessHistoryLms,
+    Country,
+    DormitoryFamilyContract,
+    Group,
+    Lesson_to_teacher,
+    LessonStandart,
+    ProfessionDefinition,
+    Student,
+    StudentRequestTutor,
+    TeacherCreditVolumePlan,
+    TimeTable,
+    UserContractWork,
+    UserInvention,
+    UserLicenseCert,
+    UserModelCertPatent,
+    UserNote,
+    UserPaper,
+    UserPatent,
+    UserProject,
+    UserQuotation,
+    UserRightCert,
+    UserSymbolCert,
+)
+from main.decorators import login_required
+from main.utils.function.pagination import CustomPagination
+from main.utils.function.serializer import dynamic_serializer
+from main.utils.function.utils import (
+    calculate_birthday,
+    create_file_to_cdn,
+    get_teacher_queryset,
+    null_to_none,
+    remove_file_from_cdn,
+    remove_from_cdn_ignore_not_found_error,
+)
 
-
-from lms.models import Country
-from lms.models import TimeTable
-from lms.models import Lesson_to_teacher
-from lms.models import TeacherCreditVolumePlan
-from lms.models import DormitoryFamilyContract
-from lms.models import Group
-from lms.models import StudentRequestTutor
-from lms.models import UserInvention
-from lms.models import UserPaper
-from lms.models import UserNote
-from lms.models import UserQuotation
-from lms.models import UserProject
-from lms.models import UserContractWork
-from lms.models import UserPatent
-from lms.models import UserModelCertPatent
-from lms.models import UserSymbolCert
-from lms.models import UserLicenseCert
-from lms.models import UserRightCert
-
-from .serializers import SchoolsRegisterSerailizer
-from .serializers import DepartmentRegisterSerailizer
-from .serializers import DepartmentListSerailizer
-from .serializers import SubSchoolRegisterSerailizer
-from .serializers import SubSchoolListSerailizer
-from .serializers import TeacherListSerializer
-from .serializers import CountryListSerializer
-from .serializers import AimaghotListSerializer
-from .serializers import BagHorooListSerializer
-from .serializers import SumDuuregListSerializer
-from .serializers import TeacherNameSerializer
-from .serializers import OrgPositionSerializer
-from .serializers import TeacherLessonListSerializer
-from .serializers import TeacherInfoSerializer
-from .serializers import ScheduleSerializer
-from .serializers import DormitoryFamilyContractSerializer
-from .serializers import Lesson_to_teacherSerializer
-from .serializers import GroupSerializer
-from .serializers import StudentRequestTutorSerializer
-from .serializers import UserInventionSerializer
-from .serializers import UserPaperSerializer
-from .serializers import UserNoteSerializer
-from .serializers import UserQuotationSerializer
-from .serializers import UserProjectSerializer
-from .serializers import UserContractWorkSerializer
-from .serializers import UserPatentSerializer
-from .serializers import UserModelCertPatentSerializer
-from .serializers import UserSymbolCertSerializer
-from .serializers import UserLicenseCertSerializer
-from .serializers import UserRightCertSerializer
-from .serializers import TeachersSerializer
-from .serializers import DepartmentRegisterListSerailizer
-from .serializers import SubSchoolPutRegisterSerailizer
-from .serializers import TeacherLongListSerializer
-from .serializers import LessonTeacherListSerializer
-from .serializers import TeacherListSchoolFilterSerializer
-from .serializers import DepartmentPostSerailizer
-from .serializers import EmployeePostSerializer
-from .serializers import UserRegisterSerializer
-from .serializers import UserInfoSerializer
-from .serializers import EmployeeSerializer, UserSerializer, PermissionSerializer, OrgPositionPostSerializer
-
-from .serializers import UserInfoSerializer, UserSaveSerializer
-from .serializers import EmployeeSerializer, UserSerializer, UserFirstRegisterSerializer
-
-
-from lms.models import ProfessionDefinition
-from lms.models import LessonStandart
-from lms.models import Student
-from lms.models import AccessHistoryLms
-from django.contrib.auth.hashers import make_password
+from .help.roles import default_roles
+from .serializers import (
+    AimaghotListSerializer,
+    BagHorooListSerializer,
+    CountryListSerializer,
+    DepartmentListSerailizer,
+    DepartmentPostSerailizer,
+    DepartmentRegisterListSerailizer,
+    DepartmentRegisterSerailizer,
+    DormitoryFamilyContractSerializer,
+    EmployeePostSerializer,
+    EmployeeSerializer,
+    GroupSerializer,
+    Lesson_to_teacherSerializer,
+    LessonTeacherListSerializer,
+    OrgPositionPostSerializer,
+    OrgPositionSerializer,
+    PermissionSerializer,
+    ScheduleSerializer,
+    SchoolsRegisterSerailizer,
+    StudentRequestTutorSerializer,
+    SubSchoolListSerailizer,
+    SubSchoolPutRegisterSerailizer,
+    SubSchoolRegisterSerailizer,
+    SumDuuregListSerializer,
+    TeacherInfoSerializer,
+    TeacherLessonListSerializer,
+    TeacherListSchoolFilterSerializer,
+    TeacherListSerializer,
+    TeacherLongListSerializer,
+    TeacherNameSerializer,
+    TeachersSerializer,
+    UserContractWorkSerializer,
+    UserInfoSerializer,
+    UserInventionSerializer,
+    UserLicenseCertSerializer,
+    UserModelCertPatentSerializer,
+    UserNoteSerializer,
+    UserPaperSerializer,
+    UserPatentSerializer,
+    UserProjectSerializer,
+    UserQuotationSerializer,
+    UserRegisterSerializer,
+    UserRightCertSerializer,
+    UserSaveSerializer,
+    UserSerializer,
+    UserSymbolCertSerializer,
+    generate_model_serializer,
+)
 
 
 @permission_classes([IsAuthenticated])
@@ -120,7 +122,7 @@ class TeacherListApiView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
 ):
-    """ Хэрэглэгчийн api """
+    """Хэрэглэгчийн api"""
 
     queryset = Teachers.objects
     serializer_class = TeacherListSerializer
@@ -128,9 +130,9 @@ class TeacherListApiView(
     def get_queryset(self):
         queryset = get_teacher_queryset()
 
-        school = self.request.query_params.get('school')
+        school = self.request.query_params.get("school")
 
-        depart = self.request.query_params.get('department')
+        depart = self.request.query_params.get("department")
 
         if school:
             queryset = queryset.filter(sub_org=school)
@@ -145,20 +147,21 @@ class TeacherListApiView(
         list_data = self.list(request).data
         return request.send_data(list_data)
 
+
 @permission_classes([IsAuthenticated])
 class TeacherLessonListApiView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
 ):
-    """ Сонгосон хичээлээс хамаарах багшийн жагсаалт """
+    """Сонгосон хичээлээс хамаарах багшийн жагсаалт"""
 
     queryset = Teachers.objects
     serializer_class = LessonTeacherListSerializer
 
     def get(self, request):
 
-        lesson = self.request.query_params.get('lesson')
-        school = self.request.query_params.get('school')
+        lesson = self.request.query_params.get("lesson")
+        school = self.request.query_params.get("school")
         teacher_ids = []
 
         # qs_teacher = get_teacher_queryset()
@@ -169,7 +172,9 @@ class TeacherLessonListApiView(
 
         if lesson:
             # teacher_ids = TimeTable.objects.filter(lesson=lesson).values_list('teacher', flat=True)
-            teacher_ids = Lesson_to_teacher.objects.filter(lesson=lesson).values_list('teacher', flat=True)
+            teacher_ids = Lesson_to_teacher.objects.filter(lesson=lesson).values_list(
+                "teacher", flat=True
+            )
 
             self.queryset = self.queryset.filter(id__in=teacher_ids)
 
@@ -183,14 +188,14 @@ class LessonToTeacherListApiView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
 ):
-    """ Хичээл заах багшийн жагсаалт """
+    """Хичээл заах багшийн жагсаалт"""
 
     queryset = Teachers.objects
     serializer_class = TeacherListSerializer
 
     def get(self, request):
 
-        lesson = self.request.query_params.get('lesson')
+        lesson = self.request.query_params.get("lesson")
         teacher_ids = []
 
         qs_teacher = get_teacher_queryset()
@@ -198,7 +203,7 @@ class LessonToTeacherListApiView(
         if lesson:
             qs = Lesson_to_teacher.objects.filter(lesson=lesson)
 
-            teacher_ids = qs.values_list('teacher', flat=True)
+            teacher_ids = qs.values_list("teacher", flat=True)
 
             self.queryset = self.queryset.filter(id__in=teacher_ids)
 
@@ -212,9 +217,9 @@ class SchoolAPIView(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin
+    mixins.DestroyModelMixin,
 ):
-    """" Сургууль, Хамгийн том Байгууллага"""
+    """ " Сургууль, Хамгийн том Байгууллага"""
 
     queryset = Schools.objects
     serializer_class = SchoolsRegisterSerailizer
@@ -225,7 +230,7 @@ class SchoolAPIView(
         logo_for_cdn = None
 
         if is_use_cdn:
-            logo_for_cdn = datas.pop('logo')[0] if datas.get('logo') else None
+            logo_for_cdn = datas.pop("logo")[0] if datas.get("logo") else None
 
         return datas, logo_for_cdn
 
@@ -233,19 +238,21 @@ class SchoolAPIView(
     def save_data(serializer, created_cdn_files, is_use_cdn, logo):
         if is_use_cdn:
             if logo:
-                created_cdn_files['logo'] = create_file_to_cdn('reference', logo)['full_path']
+                created_cdn_files["logo"] = create_file_to_cdn("reference", logo)[
+                    "full_path"
+                ]
 
         instance = serializer.save()
 
         if created_cdn_files:
-            instance.logo = created_cdn_files['logo']
+            instance.logo = created_cdn_files["logo"]
             instance.save()
 
         return instance
 
     @staticmethod
     def cdn_garbage_clean_silently(created_cdn_files):
-        """ to clear trash from CDN optimistically """
+        """to clear trash from CDN optimistically"""
 
         with suppress(Exception):
             for key in created_cdn_files:
@@ -255,8 +262,8 @@ class SchoolAPIView(
     def skip_file_replacing_if_empty(datas):
         is_skip = False
 
-        if not datas.get('logo'):
-            del datas['logo']
+        if not datas.get("logo"):
+            del datas["logo"]
             is_skip = True
 
         return is_skip
@@ -264,14 +271,14 @@ class SchoolAPIView(
     @staticmethod
     def keep_only_necessary_fields(datas):
         necessary_fields = [
-            'name',
-            'name_eng',
-            'address',
-            'web',
-            'social',
-            'logo',
-            'email',
-            'phone_number',
+            "name",
+            "name_eng",
+            "address",
+            "web",
+            "social",
+            "logo",
+            "email",
+            "phone_number",
         ]
 
         for key in [*datas.keys()]:
@@ -284,7 +291,9 @@ class SchoolAPIView(
 
     @staticmethod
     def is_access_denied_for_hr(user, school_id):
-        employee_obj = Employee.objects.filter(user=user, org_position__is_hr=True, state=Employee.STATE_WORKING).first()
+        employee_obj = Employee.objects.filter(
+            user=user, org_position__is_hr=True, state=Employee.STATE_WORKING
+        ).first()
 
         if not employee_obj:
             return True
@@ -294,20 +303,23 @@ class SchoolAPIView(
             return True
 
         return False
+
     # endregion
 
     @login_required()
     def get(self, request, pk=None):
-        " Сургуулийн жагсаалт "
+        "Сургуулийн жагсаалт"
 
         if pk:
             data = self.retrieve(request, pk).data
             return request.send_data(data)
 
-        org = getattr(request, 'org_filter', {}).get('org')
+        org = getattr(request, "org_filter", {}).get("org")
 
         if org:
-            self.queryset = self.queryset.filter(id=org.id if hasattr(org, "id") else org)
+            self.queryset = self.queryset.filter(
+                id=org.id if hasattr(org, "id") else org
+            )
 
         datas = self.list(request).data
         return request.send_data(datas)
@@ -332,7 +344,9 @@ class SchoolAPIView(
                 is_skip = self.skip_file_replacing_if_empty(datas)
                 datas, logo_for_cdn = self.get_input_data(datas, is_use_cdn)
                 self.keep_only_necessary_fields(datas)
-                serializer = dynamic_serializer(self.queryset.model, "__all__", 0)(instance, data=datas)
+                serializer = dynamic_serializer(self.queryset.model, "__all__", 0)(
+                    instance, data=datas
+                )
 
                 if not serializer.is_valid():
                     return request.send_error_valid(serializer.errors)
@@ -355,7 +369,7 @@ class SchoolAPIView(
             self.cdn_garbage_clean_silently(created_cdn_files)
             return request.send_error("ERR_002")
 
-        return request.send_info('INF_002')
+        return request.send_info("INF_002")
 
     @transaction.atomic()
     def post(self, request):
@@ -373,27 +387,36 @@ class SchoolAPIView(
             datas = request.data.copy()
 
             datas, logo_for_cdn = self.get_input_data(datas, is_use_cdn)
-            serializer = dynamic_serializer(self.queryset.model, "__all__", 0)(data=datas)
+            serializer = dynamic_serializer(self.queryset.model, "__all__", 0)(
+                data=datas
+            )
 
             if not serializer.is_valid():
                 transaction.savepoint_rollback(sid)
                 return request.send_error_valid(serializer.errors)
 
-            instance = self.save_data(serializer, created_cdn_files, is_use_cdn, logo_for_cdn)
+            instance = self.save_data(
+                serializer, created_cdn_files, is_use_cdn, logo_for_cdn
+            )
 
             # Байгуулгын хүний нөөцийн ажилтан эрх
             for role_info in default_roles:
-                org_position = self.serializer_class.create_defualt_role(role_info['name'], role_info['description'], role_info['permissions'], instance.id)
+                org_position = self.serializer_class.create_defualt_role(
+                    role_info["name"],
+                    role_info["description"],
+                    role_info["permissions"],
+                    instance.id,
+                )
                 if org_position is False:
                     transaction.savepoint_rollback(sid)
                     return request.send_error("ERR_002")
 
             user_body = {
-                'password': request.data['phone_number'],
-                'email': request.data['email'],
-                'phone_number': request.data['phone_number'],
-                'username': request.data['email'],
-                'mail_verified': True,
+                "password": request.data["phone_number"],
+                "email": request.data["email"],
+                "phone_number": request.data["phone_number"],
+                "username": request.data["email"],
+                "mail_verified": True,
             }
 
             # Байгуулгын хүний нөөцийн ажилтаны account үүсгэх
@@ -407,19 +430,26 @@ class SchoolAPIView(
 
             #  хоосон userinfo үүсгэх
             if user:
-                Teachers.objects.create(user=user, first_name=user.email, action_status=Teachers.APPROVED, action_status_type=Teachers.ACTION_TYPE_ALL)
+                Teachers.objects.create(
+                    user=user,
+                    first_name=user.email,
+                    action_status=Teachers.APPROVED,
+                    action_status_type=Teachers.ACTION_TYPE_ALL,
+                )
 
             # Шинээр үүссэн байгуулгат хэрэглэгчийн ажилтны мэдээллийг үүсгэх
-            org_position = OrgPosition.objects.filter(org_id=instance, is_hr=True).first()
+            org_position = OrgPosition.objects.filter(
+                org_id=instance, is_hr=True
+            ).first()
 
             if not org_position:
                 transaction.savepoint_rollback(sid)
                 return request.send_error("ERR_002")
 
             employee_body = {
-                'org_position': org_position.id,
-                'org': instance.id,
-                'user': user.id,
+                "org_position": org_position.id,
+                "org": instance.id,
+                "user": user.id,
             }
 
             employee_serializer = EmployeeSerializer(data=employee_body)
@@ -436,7 +466,7 @@ class SchoolAPIView(
             self.cdn_garbage_clean_silently(created_cdn_files)
             return request.send_error("ERR_002")
 
-        return request.send_info('INF_001')
+        return request.send_info("INF_001")
 
     def delete(self, request, pk=None):
         if self.is_access_denied_for_not_admin(request.user):
@@ -450,33 +480,86 @@ class SchoolAPIView(
 
 
 @permission_classes([IsAuthenticated])
+class TeacherExcel(
+    generics.GenericAPIView,
+    mixins.UpdateModelMixin,
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+):
+
+    queryset = Teachers.objects.all()
+    # serializer_class = DepartmentRegisterSerailizer
+
+    @transaction.atomic()
+    def post(self, request):
+        excel_file = request.data.get("file")
+
+        df = pd.read_excel(excel_file)
+        for _, row in df.iterrows():
+            data = row.to_dict()
+            gender = (
+                Teachers.GENDER_MALE if data["gender"] == 0 else Teachers.GENDER_FEMALE
+            )
+            user_data = {
+                "password": make_password(data.get("register")[-8:]),
+                "username": data.get("code"),
+            }
+            user = User.objects.create(**user_data)
+            salbar_code = data.pop("salbar_code")
+            salbar = Salbars.objects.get(code=salbar_code)
+
+            sub_org = salbar.sub_orgs
+            employee = {
+                "salbar": salbar,
+                "sub_org": sub_org,
+                "org": salbar.org,
+                "user": user,
+                "org_position": OrgPosition.objects.get(id=14),
+            }
+            Employee.objects.create(**employee)
+            teacher_data = {
+                **data,
+                "gender": gender,
+                "user": user,
+                "salbar": salbar,
+                "sub_org": sub_org,
+            }
+            teacher = Teachers.objects.create(
+                **teacher_data,
+            )
+        return request.send_data([])
+
+
+@permission_classes([IsAuthenticated])
 class DepartmentAPIView(
     generics.GenericAPIView,
     mixins.UpdateModelMixin,
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
-    mixins.RetrieveModelMixin
+    mixins.RetrieveModelMixin,
 ):
-    """"Салбар, тухайн дэд байгууллагын салбар """
+    """ "Салбар, тухайн дэд байгууллагын салбар"""
 
     queryset = Salbars.objects
     serializer_class = DepartmentRegisterSerailizer
 
     def get_queryset(self):
         queryset = self.queryset
-        school = self.request.query_params.get('school')
-        search = self.request.query_params.get('search')
+        school = self.request.query_params.get("school")
+        search = self.request.query_params.get("search")
         if school:
             queryset = queryset.filter(sub_orgs=school)
         if search:
             queryset = queryset.filter(name__icontains=search)
+        queryset = queryset.order_by("code")
         return queryset
 
     @login_required()
     def get(self, request, pk=None):
-        " Салбарын жагсаалт "
+        "Салбарын жагсаалт"
 
-        org = getattr(request, 'org_filter', {}).get('org')
+        org = getattr(request, "org_filter", {}).get("org")
 
         if org:
             self.queryset = self.queryset.filter(org=org)
@@ -494,7 +577,7 @@ class DepartmentAPIView(
         self.serializer_class = DepartmentPostSerailizer
         datas = request.data
 
-        org = getattr(request, 'org_filter', {}).get('org')
+        org = getattr(request, "org_filter", {}).get("org")
 
         if not org:
             return request.send_error("ERR_002", "Салбар тэнхим нэмэх эрхгүй байна")
@@ -523,7 +606,7 @@ class DepartmentAPIView(
 
     @login_required()
     def put(self, request, pk=None):
-        " хөтөлбөрийн багийн мэдээлэл засах "
+        "хөтөлбөрийн багийн мэдээлэл засах"
 
         self.serializer_class = DepartmentRegisterListSerailizer
 
@@ -534,23 +617,23 @@ class DepartmentAPIView(
         errors = []
         datas = request.data
 
-        leader = datas.get('lead') # Багш
+        leader = datas.get("lead")  # Багш
         if leader:
             teacher = Teachers.objects.get(id=leader)
             user = teacher.user.id
 
-            datas['leader'] = user
+            datas["leader"] = user
 
         instance = self.get_object()
 
-        if 'lead' in datas:
-            del datas['lead']
+        if "lead" in datas:
+            del datas["lead"]
 
-        if 'leaders' in datas:
-            del datas['leaders']
+        if "leaders" in datas:
+            del datas["leaders"]
 
-        if 'branch_pos' in datas:
-            del datas['branch_pos']
+        if "branch_pos" in datas:
+            del datas["branch_pos"]
 
         serializer = self.get_serializer(instance, data=datas)
         if serializer.is_valid(raise_exception=True):
@@ -558,10 +641,7 @@ class DepartmentAPIView(
 
         else:
             for key in serializer.errors:
-                return_error = {
-                    "field": key,
-                    "msg": serializer.errors
-                }
+                return_error = {"field": key, "msg": serializer.errors}
 
                 errors.append(return_error)
 
@@ -576,15 +656,15 @@ class DepartmentListAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
 ):
-    """"Салбар, тухайн дэд байгууллагын салбар """
+    """ "Салбар, тухайн дэд байгууллагын салбар"""
 
     queryset = Salbars.objects
     serializer_class = DepartmentListSerailizer
 
     def get_queryset(self):
         queryset = self.queryset
-        school = self.request.query_params.get('school')
-        org = getattr(self.request, 'org_filter', {}).get('org')
+        school = self.request.query_params.get("school")
+        org = getattr(self.request, "org_filter", {}).get("org")
 
         if org:
             queryset = queryset.filter(org=org)
@@ -595,7 +675,7 @@ class DepartmentListAPIView(
         return queryset
 
     def get(self, request, pk=None):
-        " Салбарын жагсаалт "
+        "Салбарын жагсаалт"
         self.serializer_class = DepartmentListSerailizer
 
         if pk:
@@ -611,17 +691,20 @@ class DepartmentTeachersListAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
 ):
-    """ Багшийн заах цагийн ачаалал бүртгэх
-    """
+    """Багшийн заах цагийн ачаалал бүртгэх"""
+
     queryset = TeacherCreditVolumePlan.objects
     serializer_class = TeacherLessonListSerializer
 
     def get(self, request, pk=None):
-        """ Багшийн жагсаалт
-        """
+        """Багшийн жагсаалт"""
 
         if pk != 0:
-            teacher_credit_volume_plan_ids = self.queryset.filter(department=pk).distinct('teacher').values_list('teacher', flat=True)
+            teacher_credit_volume_plan_ids = (
+                self.queryset.filter(department=pk)
+                .distinct("teacher")
+                .values_list("teacher", flat=True)
+            )
             qs = Teachers.objects.filter(id__in=teacher_credit_volume_plan_ids)
             data = self.serializer_class(qs, many=True).data
             return request.send_data(data)
@@ -635,19 +718,19 @@ class SubSchoolAPIView(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin
+    mixins.DestroyModelMixin,
 ):
-    """" Дэд сургууль """
+    """ " Дэд сургууль"""
 
-    queryset = SubOrgs.objects.all().filter(is_school=True).order_by('name')
+    queryset = SubOrgs.objects.all().filter(is_school=True).order_by("name")
     serializer_class = SubSchoolRegisterSerailizer
 
     @login_required()
     def get(self, request, pk=None):
-        " дэд сургуулийн жагсаалт "
+        "дэд сургуулийн жагсаалт"
         self.serializer_class = SubSchoolListSerailizer
 
-        org = getattr(request, 'org_filter', {}).get('org')
+        org = getattr(request, "org_filter", {}).get("org")
         sub_school = request.query_params.get("school")
 
         if org:
@@ -667,12 +750,14 @@ class SubSchoolAPIView(
     def post(self, request):
 
         data = request.data
-        data['is_school'] = True
+        data["is_school"] = True
 
-        org = getattr(request, 'org_filter', {}).get('org')
+        org = getattr(request, "org_filter", {}).get("org")
 
         if not org:
-            return request.send_error("ERR_002", "Салбар бүрэлдэхүүн нэмэх эрхгүй байна")
+            return request.send_error(
+                "ERR_002", "Салбар бүрэлдэхүүн нэмэх эрхгүй байна"
+            )
 
         request.data["org"] = org.id
 
@@ -680,14 +765,14 @@ class SubSchoolAPIView(
 
         if not serializer.is_valid():
 
-            return request.send_error('ERR_002', serializer.errors)
+            return request.send_error("ERR_002", serializer.errors)
 
         serializer.save()
 
-        return request.send_info('INF_001')
+        return request.send_info("INF_001")
 
     def put(self, request, pk=None):
-        " Дэд сургуулийн мэдээлэл засах "
+        "Дэд сургуулийн мэдээлэл засах"
         self.serializer_class = SubSchoolPutRegisterSerailizer
 
         subschool = self.queryset.get(id=pk)
@@ -707,7 +792,7 @@ class SubSchoolAPIView(
 
     def delete(self, request, pk=None):
         self.destroy(request)
-        return request.send_info('INF_003')
+        return request.send_info("INF_003")
 
 
 @permission_classes([IsAuthenticated])
@@ -716,7 +801,7 @@ class CountryAPIView(
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
 ):
-    """" улсын жагсаалт """
+    """ " улсын жагсаалт"""
 
     queryset = Country.objects
     serializer_class = CountryListSerializer
@@ -726,6 +811,7 @@ class CountryAPIView(
         country_list = self.list(request).data
         return request.send_data(country_list)
 
+
 @permission_classes([IsAuthenticated])
 class AimaghotAPIView(
     generics.GenericAPIView,
@@ -733,7 +819,7 @@ class AimaghotAPIView(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
 ):
-    """" аймаг хотын жагсаалт """
+    """ " аймаг хотын жагсаалт"""
 
     queryset = AimagHot.objects
     serializer_class = AimaghotListSerializer
@@ -743,13 +829,14 @@ class AimaghotAPIView(
         data = self.list(request).data
         return request.send_data(data)
 
+
 @permission_classes([IsAuthenticated])
 class SumDuuregAPIView(
     generics.GenericAPIView,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
 ):
-    """" сум дүүргийн жагсаалт """
+    """ " сум дүүргийн жагсаалт"""
 
     queryset = SumDuureg.objects
     serializer_class = SumDuuregListSerializer
@@ -760,13 +847,14 @@ class SumDuuregAPIView(
             sum_duureg_list = list(qs)
             return request.send_data(sum_duureg_list)
 
+
 @permission_classes([IsAuthenticated])
 class BagHorooAPIView(
     generics.GenericAPIView,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
 ):
-    """" баг хорооны жагсаалт """
+    """ " баг хорооны жагсаалт"""
 
     queryset = BagHoroo.objects
     serializer_class = BagHorooListSerializer
@@ -776,6 +864,7 @@ class BagHorooAPIView(
             qs = self.queryset.filter(unit2=unit2).values("id", "code", "name")
             bag_horoo_list = list(qs)
             return request.send_data(bag_horoo_list)
+
 
 @permission_classes([IsAuthenticated])
 class TeacherListAPIView(
@@ -788,21 +877,25 @@ class TeacherListAPIView(
     """ Багшийн мэдээллийн жагсаалт """
 
     def get_queryset(self):
-        "Багшийн мэдээллийг сургууль, Хөтөлбөрийн багаар харуулах "
+        "Багшийн мэдээллийг сургууль, Хөтөлбөрийн багаар харуулах"
 
         queryset = self.queryset
-        teacher_queryset = queryset.all().values_list('user', flat=True)
-        qs_employee_user = Employee.objects.filter(user_id__in=list(teacher_queryset), org_position__is_teacher=True, state=Employee.STATE_WORKING).values_list('user', flat=True)
+        teacher_queryset = queryset.all().values_list("user", flat=True)
+        qs_employee_user = Employee.objects.filter(
+            user_id__in=list(teacher_queryset),
+            org_position__is_teacher=True,
+            state=Employee.STATE_WORKING,
+        ).values_list("user", flat=True)
         if qs_employee_user:
-            queryset = queryset.filter(user_id__in = list(qs_employee_user))
+            queryset = queryset.filter(user_id__in=list(qs_employee_user))
 
-        sub_org = self.request.query_params.get('sub_org')
+        sub_org = self.request.query_params.get("sub_org")
 
         # сургууль
         if sub_org:
             queryset = queryset.filter(sub_org=sub_org)
 
-        salbar = self.request.query_params.get('salbar')
+        salbar = self.request.query_params.get("salbar")
         # салбар, тэнхим
         if salbar:
             queryset = queryset.filter(salbar=salbar)
@@ -810,7 +903,7 @@ class TeacherListAPIView(
         return queryset
 
     def get(self, request):
-        " нийт багшийн жагсаалт"
+        "нийт багшийн жагсаалт"
 
         teach_info = self.list(request).data
         return request.send_data(teach_info)
@@ -818,11 +911,9 @@ class TeacherListAPIView(
 
 @permission_classes([IsAuthenticated])
 class TeacherApiView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin
+    generics.GenericAPIView, mixins.ListModelMixin, mixins.RetrieveModelMixin
 ):
-    """ Багшийн жагсаалт """
+    """Багшийн жагсаалт"""
 
     queryset = Teachers.objects.all()
     serializer_class = TeacherNameSerializer
@@ -830,33 +921,33 @@ class TeacherApiView(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['first_name', 'register', 'user__email', 'user__phone_number']
+    search_fields = ["first_name", "register", "user__email", "user__phone_number"]
 
     def get_queryset(self):
-        "Багшийн мэдээллийг сургууль, Хөтөлбөрийн багаар харуулах "
+        "Багшийн мэдээллийг сургууль, Хөтөлбөрийн багаар харуулах"
 
         queryset = self.queryset
 
         # Бүх төвөвтэй багшийн жагсаалт
-        state = self.request.query_params.get('state')
-        sub_org = self.request.query_params.get('sub_org')
-        salbar = self.request.query_params.get('salbar')
-        position = self.request.query_params.get('position')
-        sorting = self.request.query_params.get('sorting')
+        state = self.request.query_params.get("state")
+        sub_org = self.request.query_params.get("sub_org")
+        salbar = self.request.query_params.get("salbar")
+        position = self.request.query_params.get("position")
+        sorting = self.request.query_params.get("sorting")
 
-        teacher_queryset = queryset.all().values_list('user', flat=True)
+        teacher_queryset = queryset.all().values_list("user", flat=True)
         qs_employee_user = Employee.objects.filter(user__in=list(teacher_queryset))
 
-        org = getattr(self.request, 'org_filter', {}).get('org')
-
-        if org:
-            self.queryset = self.queryset.filter(org=org)
+        # org = getattr(self.request, "org_filter", {}).get("org")
+        #
+        # if org:
+        #     self.queryset = self.queryset.filter(org=org)
 
         # Төлвөөр хайх
         if state:
             state = int(state)
             qs_employee_user = qs_employee_user.filter(state=state)
-            user_ids = qs_employee_user.values_list('user', flat=True)
+            user_ids = qs_employee_user.values_list("user", flat=True)
             queryset = queryset.filter(user__in=user_ids)
 
         # Бүрэлдэхүүн сургууль
@@ -870,7 +961,7 @@ class TeacherApiView(
         # Албан тушаалаар хайх
         if position:
             qs_employee_user = qs_employee_user.filter(org_position=position)
-            user_ids = qs_employee_user.values_list('user', flat=True)
+            user_ids = qs_employee_user.values_list("user", flat=True)
             queryset = queryset.filter(user__in=user_ids)
 
         # Sort хийх үед ажиллана
@@ -887,12 +978,12 @@ class TeacherApiView(
 
     @login_required()
     def get(self, request):
-        " нийт багшийн жагсаалт"
+        "нийт багшийн жагсаалт"
 
-        org = getattr(request, 'org_filter', {}).get('org')
-
-        if org:
-            self.queryset = self.queryset.filter(org=org)
+        # org = getattr(request, "org_filter", {}).get("org")
+        #
+        # if org:
+        #     self.queryset = self.queryset.filter(org=org)
 
         teach_info = self.list(request).data
 
@@ -904,20 +995,22 @@ class TeacherListApiView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin
+    mixins.DestroyModelMixin,
 ):
-    """ Багшийн урт жагсаалт """
+    """Багшийн урт жагсаалт"""
 
     queryset = Teachers.objects.all()
     serializer_class = TeacherLongListSerializer
 
     def get(self, request):
-        self.queryset = get_teacher_queryset() # Аль нэг салбар сургуульд хамаардаггүй багш нарыг "аних филтэр"
+        self.queryset = (
+            get_teacher_queryset()
+        )  # Аль нэг салбар сургуульд хамаардаггүй багш нарыг "аних филтэр"
 
-        school = self.request.query_params.get('school')
-        department = self.request.query_params.get('department')
+        school = self.request.query_params.get("school")
+        department = self.request.query_params.get("department")
 
-        org = getattr(request, 'org_filter', {}).get('org')
+        org = getattr(request, "org_filter", {}).get("org")
 
         if org:
             self.queryset = self.queryset.filter(org=org)
@@ -945,16 +1038,14 @@ class TeacherListApiView(
             # User мэдээлэл устгах
             user.delete()
             # self.destroy(request)
-        return request.send_info('INF_003')
+        return request.send_info("INF_003")
 
 
 @permission_classes([IsAuthenticated])
 class TeacherAllListApiView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin
+    generics.GenericAPIView, mixins.ListModelMixin, mixins.RetrieveModelMixin
 ):
-    """ Багшийн  жагсаалт """
+    """Багшийн  жагсаалт"""
 
     queryset = Teachers.objects.all()
     serializer_class = TeacherListSchoolFilterSerializer
@@ -962,10 +1053,10 @@ class TeacherAllListApiView(
     def get(self, request):
         self.queryset = get_teacher_queryset()
 
-        school = self.request.query_params.get('school')
-        department = self.request.query_params.get('department')
+        school = self.request.query_params.get("school")
+        department = self.request.query_params.get("department")
 
-        org = getattr(request, 'org_filter', {}).get('org')
+        org = getattr(request, "org_filter", {}).get("org")
 
         if org:
             self.queryset = self.queryset.filter(org=org)
@@ -983,19 +1074,17 @@ class TeacherAllListApiView(
 
 @permission_classes([IsAuthenticated])
 class TeacherListSubschoolApiView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin
+    generics.GenericAPIView, mixins.ListModelMixin, mixins.RetrieveModelMixin
 ):
-    """ Багшийн урт жагсаалт """
+    """Багшийн урт жагсаалт"""
 
-    queryset = Teachers.objects.all().order_by('first_name')
+    queryset = Teachers.objects.all().order_by("first_name")
     serializer_class = TeacherListSchoolFilterSerializer
 
     def get(self, request):
-        school = self.request.query_params.get('school')
+        school = self.request.query_params.get("school")
 
-        org = getattr(request, 'org_filter', {}).get('org')
+        org = getattr(request, "org_filter", {}).get("org")
 
         if org:
             self.queryset = self.queryset.filter(org=org)
@@ -1016,14 +1105,14 @@ class TeacherInfoAPIView(
     mixins.ListModelMixin,
     generics.GenericAPIView,
 ):
-    """ Багшийн дэлгэрэнгүй мэдээлэл """
+    """Багшийн дэлгэрэнгүй мэдээлэл"""
 
     queryset = Teachers.objects
     serializer_class = TeacherInfoSerializer
 
     def get(self, request, pk=None):
-        """ pk: teacher_id
-            user_id: нэвтэрсэн хэрэглэгч-н id user_core model-д хадгалагдана
+        """pk: teacher_id
+        user_id: нэвтэрсэн хэрэглэгч-н id user_core model-д хадгалагдана
         """
 
         user_id = ""
@@ -1042,7 +1131,9 @@ class TeacherInfoAPIView(
 
         # ----- Дотуур байр түрээслэгч мэдээлэл-----
         dormitory = DormitoryFamilyContract.objects.filter(teacher=pk)
-        serializer_dormitory = DormitoryFamilyContractSerializer(dormitory, many=True).data
+        serializer_dormitory = DormitoryFamilyContractSerializer(
+            dormitory, many=True
+        ).data
         dormitory_list = list(serializer_dormitory)
 
         # ----- Заах хичээл мэдээлэл -----
@@ -1097,7 +1188,7 @@ class TeacherInfoAPIView(
             contractwork_ser = UserContractWorkSerializer(contractwork, many=True).data
             contractwork_info = list(contractwork_ser)
 
-            #-------------------------- Оюуны өмч  -------------------------
+            # -------------------------- Оюуны өмч  -------------------------
 
             " Шинэ бүтээлийн патент"
             patent = UserPatent.objects.filter(user=user_id)
@@ -1125,17 +1216,17 @@ class TeacherInfoAPIView(
             rightcert_info = list(rightcert_ser)
 
         datas = {
-            'mainInfo': mainInfo if mainInfo else [],
-            'timetableData': schedule if schedule else [],
-            'dormitoryData': dormitory_list if dormitory_list else [],
+            "mainInfo": mainInfo if mainInfo else [],
+            "timetableData": schedule if schedule else [],
+            "dormitoryData": dormitory_list if dormitory_list else [],
             "lessonTeachData": lesson_info if lesson_info else [],
-            "groupData":group_info if group_info else [],
-            'requestTutorData': requestutor_info if requestutor_info else [],
-            'inventionData': invention_info if invention_info else [],
-            'paperData': paper_info if paper_info else [],
-            'noteData': note_info if note_info else [],
+            "groupData": group_info if group_info else [],
+            "requestTutorData": requestutor_info if requestutor_info else [],
+            "inventionData": invention_info if invention_info else [],
+            "paperData": paper_info if paper_info else [],
+            "noteData": note_info if note_info else [],
             "quotationData": quotation_info if quotation_info else [],
-            "projectData":project_info if project_info else [],
+            "projectData": project_info if project_info else [],
             "contractworkData": contractwork_info if contractwork_info else [],
             "patentData": patent_info if patent_info else [],
             "certpatentData": certpatent_info if certpatent_info else [],
@@ -1152,14 +1243,14 @@ class AllOrgPositionListAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
 ):
-    """ Албан тушаалын жагсаалт """
+    """Албан тушаалын жагсаалт"""
 
     queryset = OrgPosition.objects.all()
     serializer_class = OrgPositionSerializer
 
     @login_required()
     def get(self, request):
-        org = getattr(request, 'org_filter', {}).get('org')
+        org = getattr(request, "org_filter", {}).get("org")
 
         if org:
             self.queryset = self.queryset.filter(org=org)
@@ -1175,20 +1266,20 @@ class OrgPositionListAPIView(
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin,
     mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin
+    mixins.DestroyModelMixin,
 ):
-    """ Албан тушаалын жагсаалт """
+    """Албан тушаалын жагсаалт"""
 
     queryset = OrgPosition.objects.all()
     serializer_class = OrgPositionSerializer
 
     pagination_class = CustomPagination
     filter_backends = [SearchFilter]
-    search_fields = ['org__name', 'name', "created_at"]
+    search_fields = ["org__name", "name", "created_at"]
 
     @login_required()
     def get(self, request, pk=None):
-        org = getattr(request, 'org_filter', {}).get('org')
+        org = getattr(request, "org_filter", {}).get("org")
 
         if org:
             self.queryset = self.queryset.filter(org=org)
@@ -1203,7 +1294,7 @@ class OrgPositionListAPIView(
     @login_required()
     def post(self, request):
 
-        org = getattr(request, 'org_filter', {}).get('org')
+        org = getattr(request, "org_filter", {}).get("org")
 
         if not org:
             return request.send_error("ERR_002", "Албан тушаал нэмэх эрхгүй байна")
@@ -1217,7 +1308,7 @@ class OrgPositionListAPIView(
                 self.create(request).data
             except Exception as e:
                 print(e)
-                return request.send_error('ERR_002')
+                return request.send_error("ERR_002")
         return request.send_info("INF_001")
 
     @login_required()
@@ -1238,7 +1329,7 @@ class OrgPositionListAPIView(
                 return request.send_error_valid(serializer.errors)
 
         except Exception as e:
-            print('e', e)
+            print("e", e)
 
             return request.send_error("ERR_002")
 
@@ -1247,7 +1338,7 @@ class OrgPositionListAPIView(
         if pk:
             self.destroy(request, pk)
 
-        return request.send_info('INF_003')
+        return request.send_info("INF_003")
 
 
 @permission_classes([IsAuthenticated])
@@ -1255,7 +1346,7 @@ class PermissionListAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
 ):
-    """ Албан тушаалын жагсаалт """
+    """Албан тушаалын жагсаалт"""
 
     queryset = Permissions.objects
     serializer_class = PermissionSerializer
@@ -1271,20 +1362,20 @@ class DepLeaderAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
 ):
-    """ Хөтөлбөрийн багийн ахлагч жагсаалт """
+    """Хөтөлбөрийн багийн ахлагч жагсаалт"""
 
     queryset = Teachers.objects.all()
     serializer_class = TeachersSerializer
 
     def get(self, request):
 
-        school = request.query_params.get('school')
+        school = request.query_params.get("school")
 
         qs_teachers = get_teacher_queryset()
         self.queryset = qs_teachers
 
         if school:
-            self.queryset  = self.queryset.filter(sub_org=school)
+            self.queryset = self.queryset.filter(sub_org=school)
 
         datas = self.list(request).data
         return request.send_data(datas)
@@ -1294,20 +1385,22 @@ class TeacherPartListApiView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
 ):
-    """ Цагийн багшийн жагсаалт авах """
+    """Цагийн багшийн жагсаалт авах"""
 
     queryset = Teachers.objects.all()
     serializer_class = TeachersSerializer
 
     def get(self, request):
 
-        school = request.query_params.get('school')
+        school = request.query_params.get("school")
 
-        user_ids = Employee.objects.filter(worker_type=Employee.WORKER_TYPE_CONTRACT).values_list('user', flat=True)
-        self.queryset  = self.queryset.filter(user__id__in=user_ids)
+        user_ids = Employee.objects.filter(
+            worker_type=Employee.WORKER_TYPE_CONTRACT
+        ).values_list("user", flat=True)
+        self.queryset = self.queryset.filter(user__id__in=user_ids)
 
         if school:
-            self.queryset  = self.queryset.filter(sub_org=school)
+            self.queryset = self.queryset.filter(sub_org=school)
 
         all_data = self.list(request).data
 
@@ -1316,20 +1409,19 @@ class TeacherPartListApiView(
 
 # Хуанли цэс доторх картнууд
 
+
 @permission_classes([IsAuthenticated])
 class CalendarCountAPIView(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    generics.CreateAPIView
+    mixins.ListModelMixin, mixins.RetrieveModelMixin, generics.CreateAPIView
 ):
 
     def get(self, request):
 
-        school = request.query_params.get('school')
+        school = request.query_params.get("school")
         collected_data = dict()
 
-        STUDYING_CODE = 1           # Суралцаж байгаа сурагчид
-        TAKE_LEAVE = 2              # Чөлөө авсан сурагчид
+        STUDYING_CODE = 1  # Суралцаж байгаа сурагчид
+        TAKE_LEAVE = 2  # Чөлөө авсан сурагчид
 
         teacher_qs = get_teacher_queryset()
 
@@ -1342,13 +1434,15 @@ class CalendarCountAPIView(
             lessons_queryset = lessons_queryset.filter(school=school)
             students_queryset = students_queryset.filter(group__school=school)
 
-        collected_data['total_profession'] = profession_queryset.count()
-        collected_data['total_workers'] = teacher_qs.count()
-        collected_data['total_studies'] = lessons_queryset.count()
-        collected_data['total_students'] = students_queryset.filter(status__code=1).count()
+        collected_data["total_profession"] = profession_queryset.count()
+        collected_data["total_workers"] = teacher_qs.count()
+        collected_data["total_studies"] = lessons_queryset.count()
+        collected_data["total_students"] = students_queryset.filter(
+            status__code=1
+        ).count()
         salbar_data = []
 
-        collected_data['salbar_data'] = salbar_data
+        collected_data["salbar_data"] = salbar_data
 
         return request.send_data(collected_data)
 
@@ -1358,9 +1452,9 @@ class EmployeeApiView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
-    mixins.RetrieveModelMixin
+    mixins.RetrieveModelMixin,
 ):
-    """ Багшийн жагсаалт """
+    """Багшийн жагсаалт"""
 
     queryset = Employee.objects.all()
     serializer_class = EmployeePostSerializer
@@ -1368,36 +1462,49 @@ class EmployeeApiView(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['first_name', 'last_name', 'register_code']
+    search_fields = ["first_name", "last_name", "register_code"]
 
     def post(self, request):
         with transaction.atomic():
 
             sid = transaction.savepoint()
-            if not request.data.get('email'):
-                del request.data['email']
+            if not request.data.get("email"):
+                del request.data["email"]
 
             def check_field(field, value):
                 if not request.data.get(field):
                     request.data[field] = value
 
-            check_field('body_height', 0)
-            check_field('body_weight', 0)
-            check_field('emdd_number', None)
-            check_field('hudul_number', None)
-            check_field('ndd_number', None)
+            check_field("body_height", 0)
+            check_field("body_weight", 0)
+            check_field("emdd_number", None)
+            check_field("hudul_number", None)
+            check_field("ndd_number", None)
             check_field("home_phone", 0)
             check_field("register_code", None)
 
-            check_user = Teachers.objects.filter(register=request.data['register'], action_status=Teachers.APPROVED, user__email=request.data['email'])
-            sub_org = SubOrgs.objects.get(id=request.data.get('sub_org'))
+            check_user = Teachers.objects.filter(
+                register=request.data["register"],
+                action_status=Teachers.APPROVED,
+                user__email=request.data["email"],
+            )
+            sub_org = SubOrgs.objects.get(id=request.data.get("sub_org"))
 
             if check_user and check_user.exists:
-                return [{'register': [ErrorDetail(string='Системд бүртгэлтэй хэрэглэгч байна', code='unique')]}]
+                return [
+                    {
+                        "register": [
+                            ErrorDetail(
+                                string="Системд бүртгэлтэй хэрэглэгч байна",
+                                code="unique",
+                            )
+                        ]
+                    }
+                ]
             else:
                 # Register ийн сүүлийн 8 оронг нууц үг болгох нь
-                request.data['password'] = request.data['register'][-8:]
-                request.data['org'] = sub_org.org.id
+                request.data["password"] = request.data["register"][-8:]
+                request.data["org"] = sub_org.org.id
 
                 # User моделийн датаг эхлэээд үүсгэнэ
                 user_serializer = UserRegisterSerializer(
@@ -1410,13 +1517,15 @@ class EmployeeApiView(
 
                 #  UserInfo үүсгэхэд хэрэгтэй датануудыг цуглуулах нь
                 user = user_serializer.save()
-                request.data['user'] = str(user.id)
-                request.data['birthday'], request.data['gender'] = calculate_birthday(request.data['register'])
-                if not request.data['birthday']:
-                    request.data['birthday'] = '1985-01-01'
+                request.data["user"] = str(user.id)
+                request.data["birthday"], request.data["gender"] = calculate_birthday(
+                    request.data["register"]
+                )
+                if not request.data["birthday"]:
+                    request.data["birthday"] = "1985-01-01"
 
-                request.data['action_status'] = Teachers.APPROVED
-                request.data['action_status_type'] = Teachers.ACTION_TYPE_ALL
+                request.data["action_status"] = Teachers.APPROVED
+                request.data["action_status_type"] = Teachers.ACTION_TYPE_ALL
 
                 userinfo_serializer = UserInfoSerializer(
                     data=request.data,
@@ -1427,8 +1536,8 @@ class EmployeeApiView(
                     return request.send_error_valid(userinfo_serializer.errors)
                 userinfo_serializer.save()
 
-            if 'worker_type' in request.data:
-                request.data['worker_type'] = Employee.WORKER_TYPE_EMPLOYEE
+            if "worker_type" in request.data:
+                request.data["worker_type"] = Employee.WORKER_TYPE_EMPLOYEE
 
             employee_serializer = EmployeeSerializer(data=request.data)
             if not employee_serializer.is_valid(raise_exception=True):
@@ -1441,11 +1550,11 @@ class EmployeeApiView(
 
     def put(self, request, pk=None):
         datas = request.data
-        salbar = datas.get('salbar')
+        salbar = datas.get("salbar")
         if salbar:
             salbar_obj = Salbars.objects.filter(id=salbar).first()
             sub_org = salbar_obj.sub_orgs
-            datas['sub_org'] = sub_org.id
+            datas["sub_org"] = sub_org.id
 
         instance = Teachers.objects.filter(id=pk).first()
         user_obj = User.objects.get(id=instance.user.id)
@@ -1454,7 +1563,7 @@ class EmployeeApiView(
             return request.send_error_valid(user_serializer.errors)
 
         user = user_serializer.save()
-        datas['user'] = str(user.id)
+        datas["user"] = str(user.id)
 
         userinfo_serializer = UserInfoSerializer(instance, data=datas, partial=True)
         if not userinfo_serializer.is_valid():
@@ -1479,56 +1588,55 @@ class CRUDAPIView(
     mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
 ):
+    """
+    Динамик API
 
-    '''
-        Динамик API
+    Энэ API-р дурын моделийн crud үйлдлийг хийх боломжтой.
+    params-р моделийн нэрийг явуулсанаар ажиллана.
 
-        Энэ API-р дурын моделийн crud үйлдлийг хийх боломжтой.
-        params-р моделийн нэрийг явуулсанаар ажиллана.
+    Variables
 
-        Variables
-
-        app_name - Модел байгаа app-н нэр.
-        model_name - Моделийн нэр.
-        fields - Авах field-н нэр
-        custom_search - GET хүсэлтийг filter-лэх эсэх
-        filter_data = Хайх field болон утгийн хэсэг
-        generate_model_serializer() - Тухайн моделийн serializer-г үүсгэх функц.
-    '''
+    app_name - Модел байгаа app-н нэр.
+    model_name - Моделийн нэр.
+    fields - Авах field-н нэр
+    custom_search - GET хүсэлтийг filter-лэх эсэх
+    filter_data = Хайх field болон утгийн хэсэг
+    generate_model_serializer() - Тухайн моделийн serializer-г үүсгэх функц.
+    """
 
     filter_backends = [SearchFilter]
     pagination_class = CustomPagination
 
     def get(self, request, pk=None):
 
-        app_name = request.query_params.get('app_name')
-        model_name = request.query_params.get('model_name')
-        fields = request.query_params.get('fields')
+        app_name = request.query_params.get("app_name")
+        model_name = request.query_params.get("model_name")
+        fields = request.query_params.get("fields")
 
         data = {}
 
         if app_name:
-            data['app_name'] = app_name
+            data["app_name"] = app_name
 
         if model_name:
-            data['model_name'] = model_name
+            data["model_name"] = model_name
 
         if fields:
-            data['fields'] = fields
+            data["fields"] = fields
 
         # Модел байгаа эсэхийг шалгах
         try:
-            model = apps.get_model(data['app_name'], data['model_name'])
+            model = apps.get_model(data["app_name"], data["model_name"])
             self.queryset = model.objects.all()
 
         except:
-            return request.send_error('ERR_013')
+            return request.send_error("ERR_013")
 
-        custom_search = request.query_params.get('custom_search')
+        custom_search = request.query_params.get("custom_search")
 
         if custom_search:
 
-            filter_data = request.query_params.get('filter_data')
+            filter_data = request.query_params.get("filter_data")
             print(filter_data)
             filter_data = json.loads(filter_data)
 
@@ -1536,7 +1644,7 @@ class CRUDAPIView(
 
         # Field байгаа эсэхийг шалгах
         try:
-            self.serializer_class = generate_model_serializer(model, data['fields'])
+            self.serializer_class = generate_model_serializer(model, data["fields"])
 
         except:
             self.serializer_class = generate_model_serializer(model)
@@ -1547,7 +1655,7 @@ class CRUDAPIView(
                 all_data = self.retrieve(request, pk).data
 
             except:
-                return request.send_error('ERR_014')
+                return request.send_error("ERR_014")
 
             return request.send_data(all_data)
 
@@ -1555,10 +1663,9 @@ class CRUDAPIView(
             all_data = self.list(request, pk).data
 
         except:
-            return request.send_error('ERR_014')
+            return request.send_error("ERR_014")
 
         return request.send_data(all_data)
-
 
     @transaction.atomic()
     def post(self, request):
@@ -1567,23 +1674,22 @@ class CRUDAPIView(
 
         # Модел байгаа эсэхийг шалгах
         try:
-            model = apps.get_model(data['app_name'], data['model_name'])
+            model = apps.get_model(data["app_name"], data["model_name"])
             self.queryset = model.objects.all()
 
         except:
-            return request.send_error('ERR_013')
+            return request.send_error("ERR_013")
 
         self.serializer_class = generate_model_serializer(model)
         serializer = self.serializer_class(data=data)
 
         if not serializer.is_valid():
 
-            return request.send_error('ERR_002', serializer.errors)
+            return request.send_error("ERR_002", serializer.errors)
 
         serializer.save()
 
-        return request.send_info('INF_001')
-
+        return request.send_info("INF_001")
 
     @transaction.atomic()
     def put(self, request, pk=None):
@@ -1592,11 +1698,11 @@ class CRUDAPIView(
 
         # Модел байгаа эсэхийг шалгах
         try:
-            model = apps.get_model(data['app_name'], data['model_name'])
+            model = apps.get_model(data["app_name"], data["model_name"])
             self.queryset = model.objects.all()
 
         except:
-            return request.send_error('ERR_013')
+            return request.send_error("ERR_013")
 
         self.serializer_class = generate_model_serializer(model)
         instance = self.get_object()
@@ -1605,12 +1711,11 @@ class CRUDAPIView(
 
         if not serializer.is_valid():
 
-            return request.send_error('ERR_002', serializer.errors)
+            return request.send_error("ERR_002", serializer.errors)
 
         serializer.save()
 
-        return request.send_info('INF_002')
-
+        return request.send_info("INF_002")
 
     def delete(self, request, pk=None):
 
@@ -1618,37 +1723,37 @@ class CRUDAPIView(
 
         # Модел байгаа эсэхийг шалгах
         try:
-            model = apps.get_model(data['app_name'], data['model_name'])
+            model = apps.get_model(data["app_name"], data["model_name"])
             self.queryset = model.objects.all()
 
         except:
-            return request.send_error('ERR_013')
+            return request.send_error("ERR_013")
 
         self.destroy(request, pk)
 
-        return request.send_info('INF_003')
+        return request.send_info("INF_003")
 
 
 @permission_classes([IsAuthenticated])
-class TeacherResetPassword(
-    generics.GenericAPIView
-):
-    """ Багшийн нууц үг сэргээх """
+class TeacherResetPassword(generics.GenericAPIView):
+    """Багшийн нууц үг сэргээх"""
 
     queryset = User.objects
 
     def put(self, request, pk=None):
         self.queryset = self.queryset.filter(teachers__id=pk)
-        default_password = self.queryset.values_list('teachers__register',flat=True).first()
+        default_password = self.queryset.values_list(
+            "teachers__register", flat=True
+        ).first()
 
         if default_password and len(default_password) >= 8:
             with transaction.atomic():
                 hashed_password = make_password(default_password[-8:])
                 self.queryset.update(password=hashed_password)
         else:
-            return request.send_error('ERR_002')
+            return request.send_error("ERR_002")
 
-        return request.send_info('INF_018')
+        return request.send_info("INF_018")
 
 
 @permission_classes([IsAuthenticated])
@@ -1658,10 +1763,10 @@ class AblePositionAPIView(
     def get(self, request):
 
         header = {
-            'token': settings.GPT,
+            "token": settings.GPT,
         }
 
-        url = 'https://uia.able.mn/insight.php/?a=ableApi&tsk=getPositions&key=uia'
+        url = "https://uia.able.mn/insight.php/?a=ableApi&tsk=getPositions&key=uia"
 
         rsp = requests.get(url=url, headers=header)
         if rsp.status_code == 200:
@@ -1670,11 +1775,11 @@ class AblePositionAPIView(
             create_datas = []
             crete_namess = []
             for data in datas:
-                name = data.get('name')
+                name = data.get("name")
                 position_obj = OrgPosition.objects.filter(name__icontains=name).first()
                 if not position_obj:
                     is_teacher = False
-                    if name in ['Багш', 'багш']:
+                    if name in ["Багш", "багш"]:
                         is_teacher = True
 
                     if name not in crete_namess:
@@ -1688,11 +1793,11 @@ class AblePositionAPIView(
 
                     crete_namess.append(name)
                 else:
-                    position_obj.name=name
+                    position_obj.name = name
                     position_obj.save()
 
             OrgPosition.objects.bulk_create(create_datas)
-        return request.send_info('INF_020')
+        return request.send_info("INF_020")
 
 
 @permission_classes([IsAuthenticated])
@@ -1713,13 +1818,11 @@ class AbleWorkerAPIView(
                     return key
             return None
 
-        header = {
-            'token': settings.GPT
-        }
-        url = 'https://uia.able.mn/insight.php/?a=ableApi&tsk=getWorkers&key=uia'
+        header = {"token": settings.GPT}
+        url = "https://uia.able.mn/insight.php/?a=ableApi&tsk=getWorkers&key=uia"
         rsp = requests.get(url=url, headers=header)
 
-        dep_url = 'https://uia.able.mn/insight.php/?a=ableApi&tsk=getDeps&key=uia'
+        dep_url = "https://uia.able.mn/insight.php/?a=ableApi&tsk=getDeps&key=uia"
         dep_rsp = requests.get(url=dep_url, headers=header)
 
         try:
@@ -1732,27 +1835,29 @@ class AbleWorkerAPIView(
                 in_count = 0
                 create_datas = []
                 for data in datas:
-                    reg_number = data.get('reg_number')
-                    last_name = data.get('last_name')
-                    first_name = data.get('first_name')
-                    position_name = data.get('app_name')
+                    reg_number = data.get("reg_number")
+                    last_name = data.get("last_name")
+                    first_name = data.get("first_name")
+                    position_name = data.get("app_name")
 
-                    rank_type = data.get('rank_type')
-                    rank_name = data.get('rank_name')
-                    rank_rate = data.get('rank_rate')
+                    rank_type = data.get("rank_type")
+                    rank_rate = data.get("rank_rate")
 
-                    personal_mail = data.get('personal_mail')
-                    subschool_id = data.get('com_id')
-                    dep_id = data.get('dep_id')
-                    edu_rank = data.get('edu_rank')
+                    personal_mail = data.get("personal_mail")
+                    subschool_id = data.get("com_id")
+                    dep_id = data.get("dep_id")
+                    edu_rank = data.get("edu_rank")
 
-                    teacher = Teachers.objects.filter(Q(Q(register=reg_number) | Q(user__email__iexact=personal_mail))).first()
-                    position = OrgPosition.objects.filter(name__iexact=position_name).first()
-                    data['org_position'] = position.id if position else None
+                    teacher = Teachers.objects.filter(
+                        Q(Q(register=reg_number) | Q(user__email__iexact=personal_mail))
+                    ).first()
+                    position = OrgPosition.objects.filter(
+                        name__iexact=position_name
+                    ).first()
+                    data["org_position"] = position.id if position else None
 
                     if teacher:
                         in_count += 1
-                        teacher.rank_name = rank_name
                         teacher.rank_type = rank_type
                         teacher.rank_rate = rank_rate
                         teacher.save()
@@ -1760,16 +1865,18 @@ class AbleWorkerAPIView(
                         employee = Employee.objects.filter(user=teacher.user).first()
 
                         if not employee:
-                            data['register_code'] = data.get('id_number')
-                            data['user'] = teacher.user.id
+                            data["register_code"] = data.get("id_number")
+                            data["user"] = teacher.user.id
 
                             # register_code ягаадч юм давхцаад байгааг ингэж шийдсэн
-                            if Employee.objects.filter(register_code=data.get('id_number')).exists():
-                                data['register_code'] = data.get('app_id')
+                            if Employee.objects.filter(
+                                register_code=data.get("id_number")
+                            ).exists():
+                                data["register_code"] = data.get("app_id")
 
                             employee_serializer = EmployeeSerializer(data=data)
                             if not employee_serializer.is_valid(raise_exception=True):
-                                print('Employee үүсч чадсангүй 1')
+                                print("Employee үүсч чадсангүй 1")
                                 break
 
                             employee_serializer.save()
@@ -1779,38 +1886,45 @@ class AbleWorkerAPIView(
 
                             employee.save()
                     else:
+
                         def check_field(field, value):
                             if not data.get(field):
                                 data[field] = value
 
-                        check_field('body_height', 0)
-                        check_field('body_weight', 0)
-                        check_field('emdd_number', None)
-                        check_field('hudul_number', None)
-                        check_field('ndd_number', None)
+                        check_field("body_height", 0)
+                        check_field("body_weight", 0)
+                        check_field("emdd_number", None)
+                        check_field("hudul_number", None)
+                        check_field("ndd_number", None)
                         check_field("home_phone", 0)
                         check_field("register_code", None)
 
-                        data['password'] = reg_number[-8:]
-                        data['email'] = personal_mail
-                        data['register'] = reg_number
-                        data['register_code'] = data.get('id_number')
+                        data["password"] = reg_number[-8:]
+                        data["email"] = personal_mail
+                        data["register"] = reg_number
+                        data["register_code"] = data.get("id_number")
 
-                        school_data = find_data_from_list_by_key(dep_datas, 'id', subschool_id)
+                        school_data = find_data_from_list_by_key(
+                            dep_datas, "id", subschool_id
+                        )
                         if school_data:
-                            name = school_data['name']
+                            name = school_data["name"]
                             school = SubOrgs.objects.filter(name__iexact=name).first()
-                            data['sub_org'] = school.id if school else None
-                            sub_list = school_data['subs']
-                            sub_data = find_data_from_list_by_key(sub_list, 'id', dep_id)
+                            data["sub_org"] = school.id if school else None
+                            sub_list = school_data["subs"]
+                            sub_data = find_data_from_list_by_key(
+                                sub_list, "id", dep_id
+                            )
                             if sub_data:
-                                salbar_obj = Salbars.objects.filter(sub_orgs=school, name__iexact=sub_data['name']).first()
+                                salbar_obj = Salbars.objects.filter(
+                                    sub_orgs=school, name__iexact=sub_data["name"]
+                                ).first()
                                 if salbar_obj:
-                                    data['salbar'] = salbar_obj.id
+                                    data["salbar"] = salbar_obj.id
                                 else:
-                                    data['salbar'] = None
+                                    data["salbar"] = None
                             else:
-                                data['salbar'] = None
+                                data["salbar"] = None
 
                         # User моделийн датаг эхлэээд үүсгэнэ
                         user_serializer = UserRegisterSerializer(
@@ -1818,89 +1932,98 @@ class AbleWorkerAPIView(
                         )
 
                         if not user_serializer.is_valid():
-                            print('User үүсч чадсангүй')
+                            print("User үүсч чадсангүй")
                             break
 
                         user = user_serializer.save()
-                        data['user'] = str(user.id)
-                        data['birthday'], data['gender'] = calculate_birthday(reg_number)
-                        data['action_status_type'] = Teachers.ACTION_TYPE_ALL
-                        data['action_status'] = Teachers.APPROVED
+                        data["user"] = str(user.id)
+                        data["birthday"], data["gender"] = calculate_birthday(
+                            reg_number
+                        )
+                        data["action_status_type"] = Teachers.ACTION_TYPE_ALL
+                        data["action_status"] = Teachers.APPROVED
 
                         userinfo_serializer = UserInfoSerializer(
                             data=data,
                         )
 
                         if not userinfo_serializer.is_valid():
-                            print('UserInfo үүсч чадсангүй')
+                            print("UserInfo үүсч чадсангүй")
                             break
                         userinfo_serializer.save()
 
-                        if 'worker_type' in data:
-                            data['worker_type'] = Employee.WORKER_TYPE_EMPLOYEE
+                        if "worker_type" in data:
+                            data["worker_type"] = Employee.WORKER_TYPE_EMPLOYEE
 
                         level = get_key_from_name(edu_rank)
                         if level:
-                            data['education_level'] = level
+                            data["education_level"] = level
 
                         # register_code ягаадч юм давхцаад байгааг ингэж шийдсэн
-                        if Employee.objects.filter(register_code=data.get('id_number')).exists():
-                            data['register_code'] = data.get('app_id')
+                        if Employee.objects.filter(
+                            register_code=data.get("id_number")
+                        ).exists():
+                            data["register_code"] = data.get("app_id")
 
                         employee_serializer = EmployeeSerializer(data=data)
                         if not employee_serializer.is_valid(raise_exception=True):
-                            print('Employee үүсч чадсангүй')
+                            print("Employee үүсч чадсангүй")
                             break
 
                         employee_serializer.save()
                         count += 1
-                        print('Амжилттай үүслээ', count)
+                        print("Амжилттай үүслээ", count)
 
         except Exception as e:
-            print('e', e)
+            print("e", e)
             return request.send_error("ERR_002", "Able-с мэдээлэл татахад алдаа гарлаа")
 
         return_datas = {
-            'new': count,
+            "new": count,
         }
-        return request.send_info('INF_020', return_datas)
-
+        return request.send_info("INF_020", return_datas)
 
 
 @permission_classes([IsAuthenticated])
 class SysInfoApiView(
     generics.GenericAPIView,
 ):
-    """ Системийн хандалт"""
+    """Системийн хандалт"""
 
     queryset = AccessHistoryLms.objects.all()
 
     def get(self, request):
-        stype = request.query_params.get('stype')
+        stype = request.query_params.get("stype")
         cfilter = {}
         today = datetime.today().date()
-        if stype == 'day':
-            cfilter['in_time__date'] = today
-        elif stype == 'week':
+        if stype == "day":
+            cfilter["in_time__date"] = today
+        elif stype == "week":
             start_of_week = today - timedelta(days=today.weekday())  # Monday
             end_of_week = start_of_week + timedelta(days=6)  # Sunday
-            cfilter['in_time__range'] = (start_of_week, end_of_week)
+            cfilter["in_time__range"] = (start_of_week, end_of_week)
 
-        elif stype == 'last_month':
+        elif stype == "last_month":
             first_day_this_month = today.replace(day=1)
             last_month_last_day = first_day_this_month - timedelta(days=1)
             last_month_first_day = last_month_last_day.replace(day=1)
-            cfilter['in_time__range'] = (last_month_first_day, last_month_last_day)
+            cfilter["in_time__range"] = (last_month_first_day, last_month_last_day)
 
-        elif stype == 'three_month':
+        elif stype == "three_month":
             three_months_ago = today - relativedelta(months=3)
-            cfilter['in_time__range'] = (three_months_ago, today)
+            cfilter["in_time__range"] = (three_months_ago, today)
 
         queryset = self.queryset.filter(**cfilter)
 
-        return request.send_data({
-            'total': queryset.count(),
-            'sis': queryset.filter(system_type=AccessHistoryLms.LMS).count(),
-            'student': queryset.filter(system_type=AccessHistoryLms.STUDENT).count(),
-            'teacher': queryset.filter(system_type=AccessHistoryLms.TEACHER).count(),
-        })
+        return request.send_data(
+            {
+                "total": queryset.count(),
+                "sis": queryset.filter(system_type=AccessHistoryLms.LMS).count(),
+                "student": queryset.filter(
+                    system_type=AccessHistoryLms.STUDENT
+                ).count(),
+                "teacher": queryset.filter(
+                    system_type=AccessHistoryLms.TEACHER
+                ).count(),
+            }
+        )

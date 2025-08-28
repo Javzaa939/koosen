@@ -363,6 +363,11 @@ function useApi(isDisplay=false) {
 		study: {
 			/** Хичээлийн стандарт */
 			lessonStandart: {
+                postExcel: (data) => instance.post(`/learning/lessonstandart/post-excel/`, data, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    }
+                }),
 				getList: (schoolid, dep_id) => {
 					if (dep_id === undefined)
 						dep_id=''
@@ -581,6 +586,8 @@ function useApi(isDisplay=false) {
 				// мэргэжлээс хамаарч ангийн жагсаалт авах нь
 				getGroupList: (profId) => instance.get(`/learning/group/list/${profId}/`),
 
+
+
 			},
 			/** Багш */
 			teacher: {
@@ -589,6 +596,11 @@ function useApi(isDisplay=false) {
 					if (dep_id) depId = dep_id
 					return instance.get(`/core/teacher/?department=${depId}&school=${school_id}`)
 				},
+				postExcel: (data) => instance.post(`/core/teacher/post-excel/`, data, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    }
+                }),
 				getAll: (dep_id) => {
 					var depId = ''
 					if (dep_id) depId = dep_id

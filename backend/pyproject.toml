@@ -1,0 +1,53 @@
+
+# -------------------------------
+# Python Formatting & Linting Config
+# -------------------------------
+
+# Target Python version(s) used by tools like Ruff and Black
+target-version = ["py312"]  # Options: "py311", "py310", "py39", etc.
+
+[tool.black]
+# Max line length for formatting
+line-length = 88  # Can be increased to 100 or 120 if desired
+# Preserve string quotes (no normalization to double quotes)
+skip-string-normalization = true  # Set to false to normalize quotes to double
+
+[tool.isort]
+# Use Black-compatible import sorting style
+profile = "black"  # Other profiles: "django", "google", "hug"
+# Max line length for import lines
+line_length = 88  # Should match Black's setting
+# Style of multi-line imports:
+multi_line_output = 3  # Options: 0 (Grid), 3 (Vertical Hanging), 5 (Hanging Grid)
+# Adds trailing comma after last import in multi-line
+include_trailing_comma = true  # Can be false for minimal style
+# Ensure comments start on a new line above imports
+ensure_newline_before_comments = true
+# Mark internal/local modules for grouping
+# known_first_party = ["backend"]  # Replace "backend" with your Django root module name
+# Mark third-party modules for grouping
+known_third_party = ["django", "rest_framework"]  # Add others like "requests", "drf_yasg", etc.
+
+[tool.ruff]
+
+# Enable error and flake8 warnings (E = pycodestyle, F = pyflakes)
+# select = ["E", "F"]  # Add more like "B" (bugbear), "I" (isort), "C90" (mccabe)
+[tool.ruff.lint]
+select = ["E", "F", "B", "C90", "I"]
+# Ignore specific rules
+ignore = ["E501", "E741", "F841", "E402"]  # E501 = line too long, E741 = ambiguous variable names like l, O, I
+# Accept unused variables by ignoring F841 if needed
+# Example: ignore = ["E501", "E741", "F841"]  # F841 = local variable assigned but not used
+
+# -------------------------------
+# Security Scanning (Bandit)
+# -------------------------------
+
+[tool.bandit]
+# Skip rule B101: assert used (common in tests/dev)
+skips = ["B101"]  # Add "B403" to skip insecure imports like pickle if needed
+# Folders to exclude from scanning (e.g., virtualenv, migrations, tests)
+# exclude_dirs = ["tests", "migrations", "venv"]  # Uncomment and add directories as needed
+# Folders to scan for security issues
+
+# targets = ["apps", "common", "config"]  # Replace with actual code folders in your project

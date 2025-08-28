@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0005_employee_created_user_employee_updated_user_and_more'),
-        ('lms', '0011_alter_learning_learn_code_and_more'),
+        ('lms', '0013_alter_psychologicalquestionchoices_image_and_more'),
     ]
 
     operations = [
