@@ -268,8 +268,23 @@ def has_permission(allowed_permissions=[], must_permissions=[], back_url=None):
     def decorator(view_func):
 
         def wrap(self, request, *args, **kwargs):
+            # for student login mode
             if request.session.get('_is_student'):
-                return request.send_error("ERR_011", "Хэрэглэгч эрхгүй байна.")
+                # NOTE: HOWTO: copy paste from "Called:" string in print output (see next lines)
+                allowed_api_for_students = [
+                    'apps.service.views.CalendarNoticeApiView.get'
+                ]
+
+                func_full_name = f"{view_func.__module__}.{view_func.__qualname__}"
+
+                if func_full_name not in allowed_api_for_students:
+                    if settings.DEBUG:
+                        traceback.print_stack()
+                        print("ERR_011", "Хэрэглэгч эрхгүй байна.", 'Called:', func_full_name)
+
+                    return request.send_error("ERR_011", "Хэрэглэгч эрхгүй байна.")
+
+                return view_func(self, request, *args, **kwargs)
 
             permissions = []
             if request.user:

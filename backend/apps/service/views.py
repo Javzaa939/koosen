@@ -4,6 +4,7 @@ from rest_framework import generics
 from rest_framework import serializers
 
 from django.db import transaction
+from django.db.models import Q
 from django.conf import settings
 
 from main.utils.file import remove_folder
@@ -16,7 +17,7 @@ from main.utils.function.utils import has_permission, null_to_none
 
 from main.utils.file import save_file
 
-from lms.models import StudentNotice
+from lms.models import LearningCalendar, Student, StudentNotice
 
 from .serializers import StudentNoticeSerializer
 from .serializers import StudentNoticeListSerializer
@@ -200,10 +201,137 @@ class CalendarNoticeApiView(
     queryset = StudentNotice.objects.all()
     serializer_class = StudentNoticeSerializer
 
+    @staticmethod
+    def get_org(student):
+        result = None
+
+        if student.school:
+            result = student.school.org
+
+        if not result and student.department:
+            result = student.department.org
+
+        if not result and student.department and student.department.sub_orgs:
+            result = student.department.sub_orgs.org
+
+        if not result and student.group.school:
+            result = student.group.school.org
+
+        if not result and student.group.department:
+            result = student.group.department.org
+
+        if not result and student.group.department and student.group.department.sub_orgs:
+            result = student.group.department.sub_orgs.org
+
+        if not result and student.group.profession and student.group.profession.school:
+            result = student.group.profession.school.org
+
+        if not result and student.group.profession and student.group.profession.department:
+            result = student.group.profession.department.org
+
+        if not result and student.group.profession and student.group.profession.department and student.group.profession.department.sub_orgs:
+            result = student.group.profession.department.sub_orgs.org
+
+        return result
+
+    @staticmethod
+    def get_sub_org(student):
+        result = student.school
+
+        if not result and student.department:
+            result = student.department.sub_orgs
+
+        if not result:
+            result = student.group.school
+
+        if not result:
+            result = student.group.school
+
+        if not result and student.group.department:
+            result = student.group.department.sub_orgs
+
+        if not result and student.group.profession:
+            result = student.group.profession.school
+
+        if not result and student.group.profession and student.group.profession.department:
+            result = student.group.profession.department.sub_orgs
+
+        return result
+
+    @staticmethod
+    def get_department(student):
+        result = student.department
+
+        if not result:
+            result = student.group.department
+
+        if not result:
+            if student.group.profession:
+                result = student.group.profession.department
+
+        return result
+
+    @staticmethod
+    def filter_for_student(queryset, student_id):
+        # to reduce sql queries for related fields
+        student = Student.objects.select_related(
+            'group__profession__department__sub_orgs__org',
+            'group__profession__department__org',
+
+            'group__profession__school__org',
+
+            'group__department__sub_orgs__org',
+            'group__department__org',
+
+            'group__school__org',
+
+            'department__sub_orgs__org',
+            'department__org',
+
+            'school__org',
+        ).get(id=student_id)
+
+        # to get any filled field
+        department = CalendarNoticeApiView.get_department(student)
+        sub_org = CalendarNoticeApiView.get_sub_org(student)
+        org = CalendarNoticeApiView.get_org(student)
+
+        # scope, student_level, department, is_news, school, org
+        q_conditions_other = Q(
+            Q(
+                Q(scope=LearningCalendar.OTHER) |
+                Q(student_level__isnull=True) |
+                Q(department__isnull=True) |
+                Q(school__isnull=True) |
+                Q(org__isnull=True)
+            )
+        )
+
+        q_conditions = Q(
+            q_conditions_other |
+            Q(
+                ~Q(q_conditions_other) &
+                Q(
+                    Q(scope=LearningCalendar.STUDENT) |
+                    Q(student_level=student.group.level) |
+                    Q(department=department) |
+                    Q(school=sub_org) |
+                    Q(org=org)
+                )
+            )
+        )
+
+        result = queryset.filter(q_conditions)
+        return result
+
     @has_permission(must_permissions=['lms-service-news-read'])
     def get(self, request):
 
         self.serializer_class = StudentNoticeListSerializer
+
+        if request.session.get('_is_student'):
+            self.queryset = self.filter_for_student(self.queryset, request.user.student_id)
+
         self.queryset = self.queryset.filter(is_news=True).order_by('-created_at')[:5]
 
         return_datas = self.get_serializer(self.queryset, many=True).data
