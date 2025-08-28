@@ -43,10 +43,19 @@ def login_required():
     def decorator(view_func):
 
         def wrap(self, request, *args, **kwargs):
-            User = apps.get_model('core', 'User')
+            userModel = userModel = apps.get_model('core', 'User')
+
+            # region Оюутан нэвтэрсэн эсэхийг шалгана
+            # True бол оюутан гэж тооцсон
+            is_student = request.session.get('_is_student') or False
+
+            if is_student:
+                userModel = apps.get_model('lms', 'StudentLogin')
+            # endregion
+
             user_id = request.session.get('_auth_user_id')
 
-            user = User.objects.filter(id=user_id).first()
+            user = userModel.objects.filter(id=user_id).first()
             if user_id:
                 request.user = user
             else:

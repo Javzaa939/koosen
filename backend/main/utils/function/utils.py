@@ -268,6 +268,8 @@ def has_permission(allowed_permissions=[], must_permissions=[], back_url=None):
     def decorator(view_func):
 
         def wrap(self, request, *args, **kwargs):
+            if request.session.get('_is_student'):
+                return request.send_error("ERR_011", "Хэрэглэгч эрхгүй байна.")
 
             permissions = []
             if request.user:
@@ -293,7 +295,7 @@ def has_permission(allowed_permissions=[], must_permissions=[], back_url=None):
                 has_perm = check_must_perm()
 
             if not has_perm:
-                request.send_error("ERR_011", "Хэрэглэгч эрхгүй байна.")
+                return request.send_error("ERR_011", "Хэрэглэгч эрхгүй байна.")
 
             return view_func(self, request, *args, **kwargs)
 
