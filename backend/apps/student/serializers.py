@@ -11,7 +11,7 @@ from django.db.models.functions import Cast, ExtractYear
 from django.db.models import Avg, PositiveIntegerField
 from django.db.models import F, Sum
 
-from lms.models import Payment, Student, StudentAdmissionScore, StudentLeave, StudentLogin, TimeTable_to_group, TimeTable_to_student
+from lms.models import Payment, RegisterIrts, Student, StudentAdmissionScore, StudentLeave, StudentLogin, TimeTable_to_group, TimeTable_to_student
 from lms.models import StudentRegister
 from lms.models import Group
 from lms.models import StudentMovement
@@ -1430,4 +1430,122 @@ class UserStudentLearningPlanSerializer(serializers.ModelSerializer):
                 season = season[0]
 
         return season
+
+
+class UserStudentScoreInformationListSerializer(serializers.ModelSerializer):
+    lesson = UserStudentLessonListSerializer(many=False, read_only=True)
+    score = serializers.SerializerMethodField()
+
+    class Meta:
+        model = LearningPlan
+        fields = "lesson", "score"
+
+    def get_score(self, obj):
+        " нийт оноо "
+
+        request = self.context['request']
+        params = request.query_params
+        scores = []
+
+        student_id = params.get('student_id')
+
+        lesson_id = obj.lesson
+
+        score_qs = ScoreRegister.objects.filter(student=student_id, lesson=lesson_id)
+        if score_qs:
+            scores = list(score_qs.values('teach_score', 'exam_score', 'assessment', 'lesson_year', 'lesson_season'))
+
+        return scores
+
+
+class UserStudentLessonStandartSerializer(serializers.ModelSerializer):
+
+    category_name = serializers.CharField(source='category.category_name', default='')
+    class Meta:
+        model = LessonStandart
+        fields = ["id", "name", "code", "kredit", "category_name", "knowledge", "skill"]
+
+
+# дүн хэвлэх
+class UserStudentScoreRegisterPrintSerializer(serializers.ModelSerializer):
+    lesson = UserStudentLessonStandartSerializer(many=False)
+    # school = serializers.CharField(source='subschools__name', default='')
+
+    class Meta:
+        model = ScoreRegister
+        fields = "__all__"
+
+
+class UserStudentRegisterIrtsSerializer(serializers.ModelSerializer):
+
+    state_name = serializers.CharField(source="get_state_display", default=None)
+    week = serializers.IntegerField(source="qr.week", default=None)
+    ttid = serializers.IntegerField(source="qr.timetable_id", default=None)
+
+    class Meta:
+        model = RegisterIrts
+        fields = "__all__"
+
+
+class UserStudentRegisterIrtsTimeTableSerializer(serializers.ModelSerializer):
+
+    type_name = serializers.CharField(source="get_type_display", default='')
+    odd_even_name = serializers.CharField(source="get_odd_even_display", default="")
+    time_name = serializers.CharField(source="get_time_display", default="")
+    cbegin_week = serializers.SerializerMethodField()
+    cend_week = serializers.SerializerMethodField()
+    lesson_name = serializers.CharField(source="lesson.name", default="")
+    types = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TimeTable
+        fields = "cbegin_week", 'cend_week', 'type_name', 'type', 'odd_even', 'odd_even_name', 'time', 'time_name', 'lesson_id', 'id', 'lesson_name', 'types'
+
+    def get_cbegin_week(self, obj):
+
+        return obj.begin_week if obj.begin_week else 1
+
+
+    def get_cend_week(self, obj):
+
+        return obj.end_week if obj.end_week else 16
+
+    def get_types(self, obj):
+        request = self.context.get('request')
+        student = request.user.student
+        year, season = get_active_year_season()
+
+        type_ids = TimeTable.objects.filter(lesson=obj.lesson, lesson_year=obj.lesson_year, lesson_season=obj.lesson_season).values('type', 'id').distinct('type')
+        ctypes = []
+
+        for types in type_ids:
+            ctype = {}
+            t_id = types.get('id')
+            type = types.get('type')
+
+            obj = TimeTable.objects.get(id=t_id)
+            name = obj.get_type_display()
+            ctype['name'] = name
+            ctype['id'] = type
+
+            # Ирцийн мэдээлэл авч байгаа хэсэг
+            qs = (
+                 RegisterIrts
+                        .objects
+                        .filter(
+                            student=student,
+                            qr__timetable_id=t_id,
+                            qr__timetable__lesson_year=year,
+                            qr__timetable__lesson_season=season,
+                        )
+                        .order_by("qr__timetable__type", 'qr__week', 'qr__timetable__time')
+                )
+
+            qs = qs.select_related("qr")
+            data = UserStudentRegisterIrtsSerializer(qs, many=True).data
+
+            ctype['irts'] = data
+
+            ctypes.append(ctype)
+        return ctypes
 # endregion for student login

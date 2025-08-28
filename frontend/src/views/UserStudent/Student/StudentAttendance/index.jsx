@@ -8,8 +8,8 @@ import './style.scss'
 
 const StudentAttendance = () => {
 
-    const irtsApi = useApi().student.regirts
-    const { userDetail } = useContext(AuthContext)
+    const irtsApi = useApi().userStudent.student.regirts
+    const { user: userDetail } = useContext(AuthContext)
     const { isLoading: mainLoading, fetchData: mainFetch, fetchData } = useLoader({isFullScreen:true, initValue: true})
 
     const [ datas, setDatas ] = useState({})

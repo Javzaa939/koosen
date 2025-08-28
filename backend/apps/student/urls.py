@@ -149,5 +149,14 @@ urlpatterns = [
 
     # Cургалт/Явцын дүн page
     path('user-student/score-teacher/', UserStudentScoreTeacherAPIView.as_view()),
+
+    # оюутны дүнгийн мэдээлэл
+    path('user-student/scoreregister/<int:student>/',UserStudentScoreInformationAPIView.as_view()),
+
+    # Оюутны дүнгийн дэлгэрэнгүй мэдээлэл
+    path('user-student/allscore/<int:student>/', UserStudentDetailedScoreAPIView.as_view()),
+
+    # ---- Ирц ---- #
+    path("user-student/irts/", UserStudentListStudentIrtsApiView.as_view()),
     #endregion for student login
 ]

@@ -64,7 +64,7 @@ from lms.models import Country, ProfessionAverageScore, AttachmentConfig, Profes
 
 from core.models import SubOrgs, AimagHot, SumDuureg, User, Salbars
 
-from .serializers import StudentListSerializer, UserStudentLearningPlanSerializer
+from .serializers import StudentListSerializer, UserStudentLearningPlanSerializer, UserStudentRegisterIrtsTimeTableSerializer, UserStudentScoreInformationListSerializer, UserStudentScoreRegisterPrintSerializer
 from .serializers import StudentRegisterSerializer
 from .serializers import StudentRegisterListSerializer
 from .serializers import StudentMovementSerializer
@@ -4833,4 +4833,332 @@ class UserStudentScoreTeacherAPIView(
             datas.append(obj)
 
         return request.send_data(datas)
+
+
+@permission_classes([IsAuthenticated])
+class UserStudentScoreInformationAPIView(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    generics.GenericAPIView,
+):
+    " Оюутны дүнгийн мэдээлэл "
+
+    queryset = ScoreRegister.objects.all().order_by("-created_at")
+    serializer_class = UserStudentScoreInformationListSerializer
+    # pagination_class = CustomPagination
+
+    def get(self, request, student=None):
+
+        if not student:
+            return request.send_error("ERR_002", "Оюутны мэдээлэл олдсонгүй")
+
+        stud_score_info = self.queryset.filter(student=student, is_delete=False).order_by('lesson_year', 'lesson_season')
+
+        total_kr = 0
+        all_data = []
+        result = {}
+        key = ''
+
+        for score_data in stud_score_info:
+            # хичээлийн жил улирал авах нь
+
+            if score_data.lesson_year and score_data.lesson_season:
+                key = score_data.lesson_year + " " + score_data.lesson_season.season_name
+
+            if key not in result:
+                result[key] = []
+
+            # оюутны мэдээлэл
+            result[key].append(score_data)
+
+        for key in result.keys():
+            season_info = []
+            total_kr = 0
+            onoo = 0
+            total_index_score = 0
+
+            for eachSeason in result[key]:
+
+                # тухайн хичээлийн exam+teach оноо
+                score = eachSeason.score_total or 0
+
+                # үсгэн үнэлгээ
+                assessment = Score.objects.filter(
+                    score_max__gte=score, score_min__lte=score).first()
+
+                # Чанарын оноо
+                index_score = 0
+                if assessment:
+                    index_score = round(eachSeason.lesson.kredit * assessment.gpa , 2)
+
+                register_code = ""
+                teacher = eachSeason.teacher
+
+                # багшийн  код авах нь
+                if teacher:
+                    qs_worker = Employee.objects.filter(
+                        user=eachSeason.teacher.user).first()
+                    register_code = qs_worker.register_code
+
+                season_info.append(
+                    {
+                        "lesson": eachSeason.lesson_year if eachSeason.lesson_year else "",
+                        "lesson_code": eachSeason.lesson.code if eachSeason.lesson else "",
+                        "lesson_name": eachSeason.lesson.name if eachSeason.lesson else "",
+                        "lesson_krt": eachSeason.lesson.kredit if eachSeason.lesson else "",
+                        "score": score,
+                        "assessment": assessment.assesment if assessment else None,
+                        "teacher_code": register_code if register_code else "",
+                        "teacher_full_name": get_fullName(eachSeason.teacher.last_name, eachSeason.teacher.first_name, True, True) if eachSeason.teacher else "",
+                        "index_score": index_score,
+                        "gpa": assessment.gpa if score else "",
+                    }
+                )
+                # хичээлийн кр
+                total_kr = total_kr + eachSeason.lesson.kredit
+                onoo = onoo + score * eachSeason.lesson.kredit
+                #Чанарын оноо
+                total_index_score += index_score
+
+            # онооны дундаж олох нь
+            # round() таслалаас хойш 2 орон авах
+
+            season_gpa = 0
+            total_onoo = round(onoo / total_kr, 2)
+            if total_index_score != 0 and total_kr != 0:
+                season_gpa = total_index_score / total_kr
+
+            all_data.append(
+                {
+                    "season_info": season_info,
+                    "year_season": key,
+                    "total": {
+                        "kredit": total_kr if total_kr else "",
+                        "onoo": total_onoo if total_onoo else "",
+                        "gpa": round(season_gpa, 2),
+                        "total_index_score": round(total_index_score, 1) if total_index_score else ""
+                    }
+                }
+            )
+
+        return request.send_data(all_data)
+
+
+@permission_classes([IsAuthenticated])
+class UserStudentDetailedScoreAPIView(
+    generics.GenericAPIView,
+):
+    """ Дүнгийн дэлгэрэнгүй мэдээлэл """
+
+    queryset = ScoreRegister.objects.all().order_by("-lesson_year")
+    serializer_class = UserStudentScoreRegisterPrintSerializer
+
+    def get(self, request, student=None):
+        """ Дүнгийн тодорхойлолт (ганц оюутны хувьд) """
+
+        # жил улиралаар хайх
+        lesson_year = self.request.query_params.get('year')
+        lesson_season = self.request.query_params.get('season')
+
+        if lesson_year:
+            self.queryset = self.queryset.filter(lesson_year=lesson_year)
+
+        if lesson_season:
+            self.queryset = self.queryset.filter(lesson_season=lesson_season)
+
+        all_data = []
+        score_info = {}
+        lessons_qs = {}
+        asses_qs = {}
+        total = []
+
+        lesson_counts = []
+        lesson_code_count = []
+
+        # үсгэн дүн тоолох нь
+        asses_qs = (self.queryset.filter(student_id=student, is_delete=False).values('assessment__assesment')
+            .annotate(asses_count=Count('assessment__assesment')).order_by('assessment__assesment'))
+
+        # тухайн жил, улирал болгоны үзсэн хичээлүүдыг тоолох нь
+        lessons_qs = (self.queryset.filter(student_id=student, is_delete=False ).values("lesson_year", "lesson_season__season_name")
+            .annotate(less_count=Count('lesson')).order_by("lesson_season__season_name")).order_by("lesson_year")
+
+        if asses_qs and lessons_qs:
+            lesson_code_count = list(asses_qs)
+            lesson_counts = list(lessons_qs)
+
+        # тухайн оюутны мэдээлэл дүнгийн мэдээлэл
+        score_qs = self.queryset.filter(student_id=student, is_delete=False).order_by("lesson_year", "lesson_season")
+
+        for qs in score_qs:
+            year = ''
+
+            # жил улирал
+            if qs.lesson_year and qs.lesson_season:
+                year = qs.lesson_year + " " + qs.lesson_season.season_name
+
+            if year not in score_info:
+                score_info[year] = []
+
+            score_info[year].append(qs)
+
+        # Бүх year total
+        total_kr_count = 0
+        total_onoo_count = 0
+        total_gpa_count = 0
+        total_onoo_avg = 0
+        niit_gpa = 0
+
+        degree_name = ''
+        student_code = ''
+        proffession = ''
+        join_year = ''
+        full_names = ''
+
+        for key in score_info.keys():
+            list_info = []
+
+            # total
+            total_kr = 0
+            total_gpa = 0
+            avg_gpa = 0
+            avg_onoo = 0
+            total_onoo = 0
+
+            # суралцсан жил,улирал болгоны дүнгүүд
+            for eachScore in score_info[key]:
+                assessments = None
+                status_num = None
+                gpa = ''
+
+                total_scores = eachScore.score_total
+                status_num = eachScore.status
+
+                # exam + teach
+                total_scores = round(total_scores, 2)
+                assessment = Score.objects.filter(score_max__gte=total_scores, score_min__lte=total_scores).first()
+                if assessment:
+                    assessments = assessment.assesment
+                    gpa = assessment.gpa
+
+
+                # оюутны мэдээлэл
+                student_code = eachScore.student.code
+                proffession = eachScore.student.group.profession.name
+                join_year = eachScore.student.group.join_year
+                degree_name = eachScore.student.group.degree.degree_name
+                full_names = get_fullName(eachScore.student.last_name + " овогтой " + eachScore.student.first_name, False, True )
+                # хичээлүүд
+                list_info.append({
+                    "lesson_year":eachScore.lesson_year if eachScore.lesson_year else '',
+                    "lesson_season":eachScore.lesson_season.season_name if eachScore.lesson_season else '',
+                    "lesson_code":eachScore.lesson.code if eachScore.lesson.code else '',
+                    "lesson_name":eachScore.lesson.name if eachScore.lesson.name else '',
+                    "lesson_kr":eachScore.lesson.kredit if eachScore.lesson.kredit else 0,
+                    "exam_score":eachScore.exam_score if eachScore.exam_score is not None else '',
+                    "teach_score":eachScore.teach_score if eachScore.teach_score is not None else '',
+                    "total_scores":total_scores if total_scores else 0,
+                    "assessment":assessments if assessments else '',
+                    "status_num":status_num if status_num else 0,
+                    "gpa": gpa
+                })
+
+                total_kr = total_kr + eachScore.lesson.kredit
+                total_gpa = total_gpa + (gpa * eachScore.lesson.kredit)
+                total_onoo = total_onoo + (total_scores * eachScore.lesson.kredit)
+
+            # дундаж олох нь
+            if total_onoo != 0 and total_kr != 0:
+                avg_onoo = round(total_onoo / total_kr, 2)
+
+            if total_gpa != 0 and total_kr != 0:
+                avg_gpa = round(total_gpa / total_kr, 2)
+
+            # нийт kr
+            total_kr_count = total_kr_count + total_kr
+            total_onoo_count = total_onoo_count + total_onoo
+            total_gpa_count = total_gpa_count + total_gpa
+
+            # жил,улирал болгоны kr and lesson жагсаалт
+            all_data.append(
+                {
+                    "year_season": key,
+                    "total":{
+                        "kr": total_kr,
+                        "onoo": avg_onoo,
+                        "gpa":avg_gpa,
+                    },
+                    "lesson_info":list_info,
+
+                }
+            )
+
+        # ------------ Бүх жилийн total -----------
+        if (total_kr_count and total_onoo_count) > 0:
+            # дундаж олох нь
+            total_onoo_avg = round(total_onoo_count / total_kr_count, 2)
+
+        # ------------ Бүх жилийн total -----------
+        if (total_kr_count and total_gpa_count) > 0:
+            # дундаж олох нь
+            niit_gpa = round(total_gpa_count / total_kr_count, 2)
+
+
+        total.append({
+            "all_total":
+            {
+                "total_kr": total_kr_count if total_kr_count else "",
+                "total_onoo": total_onoo_avg,
+                "total_gpa": niit_gpa,
+            },
+            "student_info":
+            {
+                "full_name": full_names if full_names else "",
+                "code": student_code if student_code else "",
+                "proffession": proffession if proffession else "",
+                "join_year": join_year if join_year else "",
+                "degree_name":degree_name if degree_name else "",
+            },
+        })
+        data = {
+            "scoreregister":all_data,
+            "asses_count":lesson_code_count,
+            "lesson_count":lesson_counts,
+            "all_total":total,
+        }
+
+        return request.send_data(data)
+
+
+@permission_classes([IsAuthenticated])
+class UserStudentListStudentIrtsApiView(
+    generics.GenericAPIView
+):
+
+    def get(self, request):
+
+        student = request.user.student
+
+        # Оюутны анги дээр шивэгдсэн хуваарь
+        group_time_table_ids = TimeTable_to_group.objects.filter(group=student.group).values_list('timetable', flat=True)
+
+        student_add_timetable_ids = TimeTable_to_student.objects.filter(add_flag=True, student=student).values_list('timetable', flat=True)
+
+        group_time_table_ids.union(student_add_timetable_ids)
+
+        year, season = get_active_year_season()
+        timetable_qs = (
+            TimeTable
+                .objects
+                .filter(
+                    id__in=group_time_table_ids,
+                    lesson_year=year,
+                    lesson_season=season,
+                )
+                .distinct('lesson')
+            )
+
+        lessons = UserStudentRegisterIrtsTimeTableSerializer(timetable_qs, many=True, context={'request': request}).data
+
+        return request.send_data(lessons)
 # endregion for student login

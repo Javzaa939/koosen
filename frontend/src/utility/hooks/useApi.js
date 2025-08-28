@@ -2302,6 +2302,17 @@ function useApi(isDisplay=false) {
 					getTeacher:() =>
 						instance.get(`/student/user-student/score-teacher/`),
 				},
+				/** Дүнгийн мэдээлэл */
+				scoreregister: {
+					get: (student_id) => instance.get(`/student/user-student/scoreregister/${student_id}/?year=${cyear_name}&season=${cseason_id}`),
+				},
+				allscore: {
+					get:(student_id) =>
+						instance.get(`/student/user-student/allscore/${student_id}/`),
+				},
+				regirts: {
+					get: () => instance.get(`/student/user-student/irts/`)
+				},
 			},
 		},
 	}

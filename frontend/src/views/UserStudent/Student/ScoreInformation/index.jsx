@@ -39,12 +39,12 @@ const ScoreInformation = () => {
     const [total_onoo, setTotalOnoo] = useState(null);
     const [assessmentCounts, setAssessmentCounts] = useState([]);
 
-    const studentScoreApi = useApi().student.allscore;
+    const studentScoreApi = useApi().userStudent.student.allscore;
 
     const [datas, setSeason] = useState([])
 
     // api
-    const scoreInfApi = useApi().student.scoreregister
+    const scoreInfApi = useApi().userStudent.student.scoreregister
 
     async function getDatas() {
         const student_id = userDetail?.student?.id
