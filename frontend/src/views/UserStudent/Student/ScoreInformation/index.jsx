@@ -23,7 +23,7 @@ const ScoreInformation = () => {
 
     const { t } = useTranslation()
     const default_page = [10, 15, 50, 75, 100]
-    const { userDetail } = useContext(AuthContext)
+    const { user: userDetail } = useContext(AuthContext)
 
     //useState
     const [studentDatas, setDatas]= useState([])

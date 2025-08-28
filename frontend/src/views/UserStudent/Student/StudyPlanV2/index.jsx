@@ -35,7 +35,7 @@ const StudyPlan = () => {
 
     const { t } = useTranslation()
 
-    const { userDetail } = useContext(AuthContext)
+    const { user: userDetail } = useContext(AuthContext)
     const { cyear_name } = useContext(ActiveYearContext)
 
     const {

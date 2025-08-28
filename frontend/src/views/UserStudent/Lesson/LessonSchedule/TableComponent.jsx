@@ -20,7 +20,7 @@ const TableComponent = () => {
     }
 
     const { t } = useTranslation()
-    const { userDetail } = useContext(AuthContext)
+    const { user: userDetail } = useContext(AuthContext)
 
     const { isLoading, fetchData } = useLoader({ })
 
