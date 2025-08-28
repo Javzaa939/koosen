@@ -15,7 +15,7 @@ export default function useScore({
 
 	function getScoreData() {
 		Promise.all([
-			fetchData(studentApi.scoreregister.get2()),
+			fetchData(studentApi.scoreregister?.get2()),
 		]).then((values) => {
 			setData(values[0]?.data)
 		})

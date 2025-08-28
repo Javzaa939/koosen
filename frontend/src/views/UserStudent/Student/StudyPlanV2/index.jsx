@@ -54,9 +54,9 @@ const StudyPlan = () => {
     const [lesson, setLesson] = useState({})
 
     const join_year = userDetail?.student?.group?.join_year
-    let splitted_year = join_year.split('-')
-    let year1 = parseInt(splitted_year[0]);
-    let year2 = parseInt(splitted_year[1]);
+    let splitted_year = join_year?.split('-')
+    let year1 = parseInt(splitted_year?.[0]);
+    let year2 = parseInt(splitted_year?.[1]);
 
     async function getLesson() {
         const { success, data } = await lessonFetch(getLessonApi.get(lessonid))
