@@ -268,12 +268,21 @@ def has_permission(allowed_permissions=[], must_permissions=[], back_url=None):
     def decorator(view_func):
 
         def wrap(self, request, *args, **kwargs):
+            # for student login mode
             if request.session.get('_is_student'):
-                if settings.DEBUG:
-                    traceback.print_stack()
-                    print("ERR_011", "Хэрэглэгч эрхгүй байна.")
+                if True:
+                    if settings.DEBUG:
+                        traceback.print_stack()
+                        class_name = None
 
-                return request.send_error("ERR_011", "Хэрэглэгч эрхгүй байна.")
+                        if self and hasattr(self, '__class__') and hasattr(self, '__name__'):
+                            class_name = self.__class__.__name__
+
+                        print("ERR_011", "Хэрэглэгч эрхгүй байна.", 'Class:', class_name, 'Func:', view_func.__name__)
+
+                    return request.send_error("ERR_011", "Хэрэглэгч эрхгүй байна.")
+
+                return view_func(self, request, *args, **kwargs)
 
             permissions = []
             if request.user:
