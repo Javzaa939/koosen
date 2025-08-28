@@ -208,37 +208,29 @@ class CalendarNoticeApiView(
         if student.school:
             result = student.school.org
 
-        if not result:
-            if student.department:
-                result = student.department.org
+        if not result and student.department:
+            result = student.department.org
 
-        if not result:
-            if student.department and student.department.sub_orgs:
-                result = student.department.sub_orgs.org
+        if not result and student.department and student.department.sub_orgs:
+            result = student.department.sub_orgs.org
 
-        if not result:
-            if student.group.school:
-                result = student.group.school.org
+        if not result and student.group.school:
+            result = student.group.school.org
 
-        if not result:
-            if student.group.department:
-                result = student.group.department.org
+        if not result and student.group.department:
+            result = student.group.department.org
 
-        if not result:
-            if student.group.department and student.group.department.sub_orgs:
-                result = student.group.department.sub_orgs.org
+        if not result and student.group.department and student.group.department.sub_orgs:
+            result = student.group.department.sub_orgs.org
 
-        if not result:
-            if student.group.profession and student.group.profession.school:
-                result = student.group.profession.school.org
+        if not result and student.group.profession and student.group.profession.school:
+            result = student.group.profession.school.org
 
-        if not result:
-            if student.group.profession and student.group.profession.department:
-                result = student.group.profession.department.org
+        if not result and student.group.profession and student.group.profession.department:
+            result = student.group.profession.department.org
 
-        if not result:
-            if student.group.profession and student.group.profession.department and student.group.profession.department.sub_orgs:
-                result = student.group.profession.department.sub_orgs.org
+        if not result and student.group.profession and student.group.profession.department and student.group.profession.department.sub_orgs:
+            result = student.group.profession.department.sub_orgs.org
 
         return result
 
@@ -246,9 +238,8 @@ class CalendarNoticeApiView(
     def get_sub_org(student):
         result = student.school
 
-        if not result:
-            if student.department:
-                result = student.department.sub_orgs
+        if not result and student.department:
+            result = student.department.sub_orgs
 
         if not result:
             result = student.group.school
@@ -256,17 +247,14 @@ class CalendarNoticeApiView(
         if not result:
             result = student.group.school
 
-        if not result:
-            if student.group.department:
-                result = student.group.department.sub_orgs
+        if not result and student.group.department:
+            result = student.group.department.sub_orgs
 
-        if not result:
-            if student.group.profession:
-                result = student.group.profession.school
+        if not result and student.group.profession:
+            result = student.group.profession.school
 
-        if not result:
-            if student.group.profession and student.group.profession.department:
-                result = student.group.profession.department.sub_orgs
+        if not result and student.group.profession and student.group.profession.department:
+            result = student.group.profession.department.sub_orgs
 
         return result
 
