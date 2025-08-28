@@ -1013,7 +1013,7 @@ class TeacherListApiView(
         org = getattr(request, "org_filter", {}).get("org")
 
         if org:
-            self.queryset = self.queryset.filter(org=org)
+            self.queryset = self.queryset.filter(sub_org__org=org)
 
         if school:
             self.queryset = self.queryset.filter(sub_org=school)
