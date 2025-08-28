@@ -29,7 +29,7 @@ const TableComponent = () => {
     const [rangeDate, setRangeDate] = useState(range_date)
 
     // Api
-    const scheduleApi = useApi().student.schedule
+    const scheduleApi = useApi().userStudent.student.schedule
 
     function getDayName(day) {
         const day_names = days.find(value => value.id === day)

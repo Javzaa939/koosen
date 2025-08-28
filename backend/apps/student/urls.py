@@ -144,6 +144,9 @@ urlpatterns = [
     path('graduation/english/convert/', GraduationEnglishConvertAPIView.as_view()),
 
     #region for student login
+    # Хичээлийн хуваарь
+    path('user-student/schedule/<int:student>/', UserStudentScheduleAPIView.as_view()),
+
     # Оюутны санал болгох төлөвлөгөө
     path('user-student/plan/', UserStudentPlanAPIView.as_view()),
 

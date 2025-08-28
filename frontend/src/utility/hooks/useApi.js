@@ -2294,6 +2294,9 @@ function useApi(isDisplay=false) {
 		// for student login
 		userStudent: {
 			student: {
+				schedule: {
+					get:(student_id,start='',end='',month='') => instance.get(`/student/user-student/schedule/${student_id}/?year=${cyear_name}&season=${cseason_id}&start=${start}&end=${end}&month=${month}`),
+				},
 				/** санал болгох төлөвлөгөө */
 				learningplan: {
 					get:() => instance.get(`/student/user-student/plan/?year=${cyear_name}&season=${cseason_id}`),

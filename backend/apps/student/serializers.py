@@ -1333,6 +1333,79 @@ class StudentDefinitionListLiteSerializer(serializers.ModelSerializer):
 
 
 # region for student login
+class UserStudentLessonStandartSerializer(serializers.ModelSerializer):
+
+    category_name = serializers.CharField(source='category.category_name', default='')
+    class Meta:
+        model = LessonStandart
+        fields = ["id", "name", "code", "kredit", "category_name", "knowledge", "skill"]
+
+
+class UserStudentSchoolSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = SubOrgs
+        fields = ['id', 'name']
+
+
+class UserStudentLessonScheduleSerializer(serializers.ModelSerializer):
+    teacher = TeacherSerializer(many=False)
+    room = RoomSerializer(many=False)
+    event_id = serializers.CharField(source='id', default='')
+    lesson = UserStudentLessonStandartSerializer(many=False)
+    school = UserStudentSchoolSerializer(many=False)
+    type = serializers.SerializerMethodField()
+    hours = serializers.SerializerMethodField()
+    title = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = TimeTable
+        fields = "__all__"
+
+    def get_type(self, obj):
+
+        type_name = obj.get_type_display()
+
+        return type_name
+
+    def get_hours(self, obj):
+        times = obj.time
+        # Ensure times is a valid integer
+        if not isinstance(times, int) or times < 1 or times > 8:
+            return {
+                'start_time': None,
+                'end_time': None
+            }
+
+        time_dict = {
+            1: ('08:00', '09:30'),
+            2: ('09:30', '11:00'),
+            3: ('11:00', '12:30'),
+            4: ('12:30', '14:00'),
+            5: ('14:00', '15:30'),
+            6: ('15:30', '17:00'),
+            7: ('17:00', '18:30'),
+            8: ('18:30', '20:00')
+        }
+
+        start_time = None
+        end_time = None
+
+        # Check if times exists and is valid within the time_dict
+        if times in time_dict:
+            start_time, end_time = time_dict[times]
+
+        return {
+            'start_time': start_time,
+            'end_time': end_time
+        }
+
+    def get_title(self, obj):
+        type_name = obj.get_type_display()
+
+        return obj.lesson.name + ", " + type_name + ", " + (obj.room.name if obj.room else "")
+
+
 class UserStudentLessonListSerializer(serializers.ModelSerializer):
     '''  Хичээлийн жагсаалт '''
 

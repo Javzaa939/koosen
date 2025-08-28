@@ -5,7 +5,7 @@ import requests
 from googletrans import Translator
 import openpyxl_dictreader
 
-from datetime import date, datetime
+from datetime import date, datetime, time, timedelta
 
 from rest_framework import mixins
 from rest_framework import generics
@@ -64,7 +64,7 @@ from lms.models import Country, ProfessionAverageScore, AttachmentConfig, Profes
 
 from core.models import SubOrgs, AimagHot, SumDuureg, User, Salbars
 
-from .serializers import StudentListSerializer, UserStudentLearningPlanSerializer, UserStudentRegisterIrtsTimeTableSerializer, UserStudentScoreInformationListSerializer, UserStudentScoreRegisterPrintSerializer, UserStudentStudentAttachmentSerializer
+from .serializers import StudentListSerializer, UserStudentLearningPlanSerializer, UserStudentLessonScheduleSerializer, UserStudentRegisterIrtsTimeTableSerializer, UserStudentScoreInformationListSerializer, UserStudentScoreRegisterPrintSerializer, UserStudentStudentAttachmentSerializer
 from .serializers import StudentRegisterSerializer
 from .serializers import StudentRegisterListSerializer
 from .serializers import StudentMovementSerializer
@@ -4734,6 +4734,129 @@ class GraduationEnglishConvertAPIView(
 
 # region for student login
 # NOTE if @permission_classes([IsAuthenticated]) is used then @login_required() is not required, it is just repeats sql query to get user object again
+@permission_classes([IsAuthenticated])
+class UserStudentScheduleAPIView(
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    generics.GenericAPIView
+):
+    " Хичээлийн хуваарь "
+    queryset = TimeTable.objects.all().order_by('day', 'time')
+    serializer_class = UserStudentLessonScheduleSerializer
+
+    def get(self, request, student=None):
+
+        start = request.query_params.get('start')
+        end = request.query_params.get('end')
+
+        year = request.query_params.get('year')
+        season = request.query_params.get('season')
+
+        start_month = None
+        end_month = None
+
+        if start:
+            start_month = datetime.strptime(start, '%Y-%m-%d')
+
+        if end:
+            end_month = datetime.strptime(end, '%Y-%m-%d')
+
+        if year and season:
+            self.queryset = self.queryset.filter(lesson_year=year, lesson_season=season)
+        else:
+            year, season = get_active_year_season()
+            self.queryset = self.queryset.filter(lesson_year=year.strip(), lesson_season=season)
+
+        timetable_list = []
+        student = Student.objects.filter(id=student).first()
+        if student:
+            group = student.group
+
+            # Тухайн оюутны ангийн хичээлийн хуваариуд
+            timetable_ids = TimeTable_to_group.objects.filter(group=group).values_list('timetable', flat=True)
+
+            # Тухайн оюутны сонгон хичээлийн хуваариуд
+            student_timetable_ids = TimeTable_to_student.objects.filter(student_id=student, add_flag=True).values_list('timetable', flat=True)
+
+            # Бүх хичээлийн хуваарийн ids
+            all_timetable_ids = timetable_ids.union(student_timetable_ids)
+
+            querysets = self.queryset.filter(id__in=all_timetable_ids)
+
+            if start_month and end_month:
+                querysets = querysets.filter(
+                    Q(begin_date__isnull=True) |
+                    Q(end_date__isnull=True) |
+                    Q(begin_date__range=[start_month, end_month]) |
+                    Q(end_date__range=[start_month, end_month]) |
+                    Q(begin_date__lte=start_month, end_date__gte=end_month)
+                )
+
+            timetables= querysets.values('end_date', 'begin_date', 'potok', 'lesson','day','time','is_kurats').distinct()
+            time_ids = []
+
+            for t in timetables:
+                end_date = t.get('end_date')
+                begin_date = t.get('begin_date')
+                potok = t.get('potok')
+                lesson = t.get('lesson')
+                start_time= t.get('time')
+                day=t.get('day')
+                is_kurats = t.get('is_kurats')
+
+                if is_kurats:
+                    obj_time = TimeTable.objects.filter(end_date=end_date, begin_date=begin_date, potok=potok, lesson=lesson,time=start_time).first()
+                else:
+                    obj_time = TimeTable.objects.filter(end_date=end_date, begin_date=begin_date, potok=potok, lesson=lesson,time=start_time,day=day).first()
+
+                time_id = obj_time.id
+                time_ids.append(time_id)
+
+            querysets=self.queryset.filter(id__in=time_ids)
+
+            serializer = self.get_serializer(querysets, many=True)
+            timetable_list = serializer.data
+
+            for item in timetable_list:
+                begin_date = item.get('begin_date')
+                end_date = item.get('end_date')
+                is_kurats = item.get('is_kurats')
+                title=item.get('title')
+
+                if is_kurats:
+                            day_by_day = []
+                            current_date = datetime.strptime(begin_date, '%Y-%m-%d').date()  # Convert string to datetime.date object
+                            while current_date <= datetime.strptime(end_date, '%Y-%m-%d').date():  # Convert end_date to datetime.date object
+                                if current_date.weekday() == 5:  # Saturday
+                                    current_date += timedelta(days=2)  # Skip to Monday
+                                    continue
+                                elif current_date.weekday() == 6:  # Sunday
+                                    current_date += timedelta(days=1)  # Skip to Monday
+                                    continue
+                                hours = item.get('hours', {})
+                                start_time_str = hours.get("start_time")
+                                end_time_str = hours.get("end_time")
+                                if start_time_str and end_time_str:
+                                    start_hours, start_minutes = map(int, start_time_str.split(":"))
+                                    end_hours, end_minutes = map(int, end_time_str.split(":"))
+
+                                    start_datetime = datetime.combine(current_date, time(start_hours, start_minutes))
+                                    end_datetime = datetime.combine(current_date, time(end_hours, end_minutes))
+
+                                    day_by_day.append({
+                                        'start': start_datetime.isoformat(),
+                                        'end': end_datetime.isoformat(),
+                                        'title':title,
+                                        **item
+                                    })
+
+                                current_date += timedelta(days=1)
+
+                            item['day_by_day_events'] = day_by_day
+
+        return request.send_data(timetable_list)
+
+
 @permission_classes([IsAuthenticated])
 class UserStudentPlanAPIView(
     mixins.ListModelMixin,
