@@ -99,10 +99,9 @@ def check_org(get_response):
             org_lvl = 3
 
         elif request.teachers:
-            if request.teachers.sub_org:
-                org_filter.update({"org": request.teachers.sub_org.org})
-                exactly_org_filter.update({"org": request.teachers.sub_org.org})
-                org_lvl = 3
+            org_filter.update({"org": request.teachers.org})
+            exactly_org_filter.update({"org": request.teachers.org})
+            org_lvl = 3
 
             #  салбар нь exactly өөрөө бол ашиглана
         request.org_filter = org_filter

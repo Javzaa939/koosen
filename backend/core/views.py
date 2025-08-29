@@ -38,8 +38,10 @@ from lms.models import (
     Group,
     Lesson_to_teacher,
     LessonStandart,
+    ProfessionalDegree,
     ProfessionDefinition,
     Student,
+    StudentRegister,
     StudentRequestTutor,
     TeacherCreditVolumePlan,
     TimeTable,
@@ -500,36 +502,69 @@ class TeacherExcel(
         df = pd.read_excel(excel_file)
         for _, row in df.iterrows():
             data = row.to_dict()
-            gender = (
-                Teachers.GENDER_MALE if data["gender"] == 0 else Teachers.GENDER_FEMALE
-            )
-            user_data = {
-                "password": make_password(data.get("register")[-8:]),
-                "username": data.get("code"),
-            }
-            user = User.objects.create(**user_data)
-            salbar_code = data.pop("salbar_code")
-            salbar = Salbars.objects.get(code=salbar_code)
+            # salbar_code = data.pop("salbar_code")
+            # salbar = Salbars.objects.get(code=salbar_code)
+            #
+            # birthdate = data.pop("birth_date")
+            # order_date = data.pop("order_date")
+            # gender = (
+            #    Student.GENDER_MALE if data["gender"] == 0 else Teachers.GENDER_FEMALE
+            # )
+            # status_code = data.pop("status")
+            # status = StudentRegister.objects.filter(code=status_code).first()
+            #
+            # student = {
+            #     **data,
+            #     "gender": gender,
+            #     "department": salbar,
+            #     "school": salbar.sub_orgs,
+            # }
 
-            sub_org = salbar.sub_orgs
-            employee = {
-                "salbar": salbar,
-                "sub_org": sub_org,
-                "org": salbar.org,
-                "user": user,
-                "org_position": OrgPosition.objects.get(id=14),
-            }
-            Employee.objects.create(**employee)
-            teacher_data = {
-                **data,
-                "gender": gender,
-                "user": user,
-                "salbar": salbar,
-                "sub_org": sub_org,
-            }
-            teacher = Teachers.objects.create(
-                **teacher_data,
-            )
+            # data = row.to_dict()
+            # salbar_code = data.pop("salbar_code")
+            # salbar = Salbars.objects.get(code=salbar_code)
+            # degree_code = data.pop("degree_code")
+            # degree = ProfessionalDegree.objects.get(degree_code=degree_code)
+            # sub_org = salbar.sub_orgs
+            # result = {
+            #     **data,
+            #     "department": salbar,
+            #     "school": sub_org,
+            #     "degree": degree,
+            # }
+            # ProfessionDefinition.objects.create(**result)
+
+            # gender = (
+            #     Teachers.GENDER_MALE if data["gender"] == 0 else Teachers.GENDER_FEMALE
+            # )
+            # user_data = {
+            #     "password": make_password(data.get("register")[-8:]),
+            #     "username": data.get("code"),
+            # }
+            # user = User.objects.create(**user_data)
+            # salbar_code = data.pop("salbar_code")
+            # salbar = Salbars.objects.get(code=salbar_code)
+            #
+            # sub_org = salbar.sub_orgs
+            # employee = {
+            #     "salbar": salbar,
+            #     "sub_org": sub_org,
+            #     "org": salbar.org,
+            #     "user": user,
+            #     "org_position": OrgPosition.objects.get(id=14),
+            # }
+            # Employee.objects.create(**employee)
+            # teacher_data = {
+            #     **data,
+            #     "gender": gender,
+            #     "user": user,
+            #     "salbar": salbar,
+            #     "org": salbar.org,
+            #     "sub_org": sub_org,
+            # }
+            # teacher = Teachers.objects.create(
+            #     **teacher_data,
+            # )
         return request.send_data([])
 
 

@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0005_employee_created_user_employee_updated_user_and_more'),
-        ('lms', '0013_alter_psychologicalquestionchoices_image_and_more'),
+        ('lms', '0013_student_home_phone_and_more'),
     ]
 
     operations = [
@@ -53,5 +53,25 @@ class Migration(migrations.Migration):
             model_name='timetable',
             name='type',
             field=models.PositiveIntegerField(choices=[(1, 'Лаборатор'), (2, 'Лекц'), (3, 'Семинар'), (4, 'Бусад'), (5, 'Дадлага'), (6, 'Бие даалт')], db_index=True, default=4, verbose_name='Хичээллэх төрөл'),
+        ),
+             migrations.AlterField(
+            model_name='psychologicalquestionchoices',
+            name='image',
+            field=models.ImageField(
+                blank=True,
+                null=True,
+                upload_to=lms.models.get_choice_image_path,
+                verbose_name='зураг',
+            ),
+        ),
+        migrations.AlterField(
+            model_name='psychologicaltestquestions',
+            name='image',
+            field=models.ImageField(
+                blank=True,
+                null=True,
+                upload_to=lms.models.get_image_path,
+                verbose_name='зураг',
+            ),
         ),
     ]

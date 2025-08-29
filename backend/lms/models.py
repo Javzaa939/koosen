@@ -1,26 +1,25 @@
+import json
 import os
 import uuid
-import json
-
 from datetime import datetime as dt
 
-from django.utils import timezone
-
+from django.conf import settings
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models.functions import Lower
-from django.conf import settings
-from core.models import *
+from django.utils import timezone
 from shortuuidfield import ShortUUIDField
 
+from core.models import *
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.auth.models import AbstractUser, Group as AbstractGroup, Permission
 
-from .managers import SystemSettingsManager
-
-from main.utils.function.utils import get_fullName
 from main.utils.file import (
     remove_folder,
 )
+from main.utils.function.utils import get_fullName
+
+from .managers import SystemSettingsManager
 
 # Create your models here.
 # -------------------------------- Тохиргоо, лавлах сангийн мэдээллийн модел --------------------
@@ -702,6 +701,12 @@ class Student(models.Model):
     is_mental = models.BooleanField(default=False, null=True, verbose_name='Хөгжлийн бэрхшээлтэй эсэх')
     mental_type = models.PositiveIntegerField(choices=DEVELOPMENT_DIFFICULTY,null=True, db_index=True, verbose_name="Хөгжлийн бэрхшээлийн төрөл")
     pay_type = models.PositiveIntegerField(choices=PAY_TYPE, db_index=True, default=EXPENSES, verbose_name="Төлбөр төлөлт")
+
+    order_number = models.CharField(max_length=100, blank=True, verbose_name="Тушаалын дугаар")
+    order_date = models.DateField(null=True, verbose_name="Тушаалын огноо")
+
+    home_phone = models.CharField(max_length=50, null=True, verbose_name='Гэрийн Утас')
+
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

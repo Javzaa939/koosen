@@ -1796,6 +1796,8 @@ export const get_emp_state = () =>
     { id: 2, name: 'Чөлөөлөгдсөн' },
     { id: 4, name: 'Шилжсэн' },
     { id: 5, name: 'Тэтгэвэрт гарсан' },
+    { id: 6, name: 'Жирэмсний амралт' },
+    { id: 7, name: 'Хүүхэд асрах чөлөө' },
   ]
 
   return options
