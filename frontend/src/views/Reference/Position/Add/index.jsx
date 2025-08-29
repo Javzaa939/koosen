@@ -19,14 +19,16 @@ import {
 	FormFeedback,
 } from "reactstrap";
 
-import { validate, convertDefaultValue } from "@utils"
+import { validate, convertDefaultValue, ReactSelectStyles } from "@utils"
 import { t } from 'i18next';
 
 import SchoolContext from "@context/SchoolContext"
 
 import { validateSchema } from './validateSchema';
+import Select from "react-select";
+import classnames from "classnames"
 
-const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
+const AddModal = ({ open, handleModal, refreshDatas, permission_option, mainPositionData}) => {
 
     const CloseBtn = (
         <X className="cursor-pointer" size={15} onClick={handleModal} />
@@ -37,6 +39,9 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
     const { control, handleSubmit, reset, setError, formState: { errors }, setValue } = useForm(validate(validateSchema));
 
     const [is_loading, setLoader] = useState(false)
+    const [mainPositionId, setMainPositionId] = useState('')
+    const [permissionId, setPermissionId] = useState([])
+    const [removepermissionId, setRemovePermissionId] = useState([])
     const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
 
     // Api
@@ -44,7 +49,13 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
 
     async function onSubmit(cdata) {
         cdata = convertDefaultValue(cdata)
-        console.log('cdata', cdata)
+        if (permissionId.length > 0){
+            cdata['permissions'] = permissionId.map((c)=> c.id)
+        }
+        // cdata['removed_perms'] = removepermissionId.map((c)=> c.id)
+
+        cdata['org'] = school_id
+
         const { success, error } = await postFetch(orgPositionApi.post(cdata))
         if(success) {
             reset()
@@ -57,7 +68,6 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
                 setError(error[key].field, { type: 'custom', message:  error[key].msg});
             }
         }
-
 	}
 
     return (
@@ -84,14 +94,14 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
                     close={CloseBtn}
                     tag="div"
                 >
-                    <h5 className="modal-title">{t('Багшийн мэдээлэл нэмэх')}</h5>
+                    <h5 className="modal-title">{t('Албан тушаалийн мэдээлэл нэмэх')}</h5>
 
                 </ModalHeader>
                 <ModalBody className="flex-grow-1">
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
                         <Col md={12}>
                             <Label className="form-label" for="name">
-                                {t('Нэр')}
+                                {t('Нэр')} <span style={{ color: 'red' }}>*</span>
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -179,7 +189,7 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
                         </Col>
                         <Col md={12}>
                             <Label className="form-label" for="description">
-                                {t('Тайлбар')}
+                                {t('Тайлбар')} <span style={{ color: 'red' }}>*</span>
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -199,6 +209,110 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
                             />
                             {errors.description && <FormFeedback className='d-block'>{errors.description.message}</FormFeedback>}
                         </Col>
+                        <Col md={12}>
+                            <Label className="form-label" for="main_position">
+                                {t('Үндсэн албан тушаалын төрлүүд')}
+                            </Label>
+                            <Controller
+                                defaultValue=''
+                                control={control}
+                                name="main_position"
+                                render={({ field: { value, onChange} }) => {
+                                    return (
+                                        <Select
+                                            name="main_position"
+                                            id="main_position"
+                                            classNamePrefix='select'
+                                            isClearable
+                                            className={classnames('react-select', { 'is-invalid': errors.main_position })}
+                                            isLoading={postLoading}
+                                            placeholder={t(`-- Сонгоно уу --`)}
+                                            options={mainPositionData || []}
+                                            value={mainPositionData.find((c) => c.id === mainPositionId)}
+                                            noOptionsMessage={() => t('Хоосон байна.')}
+                                            onChange={(val) => {
+                                                onChange(val?.id || '')
+                                                setMainPositionId(val?.id || '')
+                                            }}
+                                            styles={ReactSelectStyles}
+                                            getOptionValue={(option) => option.id}
+                                            getOptionLabel={(option) => option.name}
+                                        />
+                                    )
+                                }}
+                            />
+                        </Col>
+                        <Col md={12}>
+                            <Label className="form-label" for="permissions">
+                                {t('Эрх нэмэх')} <span style={{ color: 'red' }}>*</span>
+                            </Label>
+                            <Controller
+                                defaultValue=''
+                                control={control}
+                                name="permissions"
+                                render={({ field: { value, onChange} }) => {
+                                    return (
+                                        <Select
+                                            name="permissions"
+                                            id="permissions"
+                                            classNamePrefix='select'
+                                            isClearable
+                                            isMulti
+                                            className={classnames('react-select', { 'is-invalid': errors.permissions })}
+                                            isLoading={postLoading}
+                                            placeholder={t(`-- Сонгоно уу --`)}
+                                            options={permission_option || []}
+                                            noOptionsMessage={() => t('Хоосон байна.')}
+                                            onChange={(val) => {
+                                                onChange(val.id || '')
+                                                setPermissionId(val || [])
+                                                }}
+                                            styles={ReactSelectStyles}
+                                            getOptionValue={(option) => option.id}
+                                            getOptionLabel={(option) => option.description}
+                                        />
+                                    )
+                                }}
+                            />
+                            {errors.permissions && <FormFeedback>{errors.permissions.message}</FormFeedback>}
+
+                        </Col>
+                        {/* <Col md={12}>
+                            <Label className="form-label" for="removed_perms">
+                                {t('Эрх устгах')}
+                            </Label>
+                            <Controller
+                                defaultValue=''
+                                control={control}
+                                name="removed_perms"
+                                render={({ field: { value, onChange} }) => {
+                                    return (
+                                        <Select
+                                            name="removed_perms"
+                                            id="removed_perms"
+                                            classNamePrefix='select'
+                                            isClearable
+                                            isMulti
+                                            className={classnames('react-select', { 'is-invalid': errors.removed_perms })}
+                                            isLoading={postLoading}
+                                            placeholder={t(`-- Сонгоно уу --`)}
+                                            options={permission_option || []}
+                                            value={permission_option.find((c) => c.id===value)}
+                                            noOptionsMessage={() => t('Хоосон байна.')}
+                                            onChange={(val) => {
+                                                if (val){
+                                                    onChange(val.id || '')
+                                                    setRemovePermissionId(val.map(v => v.id))
+                                                }
+                                            }}
+                                            styles={ReactSelectStyles}
+                                            getOptionValue={(option) => option.id}
+                                            getOptionLabel={(option) => option.description}
+                                        />
+                                    )
+                                }}
+                            />
+                        </Col> */}
                         <Col md={12} className='text-center'>
                             <Button className="me-2" color="primary" type="submit" disabled={postLoading}>
                                 {postLoading &&<Spinner size='sm' className='me-1'/>}

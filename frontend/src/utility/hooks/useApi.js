@@ -358,6 +358,14 @@ function useApi(isDisplay=false) {
 				put: (data, pk) => instance.put(`/settings/grade/${pk}/`, data),
 				delete: (id) => instance.delete(`/settings/grade/${id}/`),
 			},
+			/** үндсэн албан тушаалын төрөл */
+			mainposition: {
+				get: () => instance.get(`/settings/main-position/`),
+				post: data => instance.post('/settings/main-position/', data),
+				getOne: (pk) => instance.get(`/settings/main-position/${pk}/`),
+				put: (data, pk) => instance.put(`/settings/main-position/${pk}/`, data),
+				delete: (pk) => instance.delete(`/settings/main-position/${pk}/`),
+			},
 		},
 		/** Сургалт */
 		study: {
@@ -665,6 +673,8 @@ function useApi(isDisplay=false) {
 				post: (data) => instance.post(`/core/position/`, data),
 				put: (data, pk) => instance.put(`/core/position/${pk}/`, data),
 				delete: (pk) => instance.delete(`/core/position/${pk}/`),
+				getMainPosition: () => instance.get(`/core/position/main/`),
+
 			},
 
 		},

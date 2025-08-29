@@ -46,10 +46,12 @@ urlpatterns = [
     path("teachers/info/", TeacherListAPIView().as_view()),
     path("reference/teachers/info/<int:pk>/", TeacherInfoAPIView.as_view()),
     # Албан тушаалын жагсаалт
-    path("position/", OrgPositionListAPIView().as_view()),
-    path("position/list/", AllOrgPositionListAPIView().as_view()),
-    path("position/<int:pk>/", OrgPositionListAPIView().as_view()),
+    path('position/', OrgPositionListAPIView().as_view()),
+    path('position/list/', AllOrgPositionListAPIView().as_view()),
+    path('position/<int:pk>/', OrgPositionListAPIView().as_view()),
     path("position/permission/", PermissionListAPIView().as_view()),
+    path('position/main/', MainPositionAPIView.as_view()),
+
     # Хөтөлбөрийн багийн ахлагчийн жагсаалт
     path("leader/list/", DepLeaderAPIView().as_view()),
     # Хуанли доторх картнуудын жагсаалт
