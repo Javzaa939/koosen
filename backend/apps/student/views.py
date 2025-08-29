@@ -4966,6 +4966,9 @@ class UserStudentSeasonChooseApiView(
             next_season = Season.objects.filter(season_name=next_season).first()
             # endregion
 
+            if not next_season:
+                return request.send_error("ERR_002", 'Зун, өвлийн улирал олдсонгүй')
+
             data = {
                 'lesson_id': lesson_id,
                 'student_id': student_id,
