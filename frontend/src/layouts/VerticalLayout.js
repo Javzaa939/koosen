@@ -1009,7 +1009,7 @@ const studentMenuChildIds = [
     'score-teacher',
     'score-information',
     'student-attendance',
-    'student-graduation',
+    // 'student-graduation',
 ]
 
 function getStudentMenu(saveData, menus, user) {

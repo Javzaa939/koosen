@@ -13,10 +13,10 @@ const LessonRoutes = [
         path: 'user-student/lesson/examination-schedule',
         element: <ExaminationSchedule />
     },
-    {
-        path: 'user-student/student/graduate',
-        element: <Graduate />
-    },
+    // {
+    //     path: 'user-student/student/graduate',
+    //     element: <Graduate />
+    // },
 ]
 
 export default LessonRoutes
