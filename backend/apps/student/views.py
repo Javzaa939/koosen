@@ -64,7 +64,7 @@ from lms.models import Country, ProfessionAverageScore, AttachmentConfig, Profes
 
 from core.models import SubOrgs, AimagHot, SumDuureg, User, Salbars
 
-from .serializers import StudentListSerializer, UserStudentLearningPlanSerializer, UserStudentLessonScheduleSerializer, UserStudentRegisterIrtsTimeTableSerializer, UserStudentScoreInformationListSerializer, UserStudentScoreRegisterPrintSerializer, UserStudentStudentAttachmentSerializer
+from .serializers import StudentListSerializer, UserStudentLearningPlanSerializer, UserStudentLessonDetailSerializer, UserStudentLessonScheduleSerializer, UserStudentRegisterIrtsTimeTableSerializer, UserStudentScoreInformationListSerializer, UserStudentScoreRegisterPrintSerializer, UserStudentStudentAttachmentSerializer
 from .serializers import StudentRegisterSerializer
 from .serializers import StudentRegisterListSerializer
 from .serializers import StudentMovementSerializer
@@ -4907,6 +4907,87 @@ class UserStudentPlanAPIView(
         learnplan = self.list(request).data
 
         return request.send_data(learnplan)
+
+
+@permission_classes([IsAuthenticated])
+class UserStudentLessonDetailAPIView(
+    mixins.ListModelMixin,
+    generics.GenericAPIView,
+    mixins.RetrieveModelMixin,
+):
+
+    "Нэг хичээлийн дэлгэрэнгүй мэдээлэл"
+
+    queryset = LessonStandart.objects.all()
+    serializer_class = UserStudentLessonDetailSerializer
+
+    def get(self, request, pk=None):
+
+            self.queryset = self.queryset.filter(id=pk)
+
+            lesson_list = self.retrieve(request, pk).data
+
+            return request.send_data(lesson_list)
+
+
+@permission_classes([IsAuthenticated])
+class UserStudentSeasonChooseApiView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.DestroyModelMixin,
+):
+    """ Өвөл зуны сургалт """
+
+    def post(self, request, lesson_id):
+        try:
+            # to get student id
+            student_login_obj = request.use
+            student_id = student_login_obj.student.id
+
+            # to get year, season
+            data = request.data
+            #lesson_year = data.get('year')
+            #lesson_season = data.get('season')
+
+            # we neet to plan accordingly to current time so active year season used
+            lesson_year, lesson_season = get_active_year_season()
+            season_obj = Season.objects.get(pk=lesson_season)
+            lesson_season = season_obj.season_name
+
+            # region to plan in the nearest season
+            next_season = None
+
+            if lesson_season == "Хавар":
+                next_season = "Зун"
+
+            elif lesson_season == "Намар":
+                next_season = "Өвөл"
+
+            next_season = Season.objects.filter(season_name=next_season).first()
+            # endregion
+
+            data = {
+                'lesson_id': lesson_id,
+                'student_id': student_id,
+                'lesson_year': lesson_year,
+                'lesson_season_id': next_season.id
+            }
+
+            is_already_exists = SeasonChoose.objects.filter(**data).exists()
+
+            if is_already_exists:
+
+                return request.send_error("ERR_002", 'Өмнө нь төлөвлөсөн')
+
+            new_obj = SeasonChoose(**data)
+            new_obj.save()
+
+        except Exception:
+            traceback.print_exc()
+
+            return request.send_error("ERR_002")
+
+        return request.send_info('INF_001')
 
 
 @permission_classes([IsAuthenticated])

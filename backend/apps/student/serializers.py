@@ -11,7 +11,7 @@ from django.db.models.functions import Cast, ExtractYear
 from django.db.models import Avg, PositiveIntegerField
 from django.db.models import F, Sum
 
-from lms.models import Payment, RegisterIrts, Student, StudentAdmissionScore, StudentLeave, StudentLogin, TimeTable_to_group, TimeTable_to_student
+from lms.models import LessonCategory, Payment, RegisterIrts, Student, StudentAdmissionScore, StudentLeave, StudentLogin, TimeTable_to_group, TimeTable_to_student
 from lms.models import StudentRegister
 from lms.models import Group
 from lms.models import StudentMovement
@@ -1503,6 +1503,38 @@ class UserStudentLearningPlanSerializer(serializers.ModelSerializer):
                 season = season[0]
 
         return season
+
+
+class UserStudentLessonDetailCategorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = LessonCategory
+        fields = '__all__'
+
+
+class UserStudentLessonDetailSchoolSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = SubOrgs
+        fields = '__all__'
+
+
+class UserStudentLessonDetailDepartmentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Salbars
+        fields = '__all__'
+
+
+class UserStudentLessonDetailSerializer(serializers.ModelSerializer):
+
+    category = UserStudentLessonDetailCategorySerializer()
+    school = UserStudentLessonDetailSchoolSerializer()
+    department = UserStudentLessonDetailDepartmentSerializer()
+
+    class Meta:
+        model = LessonStandart
+        fields = '__all__'
 
 
 class UserStudentScoreInformationListSerializer(serializers.ModelSerializer):

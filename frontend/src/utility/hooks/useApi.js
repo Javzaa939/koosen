@@ -2300,6 +2300,11 @@ function useApi(isDisplay=false) {
 				/** санал болгох төлөвлөгөө */
 				learningplan: {
 					get:() => instance.get(`/student/user-student/plan/?year=${cyear_name}&season=${cseason_id}`),
+					retake: ({lesson_id, data}) => instance.post(`/student/user-student/plan/retake/${lesson_id}/`, data)
+				},
+				// Хичээлийн талаар дэлгэрэнгүй мэдээлэл харах API. Хүссэн газраа ашиглаж болно
+				lessondetail: {
+					get:(lesson_id) => instance.get(`/student/user-student/plan/lessondetail/${lesson_id}`),
 				},
 				score: {
 					getTeacher:() =>
