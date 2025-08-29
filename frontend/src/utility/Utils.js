@@ -1981,10 +1981,51 @@ export async function stableStylesPrintElement({ elementId, windowTitle = t('Ð¥Ñ
   }
 }
 
+
 // to get short name like LMS from learning management system
 export function getAbbreviation(name) {
   const words = name.split(' ');
   const abbreviation = words.map(word => word.charAt(0).toUpperCase()).join('');
 
   return abbreviation;
+}
+
+
+// to case insensitive usage of t() for first letter and for full upper/lower case letters
+export function ti(str) {
+  let result = t(str)
+
+  if (result === str) {
+    if (str.charAt(0) === str.charAt(0).toUpperCase()) {
+      result = t(str.charAt(0).toLowerCase() + str.slice(1))
+      result = result.charAt(0).toUpperCase() + result.slice(1)
+    } else {
+      result = t(str.charAt(0).toUpperCase() + str.slice(1))
+      result = result.charAt(0).toLowerCase() + result.slice(1)
+    }
+  }
+
+  if (result === str) {
+    if (str === str.toLowerCase()) {
+      // check all uppercase  condition if translation still is not finded
+      result = t(str.toUpperCase())
+      result = result.toLowerCase()
+    } else if (str === str.toUpperCase()) {
+      // check full lowercase condition if translation still is not finded
+      result = t(str.toLowerCase())
+      result = result.toUpperCase()
+    }
+  }
+
+  return result
+}
+
+
+export function getFirstLetters(str) {
+  if (typeof str !== 'string') return str
+
+  return str
+    .split(' ')
+    .map(word => word ? word[0].toUpperCase() : '')
+    .join('');
 }

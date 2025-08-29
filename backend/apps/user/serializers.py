@@ -1,8 +1,10 @@
 from django.db.models import Q
 from rest_framework import serializers
 
+from apps.student.serializers import StudentInfoSerializer
+
 from core.models import Employee, Permissions, SubOrgs, Teachers, User
-from lms.models import AccessHistoryLms
+from lms.models import AccessHistoryLms, StudentLogin
 from main.utils.function.utils import student__full_name
 
 
@@ -236,3 +238,35 @@ class AccessHistoryLmsStudentSerializer(serializers.ModelSerializer):
             'id': obj.device_type,
             'name': AccessHistoryLms.DEVICE_TYPE[obj.device_type - 1][1],
         }
+
+
+class StudentLoginSerializer(serializers.ModelSerializer):
+	student = StudentInfoSerializer(many=False, read_only=True)
+	permissions = serializers.SerializerMethodField()
+	school_id = serializers.SerializerMethodField()
+	is_student = serializers.BooleanField(default=True, read_only=True)
+
+	class Meta:
+		model = StudentLogin
+		fields = ['id', 'student', 'permissions', 'school_id', 'is_student']
+
+	def get_permissions(self, obj ):
+        # to send dummy field to frontend, because it is called in many components without "?" (Optional chaining)
+		return []
+
+	def get_school_id(self, obj ):
+		result = (
+			obj.student.school_id or
+			obj.student.group.school_id or
+            (obj.student.group.department.sub_orgs_id if obj.student.group.department else None) or
+            (obj.student.group.profession.school_id if obj.student.group.profession else None) or
+            (
+                obj.student.group.profession.department.sub_orgs_id
+					if (
+						obj.student.group.profession and
+						obj.student.group.profession.department
+					) else None
+			)
+		)
+
+		return result

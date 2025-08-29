@@ -17,6 +17,7 @@ import AuthContext from '@context/AuthContext'
 // ** Components
 const Error = lazy(() => import('@views/Error'))
 const Login = lazy(() => import('@views/Login'))
+const StudentLogin = lazy(() => import("@views/StudentLogin"))
 const NewPassword = lazy(() => import("@views/NewPassword"))
 const ResetPassword = lazy(() => import("@views/ResetPassword"))
 const NotAuthorized = lazy(() => import('@views/NotAuthorized'))
@@ -54,6 +55,10 @@ const Router = () => {
         {
             path: '/login',
             children: [{ path: '/login', element: <Login /> }]
+        },
+        {
+            path: '/student-login',
+            element: <StudentLogin />
         },
         {
             path: '/new-password',

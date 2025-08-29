@@ -8,6 +8,7 @@ import Room from '../../TimeTable/Room'
 import Season from '../Season'
 import Country from '../Country'
 import Print from '../Print'
+import MainPosition from '../MainPosition'
 
 function Teacher() {
 
@@ -56,6 +57,12 @@ function Teacher() {
             icon: 'Activity',
             id: 6,
             component: <Print />
+        },
+        {
+            name: 'Үндсэн албан тушаалын төрөл',
+            icon: 'Activity',
+            id: 7,
+            component: <MainPosition />
         }
     ]
 

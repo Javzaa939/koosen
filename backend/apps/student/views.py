@@ -659,7 +659,7 @@ class StudentRegisterAPIView(
 
         qs_student = Student.objects.filter(pk=pk)
         if not qs_student:
-            request.send_error("ERR_001", 'Оюутны мэдээлэл олдсонгүй')
+            return request.send_error("ERR_001", 'Оюутны мэдээлэл олдсонгүй')
 
         with transaction.atomic():
 

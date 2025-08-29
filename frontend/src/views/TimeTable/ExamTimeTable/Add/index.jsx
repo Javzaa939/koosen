@@ -500,7 +500,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editData }) => 
                                             }}
                                             styles={ReactSelectStyles}
                                             getOptionValue={(option) => option.id}
-                                            getOptionLabel={(option) => option?.rank_name + ' ' + option.last_name + '.' + option?.first_name}
+                                            getOptionLabel={(option) => option.last_name + '.' + option?.first_name}
                                         />
                                     )
                                 }}

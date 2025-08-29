@@ -11,6 +11,9 @@ from django.utils import timezone
 from shortuuidfield import ShortUUIDField
 
 from core.models import *
+from django.contrib.postgres.fields import ArrayField
+from django.contrib.auth.models import AbstractUser, Group as AbstractGroup, Permission
+
 from main.utils.file import (
     remove_folder,
 )
@@ -897,7 +900,7 @@ class StudentLeave(models.Model):
         unique_together = ('student', 'lesson_year', 'lesson_season')
 
 
-class StudentLogin(models.Model):
+class StudentLogin(AbstractUser):
     """ Оюутны нэвтрэх """
 
     student = models.ForeignKey(Student, on_delete=models.CASCADE, verbose_name='Оюутан')
@@ -907,6 +910,21 @@ class StudentLogin(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    # region to avoid circular conflict
+    groups = models.ManyToManyField(
+        AbstractGroup,
+        related_name="abstract_group",
+        blank=True,
+        help_text="The groups this user belongs to."
+    )
+    user_permissions = models.ManyToManyField(
+        Permission,
+        related_name="abstract_permissions",
+        blank=True,
+        help_text="Specific permissions for this user."
+    )
+    # endregion
 
 
 class Lesson_assignment_student(models.Model):
@@ -1078,7 +1096,7 @@ class TimeTable(models.Model):
         (LECT, 'Лекц'),
         (SEM, 'Семинар'),
         (OTHER, 'Бусад'),
-        (PRACTIC, 'Практик'),
+        (PRACTIC, 'Дадлага'),
         (BIY_DAALT, 'Бие даалт'),
     )
 
@@ -1089,7 +1107,7 @@ class TimeTable(models.Model):
     ODD_EVEN_VALUE = (
         (ODD, 'Сондгой'),
         (EVEN, 'Тэгш'),
-        (ALL, 'Дандаа'),
+        (ALL, 'Тогтмол'),
     )
 
     TANHIM = 1
@@ -1105,12 +1123,17 @@ class TimeTable(models.Model):
     lesson_year = models.CharField(max_length=10, verbose_name="Хичээлийн жил")
     lesson_season = models.ForeignKey(Season, on_delete=models.PROTECT, verbose_name="Улирал")
     lesson = models.ForeignKey(LessonStandart, on_delete=models.PROTECT, verbose_name="Хичээл")
-    teacher = models.ForeignKey(Teachers, on_delete=models.PROTECT, verbose_name="Багш")
+    teacher = models.ForeignKey(Teachers, on_delete=models.PROTECT, verbose_name="Багш", null=True)
     study_type = models.PositiveIntegerField(choices=STUDY_TYPE, db_index=True, default=TANHIM, verbose_name="Хичээл орох хэлбэр")
     room = models.ForeignKey(Room, on_delete=models.PROTECT, null=True, verbose_name="Хичээллэх өрөө")
     st_count = models.PositiveIntegerField(null=True, verbose_name="Оюутны тоо")
     day = models.PositiveIntegerField(choices=LESSON_DAY, db_index=True, default=MONDAY, verbose_name="Өдөр")
     time = models.PositiveIntegerField(choices=LESSON_TIME, db_index=True, default=FIRST, verbose_name="Цаг")
+
+    choosing_times = ArrayField(models.IntegerField(null=True), blank=True,null=True,verbose_name='Сонгогдох цаг')
+    choosing_deps = ArrayField(models.IntegerField(null=True), blank=True, null=True,verbose_name='Сонгогдох тэнхим')
+    choosing_levels = ArrayField(models.IntegerField(null=True), blank=True,null=True,verbose_name='Сонгогдох курс')
+
     odd_even = models.PositiveIntegerField(choices=ODD_EVEN_VALUE, db_index=True, default=ALL, verbose_name="Тэгш сондгой")
     potok = models.PositiveIntegerField(default=1, verbose_name="Поток")
     type = models.PositiveIntegerField(choices=LESSON_TYPE, db_index=True, default=OTHER, verbose_name="Хичээллэх төрөл")
@@ -1126,7 +1149,9 @@ class TimeTable(models.Model):
     color = models.CharField(max_length=250, null=True, verbose_name="Өнгө")
     kurats_room = models.CharField(max_length=200, null=True, verbose_name="Курацийн хичээл орох байрлал")
     support_teacher = ArrayField(models.IntegerField(null=True), blank=True,null=True,verbose_name='Туслах багш')
-    school = models.ForeignKey(SubOrgs, verbose_name="Сургууль", on_delete=models.PROTECT)
+
+    school = models.ForeignKey(SubOrgs, verbose_name="Сургууль", on_delete=models.SET_NULL, null=True,)
+    department = models.ForeignKey(Salbars, verbose_name="Салбар", on_delete=models.SET_NULL, null=True,)
     created_user = models.ForeignKey(User, related_name='tt_cr_user', on_delete=models.SET_NULL, null=True, verbose_name="Бүртгэсэн хэрэглэгч")
     updated_user = models.ForeignKey(User, related_name='tt_up_user', on_delete=models.SET_NULL, null=True, verbose_name="Зассан хэрэглэгч")
 
@@ -1144,6 +1169,7 @@ class TimeTable(models.Model):
         super().update(*args, **kwargs)
 
         return self
+
 
 class TimeTable_to_group(models.Model):
     """ Хичээлийн хуваарьт хичээллэх анги """

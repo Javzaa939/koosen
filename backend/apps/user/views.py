@@ -23,11 +23,12 @@ from core.models import Employee, Schools, SubOrgs, Teachers, User
 
 from .serializers import (
     AccessHistoryLmsStudentSerializer,
+    StudentLoginSerializer,
     UserInfoSerializer,
     AccessHistoryLmsSerializer,
     AccessHistoryLmsSerializerAll
 )
-from lms.models import AccessHistoryLms, Student
+from lms.models import AccessHistoryLms, Student, StudentLogin
 
 from lms.models import AccessHistoryLms
 
@@ -45,11 +46,20 @@ class UserDetailAPI(
     def get(self, request):
         """ Нэвтэрсэн хэрэглэгчийн мэдээллийг авах """
 
-        user = User.objects.filter(email=request.user).first()
+        user = None
+        qs = None
+
+        if request.session.get('_is_student'):
+            user = request.user
+            qs = AccessHistoryLms.objects.filter(student=user)
+
+        else:
+            user = User.objects.filter(email=request.user).first()
+            qs = AccessHistoryLms.objects.filter(user=user)
+
         if not user:
             return request.send_data({})
 
-        qs = AccessHistoryLms.objects.filter(user=user)
         serializer = self.get_serializer(qs, many=True)
         return request.send_data(serializer.data)
 
@@ -60,6 +70,10 @@ class AccessHistoryLmsStudentAPI(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
 ):
+    """
+    to see StudentWeb project logins (maybe)
+    """
+
     queryset = AccessHistoryLms.objects.filter(system_type=AccessHistoryLms.STUDENT)
     serializer_class = AccessHistoryLmsStudentSerializer
 
@@ -162,33 +176,20 @@ class UserAPILoginView(
 ):
     """ User login api view """
 
+    # to avoid error: "AssertionError("'UserAPILoginView' should either include a serializer_class attribute, or override the get_serializer_class() method.")"
     serializer_class = UserInfoSerializer
 
-    def get(self, request):
-        """ Нэвтэрсэн хэрэглэгчийн мэдээллийг авах """
+    # region to reduce code duplication
+    @staticmethod
+    def save_log(is_logged, user_id, request, log_user_field):
+        """
+        Нэвтрэлт хийсэн төхөөрөмжийн мэдээллийг авах хэсэг
+        """
 
-        user = User.objects.filter(email=request.user).first()
-
-        if not user:
-            return request.send_data({})
-
-        serializer = self.get_serializer(user)
-
-        return request.send_data(serializer.data)
-
-    def post(self, request):
-        """ Нэвтрэх функц """
-
-        datas = request.data
-        email = datas.get("email").strip() if datas.get("email") else None
-        password = datas.get("password").strip() if datas.get("password") else None
-
-        # Нэвтрэлт хийсэн төхөөрөмжийн мэдээллийг авах хэсэг
         ip = None
-        user_id = None
-        is_logged = False
 
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+
         if x_forwarded_for:
             ip = x_forwarded_for.split(',')[0]
         else:
@@ -203,8 +204,10 @@ class UserAPILoginView(
 
         if user_agent.is_mobile:
             device_type = AccessHistoryLms.MOBILE
+
         elif user_agent.is_pc:
             device_type = AccessHistoryLms.PC
+
         else:
             device_type = AccessHistoryLms.TABLET
 
@@ -224,83 +227,175 @@ class UserAPILoginView(
             "browser": browser,
             "os_type": os,
             "ip": ip,
+            "is_logged": is_logged
         }
 
-        user_detail = dict()
-        try:
-            user = User.objects.filter(Q(email__iexact=email) | Q(username__iexact=email)).first()
+        access_history_body[log_user_field] = user_id
+        access_history_serilaizer = AccessHistoryLmsSerializer(data=access_history_body)
+        access_history_serilaizer.is_valid(raise_exception=True)
+        access_history_serilaizer.save()
+
+    @staticmethod
+    def check_user_instance(user, ending_data, request):
+        if not user:
+            ending_data['result'] = request.send_error("ERR_001", "Cистемд бүртгүүлнэ үү.")
+            raise Exception("ERR_001 Cистемд бүртгүүлнэ үү.")
+
+        ending_data['user_id'] = user.id
+
+    @staticmethod
+    def check_user_password(auth_user, ending_data, request):
+        if not auth_user:
+            ending_data['result'] = request.send_error("ERR_001")
+            raise Exception('ERR_001')
+
+    @staticmethod
+    def user_login_step(user, auth_user, ending_data, request, serializer):
+        auth.login(request, auth_user)
+        ending_data['is_logged'] = True
+
+        user_detail = serializer(user).data
+        ending_data['result'] = request.send_info("INF_004", user_detail)
+
+    @staticmethod
+    def student_login(request, ending_data):
+        ending_data['log_user_field'] = 'student'
+        datas = request.data
+
+        # region check login
+        username = datas.get("username").strip() if datas.get("username") else None
+
+        user = (
+            StudentLogin.objects
+            # to reduce sql queries from calling of related fields
+            .select_related(
+                'student__group',
+                'student__department',
+                'student__unit1',
+                'student__unit2',
+                'student__citizenship',
+                'student__status',
+            )
+            .filter(
+                Q(
+                    Q(student__status__name__icontains='Суралцаж буй') |
+                    Q(student__status__code=1)
+                ) &
+                Q(
+                    username__iexact=username,
+                )
+            )
+            .first()
+        )
+
+        UserAPILoginView.check_user_instance(user, ending_data, request)
+        # endregion
+
+        # check password
+        password = datas.get("password").strip() if datas.get("password") else None
+        auth_user = auth.authenticate(request, **{StudentLogin.USERNAME_FIELD: getattr(user, StudentLogin.USERNAME_FIELD)}, password=password, backend='main.auth_backends.StudentBackend')
+        UserAPILoginView.check_user_password(auth_user, ending_data, request)
+
+        # Оюутны эрх хязгаарлав
+        if not user.student.is_active or not user.is_active:
+            ending_data['result'] = request.send_error("ERR_001", "Систем рүү нэвтрэх эрхгүй байна. Админд хандана уу")
+            raise Exception('ERR_001 Систем рүү нэвтрэх эрхгүй байна. Админд хандана уу')
+
+        # finish login and get details
+        UserAPILoginView.user_login_step(user, auth_user, ending_data, request, StudentLoginSerializer)
+
+        # to set special flag for backend to know login type. for example in @login_required() decorator and in self.get()
+        request.session["_is_student"] = True
+
+    @staticmethod
+    def default_login(request, ending_data):
+        ending_data['log_user_field'] = 'user'
+        datas = request.data
+
+        # region check login
+        email = datas.get("email").strip() if datas.get("email") else None
+
+        user = (
+            User.objects
+            .prefetch_related(
+                'teachers_set__sub_org'
+            )
+            .filter(
+                Q(email__iexact=email) |
+                Q(username__iexact=email)
+            ).first()
+        )
+
+        UserAPILoginView.check_user_instance(user, ending_data, request)
+        # endregion
+
+        # check password
+        password = datas.get("password").strip() if datas.get("password") else None
+        auth_user = auth.authenticate(request, **{User.USERNAME_FIELD: getattr(user, User.USERNAME_FIELD)}, password=password)
+        UserAPILoginView.check_user_password(auth_user, ending_data, request)
+
+        # region Хэрэглэгч нэвтрэх үед LMS систем рүү нэвтрэх эрхтэйг шалгах
+        user_permissions = get_user_permissions(user)
+
+        if not user_permissions or LMS_LOGIN not in user_permissions:
+            ending_data['result'] = request.send_error("ERR_001", "Систем рүү нэвтрэх эрхгүй байна. Админд хандана уу")
+            raise Exception('ERR_001 Систем рүү нэвтрэх эрхгүй байна. Админд хандана уу')
+        # endregion
+
+        # finish login and get details
+        UserAPILoginView.user_login_step(user, auth_user, ending_data, request, UserInfoSerializer)
+    # endregion to reduce code duplication
+
+    def get(self, request):
+        """ Нэвтэрсэн хэрэглэгчийн мэдээллийг авах """
+
+        is_student = request.session.get('_is_student')
+        serializer_data = None
+
+        if is_student == True:
+            user = request.user
+
+            if not isinstance(user, StudentLogin):
+                return request.send_data({})
+
+            serializer_data = StudentLoginSerializer(user).data
+
+        else:
+            user = User.objects.filter(email=request.user).first()
 
             if not user:
-                access_history_body.update({"user": user_id, "is_logged": is_logged})
-                access_history_serilaizer = AccessHistoryLmsSerializer(data=access_history_body)
-                if not access_history_serilaizer.is_valid():
-                    raise
+                return request.send_data({})
 
-                access_history_serilaizer.save()
+            serializer_data = UserInfoSerializer(user).data
 
-                return request.send_error("ERR_001", "Cистемд бүртгүүлнэ үү.")
-            user_id = user.id
+        return request.send_data(serializer_data)
 
-            serializer = self.get_serializer(user)
-            user_detail = serializer.data
+    def post(self, request):
+        """ Нэвтрэх функц """
 
-            email = user_detail['email']
-            auth_user = auth.authenticate(request, username=email, password=password)
+        # to catch and log the latest values of variables if any exception is occurred in any random moment
+        ending_data = {
+            'is_logged': False,
+            'user_id': None,
+            'result': None,
+            'log_user_field': None,
+        }
+
+        try:
+            if request.data.get('isStudent'):
+                self.student_login(request, ending_data)
+
+            else:
+                self.default_login(request, ending_data)
 
         except Exception:
             traceback.print_exc()
-            access_history_body.update({"user": user_id, "is_logged": is_logged})
-            access_history_serilaizer = AccessHistoryLmsSerializer(data=access_history_body)
-            if not access_history_serilaizer.is_valid():
-                raise
 
-            access_history_serilaizer.save()
-            return request.send_error("ERR_002")
+            if not ending_data['result']:
+                ending_data['result'] = request.send_error("ERR_002")
 
-        if not auth_user:
-            access_history_body.update({"user": user_id, "is_logged": is_logged})
-            access_history_serilaizer = AccessHistoryLmsSerializer(data=access_history_body)
-            if not access_history_serilaizer.is_valid():
-                raise
-
-            access_history_serilaizer.save()
-
-            return request.send_error("ERR_001")
-
-        # Хэрэглэгч нэвтрэх үед LMS систем рүү нэвтрэх эрхтэйг шалгах
-        user_permissions = get_user_permissions(user)
-
-        if not user_permissions:
-            access_history_body.update({"user": user_id, "is_logged": is_logged})
-            access_history_serilaizer = AccessHistoryLmsSerializer(data=access_history_body)
-            if not access_history_serilaizer.is_valid():
-                raise
-
-            access_history_serilaizer.save()
-
-            request.send_error("ERR_001", "Систем рүү нэвтрэх эрхгүй байна. Админд хандана уу")
-
-        if LMS_LOGIN not in user_permissions:
-            access_history_body.update({"user": user_id, "is_logged": is_logged})
-            access_history_serilaizer = AccessHistoryLmsSerializer(data=access_history_body)
-            if not access_history_serilaizer.is_valid():
-                raise
-
-            access_history_serilaizer.save()
-
-            return request.send_error("ERR_001", "Систем рүү нэвтрэх эрхгүй байна. Админд хандана уу")
-
-        auth.login(request, auth_user)
-
-        is_logged = True
-        access_history_body.update({"user": user_id, "is_logged": is_logged})
-        access_history_serilaizer = AccessHistoryLmsSerializer(data=access_history_body)
-        if not access_history_serilaizer.is_valid():
-            raise
-
-        access_history_serilaizer.save()
-
-        return request.send_info("INF_004", user_detail)
+        UserAPILoginView.save_log(ending_data['is_logged'], ending_data['user_id'], request, ending_data['log_user_field'])
+        return ending_data['result']
 
 
 class UserAPILogoutView(
@@ -314,12 +409,18 @@ class UserAPILogoutView(
     def get(self, request):
 
         user_id = request.user.id
+        conditions = { 'user': user_id }
 
+        if request.session.get('_is_student'):
+            conditions = { 'student': user_id }
+
+        # NOTE this can work wrong for example if many devices are used by same user to login. May be need to save sessionId to AccessHistoryLms table and use it to remove correct record, etc
         # Нэвтрэлт дууссан цагийг нэвтрэлтийн хэсэгт update хэсэгт хийж хадгалах
-        access_id = self.queryset.filter(user=user_id).first().id if self.queryset.filter(user=user_id).exists() else None
+        access_obj = self.queryset.filter(**conditions, out_time__isnull=True, system_type=AccessHistoryLms.LMS, is_logged=True).first()
 
-        if access_id:
-            self.queryset.filter(pk=access_id).update(out_time=datetime.now())
+        if access_obj:
+            access_obj.out_time=datetime.now()
+            access_obj.save()
 
         auth.logout(request)
 
@@ -332,6 +433,9 @@ class UserMenuAPI(
     """ Тухайн цэсний шийдвэрлэх эрхтэй нэгжүүд болон хэрэглэгч шийдвэрлэх эрхтэй эсэх """
 
     def get(self, request):
+
+        if request.session.get('_is_student'):
+            return request.send_data([])
 
         c_units = []
         c_menu_list = []

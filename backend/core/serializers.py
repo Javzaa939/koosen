@@ -5,6 +5,7 @@ from core.models import (
     AimagHot,
     BagHoroo,
     Employee,
+    MainPosition,
     OrgPosition,
     Permissions,
     Roles,
@@ -150,7 +151,7 @@ class LessonTeacherListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Teachers
-        fields = ["id", "last_name", "first_name", "full_name", "rank_name"]
+        fields = ["id", "last_name", "first_name", "full_name"]
 
     def get_full_name(self, obj):
         """Багшийн бүтэн нэр авах"""
@@ -536,7 +537,6 @@ class TeacherListSchoolFilterSerializer(serializers.ModelSerializer):
             "sub_org",
             "code",
             "full_name",
-            "rank_name",
         ]
         # fields = ["id", "last_name", "first_name", "salbar", "sub_org", "code", "org_position", "state", "full_name"]
 
@@ -728,25 +728,38 @@ class UserSaveSerializer(serializers.ModelSerializer):
 
         return instance
 
+class PermissionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Permissions
+        fields = "__all__"
+
+class OrgPositionPutSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrgPosition
+        fields = ["id", "name", "is_teacher", "name", "description", "org", "is_director", "is_hr", "created_at", "updated_at", 'main_position', 'permissions', 'removed_perms']
+
+class OrgPositionPostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrgPosition
+        fields = ["id", "name", "is_teacher", "name", "description", "org", "is_director", "is_hr", "created_at", "updated_at", 'main_position', 'permissions', 'removed_perms']
+
+class MainPositionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = MainPosition
+        fields = "__all__"
 
 class OrgPositionSerializer(serializers.ModelSerializer):
     org = SubSchoolsSerializer(many=False)
+    permissions = PermissionSerializer(many=True)
+    removed_perms = PermissionSerializer(many=True)
     created_at = serializers.SerializerMethodField()
-
+    main_position = MainPositionSerializer(many=False)
     class Meta:
         model = OrgPosition
-        fields = [
-            "id",
-            "name",
-            "is_teacher",
-            "name",
-            "description",
-            "org",
-            "is_director",
-            "is_hr",
-            "created_at",
-            "updated_at",
-        ]
+        fields = ["id", "name", "is_teacher", "name", "description", "org", "is_director", "is_hr", "created_at", "updated_at", "permissions", "removed_perms", "main_position"]
+
 
     def get_created_at(self, obj):
 
@@ -1253,10 +1266,3 @@ def generate_model_serializer(Model, inserted_fields="__all__"):
             fields = inserted_fields
 
     return TemplateSerializer
-
-
-class PermissionSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Permissions
-        fields = "__all__"

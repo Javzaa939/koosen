@@ -358,6 +358,14 @@ function useApi(isDisplay=false) {
 				put: (data, pk) => instance.put(`/settings/grade/${pk}/`, data),
 				delete: (id) => instance.delete(`/settings/grade/${id}/`),
 			},
+			/** үндсэн албан тушаалын төрөл */
+			mainposition: {
+				get: () => instance.get(`/settings/main-position/`),
+				post: data => instance.post('/settings/main-position/', data),
+				getOne: (pk) => instance.get(`/settings/main-position/${pk}/`),
+				put: (data, pk) => instance.put(`/settings/main-position/${pk}/`, data),
+				delete: (pk) => instance.delete(`/settings/main-position/${pk}/`),
+			},
 		},
 		/** Сургалт */
 		study: {
@@ -377,8 +385,8 @@ function useApi(isDisplay=false) {
 				},
 
 				// Хичээлийн хуваарьт зориулж хичээлийн лист авах
-				getTimetableList: () => {
-					return instance.get(`/learning/lessonstandart/timetable-list/?school=${school_id}&lesson_year=${cyear_name}&lesson_season=${cseason_id}`)
+				getTimeList: (limit='Бүгд', page=1, search='') => {
+					return instance.get(`/learning/lessonstandart/timetable-list/?page=${page}&limit=${limit}&search=${search}&school=${school_id}&lesson_year=${cyear_name}&lesson_season=${cseason_id}`)
 				},
 
 				getListAll: (profession='', search='') => instance.get(`/learning/lessonstandart/list/?profession=${profession}&search=${search}`),
@@ -665,6 +673,8 @@ function useApi(isDisplay=false) {
 				post: (data) => instance.post(`/core/position/`, data),
 				put: (data, pk) => instance.put(`/core/position/${pk}/`, data),
 				delete: (pk) => instance.delete(`/core/position/${pk}/`),
+				getMainPosition: () => instance.get(`/core/position/main/`),
+
 			},
 
 		},
@@ -898,6 +908,36 @@ function useApi(isDisplay=false) {
 
 		/** Цагийн хуваарь */
 		timetable: {
+			// #region Delete timetable button modal
+			// also for Button: "Хуваарь жагсаалтаар харах". Page: /timetable/teacher/
+			getList: (limit = 'Бүгд', page = 1, sort = '', search = '', department_id, lesson, teacher, start_date, end_date, group = '', day = '', time = '', type = '', is_delete = false) => instance.get(`/timetable/list/teacher/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&school=${school_id}&department=${department_id}&lesson=${lesson}&teacher=${teacher}&start_date=${start_date}&end_date=${end_date}&group=${group}&day=${day}&time=${time}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&type=${type}&is_delete=${is_delete}`),
+
+			getSelectGroups: (args) => {
+				const blankParams = {
+					limit: 'Бүгд', page: 1, sorting: '', search: '',
+					lesson: '',
+					...args
+				}
+
+				const params = new URLSearchParams(blankParams)
+				return instance.get(`/timetable/list/select-groups/?${params}`)
+			},
+
+			getSelectLessons: (args) => {
+				const blankParams = {
+					limit: 'Бүгд', page: 1, sorting: '', search: '',
+					...args
+				}
+
+				const params = new URLSearchParams(blankParams)
+				return instance.get(`/timetable/list/select-lessons/?${params}&lesson_year=${cyear_name}&lesson_season=${cseason_id}`)
+			},
+			// #endregion Delete timetable button modal
+
+			// Button: "Хуваарь жагсаалтаар харах". Page: /timetable/teacher/
+			getGroups: ()=>instance.get(`/timetable/list/teacher/groups/?school=${school_id}`),
+			getGroupsById: (timetable_id)=>instance.get(`/timetable/list/teacher/groups/${timetable_id}/`),
+			postTeacher: (timetable_id, cdata)=>instance.post(`/timetable/list/teacher/${timetable_id}/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`,cdata),
 
 			/* Хичээлийн хуваарь экселд зориулсан нь */
 			excel:{
@@ -914,7 +954,7 @@ function useApi(isDisplay=false) {
 			},
 			/* Хичээлийн өрөө */
 			room:{
-				getList: (room_type='') => instance.get(`/timetable/room/list/?room_type=${room_type}`),
+				getList: (room_type = '', school='') => instance.get(`/timetable/room/list/?room_type=${room_type}&school=${school? school : school_id}`),
 				get: () => instance.get(`/timetable/room/`),
 				post: data => instance.post('/timetable/room/', data),
 				getOne: (pk) => instance.get(`/timetable/room/${pk}/`),
@@ -925,18 +965,30 @@ function useApi(isDisplay=false) {
 			register:{
 				get: (limit, page, sort, search, day, group,
 				lesson, teacher, time, checked, type, isOptional) => instance.get(`/timetable/register/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&day=${day}&group=${group}&lesson=${lesson}&teacher=${teacher}&time=${time}&school=${school_id}&checked=${checked}&type=${type}&isOptional=${isOptional}&lesson_year=${cyear_name}&lesson_season=${cseason_id}`),
-				getCalendar: (isCalendar, selectedValue, stype, optionFilter, isVolume) => instance.get(`/timetable/register-new/?school=${school_id}&year=${cyear_name}&season=${cseason_id}&isCalendar=${isCalendar}&selectedValue=${selectedValue}&type=${stype}&option=${optionFilter}&is_volume=${isVolume}`),
-				getCalendarKurats: (isCalendar, selectedValue, stype, start, end, optionFilter) => instance.get(`/timetable/register1/kurats/?school=${school_id}&year=${cyear_name}&season=${cseason_id}&isCalendar=${isCalendar}&selectedValue=${selectedValue}&type=${stype}&start=${start}&end=${end}&option=${optionFilter}`),
+				getCalendar: (limit='Бүгд', page=1, sort='', search='', isCalendar='', selectedValue='', stype='', optionFilter='', isVolume='', department='', group='', lesson_type='') => instance.get(`/timetable/register-new/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&school=${school_id}&year=${cyear_name}&season=${cseason_id}&isCalendar=${isCalendar}&selectedValue=${selectedValue}&type=${stype}&option=${optionFilter}&is_volume=${isVolume}&department=${department}&group=${group}&lesson_type=${lesson_type}`),
+				getCalendarKurats: (isCalendar, selectedValue, stype, start, end, optionFilter, department, prof, group, level,is_month, lesson_type='') => instance.get(`/timetable/register1/kurats/?school=${school_id}&year=${cyear_name}&season=${cseason_id}&isCalendar=${isCalendar}&selectedValue=${selectedValue}&type=${stype}&start=${start}&end=${end}&option=${optionFilter}&department=${department}&profession=${prof}&group=${group}&level=${level}&by_month=${is_month}&lesson_type=${lesson_type}`),
 				// getSearchSelect: (selectType) => instance.get(`/timetable/resource/select/?school=${school_id}&year=${cyear_name}&season=${cseason_id}&stype=${selectType}`),
-				post: (data, type) => instance.post(`/timetable/register/?type=${type}`, data),
+				post: (data, type) => instance.post(`/timetable/register/?type=${type}&lesson_year=${cyear_name}&lesson_season=${cseason_id}`, data),
+				postSimple: (data, type) => instance.post(`/timetable/register/simple/?type=${type}`, data),
 				getOne: (pk) => instance.get(`/timetable/register/${pk}/`),
 				getPotok: (lesson, potok) => instance.get(`/timetable/list/?lesson=${lesson}&potok=${potok}&school=${school_id}&year=${cyear_name}&season=${cseason_id}`),
-				put: (data, pk) => instance.put(`/timetable/register/${pk}/`, data),
+				put: (data, pk) => instance.put(`/timetable/register/${pk}/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`, data),
+				edit: (data, pk) => instance.put(`/timetable/register/edit/${pk}/`, data),
 				delete: (pk) => instance.delete(`/timetable/register/${pk}/`),
-				selectionDatas: (selectType, selectedValue, optionFilter, isVolume) => instance.get(`/timetable/resource1/?school=${school_id}&year=${cyear_name}&season=${cseason_id}&stype=${selectType}&selectedValue=${selectedValue}&option=${optionFilter}&is_volume=${isVolume}`),
+				deleteByList: (ids='') => instance.delete(`/timetable/register/?ids=${ids}`),
+				selectionDatas: (selectType, selectedValue, optionFilter, isVolume, department, lesson_type='') => instance.get(`/timetable/resource1/?school=${school_id}&year=${cyear_name}&season=${cseason_id}&stype=${selectType}&selectedValue=${selectedValue}&option=${optionFilter}&is_volume=${isVolume}&department=${department}&lesson_type=${lesson_type}`),
 				setEvent: (data, id) => instance.put(`/timetable/event/${id}/`, data),
 				moveEvent: (data, id) => instance.put(`/timetable/register/new/${id}/`, data),
-				saveFile: (data) => instance.post(`/timetable/file/`, data)
+				saveFile: (data) => instance.post(`/timetable/file/`, data),
+
+				// Файл оруулсан датаг бааз руу хадгалах
+				excelImport: ({ data, school=school_id || '' }) =>
+					instance.post(
+						`/timetable/register/excel-import/?school=${school}&lesson_year=${cyear_name}&lesson_season=${cseason_id}`,
+						data, multiPart
+					),
+
+				postDate: (data) => instance.post(`/timetable/date/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`, data),
 			},
 			// Шалгалтын хуваарь
 			exam:{

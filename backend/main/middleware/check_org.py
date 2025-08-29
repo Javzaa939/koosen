@@ -33,6 +33,9 @@ def check_org(get_response):
             return False
 
     def middleware(request):
+        if request.session.get('_is_student'):
+            response = get_response(request)
+            return response
 
         #  Байгууллагын мэдээллээр шүүхэд хэрэгтэй
         #  filter ийг энэчээ оруулах

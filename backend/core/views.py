@@ -21,6 +21,7 @@ from core.models import (
     AimagHot,
     BagHoroo,
     Employee,
+    MainPosition,
     OrgPosition,
     Permissions,
     Salbars,
@@ -84,6 +85,7 @@ from .serializers import (
     Lesson_to_teacherSerializer,
     LessonTeacherListSerializer,
     OrgPositionPostSerializer,
+    OrgPositionPutSerializer,
     OrgPositionSerializer,
     PermissionSerializer,
     ScheduleSerializer,
@@ -1047,8 +1049,8 @@ class TeacherListApiView(
 
         org = getattr(request, "org_filter", {}).get("org")
 
-        # if org:
-        #     self.queryset = self.queryset.filter(org=org)
+        if org:
+            self.queryset = self.queryset.filter(sub_org__org=org)
 
         if school:
             self.queryset = self.queryset.filter(sub_org=school)
@@ -1305,7 +1307,7 @@ class OrgPositionListAPIView(
 ):
     """Албан тушаалын жагсаалт"""
 
-    queryset = OrgPosition.objects.all()
+    queryset = OrgPosition.objects.all().order_by('-created_at')
     serializer_class = OrgPositionSerializer
 
     pagination_class = CustomPagination
@@ -1320,8 +1322,8 @@ class OrgPositionListAPIView(
             self.queryset = self.queryset.filter(org=org)
 
         if pk:
-            group = self.retrieve(request, pk).data
-            return request.send_data(group)
+            datas = self.retrieve(request, pk).data
+            return request.send_data(datas)
 
         datas = self.list(request).data
         return request.send_data(datas)
@@ -1334,26 +1336,32 @@ class OrgPositionListAPIView(
         if not org:
             return request.send_error("ERR_002", "Албан тушаал нэмэх эрхгүй байна")
 
+        self.serializer_class = OrgPositionPostSerializer
         request.data["org"] = org.id
 
-        self.serializer_class = OrgPositionPostSerializer
-
-        with transaction.atomic():
-            try:
+        try:
+            with transaction.atomic():
                 self.create(request).data
-            except Exception as e:
-                print(e)
-                return request.send_error("ERR_002")
+        except Exception as e:
+            print(e)
+            return request.send_error('ERR_002')
         return request.send_info("INF_001")
 
     @login_required()
     def put(self, request, pk=None):
-        self.serializer_class = OrgPositionPostSerializer
+        """ Албан тушаалын засах """
 
+        self.serializer_class = OrgPositionPutSerializer
+        org = getattr(request, 'org_filter', {}).get('org')
+        if not org:
+            return request.send_error("ERR_002", "Албан тушаал нэмэх эрхгүй байна")
+
+        request.data["org"] = org.id
         request_data = request.data
         instance = self.queryset.filter(id=pk).first()
 
         try:
+
             serializer = self.get_serializer(instance, data=request_data)
 
             if serializer.is_valid(raise_exception=False):
@@ -1370,6 +1378,8 @@ class OrgPositionListAPIView(
 
     @login_required()
     def delete(self, request, pk=None):
+        """ Албан тушаалын устгах """
+
         if pk:
             self.destroy(request, pk)
 
@@ -1383,7 +1393,7 @@ class PermissionListAPIView(
 ):
     """Албан тушаалын жагсаалт"""
 
-    queryset = Permissions.objects
+    queryset = Permissions.objects.all()
     serializer_class = PermissionSerializer
 
     def get(self, request):
@@ -1876,7 +1886,6 @@ class AbleWorkerAPIView(
                     position_name = data.get("app_name")
 
                     rank_type = data.get("rank_type")
-                    rank_name = data.get("rank_name")
                     rank_rate = data.get("rank_rate")
 
                     personal_mail = data.get("personal_mail")
@@ -1894,7 +1903,6 @@ class AbleWorkerAPIView(
 
                     if teacher:
                         in_count += 1
-                        teacher.rank_name = rank_name
                         teacher.rank_type = rank_type
                         teacher.rank_rate = rank_rate
                         teacher.save()
@@ -2052,15 +2060,21 @@ class SysInfoApiView(
 
         queryset = self.queryset.filter(**cfilter)
 
-        return request.send_data(
-            {
-                "total": queryset.count(),
-                "sis": queryset.filter(system_type=AccessHistoryLms.LMS).count(),
-                "student": queryset.filter(
-                    system_type=AccessHistoryLms.STUDENT
-                ).count(),
-                "teacher": queryset.filter(
-                    system_type=AccessHistoryLms.TEACHER
-                ).count(),
-            }
-        )
+        return request.send_data({
+            'total': queryset.count(),
+            'sis': queryset.filter(system_type=AccessHistoryLms.LMS).count(),
+            'student': queryset.filter(system_type=AccessHistoryLms.STUDENT).count(),
+            'teacher': queryset.filter(system_type=AccessHistoryLms.TEACHER).count(),
+        })
+
+
+class MainPositionAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+):
+    """ Албан тушаалын үндсэн төрөлүүд """
+
+    def get(self, request):
+
+        data = MainPosition.objects.all().values('id', 'name', 'code')
+        return request.send_data(list(data))

@@ -4,9 +4,9 @@ export const validateSchema = Yup.object().shape({
 	type: Yup.string()
 		.trim()
 		.required('Хоосон байна'),
-	st_count: Yup.string()
-		.trim()
-		.required('Хоосон байна'),
+	// st_count: Yup.string()
+	// 	.trim()
+	// 	.required('Хоосон байна'),
 	study_type: Yup.string()
 		.trim()
 		.required('Хоосон байна'),
@@ -16,9 +16,9 @@ export const validateSchema = Yup.object().shape({
 	potok: Yup.string()
 		.trim()
 		.required('Хоосон байна'),
-	teacher: Yup.string()
-		.trim()
-		.required('Хоосон байна'),
+	// teacher: Yup.string()
+	// 	.trim()
+	// 	.required('Хоосон байна'),
 	end_date: Yup.string()
 		.trim()
 		.required('Хоосон байна'),

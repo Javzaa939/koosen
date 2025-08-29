@@ -87,4 +87,8 @@ urlpatterns = [
     path('grade/', GradeLetterAPIView.as_view()),
     path('grade/<int:pk>/', GradeLetterAPIView.as_view()),
 
+    # Үндсэн албан тушаалын төрөл
+    path('main-position/', MainPositionAPIView.as_view()),
+    path('main-position/<int:pk>/', MainPositionAPIView.as_view()),
+
 ]

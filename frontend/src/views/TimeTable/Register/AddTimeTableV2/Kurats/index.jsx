@@ -11,6 +11,7 @@ import ActiveYearContext from '@context/ActiveYearContext'
 import classnames from "classnames";
 import CTable from '../../Table';
 import { useForm, Controller } from "react-hook-form";
+import { student_course_level } from '@utils'
 
 import {
     Row,
@@ -43,7 +44,7 @@ const Kurats = ({  handleRoomModal, editValues, handleModal, roomModal,  is_load
     const { t } = useTranslation()
 
     // ** Hook
-    const { control, handleSubmit, reset, setError, clearErrors, setValue, formState: { errors } } = useForm(validate(validateSchema));
+    const { control, handleSubmit, resetField, setError, clearErrors, setValue, formState: { errors } } = useForm(validate(validateSchema));
 
 	// Loader
 	const { Loader, isLoading, fetchData } = useLoader({});
@@ -53,7 +54,9 @@ const Kurats = ({  handleRoomModal, editValues, handleModal, roomModal,  is_load
 
     const [select_value, setSelectValue] = useState(values);
     const [tdata, setTimeData] = useState([])
+    const [kurs, setKurs] = useState([])
     const [lesson_name, setLesson] = useState('')
+    const [schoolId, setSchoolId ] = useState(school_id)
 
     const [studyType, setStudyType] = useState(1)
     const [colorName, setColorName] = useState('#eeeeee')
@@ -63,8 +66,10 @@ const Kurats = ({  handleRoomModal, editValues, handleModal, roomModal,  is_load
     const [timeOption, setTime] = useState([])
     const [groupOption, setGroup] = useState([])
     const [typeOption, setType] =useState([])
-    const [studentOption, setStudent] =useState([])
-    const [excludeStudentsOption, setExcludeStudent] = useState([])
+    // const [studentOption, setStudent] =useState([])
+    const [schoolOption, setSchoolOption] = useState([])
+    const [departOption, setDepartOption] = useState([])
+    // const [excludeStudentsOption, setExcludeStudent] = useState([])
     const [onlineOption, setOnlineOption] = useState([])
 
     const [selectedGroups, setSelectedGroups] = useState([])
@@ -73,14 +78,26 @@ const Kurats = ({  handleRoomModal, editValues, handleModal, roomModal,  is_load
     const [removeStudents, setRemoveStudent] = useState([])
     const [selectedTimes, setSelectedTimes] = useState([])
     const [roomOption, setRoom] = useState([])
+    const [selectDepart, setSelectDepart] = useState([])
+
+    const [checked, setOnlyCheck] = useState(false)
+    const [levelOptions, setLevelOptions] = useState(student_course_level())
+
+    const [lessonCurrentPage, setLessonCurrentPage] = useState(1);
+    const [lessonRowsPerPage] = useState(15);
+	const [lessonPageCount, setLessonPageCount] = useState(1);
+	const [lessonSearchValue, setLessonSearchValue] = useState([]);
+    const [isFirstRender, setIsFirstRender] = useState(true)
 
     // Api
     const teacherApi = useApi().hrms.teacher
     const lessonApi = useApi().study.lessonStandart
     const groupApi = useApi().student.group
     const timetableApi = useApi().timetable.register
-    const studentApi = useApi().student
+    // const studentApi = useApi().student
     const roomApi = useApi().timetable.room
+    const departApi = useApi().hrms.department
+    const schoolApi = useApi().hrms.subschool
 
     // Өрөөний жагсаалт
     async function getRoom() {
@@ -100,17 +117,32 @@ const Kurats = ({  handleRoomModal, editValues, handleModal, roomModal,  is_load
 
     // Багшийн жагсаалт
     async function getTeacher() {
-        const { success, data } = await fetchData(teacherApi.getTeacher(select_value.lesson))
+        const { success, data } = await fetchData(teacherApi.getTeacher(''))
         if(success) {
             setTeacher(data)
         }
     }
 
+    async function getSchools() {
+        const { success, data } = await fetchData(schoolApi.get())
+        if(success) {
+            setSchoolOption(data)
+        }
+    }
+
     // Ангийн жагсаалт
     async function getGroup() {
-        const { success, data } = await fetchData(groupApi.getTimetableList(select_value.lesson))
+        const { success, data } = await fetchData(groupApi.getTimetableList(select_value.lesson, kurs))
         if(success) {
             setGroup(data)
+        }
+    }
+
+    // Тэнхимийн жагсаалт
+    async function getDepartment() {
+        const { success, data } = await fetchData(departApi.getSelectSchool(schoolId))
+        if(success) {
+            setDepartOption(data)
         }
     }
 
@@ -152,22 +184,35 @@ const Kurats = ({  handleRoomModal, editValues, handleModal, roomModal,  is_load
         }
     }
 
-    function getAll() {
+    function getAll(page=1) {
         Promise.all(
             [
-                fetchData(fetchData(lessonApi.getTimetableList())),
+                fetchData(lessonApi.getTimeList(lessonRowsPerPage, page, lessonSearchValue))
             ]
         ).then((values) => {
-            setLessonOption(values[0]?.data)
+            const data = values[0]?.data
+            const results = data?.results
+            if (page === 1) setLessonOption(results ?? [])
+            else setLessonOption((prev) => [...prev, ...results])
+            setLessonPageCount(Math.ceil(data?.count / lessonRowsPerPage))
         })
     }
 
     useEffect(() => {
         getAll()
+        getSchools()
         setOnlineOption(get_lesson_type())
         setPotokOption(get_potok())
         setTime(get_time())
     },[])
+
+    useEffect(
+        () =>
+        {
+            getDepartment()
+        },
+        [schoolId]
+    )
 
     useEffect(() => {
         setValue('day', editValues?.day),
@@ -191,10 +236,18 @@ const Kurats = ({  handleRoomModal, editValues, handleModal, roomModal,  is_load
     //     }
     // }, [groupOption])
 
-    // Ангийн онлайнаар хичээл үзэх анги
-    function groupSelect(data) {
-        setSelectedGroups(data);
+    // Check
+    const handleCheck = (e) => {
+        if (!e.target.checked) {
+            setSelectedGroups([])
+        }
+        setOnlyCheck(e.target.checked)
     }
+
+    // Ангийн онлайнаар хичээл үзэх анги
+    // function groupSelect(data) {
+    //     setSelectedGroups(data);
+    // }
 
     // Хосолсон ангийн онлайнаар хичээл үзэх анги
     function groupAddSelect(data) {
@@ -202,63 +255,62 @@ const Kurats = ({  handleRoomModal, editValues, handleModal, roomModal,  is_load
     }
 
     // Нэмэлтээр үзэх гэж байгаа оюутнууд
-    function studentSelect(data) {
-        setSelectedGroupStudent(data);
-    }
+    // function studentSelect(data) {
+    //     setSelectedGroupStudent(data);
+    // }
 
-    // Хасалт хийлгэж байгаа оюутнууд
-    function excludeSelect(data) {
-        setRemoveStudent(data);
-    }
+    // // Хасалт хийлгэж байгаа оюутнууд
+    // function excludeSelect(data) {
+    //     setRemoveStudent(data);
+    // }
 
     // Тухайн хичээлийн багц цагийн задаргаанаас хичээлийн төрөл авах хэсэг
     async function getLessonType() {
         const { success, data } = await fetchData(lessonApi.getType(select_value.lesson))
         if(success)
-        {
+            {
             if(data.length == 0) {
                 setError('type', { type: 'custom', message: 'Багц цагийн тохиргоогоо оруулна уу'})
             } else {
                 setType(data)
                 clearErrors('type')
-
             }
         }
     }
 
-    function getStudents() {
+    // function getStudents() {
 
-        var group_ids = []
-        if (selectedGroups) {
-            selectedGroups.forEach(element => {
-                if (element) group_ids.push(element?.id)
-            })
-        }
+    //     var group_ids = []
+    //     if (selectedGroups) {
+    //         selectedGroups.forEach(element => {
+    //             if (element) group_ids.push(element?.id)
+    //         })
+    //     }
 
-        Promise.all(
-            [
-                groupFetchData(studentApi.getGroup(group_ids, true)),
-                groupFetchData(studentApi.getRemoveGroup(group_ids, false))
-            ]
-        ).then((values) => {
-            setStudent(values[0]?.data)
-            setExcludeStudent(values[1]?.data)
-        })
-    }
+    //     Promise.all(
+    //         [
+    //             groupFetchData(studentApi.getGroup(group_ids, true)),
+    //             groupFetchData(studentApi.getRemoveGroup(group_ids, false))
+    //         ]
+    //     ).then((values) => {
+    //         setStudent(values[0]?.data)
+    //         setExcludeStudent(values[1]?.data)
+    //     })
+    // }
 
-    useEffect(
-        () =>
-        {
-            if (selectedGroups.length > 0) {
-                const timeoutId = setTimeout(() => {
-                    getStudents();
-                }, 1000);
+    // useEffect(
+    //     () =>
+    //     {
+    //         if (selectedGroups.length > 0) {
+    //             const timeoutId = setTimeout(() => {
+    //                 getStudents();
+    //             }, 1000);
 
-                return () => clearTimeout(timeoutId);
-            }
-        },
-        [selectedGroups]
-    )
+    //             return () => clearTimeout(timeoutId);
+    //         }
+    //     },
+    //     [selectedGroups]
+    // )
 
     useEffect(
         () =>
@@ -268,10 +320,19 @@ const Kurats = ({  handleRoomModal, editValues, handleModal, roomModal,  is_load
             }
             if (select_value?.lesson) {
                 getLessonType()
-                getGroup()
             }
         },
         [select_value.potok, select_value.lesson]
+    )
+
+    useEffect(
+        () =>
+        {
+            if (select_value?.lesson) {
+                getGroup()
+            }
+        },
+        [select_value.lesson, kurs]
     )
 
     useEffect(
@@ -282,6 +343,26 @@ const Kurats = ({  handleRoomModal, editValues, handleModal, roomModal,  is_load
         [select_value?.lesson]
     )
 
+    useEffect(() => {
+        if (isFirstRender) {
+            setIsFirstRender(false)
+
+            return
+        }
+
+        getAll(lessonCurrentPage)
+    }, [lessonCurrentPage])
+
+	useEffect(() => {
+		const timeoutId = setTimeout(() => {
+			if (lessonSearchValue.length !== 1) getAll();
+		}, 1000);
+
+		return () => {
+			clearTimeout(timeoutId)
+		}
+	}, [lessonSearchValue])
+
 	async function onSubmit(cdata) {
         var odd_even_list = []
 
@@ -290,7 +371,7 @@ const Kurats = ({  handleRoomModal, editValues, handleModal, roomModal,  is_load
         cdata['day'] = 1
         cdata['time'] =1
 
-        if (selectedGroups.length == 0) {
+        if (!checked && selectedGroups.length == 0) {
             setError('group', { type: 'custom', message: 'Хоосон байна'})
         } else {
             setLoader(true)
@@ -324,6 +405,10 @@ const Kurats = ({  handleRoomModal, editValues, handleModal, roomModal,  is_load
             cdata['remove_students'] = remove_students
             cdata['kurats_time'] = kurats_times
             cdata['color'] = colorName
+            cdata['is_optional'] = checked
+            cdata['choosing_deps'] = selectDepart?.map((c) => c.id)
+            cdata['choosing_levels'] = kurs?.map((e) => e.id)
+            cdata['department'] = selectDepart?.map((c) => c.id)?.length > 0  ? selectDepart?.map((c) => c.id)[0] : ''
 
             odd_even_list.push(defaultOddEven)
 
@@ -338,8 +423,6 @@ const Kurats = ({  handleRoomModal, editValues, handleModal, roomModal,  is_load
             cdata = convertDefaultValue(cdata)
             const { success, error } = await fetchData(timetableApi.post(cdata, 'is_kurats'))
             if(success) {
-                reset()
-                handleModal()
                 refreshDatas()
             } else {
                 /** Алдааны мессэжийг input дээр харуулна */
@@ -356,12 +439,31 @@ const Kurats = ({  handleRoomModal, editValues, handleModal, roomModal,  is_load
         setColorName(e.target.value)
     }
 
+    // Анги бүтнээр check хийх
+    const handleAllCheck = (e) => {
+        if (e.target.checked) {
+            var ids = groupOption?.map((e) => e.id)
+            setSelectedGroups([...ids])
+        } else {
+            setSelectedGroups([])
+        }
+    }
+
+    // Анги нэг нэгээр check хийх
+    const handleOneSelect = (e, val) => {
+        if (e.target.checked) {
+            setSelectedGroups((prev) => [...prev, val]);
+        } else {
+            setSelectedGroups((prev) => prev.filter((item) => item !== val));
+        }
+    }
+
 	return (
         <Fragment>
             <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
             <div className='mt-1'>
                 <Row className='mb-1'>
-                    <Col md={4} sm={12}>
+                    <Col md={3} sm={12}>
                         <Label className="form-label" for="lesson">
                             {t('Хичээл')}
                         </Label>
@@ -392,12 +494,20 @@ const Kurats = ({  handleRoomModal, editValues, handleModal, roomModal,  is_load
                                         styles={ReactSelectStyles}
                                         getOptionValue={(option) => option.id}
                                         getOptionLabel={(option) => option.full_name}
+                                        onMenuScrollToBottom={() => {
+                                            if (lessonCurrentPage < lessonPageCount) {
+                                                setLessonCurrentPage(lessonCurrentPage + 1)
+                                            }
+                                        }}
+                                        onInputChange={(value) => {
+                                            setLessonSearchValue(value);
+                                        }}
                                     />
                             )}}
                         />
                         {errors.lesson && <FormFeedback className='d-block'>{t(errors.lesson.message)}</FormFeedback>}
                     </Col>
-                    <Col md={4} sm={12}>
+                    <Col md={3} sm={12}>
                         <Label className="form-label" for="potok">
                             {t('Потокийн дугаар')}
                         </Label>
@@ -431,7 +541,74 @@ const Kurats = ({  handleRoomModal, editValues, handleModal, roomModal,  is_load
                         />
                         {errors.potok && <FormFeedback className='d-block'>{t(errors.potok.message)}</FormFeedback>}
                     </Col>
-                    <Col md={4} sm={12}>
+                    <Col md={3} sm={12}>
+                        <Label className="form-label" for="school">
+                            {t("Сургууль")}
+                        </Label>
+                        <Controller
+                            control={control}
+                            defaultValue=''
+                            name="school"
+                            render={({ field: { value, onChange} }) => {
+                                return (
+                                    <Select
+                                        name="school"
+                                        id="school"
+                                        classNamePrefix='select'
+                                        isClearable
+                                        className={classnames('react-select', { 'is-invalid': errors.school })}
+                                        isLoading={isLoading}
+                                        placeholder={t(`-- Сонгоно уу --`)}
+                                        options={schoolOption || []}
+                                        value={schoolOption?.find((c) => c.id == value)}
+                                        noOptionsMessage={() => t('Хоосон байна.')}
+                                        onChange={(val) => {
+                                            setSchoolId(val?.id)
+                                            onChange(val?.id || '')
+                                        }}
+                                        styles={ReactSelectStyles}
+                                        getOptionValue={(option) => option.id}
+                                        getOptionLabel={(option) => option.name}
+                                    />
+                                )
+                            }}
+                        />
+                    </Col>
+                    <Col md={3} sm={12}>
+                        <Label className="form-label" for="department">
+                            {t("Тэнхим")}
+                        </Label>
+                        <Controller
+                            control={control}
+                            defaultValue=''
+                            name="department"
+                            render={({ field: { value, onChange} }) => {
+                                return (
+                                    <Select
+                                        name="department"
+                                        id="department"
+                                        classNamePrefix='select'
+                                        isClearable
+                                        isMulti
+                                        className={classnames('react-select', { 'is-invalid': errors.department })}
+                                        isLoading={isLoading}
+                                        placeholder={t(`-- Сонгоно уу --`)}
+                                        options={departOption || []}
+                                        value={selectDepart}
+                                        noOptionsMessage={() => t('Хоосон байна.')}
+                                        onChange={(val) => {
+                                            setSelectDepart(val)
+                                        }}
+                                        styles={ReactSelectStyles}
+                                        getOptionValue={(option) => option.id}
+                                        getOptionLabel={(option) => option.name}
+                                    />
+                                )
+                            }}
+                        />
+                        {errors.teacher && <FormFeedback className='d-block'>{t(errors.teacher.message)}</FormFeedback>}
+                    </Col>
+                    <Col md={3} sm={12}>
                         <Label className="form-label" for="teacher">
                             {t("Багш")}
                         </Label>
@@ -458,7 +635,7 @@ const Kurats = ({  handleRoomModal, editValues, handleModal, roomModal,  is_load
                                         }}
                                         styles={ReactSelectStyles}
                                         getOptionValue={(option) => option.id}
-                                        getOptionLabel={(option) => option.last_name + ' ' + option.first_name}
+                                        getOptionLabel={(option) => option.full_name}
                                     />
                                 )
                             }}
@@ -703,6 +880,7 @@ const Kurats = ({  handleRoomModal, editValues, handleModal, roomModal,  is_load
                         )
                     }}
                 />
+                {errors.room && <FormFeedback className='d-block'>{t(errors.room.message)}</FormFeedback>}
             </Col>
             <Col md={12} sm={12}>
                 <Label className="form-label" for="kurats_time">
@@ -739,42 +917,89 @@ const Kurats = ({  handleRoomModal, editValues, handleModal, roomModal,  is_load
                 ></Controller>
                 {errors.kurats_time && <FormFeedback className='d-block'>{t(errors.kurats_time.message)}</FormFeedback>}
             </Col>
-            <Col sm={12}>
-                <Label className="form-label" for="group">
-                    {t("Анги")}
-                </Label>
-                <Controller
-                    control={control}
-                    defaultValue={editValues?.group || '' }
-                    name="group"
-                    render={({ field: { value, onChange} }) => {
-                        return (
-                            <Select
-                                name="group"
-                                id="group"
-                                classNamePrefix='select'
-                                isClearable
-                                className={classnames('react-select', { 'is-invalid': errors.group })}
-                                isLoading={isLoading}
-                                placeholder={t(`-- Сонгоно уу --`)}
-                                options={groupOption || []}
-                                value={groupOption.find((c) => c.id === (value || editValues?.group))}
-                                noOptionsMessage={() => t('Хоосон байна.')}
-                                onChange={(val) => {
-                                    onChange(val?.id || '')
-                                    groupSelect(val)
-                                }}
-                                isMulti
-                                isSearchable={true}
-                                styles={ReactSelectStyles}
-                                getOptionValue={(option) => option.id}
-                                getOptionLabel={(option) => option.name}
-                            />
-                        )
-                    }}
-                ></Controller>
-                {errors.group && <FormFeedback className='d-block'>{t(errors.group.message)}</FormFeedback>}
-            </Col>
+            <Row className=''>
+                    <Col className='d-flex align-items-center justify-content-start ms-0 mt-1' md={6} sm={12} >
+                        <Input
+                            id="is_optional"
+                            className="dataTable-check mb-50 me-1"
+                            type="checkbox"
+                            bsSize="sm-5"
+                            onChange={(e) => handleCheck(e)}
+                            checked={checked}
+                        />
+                        <Label className="checkbox-wrapper" for="is_optional">
+                            {t('Сонгон хичээл')}
+                        </Label>
+                    </Col>
+                </Row>
+                <Col md={6} sm={12}>
+                    <Label className="form-label" for="kurs">
+                        { checked ? t("Сонгон хичээл сонгох курс") : t("Курс")}
+                    </Label>
+                    <Select
+                        name="kurs"
+                        id="kurs"
+                        classNamePrefix='select'
+                        isClearable
+                        className={classnames('react-select')}
+                        isLoading={groupLoading}
+                        placeholder={t(`-- Сонгоно уу --`)}
+                        options={levelOptions || []}
+                        value={levelOptions.find((c) => c.id === kurs)}
+                        noOptionsMessage={() => t('Хоосон байна.')}
+                        onChange={(val) => {
+                            setKurs(val)
+                        }}
+                        isMulti
+                        isSearchable={true}
+                        styles={ReactSelectStyles}
+                        getOptionValue={(option) => option.id}
+                        getOptionLabel={(option) => option.name}
+                    />
+                </Col>
+            {
+                // !checked &&
+                <>
+                    <Col sm={12}>
+                        <Label className="form-label" for="group">
+                            {t("Анги хэсэг")}
+                        </Label>
+                        {errors.group && <FormFeedback className='d-block'>{t(errors.group.message)}</FormFeedback>}
+                        <div className='border p-1'>
+                            <div className="d-flex justify-content-start">
+                                <div>
+                                    <Input
+                                        type='checkbox'
+                                        id='all'
+                                        className=' me-1'
+                                        bsSize="md"
+                                        checked={selectedGroups?.length === groupOption?.length ? true : false}
+                                        onChange={(e) => handleAllCheck(e)}
+                                    />
+                                </div>
+                                <Label for='all'>{'Бүгд'}</Label>
+                            </div>
+                            {
+                                groupOption?.map((group, idx) =>
+                                    <div className=" d-flex justify-content-start" key={idx}>
+                                        <div>
+                                            <Input
+                                                type='checkbox'
+                                                id='checked'
+                                                className=' me-1'
+                                                bsSize="md"
+                                                checked={selectedGroups?.find((c) => c == group?.id)}
+                                                onChange={(e) => handleOneSelect(e, group?.id)}
+                                            />
+                                        </div>
+                                        <Label>{group?.name}</Label>
+                                    </div>
+                                )
+                            }
+                        </div>
+                    </Col>
+                </>
+            }
             {
                 studyType === 3
                 &&
@@ -814,7 +1039,7 @@ const Kurats = ({  handleRoomModal, editValues, handleModal, roomModal,  is_load
                         {errors.addgroup && <FormFeedback className='d-block'>{t(errors.addgroup.message)}</FormFeedback>}
                     </Col>
             }
-            <Col sm={12} className='mt-1'>
+            {/* <Col sm={12} className='mt-1'>
                 <Label className="form-label" for="students">
                     {t("Нэмэлтээр судалж буй оюутан")}
                 </Label>
@@ -885,11 +1110,11 @@ const Kurats = ({  handleRoomModal, editValues, handleModal, roomModal,  is_load
                     }}
                 ></Controller>
                 {errors.exclude_student && <FormFeedback className='d-block'>{errors.exclude_student.message}</FormFeedback>}
-            </Col>
+            </Col> */}
             <Col md={12} sm={12} className="mt-2 d-flex justify-content-start mb-0">
                 <Button color="primary" type="submit" disabled={is_loading}>
                     {is_loading && <i className={`fas fa-spinner-third fa-spin me-2`}></i>}
-                    {t('Хадгалах')}
+                    {t('Хадгалаад нэмэх')}
                 </Button>
                 <Button className='ms-1' color="secondary" type="reset" outline  onClick={handleModal}>
                     {t("Буцах")}

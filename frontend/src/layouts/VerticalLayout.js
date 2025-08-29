@@ -89,6 +89,9 @@ const VerticalLayout = (props) => {
                         'study3',
                     );
 
+                    /** ----------------------------- Сургалт/If user is student ---------------------------- */
+                    childrenDatas = getStudentMenu(childrenDatas, menus, user)
+
                     /** ----------------------------Лавлах сан ------------------------------- */
 
                     /** Сургууль */
@@ -997,3 +1000,23 @@ const VerticalLayout = (props) => {
 };
 
 export default VerticalLayout;
+
+// to define menu just by id in this array
+const studentMenuChildIds = [
+    'lesson-schedule',
+    'examination-schedule',
+    'offer-study-plan',
+    'score-teacher',
+    'score-information',
+    'student-attendance',
+    'student-graduation',
+]
+
+function getStudentMenu(saveData, menus, user) {
+    if (user.is_student) {
+        const navChildren = menus.navChildren.filter((child) => studentMenuChildIds.includes(child.id));
+        if (navChildren.length > 0) saveData = [...saveData, ...navChildren]
+    }
+
+    return saveData
+}
