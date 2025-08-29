@@ -5019,12 +5019,7 @@ class UserStudentScoreTeacherAPIView(
                         take_score=F('score_type__score')
                     ).values('type_name', 'score', 'take_score')
             )
-            print(TeacherScore.objects
-                    .filter(student=student, lesson_year=lesson_year, lesson_season=lesson_season, score_type__lesson_teacher__lesson__code=lesson.get('score_type__lesson_teacher__lesson__code'), score_type__lesson_teacher__teacher__first_name=lesson.get('score_type__lesson_teacher__teacher__first_name'))
-                    .annotate(
-                        type_name=F('score_type__name'),
-                        take_score=F('score_type__score')
-                    ).values('type_name', 'score', 'take_score').query)
+
             # Нийт оноо
             total = (
                 TeacherScore.objects
