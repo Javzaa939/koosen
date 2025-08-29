@@ -1014,8 +1014,8 @@ const studentMenuChildIds = [
 
 function getStudentMenu(saveData, menus, user) {
     if (user.is_student) {
-        const navChildren = menus.navChildren.filter((child) => studentMenuChildIds.includes(child.id));
-        if (navChildren.length > 0) saveData = [...saveData, ...navChildren]
+        const navChildrens = menus.navChildren.filter((child) => studentMenuChildIds.includes(child.id));
+        if (navChildrens.length > 0) saveData = [...saveData, ...navChildrens]
     }
 
     return saveData

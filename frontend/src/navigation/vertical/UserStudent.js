@@ -8,7 +8,7 @@ export default [
         title: 'Cургалт',
         icon: <i className="fal fa-book"></i>,
         navLink: "/lesson",
-        children: [
+        navChildren: [
 
             {
                 id: 'lesson-schedule',
