@@ -704,6 +704,8 @@ class Employee(models.Model):
     STATE_LEFT = 3
     STATE_MOVE = 4
     STATE_RETIRED = 5
+    STATE_PREGNANT = 6
+    STATE_CHILD_CARE = 7
 
     STATE = (
         (STATE_WORKING, "Ажиллаж байгаа"),
@@ -711,6 +713,8 @@ class Employee(models.Model):
         (STATE_LEFT, "Гарсан"),
         (STATE_MOVE, "Шилжсэн"),
         (STATE_RETIRED, "Тэтгэвэрт гарсан"),
+        (STATE_PREGNANT, "Жирэмсэны амралт"),
+        (STATE_CHILD_CARE, "Хүүхэд асрах чөлөө"),
     )
 
     WORKER_TYPE_CONTRACT = 1
