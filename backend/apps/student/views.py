@@ -5019,7 +5019,12 @@ class UserStudentScoreTeacherAPIView(
                         take_score=F('score_type__score')
                     ).values('type_name', 'score', 'take_score')
             )
-
+            print(TeacherScore.objects
+                    .filter(student=student, lesson_year=lesson_year, lesson_season=lesson_season, score_type__lesson_teacher__lesson__code=lesson.get('score_type__lesson_teacher__lesson__code'), score_type__lesson_teacher__teacher__first_name=lesson.get('score_type__lesson_teacher__teacher__first_name'))
+                    .annotate(
+                        type_name=F('score_type__name'),
+                        take_score=F('score_type__score')
+                    ).values('type_name', 'score', 'take_score').query)
             # Нийт оноо
             total = (
                 TeacherScore.objects
@@ -5115,7 +5120,7 @@ class UserStudentScoreInformationAPIView(
                         "teacher_code": register_code if register_code else "",
                         "teacher_full_name": get_fullName(eachSeason.teacher.last_name, eachSeason.teacher.first_name, True, True) if eachSeason.teacher else "",
                         "index_score": index_score,
-                        "gpa": assessment.gpa if score else "",
+                        "gpa": assessment.gpa if assessment else "",
                     }
                 )
                 # хичээлийн кр
@@ -5233,7 +5238,7 @@ class UserStudentDetailedScoreAPIView(
             for eachScore in score_info[key]:
                 assessments = None
                 status_num = None
-                gpa = ''
+                gpa = 0
 
                 total_scores = eachScore.score_total
                 status_num = eachScore.status

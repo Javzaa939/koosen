@@ -55,13 +55,13 @@ const CTable = ({ data, title }) => {
                         })
                     }
 
-                    <tr style={{textAlign: "center"}} ><td></td>
-                        <th colSpan={1}>Нийт</th>
+                    <tr style={{textAlign: "center"}} >
+                        <th colSpan={2}>Нийт</th>
                         <th></th>
-                        <th colSpan={1}>{data.total.kredit}</th>
-                        <th colSpan={1}>{data.total.onoo}</th>
-                        <th style={{textAlign: "center"}} colSpan={1}>Улирлын голч дүн: {data.total.gpa}</th>
-                        <th style={{textAlign: "center"}} colSpan={1}>{data.total.total_index_score}</th>
+                        <th>{data.total.kredit}</th>
+                        <th>{data.total.onoo}</th>
+                        <th style={{textAlign: "center"}}>Улирлын голч дүн: {data.total.gpa}</th>
+                        <th style={{textAlign: "center"}}>{data.total.total_index_score}</th>
                     </tr>
                 </tbody>
             </Table>

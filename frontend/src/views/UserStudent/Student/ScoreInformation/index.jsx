@@ -94,7 +94,7 @@ const ScoreInformation = () => {
                                         />
                                     </div>
                                 ))}
-                                {total_kr && total_onoo && total_gpa && assessmentCounts.length > 0 && (
+                                {total_kr && total_onoo && total_gpa && assessmentCounts.length > 0 ? (
                                     <div className='mb-0'>
                                         <Table size='sm' bordered responsive>
                                             <tbody>
@@ -112,7 +112,7 @@ const ScoreInformation = () => {
                                             </tbody>
                                         </Table>
                                     </div>
-                                )}
+                                ) : <></>}
                             </Col>
                         </Row>
                     </>

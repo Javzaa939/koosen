@@ -209,28 +209,20 @@ class Lesson_to_teacher(models.Model):
     class Meta:
         unique_together = ('lesson', 'teacher')
 
+
+class TeacherScoreType(models.Model):
+    """ Дүнгийн төрөл """
+
+    name = models.CharField(max_length=255, verbose_name='Нэр')
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+
+
 class Lesson_teacher_scoretype(models.Model):
 
-    QUIZ1 = 1
-    QUIZ2 = 2
-    IRTS = 3
-    BIEDAALT1 = 4
-    BIEDAALT2 = 5
-    BUSAD = 6
-    SHALGALT_ONOO = 7
-
-    SCORE_TYPE = (
-        (QUIZ1, "Сорил 1"),
-        (QUIZ2, "Сорил 2"),
-        (IRTS, "Ирц"),
-        (BIEDAALT1, "Бие даалт 1"),
-        (BIEDAALT2, "Бие даалт 2"),
-        (BUSAD, "Бусад"),
-        (SHALGALT_ONOO, "30 онооны шалгалт"),
-    )
-
-    lesson_teacher = models.ForeignKey(Lesson_to_teacher, on_delete=models.PROTECT, verbose_name="Хичээл багш")
-    score_type = models.PositiveIntegerField(choices=SCORE_TYPE, db_index=True, default=BUSAD, verbose_name="Дүгнэх хэлбэр")
+    lesson_teacher = models.ForeignKey(Lesson_to_teacher, on_delete=models.CASCADE, verbose_name="Хичээл багш")
+    score_type = models.ForeignKey(TeacherScoreType, on_delete=models.PROTECT, null=True, verbose_name="Дүнгийн задаргааны төрөл")
+    name = models.CharField(verbose_name='Багшийн дүнгээ задлах нэр', null=True, max_length=255)
     score = models.FloatField(verbose_name="Дүгнэх хэлбэрт харгалзах багшийн оноо")
 
     created_at = models.DateTimeField(auto_now_add=True)

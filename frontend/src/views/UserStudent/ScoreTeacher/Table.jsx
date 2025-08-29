@@ -29,7 +29,7 @@ const CTable = ({ data, title }) => {
                     {
                         data.scores.map((value, index) => {
                             return (
-                                    <tr  >
+                                    <tr key={index}>
                                         <th scope="row">{index+1}</th>
                                         <td>{value?.type_name}</td>
                                         <td>{value?.take_score}</td>
