@@ -4941,7 +4941,7 @@ class UserStudentSeasonChooseApiView(
     def post(self, request, lesson_id):
         try:
             # to get student id
-            student_login_obj = request.use
+            student_login_obj = request.user
             student_id = student_login_obj.student.id
 
             # to get year, season
