@@ -669,7 +669,7 @@ function useApi(isDisplay=false) {
 				get: (limit, page, school_id, search) => instance.get(`/core/position/?page=${page}&limit=${limit}&school=${school_id}&search=${search}`),
 				getList: () => instance.get(`/core/position/list/?school=${school_id}`),
 				getOne: (pk) => instance.get(`/core/position/${pk}/`),
-				getPerList: () => instance.get(`/core/permission/`),
+				getPerList: () => instance.get(`/core/position/permission/`),
 				post: (data) => instance.post(`/core/position/`, data),
 				put: (data, pk) => instance.put(`/core/position/${pk}/`, data),
 				delete: (pk) => instance.delete(`/core/position/${pk}/`),
@@ -2301,6 +2301,39 @@ function useApi(isDisplay=false) {
 			},
 		},
 
+		// for student login
+		userStudent: {
+			student: {
+				schedule: {
+					get:(student_id,start='',end='',month='') => instance.get(`/student/user-student/schedule/${student_id}/?year=${cyear_name}&season=${cseason_id}&start=${start}&end=${end}&month=${month}`),
+				},
+				/** санал болгох төлөвлөгөө */
+				learningplan: {
+					get:() => instance.get(`/student/user-student/plan/?year=${cyear_name}&season=${cseason_id}`),
+					retake: ({lesson_id, data}) => instance.post(`/student/user-student/plan/retake/${lesson_id}/`, data)
+				},
+				// Хичээлийн талаар дэлгэрэнгүй мэдээлэл харах API. Хүссэн газраа ашиглаж болно
+				lessondetail: {
+					get:(lesson_id) => instance.get(`/student/user-student/plan/lessondetail/${lesson_id}`),
+				},
+				score: {
+					getTeacher:() =>
+						instance.get(`/student/user-student/score-teacher/`),
+				},
+				/** Дүнгийн мэдээлэл */
+				scoreregister: {
+					get: (student_id) => instance.get(`/student/user-student/scoreregister/${student_id}/?year=${cyear_name}&season=${cseason_id}`),
+					get2: (id) => instance.get(`/student/user-student/score-register/?id=${id}`),
+				},
+				allscore: {
+					get:(student_id) =>
+						instance.get(`/student/user-student/allscore/${student_id}/`),
+				},
+				regirts: {
+					get: () => instance.get(`/student/user-student/irts/`)
+				},
+			},
+		},
 	}
 }
 

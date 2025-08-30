@@ -208,28 +208,20 @@ class Lesson_to_teacher(models.Model):
     class Meta:
         unique_together = ('lesson', 'teacher')
 
+
+class TeacherScoreType(models.Model):
+    """ Дүнгийн төрөл """
+
+    name = models.CharField(max_length=255, verbose_name='Нэр')
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+
+
 class Lesson_teacher_scoretype(models.Model):
 
-    QUIZ1 = 1
-    QUIZ2 = 2
-    IRTS = 3
-    BIEDAALT1 = 4
-    BIEDAALT2 = 5
-    BUSAD = 6
-    SHALGALT_ONOO = 7
-
-    SCORE_TYPE = (
-        (QUIZ1, "Сорил 1"),
-        (QUIZ2, "Сорил 2"),
-        (IRTS, "Ирц"),
-        (BIEDAALT1, "Бие даалт 1"),
-        (BIEDAALT2, "Бие даалт 2"),
-        (BUSAD, "Бусад"),
-        (SHALGALT_ONOO, "30 онооны шалгалт"),
-    )
-
-    lesson_teacher = models.ForeignKey(Lesson_to_teacher, on_delete=models.PROTECT, verbose_name="Хичээл багш")
-    score_type = models.PositiveIntegerField(choices=SCORE_TYPE, db_index=True, default=BUSAD, verbose_name="Дүгнэх хэлбэр")
+    lesson_teacher = models.ForeignKey(Lesson_to_teacher, on_delete=models.CASCADE, verbose_name="Хичээл багш")
+    score_type = models.ForeignKey(TeacherScoreType, on_delete=models.PROTECT, null=True, verbose_name="Дүнгийн задаргааны төрөл")
+    name = models.CharField(verbose_name='Багшийн дүнгээ задлах нэр', null=True, max_length=255)
     score = models.FloatField(verbose_name="Дүгнэх хэлбэрт харгалзах багшийн оноо")
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -2926,7 +2918,8 @@ class PermissionsOtherInterval(models.Model):
     EXAM_QUESTION = 8
     EXAM = 9
     TEACHER_TIME = 10
-    PRACTICE = 10
+    PRACTICE = 11
+    STUDENT_TIMETABLE = 12
 
     PERMISSION_TYPE=(
         (TIMETABLE, "Хичээлийн хуваарийн эрх"),
@@ -2939,7 +2932,8 @@ class PermissionsOtherInterval(models.Model):
         (EXAM_QUESTION, "Шалгалтын даалгавар оруулах хугацаа"),
         (EXAM, "Шалгалтын хуваарь үүсгэх хугацаа"),
         (TEACHER_TIME, "Багш багц цагт тооцох мэдээлэл оруулах хугацаа"),
-        (PRACTICE, "Дадлагын оноо байршуулах хугацаа")
+        (PRACTICE, "Дадлагын оноо байршуулах хугацаа"),
+        (STUDENT_TIMETABLE, "Оюутны хичээл сонголтын эрх"),
     )
 
     org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага", null=True)
@@ -4912,3 +4906,15 @@ class MentalStudent(models.Model):
 
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+# region for student login
+class SeasonChoose(models.Model):
+    """ Өвөл зуны сургалт"""
+
+    lesson = models.ForeignKey(LessonStandart, on_delete=models.PROTECT, verbose_name='хичээл')
+    student = models.ForeignKey(Student, on_delete=models.PROTECT, verbose_name='Оюутан')
+    created_at = models.DateTimeField(auto_now_add=True)
+    lesson_year = models.CharField( max_length=20, verbose_name='Хичээлийн жил', null=True)
+    lesson_season = models.ForeignKey(Season, verbose_name='Идэвхтэй улирал', on_delete=models.PROTECT, null=True)
+# endregion for student login
