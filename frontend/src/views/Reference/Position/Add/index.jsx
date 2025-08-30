@@ -210,39 +210,6 @@ const AddModal = ({ open, handleModal, refreshDatas, permission_option, mainPosi
                             {errors.description && <FormFeedback className='d-block'>{errors.description.message}</FormFeedback>}
                         </Col>
                         <Col md={12}>
-                            <Label className="form-label" for="main_position">
-                                {t('Үндсэн албан тушаалын төрлүүд')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                name="main_position"
-                                render={({ field: { value, onChange} }) => {
-                                    return (
-                                        <Select
-                                            name="main_position"
-                                            id="main_position"
-                                            classNamePrefix='select'
-                                            isClearable
-                                            className={classnames('react-select', { 'is-invalid': errors.main_position })}
-                                            isLoading={postLoading}
-                                            placeholder={t(`-- Сонгоно уу --`)}
-                                            options={mainPositionData || []}
-                                            value={mainPositionData.find((c) => c.id === mainPositionId)}
-                                            noOptionsMessage={() => t('Хоосон байна.')}
-                                            onChange={(val) => {
-                                                onChange(val?.id || '')
-                                                setMainPositionId(val?.id || '')
-                                            }}
-                                            styles={ReactSelectStyles}
-                                            getOptionValue={(option) => option.id}
-                                            getOptionLabel={(option) => option.name}
-                                        />
-                                    )
-                                }}
-                            />
-                        </Col>
-                        <Col md={12}>
                             <Label className="form-label" for="permissions">
                                 {t('Эрх нэмэх')} <span style={{ color: 'red' }}>*</span>
                             </Label>
