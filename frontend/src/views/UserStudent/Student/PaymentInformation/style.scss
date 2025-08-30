@@ -1,0 +1,77 @@
+
+
+table thead th.leftHeader {
+    vertical-align: top;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: linear-gradient(118deg, #144e97, rgba(20, 78, 151, 0.9)) !important;
+    color: #fff !important;
+    height: 39px !important;
+    padding-top: 11px !important;
+}
+
+table tbody td.leftHeader {
+    padding-left: 6px !important;
+}
+
+table tbody td.lrow {
+    color: #144e97 !important;
+}
+
+// Dark
+.dark-layout{
+    table, th, td, tr {
+        background-color: transparent!important;
+    }
+    tr:nth-child(even) {
+        background-color: #00000018!important;
+    }
+    .table-striped > tbody > tr:nth-of-type(odd) > * {
+        --bs-table-accent-bg: #000a22 !important;
+    }
+    .table tbody td.lrow {
+        color: #b4b7bd !important;
+    }
+}
+
+.dark-layout .table.table-striped tbody tr:nth-of-type(odd) {
+    --bs-table-accent-bg: #242b3d;
+}
+
+.payment-card-img {
+    height: 200px !important;
+}
+
+.payment-card-money {
+    font-size: 14.72px !important;
+}
+
+.payment-card {
+    font-size: 12px !important;
+}
+
+@media (max-width: 613px) {
+    .payment-card-img {
+        height: 234px !important;
+    }
+}
+
+@media (max-width: 613px) {
+    .payment-card-money {
+        font-size: 11px !important;
+    }
+
+    .payment-card {
+        font-size: 10px !important;
+    }
+}
+
+@media (max-width: 400px) {
+    .payment-card-money {
+        font-size: 10px !important;
+    }
+
+    .payment-card {
+        font-size: 9px !important;
+    }
+}
