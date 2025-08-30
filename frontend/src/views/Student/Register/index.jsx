@@ -753,7 +753,7 @@ const Register = () => {
                             getOptionLabel={(option) => option.name}
                         />
                     </Col>
-                    <Col sm={6} md={3} className='mt-1'>
+                    {/* <Col sm={6} md={3} className='mt-1'>
                         <Label className="form-label" for="isPayed">
                             {t("Тухайн хичээлийн жилийн систем ашиглалтын төлбөр төлсөн эсэх")}
                         </Label>
@@ -773,7 +773,7 @@ const Register = () => {
                             onChange={(val) => setIsPayed(val?.value)}
                             styles={ReactSelectStyles}
                         />
-                    </Col>
+                    </Col> */}
                 </Row>
                 <Row className='justify-content-between mx-0'>
                     <Col className='d-flex align-items-center justify-content-start mt-1' md={6} sm={12}>
