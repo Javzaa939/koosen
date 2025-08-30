@@ -131,8 +131,8 @@ export default function StudentPayment({ template }) {
                             <Legend />
                             <Tooltip content={CustomTooltip} cursor={{ fill: 'rgba(148, 148, 148, 0.1)' }} />
 
-                            <Bar dataKey={datas.labels_level2[0].key} name={datas.labels_level2[0].label} fill="#4287f5" radius={[50, 50, 0, 0]} />
-                            <Bar dataKey={datas.labels_level2[1].key} name={datas.labels_level2[1].label} fill='#dc8ee6' radius={[50, 50, 0, 0]} />
+                            <Bar dataKey={datas?.labels_level2?.[0]?.key} name={datas?.labels_level2?.[0]?.label} fill="#4287f5" radius={[50, 50, 0, 0]} />
+                            <Bar dataKey={datas?.labels_level2?.[1]?.key} name={datas?.labels_level2?.[1]?.label} fill='#dc8ee6' radius={[50, 50, 0, 0]} />
 
                         </BarChart>
                     </ResponsiveContainer>

@@ -92,18 +92,18 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
             sortable: true,
 			center: true
         },
-		{
-			header: 'is_payed',
-			name: t("Төлбөр төлөгдсөн эсэх"),
-			selector: (row) => (
-				<Badge color="light-primary" pill>
-					{row.is_payed ? t('Төлбөр төлөгдсөн') : t('Төлбөр төлөгдсөнгүй')}
-				</Badge>
-			),
-            sortable: true,
-			center: true,
-			minWidth: "200px",
-        },
+		// {
+		// 	header: 'is_payed',
+		// 	name: t("Төлбөр төлөгдсөн эсэх"),
+		// 	selector: (row) => (
+		// 		<Badge color="light-primary" pill>
+		// 			{row.is_payed ? t('Төлбөр төлөгдсөн') : t('Төлбөр төлөгдсөнгүй')}
+		// 		</Badge>
+		// 	),
+        //     sortable: true,
+		// 	center: true,
+		// 	minWidth: "200px",
+        // },
 	]
 
 	if(Object.keys(user).length > 0) {
