@@ -4,12 +4,16 @@ import traceback
 import requests
 from googletrans import Translator
 import openpyxl_dictreader
+import pandas as pd
 
 from datetime import date, datetime, time, timedelta
 
 from rest_framework import mixins
 from rest_framework import generics
-import pandas as pd
+from rest_framework.response import Response
+from rest_framework.filters import SearchFilter
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import permission_classes, api_view
 
 from django.conf import settings
 from django.db import transaction
@@ -18,21 +22,19 @@ from django.db.models.functions import Replace, Upper, Coalesce
 from django.contrib.auth.hashers import make_password
 from django.db import connection
 from django.utils import timezone
+from django.utils.timezone import now
 
-from main.utils.function.pagination import CustomPagination
 from main.decorators import login_required
 
-from rest_framework.filters import SearchFilter
-from main.utils.file import remove_folder, split_root_path
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import permission_classes
+from main.utils.file import remove_folder, split_root_path, save_file, remove_folder
 from main.utils.function.pagination import CustomPagination
 from main.utils.function.utils import (
-    str2bool, has_permission, get_lesson_choice_student, remove_key_from_dict, get_fullName, get_student_score_register, calculate_birthday, null_to_none,
+    json_dumps, str2bool, has_permission, get_lesson_choice_student, remove_key_from_dict, get_fullName, get_student_score_register, calculate_birthday, null_to_none,
     bytes_image_encode, get_active_year_season,start_time, json_load, dict_fetchall, unit_static_datas, undefined_to_none, add_student_eng_name
 )
+
 # from main.khur.XypClient import citizen_regnum, highschool_regnum
-from main.utils.file import save_file, remove_folder
+
 from lms.models import Learning, Payment, PermissionsOtherInterval, ProfessionalDegree, SeasonChoose, Student, StudentAdmissionScore, StudentEducation, StudentLeave, StudentLogin, TimeTable
 from lms.models import StudentMovement
 from lms.models import Group
@@ -63,6 +65,7 @@ from lms.models import PaymentBeginBalance
 from lms.models import Country, ProfessionAverageScore, AttachmentConfig, ProfessionDefinition, StudentMedal, MedalType
 
 from core.models import SubOrgs, AimagHot, SumDuureg, User, Salbars
+from main.utils.qpay import Qpay
 
 from .serializers import StudentListSerializer, UserStudentLearningPlanSerializer, UserStudentLessonDetailSerializer, UserStudentLessonScheduleSerializer, UserStudentRegisterIrtsTimeTableSerializer, UserStudentScoreInformationListSerializer, UserStudentScoreRegisterPrintSerializer, UserStudentStudentAttachmentSerializer
 from .serializers import StudentRegisterSerializer
@@ -5438,4 +5441,64 @@ class UserStudentStudentScoreRegisterAPIView(
         all_data['calculated_length'] = calculated_gpa_qs_count
 
         return request.send_data(all_data)
+
+
+def check_and_save_payment(payment, data):
+    """
+        Qpay-ээр төлбөр төлөгдсөн байвал бааз руу төлөгдсөн утгуудыг хадгалах
+    """
+
+    is_paid = False
+
+    # Хэрвээ төлбөр төлөгдсөн бол rows-ийн дата нь үнэн. Мөн payment_status = PAID байна!
+    rows = data['rows']
+
+    if len(rows) > 0:
+        # NOTE Төлбөрийн бүх мэдээлэл энд байгаа!
+        payment_data = rows[0]
+
+        if 'paid' == payment_data['payment_status'].lower():
+            is_paid = True
+
+            # NOTE төлбөр төлөгдсөн байна гэсэн үг!
+            payment.status = is_paid
+            payment.payed_date = now()
+            payment.invoice_type = 2
+            payment.bank_unique_number = payment_data['payment_id']
+
+            payment.paid_rsp = json_dumps(data)
+            payment.save()
+
+    return is_paid
+
+
+@api_view(['GET'])
+def check_qpay(request):
+    """
+        QPay талаас дуудах функц
+    """
+
+    unique_id = request.GET.get('unique_id')
+
+    purchase = Payment.objects.filter(unique_id=unique_id).first()
+
+    # NOTE purchase болон purchase-ийн qpay_rsp заавал байх ёстой!
+    if not purchase or not purchase.qpay_rsp:
+        return request.send_error('ERR_001', 'Тухайн хүсэлтийн мэдээлэл байхгүй байна')
+
+    json_qpay = json_load(purchase.qpay_rsp)
+
+    qpay = Qpay(unique_id)
+    check_state, rsp_check = qpay.check(json_qpay['invoice_id'])
+
+    if not check_state:
+        return request.send_error('ERR_001', 'QPay дээр хүсэлт шалгахад алдаа гарсан байна')
+
+    # NOTE төлбөр төлөгдсөн эсэхийг шалгаж бааз руу хадгалах
+    is_success = check_and_save_payment(purchase, rsp_check)
+
+    if not is_success:
+        return request.send_error('ERR_002', 'Төлбөр төлөгдөөгүй байна')
+
+    return Response({"success": is_success, 'info': 'Амжилттай төлөгдлөө'})
 # endregion for student login

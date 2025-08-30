@@ -1370,80 +1370,6 @@ class ScoreRegister(models.Model):
 
 
 #------------------------------------Сургалтын төлбөр------------------------------------------------
-
-class Payment(models.Model):
-
-    class Meta:
-        db_table = 'lms_payment'
-
-    KIND_MONGOLBANK = 1
-    KIND_QPAY = 2
-
-    KIND_CHOICES = (
-        (KIND_MONGOLBANK, 'Монгол Банк'),
-        (KIND_QPAY, 'QPay'),
-    )
-
-    STUDY = 1
-    DORMITORY = 2
-    SPORT = 3
-    GYM = 4
-    SYSTEM = 5
-    ADMISSION = 6
-
-    PAYMENT_FOR = (
-        (STUDY, "Сургалтын төлбөр"),
-        (DORMITORY, "Дотуур байрны төлбөр"),
-        (SPORT, "Заалны түрээс"),
-        (GYM, "Фитнесийн төлбөр"),
-        (SYSTEM, "Програм ашигласны төлбөр"),
-        (ADMISSION, "Элсэлтийн хураамж"),
-    )
-
-    user = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
-    student = models.ForeignKey(Student, on_delete=models.PROTECT, null=True)
-    admission = models.ForeignKey(to='elselt.ElseltUser', on_delete=models.PROTECT, null=True)
-
-    total_amount = models.FloatField(null=True)
-    kind = models.PositiveIntegerField(choices=KIND_CHOICES, db_index=True, null=True)
-    dedication = models.PositiveBigIntegerField(choices=PAYMENT_FOR, db_index=True, default=STUDY, verbose_name="Төлбөрийн зориулалт")
-
-    unique_id = models.CharField(max_length=300, verbose_name='qpay үүсгэхэд шаардаг unique id', null=True)
-    card_number = models.CharField(max_length=500, null=True)
-    bank_unique_number = models.CharField(max_length=300, verbose_name='payment_id буюу банкнаас төлбөр төлсөн эсэхийг илтгэх id')
-    mongolbank_rsp = models.TextField(null=True, verbose_name='Mongol bank response')
-
-    qpay_rsp = models.TextField(null=True, verbose_name='QPay bank response')
-    q_text = models.CharField(max_length=500, verbose_name="Данс болон картын гүйлгээ дэмжих QR утга", null=True)
-    qr_image = models.CharField(max_length=20000, verbose_name="Зурган хэлбэрээр үүсэх QR", null=True)
-
-    paid_rsp = models.TextField(null=True, verbose_name="QPay дээр төлбөр төлөгдсөн эсэхийг илтгэх")
-
-    status = models.BooleanField(default=False, verbose_name="Төлбөр төлөгдсөн эсэхийг илтгэх")
-    payed_date = models.DateTimeField(verbose_name="Төлсөн огноо", null=True)
-    description = models.CharField(max_length=500, null=True, verbose_name="Гүйлгээний утга")
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    @property
-    def qpay_total_amount(self):
-        qpay_payment_total = 0
-
-        paid_rsp = self.paid_rsp
-
-        if paid_rsp:
-            paid_rsp = json.loads(paid_rsp)
-
-            rows = paid_rsp.get('rows') if paid_rsp else None
-
-            for row in rows:
-                payment_amount = row.get('payment_amount') or 0
-                qpay_payment_total += float(payment_amount)
-
-        return qpay_payment_total
-
-
 class StudentOnlinePayment(models.Model):
     """ Онлайн төлөлтийн мэдээлэл оюутны"""
 
@@ -1593,6 +1519,168 @@ class PaymentBalance(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class QPayToken(models.Model):
+    """
+        qpay token
+    """
+
+    class Meta:
+        db_table = 'lms_qpaytoken'
+
+    token = models.CharField(max_length=500, null=False, blank=False, verbose_name="Токен")
+    refresh_token = models.CharField(max_length=500, null=False, blank=False, verbose_name="Шинэчилэх токен")
+    expire_date = models.DateTimeField(verbose_name="Токен дуусах хугацаа")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class QPaySettingsUser(models.Model):
+    """
+        qpay болон gateway тохиргоо
+    """
+
+    class Meta:
+        db_table = 'lms_qpaysettingsuser'
+
+    school = models.OneToOneField(SubOrgs, on_delete=models.CASCADE, null=True, verbose_name='Сургууль')
+    qpay_api_url = models.CharField(verbose_name="QPAY API зам", max_length=500)
+    qpay_api_username = models.CharField(verbose_name="Qpay api username", default="", max_length=500)
+    qpay_api_password = models.CharField(verbose_name="Qpay api password", default="", max_length=500)
+    qpay_api_call = models.CharField(max_length=200, verbose_name="QPay api call_back", default="")
+    qpay_api_invoice_code = models.CharField(max_length=200, verbose_name="QPay invoice_code", default="")
+
+    account_number = models.CharField(max_length=256, null=True, blank=True, verbose_name="Дансны дугаар")
+    corp_password = models.CharField(max_length=256, null=True, blank=True, verbose_name="Хуулга татах нууц үг")
+    corp_username = models.CharField(max_length=255, null=True, blank=True, verbose_name="Хуулга татах хэрэглэгч")
+    corp_api_url = models.CharField(max_length=500, null=True, blank=True, verbose_name="API зам")
+
+
+class Payment(models.Model):
+
+    class Meta:
+        db_table = 'lms_payment'
+
+    KIND_MONGOLBANK = 1
+    KIND_QPAY = 2
+
+    KIND_CHOICES = (
+        (KIND_MONGOLBANK, 'Монгол Банк'),
+        (KIND_QPAY, 'QPay'),
+    )
+
+    STUDY = 1
+    DORMITORY = 2
+    SPORT = 3
+    GYM = 4
+    SYSTEM = 5
+    ADMISSION = 6
+
+    PAYMENT_FOR = (
+        (STUDY, "Сургалтын төлбөр"),
+        (DORMITORY, "Дотуур байрны төлбөр"),
+        (SPORT, "Заалны түрээс"),
+        (GYM, "Фитнесийн төлбөр"),
+        (SYSTEM, "Програм ашигласны төлбөр"),
+        (ADMISSION, "Элсэлтийн хураамж"),
+    )
+
+    WAITING = 1
+    PAYED = 2
+    CANCEL = 3
+
+    INVOICE_TYPE = (
+        (WAITING, 'Хүлээгдэж буй'),
+        (PAYED, 'Баталгаажсан'),
+        (CANCEL, 'Цуцалсан'),
+    )
+
+    user = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
+    student = models.ForeignKey(Student, on_delete=models.PROTECT, null=True)
+    admission = models.ForeignKey(to='elselt.ElseltUser', on_delete=models.PROTECT, null=True)
+
+    total_amount = models.FloatField(null=True)
+    kind = models.PositiveIntegerField(choices=KIND_CHOICES, db_index=True, null=True)
+    dedication = models.PositiveBigIntegerField(choices=PAYMENT_FOR, db_index=True, default=STUDY, verbose_name="Төлбөрийн зориулалт")
+
+    unique_id = models.CharField(max_length=300, verbose_name='qpay үүсгэхэд шаардаг unique id', null=True)
+    card_number = models.CharField(max_length=500, null=True)
+    bank_unique_number = models.CharField(max_length=300, verbose_name='payment_id буюу банкнаас төлбөр төлсөн эсэхийг илтгэх id')
+    mongolbank_rsp = models.TextField(null=True, verbose_name='Mongol bank response')
+
+    qpay_rsp = models.TextField(null=True, verbose_name='QPay bank response')
+    q_text = models.CharField(max_length=500, verbose_name="Данс болон картын гүйлгээ дэмжих QR утга", null=True)
+    qr_image = models.CharField(max_length=20000, verbose_name="Зурган хэлбэрээр үүсэх QR", null=True)
+
+    paid_rsp = models.TextField(null=True, verbose_name="QPay дээр төлбөр төлөгдсөн эсэхийг илтгэх")
+    invoice_type = models.PositiveIntegerField(choices=INVOICE_TYPE, db_index=True, default=WAITING, verbose_name="Нэхэмжлэлийн төлөв")
+
+    status = models.BooleanField(default=False, verbose_name="Төлбөр төлөгдсөн эсэхийг илтгэх")
+    payed_date = models.DateTimeField(verbose_name="Төлсөн огноо", null=True)
+    description = models.CharField(max_length=500, null=True, verbose_name="Гүйлгээний утга")
+
+    transaction = models.ForeignKey(PaymentBalance, null=True, on_delete=models.SET_NULL, verbose_name="Дансны хуулгаар орж ирсэн гүйлгээ")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def qpay_payment(self):
+        """
+            Яг амжилттай төлөгдсөн дүнгийн мэдээллийг авна
+            Суутгалыг хасаж тооцсон болно
+        """
+
+        payments = (
+            Payment
+            .objects
+            .filter(
+                id=self.id,
+                status=True,
+                paid_rsp__isnull=False
+            ).annotate(
+                total_qpay_transaction_amount=models.expressions.RawSQL(
+                    """
+                        (
+                            SELECT SUM((elem->>'amount')::numeric)::float
+                            FROM jsonb_array_elements(paid_rsp::jsonb->'rows') row,
+                                jsonb_array_elements(row->'p2p_transactions') elem
+                            WHERE (row->>'payment_status') = 'PAID'
+                        )
+                    """,
+                    []
+                )
+            )
+            .aggregate(total=models.Sum('total_qpay_transaction_amount'))
+        )
+
+        return payments['total'] if payments['total'] is not None else 0
+
+    @property
+    def not_fee_amount(self):
+        """ Шимтгэлийг суутгалгүй тооцсон мөнгөн дүнгийн нийлбэр """
+
+        payments = (
+            Payment
+            .objects
+            .filter(
+                id=self.id,
+                status=True,
+                paid_rsp__isnull=False
+            )
+            .annotate(
+                payment_amount=models.expressions.RawSQL(
+                    """
+                        (jsonb_extract_path_text(paid_rsp::jsonb, 'rows')::jsonb->0->>'payment_amount')::float
+                    """,
+                    []
+                )
+            )
+            .aggregate(total=models.Sum('payment_amount'))
+        )
+
+        return payments['total'] if payments['total'] is not None else 0
 
 
 class DiscountType(models.Model):

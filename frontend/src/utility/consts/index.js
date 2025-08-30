@@ -43,3 +43,5 @@ export const COLORS = [
     'rgba(255, 159, 64)',
     'rgb(128,128,128)',
 ]
+
+export const FEE = 100                  // Шимтгэл

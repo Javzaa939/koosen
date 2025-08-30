@@ -1,0 +1,37 @@
+
+
+@page {
+    size: portrait A4;
+    margin: 30px 30px 30px 30px;
+}
+
+
+@media print {
+    // print дарах үеийн css
+    .fontchange{
+        font-family: 'Times New Roman', Times, serif;
+    }
+    .invoice_print {
+        /* Apply styles specific to printing */
+        color: black !important;
+        font-weight: 900 !important;
+        text-decoration-color: black;
+    }
+    .head_text {
+        color: black !important;
+        font-weight: 900 !important;
+        text-decoration-color: black;
+    }
+}
+
+.invoice_print {
+    color: black !important;
+    font-weight: 900 !important;
+}
+
+
+.head_text {
+    color: black !important;
+    font-weight: 900 !important;
+    text-decoration-color: black;
+}

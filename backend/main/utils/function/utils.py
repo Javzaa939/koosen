@@ -2096,3 +2096,65 @@ def get_dates_from_week_mnums_version():
         for day_week in weeks:
             if day_week.get('id') == week:
                 return day_week
+
+# region for student user
+def qpay_settings(school=None):
+    """ Qpay тохиргооны хэсэг """
+
+    QPaySettingsUser = apps.get_model('lms', 'QPaySettingsUser')
+
+    qpay_setting = None
+    qpay_api_call = 'http://localhost:8000/student/qpay/check/payments/?unique_id='
+
+    if school:
+        qpay_settings = QPaySettingsUser.objects.filter(school=school)
+
+        if qpay_settings:
+            qpay_setting = qpay_settings.first()
+    else:
+        qpay_setting = QPaySettingsUser.objects.filter(school__isnull=True).first()
+
+    qpay_api_username = qpay_setting.qpay_api_username if qpay_setting else None
+    qpay_api_password = qpay_setting.qpay_api_password if qpay_setting else None
+    qpay_api_invoice_code = qpay_setting.qpay_api_invoice_code if qpay_setting else None
+    qpay_api_url = qpay_setting.qpay_api_url if qpay_setting else None
+    qpay_api_call = qpay_setting.qpay_api_call if qpay_setting else None
+
+    # TODO: Production орчинд ажиллах qpay мэдээлэл авах
+    if not settings.DEBUG:
+        qpay_api_call = f'{settings.STUDENT_URL}/api/student/qpay/check/payments/?unique_id='
+
+    return qpay_api_url, qpay_api_username, qpay_api_password, qpay_api_call, qpay_api_invoice_code
+
+
+def discord_notif(title, message_content, success=False):
+    webhook_url = "https://discord.com/api/webhooks/1291739043633299669/2ikSVyHT3UYjwYUnos_4a5fBZpwmFlUWYb4PuCebpKIJidpHtyXQ7SC8pumJFvKAaOj2"
+
+    color = 16711680
+
+    if success:
+        color = 3407616
+
+    payload = {
+        "username": "Анагаах",
+        # "content": title,
+        "embeds": [
+            {
+                "author": {
+                    "name": "Анагаах",
+                    "url": "https://student.mnums.edu.mn/",
+                    "icon_url": "https://hr.mnums.edu.mn/static/app-assets/images/logo/muis_vacation_logo.png"
+                },
+                "title": title,
+                "description": message_content,
+                "color": color,
+            }
+        ]
+    }
+
+    headers = {
+        "Content-Type": "application/json"
+    }
+
+    res = requests.post(webhook_url, json=payload, headers=headers)
+# endregion

@@ -164,5 +164,19 @@ urlpatterns = [
 
     # ---- Ирц ---- #
     path("user-student/irts/", UserStudentListStudentIrtsApiView.as_view()),
+
+    # ---------------------QPAY--------------------------------
+
+    # Qpay талаас төлбөр төлөгдсөн үед rsp буцаах url
+    path('qpay/check/payments/', check_qpay, name='check_qpay'),
+
+    # modal хаах үед төлбөр төлөгдсөн эсэхийг шалгана
+    # path('qpay/exit/<int:payment>/', QpayExitAPIView.as_view()),
+
+    # # Төлбөр шалгах товч дарах үед төлбөр төлөгдсөн эсэхийг шалгана
+    # path('qpay/check-pay/<int:payment>/', QPayCheckAPIView.as_view()),
+
+    # # Нэхэмжлэл үүсгэх
+    # path('qpay/create/<int:student>/', QPayCreateAPIView.as_view()),
     #endregion for student login
 ]

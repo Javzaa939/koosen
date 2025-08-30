@@ -2029,3 +2029,13 @@ export function getFirstLetters(str) {
     .map(word => word ? word[0].toUpperCase() : '')
     .join('');
 }
+
+// #region for student login
+export const get_repayOption = () => {
+  const options = [
+    { id: 1, value: 100, name: 'Нийт төлбөр (100%)'},
+    { id: 2, value: 50, name: 'Тухайн улирлын төлбөр (50%)'},
+  ]
+  return options
+}
+// #endregion for student login

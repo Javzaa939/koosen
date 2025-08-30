@@ -2332,6 +2332,23 @@ function useApi(isDisplay=false) {
 				regirts: {
 					get: () => instance.get(`/student/user-student/irts/`)
 				},
+				/** Төлбөрийн дэлгэрэнгүй */
+				ebarimt: {
+					send: (data) => instance.post(`/ebarimt/user-student/sendlist/`, data),
+				},
+				payment: {
+					get: (pk, all=false) => instance.get(`/student/user-student/payment/${pk}/?year=${cyear_name}&season=${cseason_id}&all=${all}`),
+				},
+				/** Төлбөрийн дэлгэрэнгүй */
+				paymentdetail: {
+					get:(student_id, lesson_year='') => instance.get(`/student/user-student/paymentdetail/${student_id}/?lesson_year=${lesson_year}`),
+					getTransiction:(student_id) => instance.get(`/student/user-student/paymentdetail/transiction/${student_id}/`),
+				},
+			},
+			qpay: {
+				create: (student, datas) => instance.post(`/student/user-student/qpay/create/${student}/`, datas),
+				check: (payment) => instance.get(`/student/user-student/qpay/check-pay/${payment}/`),
+				exitCheckPayment: (payment) => instance.get(`/student/user-student/qpay/exit/${payment}/`),
 			},
 		},
 	}

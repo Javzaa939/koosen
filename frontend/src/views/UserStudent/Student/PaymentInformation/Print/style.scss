@@ -1,0 +1,14 @@
+@page {
+    size: A4 portrait;
+    margin: 10px 30px 10px 30px
+}
+
+.fontchange{
+    font-family: 'Times New Roman', Times, serif;
+}
+
+.pageBreakInside {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    // page-break-after: always;
+}

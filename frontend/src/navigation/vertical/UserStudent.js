@@ -57,8 +57,13 @@ export default [
                 title: 'Төгсөлт',
                 icon: <Circle size={8} />,
                 navLink: "user-student/student/graduate/",
-            }
+            },
         ]
     },
-
+    {
+        id: 'payment-information',
+        title: 'Төлбөрийн мэдээлэл',
+        icon: <i className="fal fa-money-check-alt"></i>,
+        navLink: "user-student/student/payment-information"
+    },
 ]
