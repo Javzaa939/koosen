@@ -1975,7 +1975,7 @@ class StudentDetailAPIView(
     def put(self, request, pk=None):
 
         self.serializer_class = StudentRegisterSerializer
-        data = request.data.dict()
+        data = request.data
 
         image = data.get('image')
         change_image = str2bool(data.get("change_image"))
