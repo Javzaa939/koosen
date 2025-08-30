@@ -823,6 +823,7 @@ class GroupReportAPI(
     def get(self, request):
 
         school = request.query_params.get('school')
+        org = getattr(self.request, 'org_filter', {}).get('org')
 
         extra_filter = {}
 
@@ -830,6 +831,10 @@ class GroupReportAPI(
             extra_filter.update({'school': school})
 
         status = Learning.objects.values('id', 'learn_name').order_by('id')
+
+        if org:
+            status = status.filter(org=org)
+            extra_filter.update({'school__org': org})
 
         def fill_data(chart_data):
             sorted_data = []
@@ -861,6 +866,9 @@ class GroupReportAPI(
             label_obj = ProfessionalDegree.objects.annotate(name=F('degree_name')).values('id', 'name')
         else:
             label_obj = SubOrgs.objects.filter(is_school=True).values('id', 'name')
+
+        if org:
+            label_obj = label_obj.filter(org=org)
 
         for index, item in enumerate(label_obj):
             if school:
@@ -910,6 +918,7 @@ class StudentReportAPI(
     def get(self, request):
 
         school = request.query_params.get('school')
+        org = getattr(self.request, 'org_filter', {}).get('org')
 
         currentYear = request.GET.get("currentYear")
 
@@ -930,6 +939,10 @@ class StudentReportAPI(
             })
 
         status = StudentRegister.objects.exclude(name__icontains='Төгссөн').values('code', 'name').order_by('code')
+
+        if org:
+            status = status.filter(org=org)
+            extra_filter.update({'group__school__org': org})
 
         def fill_data(chart_data):
             sorted_data = []
@@ -1023,11 +1036,18 @@ class StudentCourseAPI(
     def get(self, request):
 
         school = request.query_params.get('school')
+        org = getattr(self.request, 'org_filter', {}).get('org')
 
+        group_filters = dict()
         extra_filter = dict()
 
         if school:
+            group_filters.update({'school': school})
             extra_filter.update({'group__school': school})
+
+        if org:
+            group_filters.update({'school__org': school})
+            extra_filter.update({'group__school__org': org})
 
         total = Student.objects.filter(**extra_filter).exclude(status__name__icontains='Төгссөн').count()
 
@@ -1078,6 +1098,7 @@ class StudentCourseAPI(
         chart_data = list(
             Group
             .objects
+            .filter(**group_filters)
             .values("level")
             .annotate(count=Count("*"))
             .values("level", "count")
@@ -1109,11 +1130,17 @@ class StudentProfessionAPI(
     def get(self, request):
 
         school = request.query_params.get('school')
+        org = getattr(self.request, 'org_filter', {}).get('org')
 
         extra_filter = dict()
+        profession_filters = dict()
 
         if school:
             extra_filter.update({'group__school': school})
+
+        if org:
+            extra_filter.update({'group__school__org': org})
+            profession_filters["school__org"] = org
 
         total = Student.objects.filter(**extra_filter).exclude(status__name__icontains='Төгссөн').count()
 
@@ -1164,6 +1191,7 @@ class StudentProfessionAPI(
         chart_data = list(
             ProfessionDefinition
             .objects
+            .filter(**profession_filters)
             .values("name")
             .annotate(count=Count("*"))
             .values("name", "count")
@@ -1285,7 +1313,9 @@ class StudentReportPaymentAPI(
     def get(self, request):
 
         school = request.query_params.get("school")
+        org = getattr(self.request, 'org_filter', {}).get('org')
         extra_filter_Q = Q()
+        filters = dict()
 
         if school:
             extra_filter_Q = Q(
@@ -1318,15 +1348,23 @@ class StudentReportPaymentAPI(
             )
 
             by_model = SubOrgs
+            if org:
+                filters["org"] = org
         elif template == "2":
             level1_condition = Q(group__profession__department=OuterRef("pk"))
             by_model = Salbars
+            if org:
+                filters["org"] = org
         elif template == "3":
             level1_condition = Q(group__profession=OuterRef("pk"))
             by_model = ProfessionDefinition
+            if org:
+                filters["school__org"] = org
         elif template == "4":
             level1_condition = Q(group=OuterRef("pk"))
             by_model = Group
+            if org:
+                filters["school__org"] = org
         else:
 
             return request.send_error("ERR_002")
@@ -1373,7 +1411,7 @@ class StudentReportPaymentAPI(
                 },
                 total=F(labels_level2[0]["key"]) + F(labels_level2[1]["key"]),
             )
-            .filter(total__gt=0)
+            .filter(total__gt=0, **filters)
             .values("name", "total", labels_level2[0]["key"], labels_level2[1]["key"])
             .order_by("name")
         )
@@ -1395,16 +1433,21 @@ class StudentSchoolAPI(
     def get(self, request):
 
         school = request.query_params.get('school')
+        org = getattr(self.request, 'org_filter', {}).get('org')
 
         extra_filter_ylabel = {
             'is_school': True
         }
 
-        schools = SubOrgs.objects.filter(**extra_filter_ylabel).values('id', 'name')
-
         extra_filter = {
             "group__school__isnull": False
         }
+
+        if org:
+            extra_filter_ylabel.update({'org': org})
+            extra_filter.update({'group__school__org': org})
+
+        schools = SubOrgs.objects.filter(**extra_filter_ylabel).values('id', 'name')
 
         if school:
             extra_filter.update({'group__school': school})
