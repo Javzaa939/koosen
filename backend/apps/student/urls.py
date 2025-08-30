@@ -142,4 +142,27 @@ urlpatterns = [
     # Уйгаржин хөрвүүлэх
     path('graduation/uigarjin/convert/', GraduationLessonConvertAPIView.as_view()),
     path('graduation/english/convert/', GraduationEnglishConvertAPIView.as_view()),
+
+    #region for student login
+    # Хичээлийн хуваарь
+    path('user-student/schedule/<int:student>/', UserStudentScheduleAPIView.as_view()),
+
+    # Оюутны санал болгох төлөвлөгөө
+    path('user-student/plan/', UserStudentPlanAPIView.as_view()),
+    path('user-student/plan/lessondetail/<int:pk>', UserStudentLessonDetailAPIView.as_view()),
+    path('user-student/plan/retake/<int:lesson_id>/', UserStudentSeasonChooseApiView.as_view()),
+
+    # Cургалт/Явцын дүн page
+    path('user-student/score-teacher/', UserStudentScoreTeacherAPIView.as_view()),
+
+    # оюутны дүнгийн мэдээлэл
+    path('user-student/scoreregister/<int:student>/',UserStudentScoreInformationAPIView.as_view()),
+    path('user-student/score-register/', UserStudentStudentScoreRegisterAPIView.as_view()),
+
+    # Оюутны дүнгийн дэлгэрэнгүй мэдээлэл
+    path('user-student/allscore/<int:student>/', UserStudentDetailedScoreAPIView.as_view()),
+
+    # ---- Ирц ---- #
+    path("user-student/irts/", UserStudentListStudentIrtsApiView.as_view()),
+    #endregion for student login
 ]

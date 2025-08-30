@@ -1,0 +1,91 @@
+@page {
+    size: A4 landscape;
+    margin: 20px 10px 20px 20px;
+
+    /* margin: 10px;  top, right, bottom, left. */
+    /* margin: 20px 0px 0px 10px; */
+    /* margin: 30px 30px 20px 30px; */
+}
+
+@media print {
+
+    html,
+    body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    .row {
+        display: flex !important;
+        flex-wrap: wrap !important;
+    }
+
+    .col-md-3 {
+        flex: 0 0 25%;
+        /* Ensure equal width columns */
+        max-width: 25%;
+    }
+
+    .col-md-4 {
+        flex: 0 0 33.3%;
+        /* Ensure equal width columns */
+        max-width: 33.3%;
+    }
+
+    .col-md-6 {
+        flex: 0 0 50%;
+        /* Ensure equal width columns */
+        max-width: 50%;
+    }
+}
+
+body {
+    letter-spacing: 0.4px;
+    color: black;
+}
+
+.page-break {
+    page-break-after: always;
+}
+
+header {
+    position: fixed;
+    top: 0;
+}
+
+footer {
+    position: fixed;
+    bottom: 0;
+}
+
+.mini-cell {
+    width: 6%;
+}
+
+.body-cell {
+    width: 73%;
+    line-height: 1;
+    padding: 2px 2px 2px 2px;
+    text-align: start;
+}
+
+.body-cell1 {
+    width: 73%;
+    line-height: 1;
+    padding: 5px 5px 5px 4px;
+    text-align: start;
+}
+
+.footer1-cell {
+    width: 7%;
+}
+
+.footer2-cell {
+    width: 7%;
+}
+
+.footer3-cell {
+    width: 7%;
+}

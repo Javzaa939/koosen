@@ -1001,7 +1001,7 @@ const VerticalLayout = (props) => {
 
 export default VerticalLayout;
 
-// to define menu just by id in this array
+// to define menu just by id in this array for student login in one place
 const studentMenuChildIds = [
     'lesson-schedule',
     'examination-schedule',
@@ -1009,13 +1009,13 @@ const studentMenuChildIds = [
     'score-teacher',
     'score-information',
     'student-attendance',
-    'student-graduation',
+    // 'student-graduation',
 ]
 
 function getStudentMenu(saveData, menus, user) {
     if (user.is_student) {
-        const navChildren = menus.navChildren.filter((child) => studentMenuChildIds.includes(child.id));
-        if (navChildren.length > 0) saveData = [...saveData, ...navChildren]
+        const navChildrens = menus.navChildren.filter((child) => studentMenuChildIds.includes(child.id));
+        if (navChildrens.length > 0) saveData = [...saveData, ...navChildrens]
     }
 
     return saveData

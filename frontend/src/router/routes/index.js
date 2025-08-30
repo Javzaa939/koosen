@@ -28,6 +28,10 @@ import PsychologicalTestingRoutes from './PsychologicalTesting';
 import OnlineLessonRoutes from './OnlineLesson';
 import StudentBrowserRoutes from './StudentBrowser';
 
+// for student login
+import UserStudentLessonRoutes from './UserStudent/Lesson';
+import UserStudentStudentRoutes from './UserStudent/Student';
+
 // ** Layouts
 import BlankLayout from '@layouts/BlankLayout';
 import VerticalLayout from '@src/layouts/VerticalLayout';
@@ -79,6 +83,8 @@ const Routes = [
     ...OnlineLessonRoutes,
     ...StudentBrowserRoutes,
     ...RemoteRoutes,
+    ...UserStudentLessonRoutes,
+    ...UserStudentStudentRoutes,
 ];
 
 const getRouteMeta = (route) => {
