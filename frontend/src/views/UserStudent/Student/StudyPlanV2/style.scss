@@ -1,0 +1,230 @@
+.customopacity{
+    opacity: 35%;
+}
+
+.hoverglass:hover {
+    background-color: rgba($color: #50788e, $alpha: 0.15);
+    transition: 0.2s;
+}
+
+.customscroll::-webkit-scrollbar {
+    width: 8px;
+  }
+
+.customscroll::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0);
+}
+
+.customscroll::-webkit-scrollbar-thumb {
+    background-color: rgb(116, 116, 116);
+    border-radius: 10px;
+    outline: 0px solid rgb(0, 0, 0);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// GREENCARD
+
+.cardmastergreen{
+    transition: 0.3s;
+    background-color: #f1f3f7;
+    cursor: default;
+    box-shadow: 0.2em 0.5em 1em rgba(0, 0, 0, 0.339);
+    .cardbody{
+        background: rgb(102, 150, 36);
+        background: linear-gradient(180deg, rgb(102, 115, 35) 45%, rgba(0, 213, 255, 0) 80%);
+        transition: 0.3s;
+        color: white;
+        box-shadow:
+        inset 0 -30em 3em rgba(0, 200, 183, 0.152),
+        0 0 0 2px rgba(57, 57, 57, 0.2),
+    }
+}
+
+.cardmastergreen:hover{
+    box-shadow: 0.2em 0.5em 1em rgba(0, 0, 0, 0.504);
+    .cardbody{
+        box-shadow:
+        inset 0 -30em 3em rgba(77, 164, 47, 0.1),
+
+        0 0 0 2px rgba(57, 57, 57, 0.2),
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// DARKERBLUECARD
+
+.cardmasterdarkerblue{
+    transition: 0.3s;
+    background-color: #f1f3f7;
+    cursor: default;
+    box-shadow: 0.2em 0.5em 1em rgba(0, 0, 0, 0.339);
+    .cardbody{
+        background: rgb(36, 102, 189);
+        background: linear-gradient(180deg, rgb(35, 102, 165) 45%, rgba(0, 213, 255, 0) 80%);
+        transition: 0.3s;
+        color: white;
+        box-shadow:
+        inset 0 -30em 3em rgba(0, 200, 183, 0.152),
+        0 0 0 2px rgba(57, 57, 57, 0.2),
+    }
+}
+
+.cardmasterdarkerblue:hover{
+    box-shadow: 0.2em 0.5em 1em rgba(0, 0, 0, 0.504);
+    .cardbody{
+        box-shadow:
+        inset 0 -30em 3em rgba(77, 164, 47, 0.1),
+
+        0 0 0 2px rgba(57, 57, 57, 0.2),
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// BLUECARD
+.cardmasterblue{
+    transition: 0.3s;
+    background-color: #f1f3f7;
+    cursor: default;
+    color: white;
+    box-shadow: 0.2em 0.5em 1em rgba(0, 0, 0, 0.239);
+    .cardbody{
+        background: rgb(71, 162, 247);
+        background: linear-gradient(180deg, rgb(74, 117, 157) 35%, rgba(255, 0, 251, 0.087) 80%);
+            // background: rgb(238,174,202);
+            // background: radial-gradient(circle, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%);
+        transition: 0.3s;
+        box-shadow:
+        inset 0 -30em 3em rgba(0, 87, 200, 0.142),
+        0 0 0 2px rgba(57, 57, 57, 0.2),
+    }
+}
+
+.cardmasterblue:hover{
+    box-shadow: 0.2em 0.5em 1em rgba(0, 0, 0, 0.504);
+    .cardbody{
+        box-shadow:
+        inset 0 -30em 3em rgba(32, 117, 229, 0.352),
+        0 0 0 2px rgba(57, 57, 57, 0.2),
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ORANGECARD
+
+.cardmasterorange{
+    transition: 0.3s;
+    background-color: #f1f3f7;
+    color: white;
+    cursor: default;
+    box-shadow: 0.2em 0.5em 1em rgba(0, 0, 0, 0.239);
+    .cardbody{
+        transition: 0.3s;
+        background: rgb(34,193,195);
+        background: linear-gradient(0deg, rgba(34,193,195,0.4) 0%, rgb(218, 172, 72) 100%);
+        box-shadow:
+        inset 0 -30em 3em rgba(253, 166, 17, 0.1),
+        0 0 0 2px rgba(57, 57, 57, 0.2),
+
+    }
+}
+
+.cardmasterorange:hover{
+    box-shadow: 0.2em 0.5em 1em rgba(0, 0, 0, 0.504);
+    .cardbody{
+        box-shadow:
+        inset 0 -30em 3em rgba(253, 166, 17, 0.313),
+        0 0 0 2px rgba(57, 57, 57, 0.2),
+    }
+}
+
+.cardmasterdark{
+    transition: 0.3s;
+    background-color: #f1f3f7;
+    cursor: default;
+    color: white;
+    box-shadow: 0.2em 0.5em 1em rgba(0, 0, 0, 0.239);
+    .cardbody{
+        background: rgb(108,108,108);
+background: radial-gradient(circle, rgba(108,108,108,1) 9%, rgba(65,71,78,1) 100%);
+            // background: rgb(238,174,202);
+            // background: radial-gradient(circle, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%);
+        transition: 0.3s;
+        box-shadow:
+        inset 0 -30em 3em rgba(0, 87, 200, 0.142),
+        0 0 0 2px rgba(57, 57, 57, 0.2),
+    }
+}
+
+.cardmasterdark:hover{
+    box-shadow: 0.2em 0.5em 1em rgba(0, 0, 0, 0.504);
+    .cardbody{
+        box-shadow:
+        inset 0 -30em 3em rgba(32, 117, 229, 0.352),
+        0 0 0 2px rgba(57, 57, 57, 0.2),
+    }
+}
+
+.dark-layout{
+
+    .cardmastergreen{
+        background-color: #39528841;
+        box-shadow: 0.2em 0.5em 1em rgba(0, 0, 0, 0.639);
+    }
+
+    .cardmasterblue{
+        transition: 0.3s;
+        background-color: #39528841;
+        box-shadow: 0.2em 0.5em 1em rgba(0, 0, 0, 0.639);
+        .cardbody{
+            background: rgb(71, 162, 247);
+            background: linear-gradient(180deg, rgb(74, 117, 157) 55%, rgba(231, 159, 233, 0.63) 80%);
+            transition: 0.3s;
+        }
+    }
+
+    .cardmasterorange{
+        background-color: #39528841;
+        transition: 0.3s;
+        box-shadow: 0.2em 0.5em 1em rgba(0, 0, 0, 0.339);
+    }
+
+    .cardmasterorange:hover{
+        background-color: #39528841;
+        transition: 0.3s;
+        box-shadow: 0.2em 0.5em 1em rgb(0, 0, 0);
+    }
+
+    .cardmasterdark{
+        background-color: #39528841;
+        box-shadow: 0.2em 0.5em 1em rgba(0, 0, 0, 0.639);
+    }
+
+    .fontdark{
+        color: rgb(163, 163, 163);
+    }
+    .plantabledark{
+        table, th, td, tr {
+            background-color: #10163a08
+          };
+    }
+}
+
+
+.rotate {
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    width: 1.5em;
+  }
+  .rotate div {
+    writing-mode: vertical-lr;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    -webkit-writing-mode: vertical-lr;
+    -ms-writing-mode: vertical-lr;
+    -webkit-transform: rotate(-180deg);
+    -moz-transform: rotate(-180deg);
+    -o-transform: rotate(-180deg);
+    transform: rotate(-180deg);
+  }

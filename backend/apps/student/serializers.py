@@ -11,7 +11,7 @@ from django.db.models.functions import Cast, ExtractYear
 from django.db.models import Avg, PositiveIntegerField
 from django.db.models import F, Sum
 
-from lms.models import Payment, Student, StudentAdmissionScore, StudentLeave
+from lms.models import LessonCategory, Payment, RegisterIrts, Student, StudentAdmissionScore, StudentLeave, StudentLogin, TimeTable_to_group, TimeTable_to_student
 from lms.models import StudentRegister
 from lms.models import Group
 from lms.models import StudentMovement
@@ -1330,3 +1330,384 @@ class StudentDefinitionListLiteSerializer(serializers.ModelSerializer):
         school_data = SchoolSerializer(school_qs, many=False).data
 
         return school_data
+
+
+# region for student login
+class UserStudentLessonStandartSerializer(serializers.ModelSerializer):
+
+    category_name = serializers.CharField(source='category.category_name', default='')
+    class Meta:
+        model = LessonStandart
+        fields = ["id", "name", "code", "kredit", "category_name", "knowledge", "skill"]
+
+
+class UserStudentSchoolSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = SubOrgs
+        fields = ['id', 'name']
+
+
+class UserStudentLessonScheduleSerializer(serializers.ModelSerializer):
+    teacher = TeacherSerializer(many=False)
+    room = RoomSerializer(many=False)
+    event_id = serializers.CharField(source='id', default='')
+    lesson = UserStudentLessonStandartSerializer(many=False)
+    school = UserStudentSchoolSerializer(many=False)
+    type = serializers.SerializerMethodField()
+    hours = serializers.SerializerMethodField()
+    title = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = TimeTable
+        fields = "__all__"
+
+    def get_type(self, obj):
+
+        type_name = obj.get_type_display()
+
+        return type_name
+
+    def get_hours(self, obj):
+        times = obj.time
+        # Ensure times is a valid integer
+        if not isinstance(times, int) or times < 1 or times > 8:
+            return {
+                'start_time': None,
+                'end_time': None
+            }
+
+        time_dict = {
+            1: ('08:00', '09:30'),
+            2: ('09:30', '11:00'),
+            3: ('11:00', '12:30'),
+            4: ('12:30', '14:00'),
+            5: ('14:00', '15:30'),
+            6: ('15:30', '17:00'),
+            7: ('17:00', '18:30'),
+            8: ('18:30', '20:00')
+        }
+
+        start_time = None
+        end_time = None
+
+        # Check if times exists and is valid within the time_dict
+        if times in time_dict:
+            start_time, end_time = time_dict[times]
+
+        return {
+            'start_time': start_time,
+            'end_time': end_time
+        }
+
+    def get_title(self, obj):
+        type_name = obj.get_type_display()
+
+        return obj.lesson.name + ", " + type_name + ", " + (obj.room.name if obj.room else "")
+
+
+class UserStudentLessonListSerializer(serializers.ModelSerializer):
+    '''  Хичээлийн жагсаалт '''
+
+    class Meta:
+        model = LessonStandart
+        fields = "id", "code", "name", "kredit"
+
+
+class UserStudentLearningPlanPrevLessonSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = LessonStandart
+        fields = "__all__"
+
+
+# Оюутны санал болгох төлөвлөгөө
+class UserStudentLearningPlanSerializer(serializers.ModelSerializer):
+    lesson = UserStudentLessonListSerializer(many=False)
+    status = serializers.SerializerMethodField()
+    season = serializers.SerializerMethodField()
+    previous_lesson = UserStudentLearningPlanPrevLessonSerializer()
+    total_score = serializers.FloatField()
+    last_retake_year_season = serializers.BooleanField()
+    is_taken = serializers.BooleanField()
+
+    class Meta:
+        model = LearningPlan
+        fields = "__all__"
+
+    def get_status(self, obj):
+        " үзсэн or үзэж байгаа or үзээгүй хичээл"
+
+        request = self.context['request']
+
+        student_login = request.user
+        student_obj = student_login.student
+
+        params = request.query_params
+
+        lesson_year = params.get('year')
+        lesson_season = params.get('season')
+
+        if not lesson_year  and not lesson_season:
+            lesson_year, lesson_season = get_active_year_season()
+
+        status = 2  # Үзээгүй
+
+        lesson_id = obj.lesson
+
+        # student_obj = Student.objects.get(id=student)
+        group = student_obj.group
+
+        # хичээл хуваарьт шивэгдсэн эсэх
+        lesson_time = TimeTable.objects.filter(lesson=lesson_id, lesson_year=lesson_year, lesson_season=lesson_season)
+
+        # тухайн оюутны ангиараа үзэж байгаа хуваарь
+        group_timetable = TimeTable_to_group.objects.filter(timetable__in=lesson_time, group=group)
+
+        # тухайн оюутны үзэж байгаа хуваарь
+        timetable_student = TimeTable_to_student.objects.filter(timetable__in=lesson_time, student=student_obj)
+
+        # тухайн оюутны хуваарь дээр нэмэлт хийлгэсэн эсэх
+        add_student_timetable = timetable_student.filter(add_flag=True)
+
+        score = ''
+        # Дүнгийн мэдээлэл орсон л бол үзсэн гэж үзэж байгаа
+        score_qs = ScoreRegister.objects.filter(student=student_obj, lesson=lesson_id).first()
+
+        if score_qs:
+            score = score_qs.score_total
+
+        # Үзсэн эсэх status
+        if add_student_timetable or group_timetable:
+            status = 3  # Үзэж байгаа
+        if score:
+            status = 1 # үзсэн
+            if score < 60:
+                status = 4 # унасан
+        else:
+            if obj.is_taken:
+                print(obj.is_taken)
+                status = 5 # үзэхээр төлөвлсөн
+            else:
+                join_year = group.level
+                check_season = join_year * 2
+                if obj.season and float(obj.season) < check_season:
+                    status = 4 # унасан
+        return status
+
+    def get_season(self, obj):
+        season = None
+        if obj.season:
+            season = json_load(obj.season)
+            if isinstance(season, list) and len(season) > 0:
+                season = season[0]
+
+        return season
+
+
+class UserStudentLessonDetailCategorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = LessonCategory
+        fields = '__all__'
+
+
+class UserStudentLessonDetailSchoolSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = SubOrgs
+        fields = '__all__'
+
+
+class UserStudentLessonDetailDepartmentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Salbars
+        fields = '__all__'
+
+
+class UserStudentLessonDetailSerializer(serializers.ModelSerializer):
+
+    category = UserStudentLessonDetailCategorySerializer()
+    school = UserStudentLessonDetailSchoolSerializer()
+    department = UserStudentLessonDetailDepartmentSerializer()
+
+    class Meta:
+        model = LessonStandart
+        fields = '__all__'
+
+
+class UserStudentScoreInformationListSerializer(serializers.ModelSerializer):
+    lesson = UserStudentLessonListSerializer(many=False, read_only=True)
+    score = serializers.SerializerMethodField()
+
+    class Meta:
+        model = LearningPlan
+        fields = "lesson", "score"
+
+    def get_score(self, obj):
+        " нийт оноо "
+
+        request = self.context['request']
+        params = request.query_params
+        scores = []
+
+        student_id = params.get('student_id')
+
+        lesson_id = obj.lesson
+
+        score_qs = ScoreRegister.objects.filter(student=student_id, lesson=lesson_id)
+        if score_qs:
+            scores = list(score_qs.values('teach_score', 'exam_score', 'assessment', 'lesson_year', 'lesson_season'))
+
+        return scores
+
+
+class UserStudentLessonStandartSerializer(serializers.ModelSerializer):
+
+    category_name = serializers.CharField(source='category.category_name', default='')
+    class Meta:
+        model = LessonStandart
+        fields = ["id", "name", "code", "kredit", "category_name", "knowledge", "skill"]
+
+
+# дүн хэвлэх
+class UserStudentScoreRegisterPrintSerializer(serializers.ModelSerializer):
+    lesson = UserStudentLessonStandartSerializer(many=False)
+    # school = serializers.CharField(source='subschools__name', default='')
+
+    class Meta:
+        model = ScoreRegister
+        fields = "__all__"
+
+
+class UserStudentRegisterIrtsSerializer(serializers.ModelSerializer):
+
+    state_name = serializers.CharField(source="get_state_display", default=None)
+    week = serializers.IntegerField(source="qr.week", default=None)
+    ttid = serializers.IntegerField(source="qr.timetable_id", default=None)
+
+    class Meta:
+        model = RegisterIrts
+        fields = "__all__"
+
+
+class UserStudentRegisterIrtsTimeTableSerializer(serializers.ModelSerializer):
+
+    type_name = serializers.CharField(source="get_type_display", default='')
+    odd_even_name = serializers.CharField(source="get_odd_even_display", default="")
+    time_name = serializers.CharField(source="get_time_display", default="")
+    cbegin_week = serializers.SerializerMethodField()
+    cend_week = serializers.SerializerMethodField()
+    lesson_name = serializers.CharField(source="lesson.name", default="")
+    types = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TimeTable
+        fields = "cbegin_week", 'cend_week', 'type_name', 'type', 'odd_even', 'odd_even_name', 'time', 'time_name', 'lesson_id', 'id', 'lesson_name', 'types'
+
+    def get_cbegin_week(self, obj):
+
+        return obj.begin_week if obj.begin_week else 1
+
+
+    def get_cend_week(self, obj):
+
+        return obj.end_week if obj.end_week else 16
+
+    def get_types(self, obj):
+        request = self.context.get('request')
+        student = request.user.student
+        year, season = get_active_year_season()
+
+        type_ids = TimeTable.objects.filter(lesson=obj.lesson, lesson_year=obj.lesson_year, lesson_season=obj.lesson_season).values('type', 'id').distinct('type')
+        ctypes = []
+
+        for types in type_ids:
+            ctype = {}
+            t_id = types.get('id')
+            type = types.get('type')
+
+            obj = TimeTable.objects.get(id=t_id)
+            name = obj.get_type_display()
+            ctype['name'] = name
+            ctype['id'] = type
+
+            # Ирцийн мэдээлэл авч байгаа хэсэг
+            qs = (
+                 RegisterIrts
+                        .objects
+                        .filter(
+                            student=student,
+                            qr__timetable_id=t_id,
+                            qr__timetable__lesson_year=year,
+                            qr__timetable__lesson_season=season,
+                        )
+                        .order_by("qr__timetable__type", 'qr__week', 'qr__timetable__time')
+                )
+
+            qs = qs.select_related("qr")
+            data = UserStudentRegisterIrtsSerializer(qs, many=True).data
+
+            ctype['irts'] = data
+
+            ctypes.append(ctype)
+        return ctypes
+
+
+class UserStudentStudentAttachmentSerializer(serializers.ModelSerializer):
+
+    score_code = serializers.SerializerMethodField(read_only=True)
+    graduation_work = serializers.SerializerMethodField(read_only=True)
+    full_name = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Student
+        fields = "__all__"
+
+    def get_full_name(self, obj):
+        return obj.code + " " + obj.full_name()
+
+    def get_graduation_work(self, obj):
+
+        data = dict()
+        graduation_work = GraduationWork.objects.filter(student__id=obj.id).first()
+        data = GraduationWorkSerializer(graduation_work, many=False).data
+
+        return data
+
+    def get_score_code(self, obj):
+        # Голч дүнгийн жагсаалт
+
+        score_assesment = ''
+        final_gpa = 0
+        stud_id = obj.id
+        scoreRegister = ScoreRegister.objects.filter(student=stud_id) \
+            .values(
+                "id",
+                "teach_score",
+                "exam_score",
+                "lesson__kredit"
+            )
+        max_kredit = 0
+        all_score = 0
+        count = 0
+        for scoreData in scoreRegister:
+            total_score = 0
+            if scoreData['teach_score']:
+                total_score = scoreData['teach_score']
+            if scoreData['exam_score']:
+                total_score = total_score + scoreData['exam_score']
+            if scoreData['lesson__kredit']:
+                all_score = all_score + total_score * scoreData['lesson__kredit']
+                max_kredit = max_kredit + scoreData['lesson__kredit']
+                count = count + 1
+
+        if all_score > 0:
+            if max_kredit != 0:
+                final_gpa = round((all_score / max_kredit), 2)
+                score_qs = Score.objects.filter(score_max__gte=final_gpa, score_min__lte=final_gpa).first()
+                if score_qs:
+                    score_assesment = score_qs.gpa
+        return { 'score_code': score_assesment, 'max_kredit': max_kredit }
+# endregion for student login

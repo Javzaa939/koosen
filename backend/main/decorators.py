@@ -55,6 +55,7 @@ def login_required():
 
             user_id = request.session.get('_auth_user_id')
 
+            # NOTE why get user object if DRF already is getting it automatically i do not know.
             user = userModel.objects.filter(id=user_id).first()
             if user_id:
                 request.user = user

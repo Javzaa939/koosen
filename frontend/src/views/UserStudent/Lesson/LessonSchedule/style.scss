@@ -1,0 +1,62 @@
+
+
+table thead th.leftHeader {
+    vertical-align: top;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: linear-gradient(118deg, #144e97, rgba(20, 78, 151, 0.9)) !important;
+    color: #fff !important;
+    height: 39px !important;
+    padding-top: 11px !important;
+}
+
+table tbody td.leftHeader {
+    padding-left: 6px !important;
+}
+
+table tbody td.lrow {
+    color: #144e97 !important;
+}
+
+// Dark
+.dark-layout{
+    table, th, td, tr {
+        background-color: transparent!important;
+    }
+    tr:nth-child(even) {
+        background-color: #00000018!important;
+    }
+    .table-striped > tbody > tr:nth-of-type(odd) > * {
+        --bs-table-accent-bg: #000a22 !important;
+    }
+    .table tbody td.lrow {
+        color: #b4b7bd !important;
+    }
+}
+
+.dark-layout .table.table-striped tbody tr:nth-of-type(odd) {
+    --bs-table-accent-bg: #242b3d;
+}
+
+.print_title{
+    display: none;
+}
+
+@media print{
+    .print_title{
+        display: block;
+    }
+}
+
+.custom_lesson_card{
+    background-color: rgb(233, 233, 233);
+    font-size: 9px;
+    box-shadow: 2px 5px 5px -5px rgba(0,0,0,0.25);
+}
+
+.dark-layout{
+    .custom_lesson_card{
+        background-color: rgba(11, 29, 55, 0.374);
+        font-size: 9px;
+    }
+}
